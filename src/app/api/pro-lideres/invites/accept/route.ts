@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 
   const { data: tenant } = await supabaseAdmin
     .from('leader_tenants')
-    .select('id, owner_user_id, team_bank_payment_url')
+    .select('id, owner_user_id, team_bank_payment_url, team_bank_pix_payment_url')
     .eq('id', inv.leader_tenant_id)
     .maybeSingle()
 
@@ -234,6 +234,10 @@ export async function POST(request: NextRequest) {
     typeof tenant?.team_bank_payment_url === 'string' && tenant.team_bank_payment_url.trim()
       ? tenant.team_bank_payment_url.trim()
       : null
+  const teamBankPixPaymentUrl =
+    typeof tenant?.team_bank_pix_payment_url === 'string' && tenant.team_bank_pix_payment_url.trim()
+      ? tenant.team_bank_pix_payment_url.trim()
+      : null
 
-  return NextResponse.json({ ok: true, teamBankPaymentUrl })
+  return NextResponse.json({ ok: true, teamBankPaymentUrl, teamBankPixPaymentUrl })
 }

@@ -114,6 +114,7 @@ function devStubLeaderTenant(userId: string): LeaderTenantRow {
     daily_tasks_visible_to_team: true,
     daily_tasks_full_day_bonus_points: 10,
     team_bank_payment_url: null,
+    team_bank_pix_payment_url: null,
     created_at: now,
     updated_at: now,
   }

@@ -132,6 +132,18 @@ export async function PATCH(request: NextRequest) {
     }
   }
 
+  if (Object.prototype.hasOwnProperty.call(body, 'team_bank_pix_payment_url')) {
+    const parsed = parseTeamBankPaymentUrlField(body.team_bank_pix_payment_url)
+    if (parsed.action === 'error') {
+      return NextResponse.json({ error: parsed.message }, { status: 400 })
+    }
+    if (parsed.action === 'clear') {
+      payload.team_bank_pix_payment_url = null
+    } else if (parsed.action === 'set') {
+      payload.team_bank_pix_payment_url = parsed.url
+    }
+  }
+
   if (Object.keys(payload).length === 0) {
     return NextResponse.json({ error: 'Nenhum campo para atualizar.' }, { status: 400 })
   }

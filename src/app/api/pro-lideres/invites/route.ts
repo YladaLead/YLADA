@@ -247,6 +247,10 @@ export async function POST(request: NextRequest) {
     typeof paid.ctx.tenant.team_bank_payment_url === 'string' && paid.ctx.tenant.team_bank_payment_url.trim()
       ? paid.ctx.tenant.team_bank_payment_url.trim()
       : null
+  const team_bank_pix_payment_url =
+    typeof paid.ctx.tenant.team_bank_pix_payment_url === 'string' && paid.ctx.tenant.team_bank_pix_payment_url.trim()
+      ? paid.ctx.tenant.team_bank_pix_payment_url.trim()
+      : null
 
-  return NextResponse.json({ invite, invite_url, team_bank_payment_url })
+  return NextResponse.json({ invite, invite_url, team_bank_payment_url, team_bank_pix_payment_url })
 }

@@ -36,12 +36,15 @@ export function ProLideresInvitesPanel() {
   const lastCreatedInviteIdRef = useRef<string | null>(null)
   const [copiedInvite, setCopiedInvite] = useState(false)
   const [copiedBank, setCopiedBank] = useState(false)
+  const [copiedPix, setCopiedPix] = useState(false)
   const [subscriptionAccessOk, setSubscriptionAccessOk] = useState<boolean | null>(null)
   const [yladaSubHint, setYladaSubHint] = useState<YladaTeamSubHint | null>(null)
   const [teamBankPaymentUrlDraft, setTeamBankPaymentUrlDraft] = useState('')
+  const [teamBankPixPaymentUrlDraft, setTeamBankPixPaymentUrlDraft] = useState('')
   const [teamBankUrlSaving, setTeamBankUrlSaving] = useState(false)
   const [teamBankUrlSavedMsg, setTeamBankUrlSavedMsg] = useState<string | null>(null)
   const [lastCreatedBankUrl, setLastCreatedBankUrl] = useState<string | null>(null)
+  const [lastCreatedPixUrl, setLastCreatedPixUrl] = useState<string | null>(null)
 
   const [quotaTopupMsg, setQuotaTopupMsg] = useState<string | null>(null)
   const [quotaTopupLoading, setQuotaTopupLoading] = useState(false)
@@ -75,9 +78,14 @@ export function ProLideresInvitesPanel() {
       ])
       const tenantData = await tenantRes.json().catch(() => ({}))
       if (tenantRes.ok) {
-        const t = (tenantData as { tenant?: { team_bank_payment_url?: string | null } }).tenant
+        const t = (tenantData as {
+          tenant?: { team_bank_payment_url?: string | null; team_bank_pix_payment_url?: string | null }
+        }).tenant
         setTeamBankPaymentUrlDraft(
           typeof t?.team_bank_payment_url === 'string' ? t.team_bank_payment_url.trim() : ''
+        )
+        setTeamBankPixPaymentUrlDraft(
+          typeof t?.team_bank_pix_payment_url === 'string' ? t.team_bank_pix_payment_url.trim() : ''
         )
       }
 
@@ -168,6 +176,7 @@ export function ProLideresInvitesPanel() {
     setLastCreatedUrl(null)
     setLastCreatedInviteId(null)
     setLastCreatedBankUrl(null)
+    setLastCreatedPixUrl(null)
     try {
       const res = await fetch('/api/pro-lideres/invites', {
         method: 'POST',
@@ -188,7 +197,9 @@ export function ProLideresInvitesPanel() {
       const url = (data as { invite_url?: string }).invite_url
       const inv = (data as { invite?: { id?: string } }).invite
       const bank = (data as { team_bank_payment_url?: string | null }).team_bank_payment_url
+      const pix = (data as { team_bank_pix_payment_url?: string | null }).team_bank_pix_payment_url
       setLastCreatedBankUrl(typeof bank === 'string' && bank.trim() ? bank.trim() : null)
+      setLastCreatedPixUrl(typeof pix === 'string' && pix.trim() ? pix.trim() : null)
       if (url) setLastCreatedUrl(url)
       if (inv?.id) {
         setLastCreatedInviteId(inv.id)
@@ -244,7 +255,16 @@ export function ProLideresInvitesPanel() {
   function copyBankUrl(url: string) {
     void navigator.clipboard.writeText(url).then(() => {
       setCopiedBank(true)
+      setCopiedPix(false)
       setTimeout(() => setCopiedBank(false), 2000)
+    })
+  }
+
+  function copyPixUrl(url: string) {
+    void navigator.clipboard.writeText(url).then(() => {
+      setCopiedPix(true)
+      setCopiedBank(false)
+      setTimeout(() => setCopiedPix(false), 2000)
     })
   }
 
@@ -272,7 +292,7 @@ export function ProLideresInvitesPanel() {
     }
   }
 
-  async function saveTeamBankPaymentUrl(e: React.FormEvent) {
+  async function saveTeamPaymentUrls(e: React.FormEvent) {
     e.preventDefault()
     setTeamBankUrlSaving(true)
     setTeamBankUrlSavedMsg(null)
@@ -284,6 +304,7 @@ export function ProLideresInvitesPanel() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           team_bank_payment_url: teamBankPaymentUrlDraft.trim() === '' ? null : teamBankPaymentUrlDraft.trim(),
+          team_bank_pix_payment_url: teamBankPixPaymentUrlDraft.trim() === '' ? null : teamBankPixPaymentUrlDraft.trim(),
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -291,9 +312,14 @@ export function ProLideresInvitesPanel() {
         setError((data as { error?: string }).error || 'Não foi possível guardar o link.')
         return
       }
-      const t = (data as { tenant?: { team_bank_payment_url?: string | null } }).tenant
+      const t = (data as {
+        tenant?: { team_bank_payment_url?: string | null; team_bank_pix_payment_url?: string | null }
+      }).tenant
       setTeamBankPaymentUrlDraft(
         typeof t?.team_bank_payment_url === 'string' ? t.team_bank_payment_url.trim() : ''
+      )
+      setTeamBankPixPaymentUrlDraft(
+        typeof t?.team_bank_pix_payment_url === 'string' ? t.team_bank_pix_payment_url.trim() : ''
       )
       setTeamBankUrlSavedMsg('Guardado.')
       setTimeout(() => setTeamBankUrlSavedMsg(null), 4000)
@@ -349,22 +375,40 @@ export function ProLideresInvitesPanel() {
             Os convites pendentes expiram na data indicada na lista abaixo. Podes revogar a qualquer momento.
           </p>
           <p className="mt-2 break-all font-mono text-xs text-green-800">{lastCreatedUrl}</p>
-          {lastCreatedBankUrl ? (
-            <div className="mt-3 rounded-lg border border-green-300/80 bg-white/90 px-3 py-2.5 text-xs text-green-950">
-              <p className="font-semibold text-green-900">Cobrança da operação (também na app após o cadastro)</p>
-              <p className="mt-1 break-all font-mono text-[11px] text-green-900/90">{lastCreatedBankUrl}</p>
-              <button
-                type="button"
-                onClick={() => copyBankUrl(lastCreatedBankUrl)}
-                className="mt-2 min-h-[36px] rounded-md border border-green-600 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-900 hover:bg-green-100"
-              >
-                {copiedBank ? 'Copiado!' : 'Copiar link de cobrança'}
-              </button>
+          {lastCreatedBankUrl || lastCreatedPixUrl ? (
+            <div className="mt-3 space-y-2 rounded-lg border border-green-300/80 bg-white/90 px-3 py-2.5 text-xs text-green-950">
+              <p className="font-semibold text-green-900">Cobrança da operação (na app após o cadastro)</p>
+              {lastCreatedBankUrl ? (
+                <div>
+                  <p className="font-medium text-green-900/95">Cartão / Mercado Pago</p>
+                  <p className="mt-0.5 break-all font-mono text-[11px] text-green-900/90">{lastCreatedBankUrl}</p>
+                  <button
+                    type="button"
+                    onClick={() => copyBankUrl(lastCreatedBankUrl)}
+                    className="mt-1.5 min-h-[36px] rounded-md border border-green-600 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-900 hover:bg-green-100"
+                  >
+                    {copiedBank ? 'Copiado!' : 'Copiar link cartão/MP'}
+                  </button>
+                </div>
+              ) : null}
+              {lastCreatedPixUrl ? (
+                <div>
+                  <p className="font-medium text-green-900/95">Pix</p>
+                  <p className="mt-0.5 break-all font-mono text-[11px] text-green-900/90">{lastCreatedPixUrl}</p>
+                  <button
+                    type="button"
+                    onClick={() => copyPixUrl(lastCreatedPixUrl)}
+                    className="mt-1.5 min-h-[36px] rounded-md border border-emerald-600 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-950 hover:bg-emerald-100"
+                  >
+                    {copiedPix ? 'Copiado!' : 'Copiar link Pix'}
+                  </button>
+                </div>
+              ) : null}
             </div>
           ) : (
             <p className="mt-2 text-xs text-green-800/85">
-              Sem link de cobrança configurado — a pessoa só entra pelo convite; podes enviar o pagamento por fora se
-              quiseres ou indicar o link no fim desta página.
+              Sem links de cobrança configurados — a pessoa só entra pelo convite; podes enviar o pagamento por fora se
+              quiseres ou indicar os links no bloco abaixo.
             </p>
           )}
           <div className="mt-3 flex flex-wrap gap-2">
@@ -551,15 +595,32 @@ export function ProLideresInvitesPanel() {
       </div>
 
       <form
-        onSubmit={(e) => void saveTeamBankPaymentUrl(e)}
+        onSubmit={(e) => void saveTeamPaymentUrls(e)}
         className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
       >
+        <p className="text-sm font-semibold text-gray-900">Links de cobrança da equipa</p>
+        <p className="text-xs leading-relaxed text-gray-600">
+          Quem concluir o convite vê estes endereços na app. Se preencheres <strong className="text-gray-800">cartão e Pix</strong>, a
+          pessoa escolhe antes de abrir o link (útil porque assinatura MP muitas vezes não aceita Pix).
+        </p>
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-gray-900">Coloque aqui seu link de cobrança</span>
+          <span className="mb-1 block text-sm font-medium text-gray-900">Cartão ou Mercado Pago (assinatura)</span>
           <input
             type="url"
             value={teamBankPaymentUrlDraft}
             onChange={(e) => setTeamBankPaymentUrlDraft(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm text-gray-900"
+            placeholder="https://…"
+            maxLength={2000}
+            autoComplete="off"
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-gray-900">Pix (página ou checkout com Pix)</span>
+          <input
+            type="url"
+            value={teamBankPixPaymentUrlDraft}
+            onChange={(e) => setTeamBankPixPaymentUrlDraft(e.target.value)}
             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm text-gray-900"
             placeholder="https://…"
             maxLength={2000}

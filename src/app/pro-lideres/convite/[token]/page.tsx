@@ -18,6 +18,23 @@ type ValidateOk = {
   tabulatorNames: string[]
 }
 
+/** Após cadastro/aceite: escolha Pix vs cartão ou abertura do link configurado pelo líder. */
+type InvitePaymentFlowState =
+  | null
+  | { step: 'choose'; cardUrl: string; pixUrl: string }
+  | {
+      step: 'open_link'
+      url: string
+      kind: 'card' | 'pix'
+      /** Presente quando o utilizador veio do ecrã de escolha (dois links). */
+      chooseBack?: { cardUrl: string; pixUrl: string }
+    }
+
+function normalizePaymentUrl(raw: unknown): string | null {
+  const s = typeof raw === 'string' ? raw.trim() : ''
+  return s || null
+}
+
 export default function ProLideresConviteTokenPage() {
   const params = useParams()
   const router = useRouter()
@@ -43,8 +60,7 @@ export default function ProLideresConviteTokenPage() {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [registering, setRegistering] = useState(false)
   const [registerError, setRegisterError] = useState<string | null>(null)
-  /** Após cadastro ou aceite: URL de cobrança externa do líder (banco), quando configurada. */
-  const [pendingBankPaymentUrl, setPendingBankPaymentUrl] = useState<string | null>(null)
+  const [invitePaymentFlow, setInvitePaymentFlow] = useState<InvitePaymentFlowState>(null)
 
   const validate = useCallback(async () => {
     if (!token) {
@@ -155,10 +171,18 @@ export default function ProLideresConviteTokenPage() {
         setRegisterError('Conta criada. Entre com o e-mail e a senha que você cadastrou.')
         return
       }
-      const pay = (data as { teamBankPaymentUrl?: string | null }).teamBankPaymentUrl
-      const payTrimmed = typeof pay === 'string' && pay.trim() ? pay.trim() : null
-      if (payTrimmed) {
-        setPendingBankPaymentUrl(payTrimmed)
+      const cardUrl = normalizePaymentUrl((data as { teamBankPaymentUrl?: string | null }).teamBankPaymentUrl)
+      const pixUrl = normalizePaymentUrl((data as { teamBankPixPaymentUrl?: string | null }).teamBankPixPaymentUrl)
+      if (cardUrl && pixUrl) {
+        setInvitePaymentFlow({ step: 'choose', cardUrl, pixUrl })
+        return
+      }
+      if (cardUrl || pixUrl) {
+        setInvitePaymentFlow({
+          step: 'open_link',
+          url: (cardUrl || pixUrl) as string,
+          kind: cardUrl ? 'card' : 'pix',
+        })
         return
       }
       // Navegação completa evita ficar na área matriz (ex. /pt/estetica) se houver efeitos de sessão/última página.
@@ -202,11 +226,20 @@ export default function ProLideresConviteTokenPage() {
         setAcceptError((data as { error?: string }).error || 'Não foi possível aceitar.')
         return
       }
-      const pay = (data as { teamBankPaymentUrl?: string | null }).teamBankPaymentUrl
-      const payTrimmed = typeof pay === 'string' && pay.trim() ? pay.trim() : null
-      if (payTrimmed) {
+      const cardUrl = normalizePaymentUrl((data as { teamBankPaymentUrl?: string | null }).teamBankPaymentUrl)
+      const pixUrl = normalizePaymentUrl((data as { teamBankPixPaymentUrl?: string | null }).teamBankPixPaymentUrl)
+      if (cardUrl && pixUrl) {
         setAcceptOk(true)
-        setPendingBankPaymentUrl(payTrimmed)
+        setInvitePaymentFlow({ step: 'choose', cardUrl, pixUrl })
+        return
+      }
+      if (cardUrl || pixUrl) {
+        setAcceptOk(true)
+        setInvitePaymentFlow({
+          step: 'open_link',
+          url: (cardUrl || pixUrl) as string,
+          kind: cardUrl ? 'card' : 'pix',
+        })
         return
       }
       setAcceptOk(true)
@@ -251,21 +284,78 @@ export default function ProLideresConviteTokenPage() {
               Voltar ao Pro Líderes
             </Link>
           </div>
-        ) : valid && pendingBankPaymentUrl ? (
+        ) : valid && invitePaymentFlow?.step === 'choose' ? (
+          <div className="space-y-5 text-center">
+            <h1 className="text-xl font-bold text-gray-900">Como prefere pagar?</h1>
+            <p className="text-sm leading-relaxed text-gray-700">
+              O líder configurou duas formas de cobrança. <strong className="text-gray-900">Assinaturas no Mercado Pago</strong>{' '}
+              costumam não aceitar Pix — escolha a opção combinada com a equipe.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setInvitePaymentFlow({
+                    step: 'open_link',
+                    url: invitePaymentFlow.pixUrl,
+                    kind: 'pix',
+                    chooseBack: {
+                      cardUrl: invitePaymentFlow.cardUrl,
+                      pixUrl: invitePaymentFlow.pixUrl,
+                    },
+                  })
+                }
+                className="inline-flex min-h-[48px] w-full items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-semibold text-white hover:bg-emerald-800"
+              >
+                Pagar com Pix
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setInvitePaymentFlow({
+                    step: 'open_link',
+                    url: invitePaymentFlow.cardUrl,
+                    kind: 'card',
+                    chooseBack: {
+                      cardUrl: invitePaymentFlow.cardUrl,
+                      pixUrl: invitePaymentFlow.pixUrl,
+                    },
+                  })
+                }
+                className="inline-flex min-h-[48px] w-full items-center justify-center rounded-xl bg-amber-700 px-5 text-sm font-semibold text-white hover:bg-amber-800"
+              >
+                Cartão ou Mercado Pago
+              </button>
+            </div>
+            <p className="text-xs text-gray-500">
+              Depois de pagar, pode entrar no painel pelo botão na página seguinte.
+            </p>
+          </div>
+        ) : valid && invitePaymentFlow?.step === 'open_link' ? (
           <div className="space-y-5 text-center">
             <h1 className="text-xl font-bold text-gray-900">Tudo certo com o acesso</h1>
             <p className="text-sm leading-relaxed text-gray-700">
-              O líder desta operação deixou um <strong className="text-gray-900">link para pagamento</strong> (banco
-              ou boleto). Abra em uma nova aba segura, conclua o pagamento conforme combinado com a equipe e depois
-              entre no painel.
+              {invitePaymentFlow.kind === 'pix' ? (
+                <>
+                  Abra o <strong className="text-gray-900">link de pagamento via Pix</strong> que o líder deixou,
+                  conclua conforme combinado com a equipe e depois entre no painel.
+                </>
+              ) : (
+                <>
+                  Abra o <strong className="text-gray-900">link de pagamento com cartão ou no Mercado Pago</strong>,
+                  conclua conforme combinado com a equipe e depois entre no painel.
+                </>
+              )}
             </p>
             <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-left text-sm text-amber-950">
-              <p className="font-semibold">Link de cobrança</p>
-              <p className="mt-1 break-all font-mono text-xs">{pendingBankPaymentUrl}</p>
+              <p className="font-semibold">
+                {invitePaymentFlow.kind === 'pix' ? 'Link (Pix)' : 'Link (cartão / Mercado Pago)'}
+              </p>
+              <p className="mt-1 break-all font-mono text-xs">{invitePaymentFlow.url}</p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
               <a
-                href={pendingBankPaymentUrl}
+                href={invitePaymentFlow.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-amber-700 px-5 text-sm font-semibold text-white hover:bg-amber-800"
@@ -284,6 +374,19 @@ export default function ProLideresConviteTokenPage() {
                 Ir para o painel Pro Líderes
               </button>
             </div>
+            {invitePaymentFlow.chooseBack ? (
+              <button
+                type="button"
+                onClick={() => {
+                  const b = invitePaymentFlow.chooseBack
+                  if (!b) return
+                  setInvitePaymentFlow({ step: 'choose', cardUrl: b.cardUrl, pixUrl: b.pixUrl })
+                }}
+                className="text-sm font-medium text-blue-600 underline hover:text-blue-800"
+              >
+                Escolher outra forma de pagamento
+              </button>
+            ) : null}
           </div>
         ) : valid ? (
           <div className="space-y-5">
