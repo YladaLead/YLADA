@@ -1,13 +1,137 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import type { ProLideresMemberListItem } from '@/lib/pro-lideres-members-enriched'
 import type { ProLideresTenantRole } from '@/types/leader-tenant'
 
 function roleLabel(role: ProLideresTenantRole): string {
   return role === 'leader' ? 'Líder' : 'Equipe'
+}
+
+type MemberDiagRow = {
+  linkId: string
+  title: string
+  slug: string
+  views: number
+  starts: number
+  completions: number
+  whatsappClicks: number
+}
+
+function MemberToolsDiagBlock({ memberUserId, memberLabel }: { memberUserId: string; memberLabel: string }) {
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [rows, setRows] = useState<MemberDiagRow[]>([])
+
+  useEffect(() => {
+    if (!open) return
+    let cancelled = false
+    ;(async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const res = await fetch(
+          `/api/pro-lideres/equipe/links-diagnostics?days=30&member_user_id=${encodeURIComponent(memberUserId)}`,
+          { credentials: 'include' }
+        )
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          if (!cancelled) {
+            setError((data as { error?: string }).error || 'Não foi possível carregar.')
+            setRows([])
+          }
+          return
+        }
+        if (!cancelled) setRows((data as { rows?: MemberDiagRow[] }).rows ?? [])
+      } catch {
+        if (!cancelled) {
+          setError('Erro de rede.')
+          setRows([])
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [open, memberUserId])
+
+  const ranked = useMemo(() => {
+    const withScore = rows.map((r) => ({
+      ...r,
+      score: r.views + r.starts * 2 + r.completions * 3 + r.whatsappClicks * 4,
+    }))
+    withScore.sort((a, b) => b.score - a.score)
+    return withScore
+  }, [rows])
+
+  const used = ranked.filter((r) => r.score > 0)
+  const unused = ranked.filter((r) => r.score === 0)
+
+  return (
+    <div className="mt-3 border-t border-gray-100 pt-3">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="text-xs font-semibold text-blue-700 underline-offset-2 hover:underline"
+        aria-expanded={open}
+      >
+        {open ? 'Ocultar' : 'Ver'} uso das ferramentas (30 dias) — {memberLabel}
+      </button>
+      {open ? (
+        <div className="mt-2 rounded-lg border border-gray-100 bg-gray-50/90 p-3">
+          <p className="text-[11px] leading-snug text-gray-600">
+            Só conta tráfego no <strong className="text-gray-800">link rastreado</strong> desta pessoa (com código de
+            membro). Se ela ainda não divulgou esse link, os números ficam zerados mesmo usando o catálogo por dentro.
+          </p>
+          {error ? (
+            <p className="mt-2 text-xs font-medium text-red-600" role="alert">
+              {error}
+            </p>
+          ) : null}
+          {loading ? (
+            <p className="mt-2 text-xs text-gray-500">Carregando…</p>
+          ) : ranked.length === 0 ? (
+            <p className="mt-2 text-xs text-gray-600">Nenhuma ferramenta catalogada para este espaço.</p>
+          ) : (
+            <div className="mt-2 space-y-3">
+              {used.length > 0 ? (
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">
+                    Ranking: mais uso → menos uso (link rastreado)
+                  </p>
+                  <ul className="mt-1.5 space-y-1.5 text-xs">
+                    {used.map((r) => (
+                      <li
+                        key={r.linkId}
+                        className="flex flex-wrap items-baseline justify-between gap-2 rounded-md border border-white bg-white/90 px-2 py-1.5"
+                      >
+                        <span className="min-w-0 font-medium text-gray-900">{r.title}</span>
+                        <span className="shrink-0 tabular-nums text-gray-600">
+                          {r.views} abert. · {r.starts} início · {r.completions} concl. · {r.whatsappClicks} WA
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-600">Nenhum evento rastreado para esta pessoa no período.</p>
+              )}
+              {unused.length > 0 && used.length > 0 ? (
+                <p className="text-[11px] text-gray-500">
+                  Outras {unused.length} ferramenta(s) sem cliques rastreados neste período.
+                </p>
+              ) : null}
+            </div>
+          )}
+        </div>
+      ) : null}
+    </div>
+  )
 }
 
 function formatExpiryPt(iso: string | null): string | null {
@@ -515,6 +639,10 @@ export function ProLideresEquipeMembersCollapsible({
                         ) : null}
                       </div>
                     </div>
+
+                    {canManageMembers && m.role === 'member' && m.teamAccessState === 'active' ? (
+                      <MemberToolsDiagBlock memberUserId={m.userId} memberLabel={title} />
+                    ) : null}
                   </li>
                 )
               })

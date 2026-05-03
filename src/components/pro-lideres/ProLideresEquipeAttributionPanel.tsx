@@ -2,117 +2,73 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-type YladaLinkRow = {
-  id: string
+type DiagnosticRow = {
+  linkId: string
   slug: string
-  title?: string | null
-  template_type?: string | null
-}
-
-type AttributionMember = {
-  userId: string
-  role: string
-  displayName: string | null
-  email: string | null
-  token: string | null
-  sharePathSlug?: string | null
-  shareUrl: string | null
-  shareUrlLegacyQuery?: string | null
+  title: string
   views: number
+  starts: number
+  completions: number
   whatsappClicks: number
 }
 
-const ALLOWED = new Set(['calculator', 'diagnostico', 'quiz', 'triagem'])
-
 export function ProLideresEquipeAttributionPanel() {
-  const [links, setLinks] = useState<YladaLinkRow[]>([])
-  const [linkId, setLinkId] = useState('')
-  const [loadingLinks, setLoadingLinks] = useState(true)
-  const [loadingData, setLoadingData] = useState(false)
+  const [days] = useState(30)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [members, setMembers] = useState<AttributionMember[]>([])
-  const [meta, setMeta] = useState<{ slug?: string; title?: string }>({})
-  const [panelOpen, setPanelOpen] = useState(false)
+  const [rows, setRows] = useState<DiagnosticRow[]>([])
+  const [truncated, setTruncated] = useState(false)
+  const [sinceIso, setSinceIso] = useState<string | null>(null)
+  const [panelOpen, setPanelOpen] = useState(true)
   const [tableQuery, setTableQuery] = useState('')
 
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      setLoadingLinks(true)
-      try {
-        const res = await fetch('/api/ylada/links', { credentials: 'include' })
-        const data = await res.json().catch(() => ({}))
-        const raw = (data.success && Array.isArray(data.data) ? data.data : []) as YladaLinkRow[]
-        const filtered = raw.filter((l) => l.template_type && ALLOWED.has(String(l.template_type)))
-        if (!cancelled) {
-          setLinks(filtered)
-          setLinkId((prev) => prev || (filtered[0]?.id ?? ''))
-        }
-      } catch {
-        if (!cancelled) setError('Não foi possível carregar seus links YLADA.')
-      } finally {
-        if (!cancelled) setLoadingLinks(false)
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  const loadAttribution = useCallback(async (ensure: boolean) => {
-    if (!linkId) return
-    setLoadingData(true)
+  const load = useCallback(async () => {
+    setLoading(true)
     setError(null)
     try {
-      const q = ensure ? '&ensure=1' : ''
-      const res = await fetch(`/api/pro-lideres/equipe/attribution?link_id=${encodeURIComponent(linkId)}${q}`, {
+      const res = await fetch(`/api/pro-lideres/equipe/links-diagnostics?days=${days}`, {
         credentials: 'include',
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError((data as { error?: string }).error || 'Erro ao carregar métricas.')
-        setMembers([])
+        setError((data as { error?: string }).error || 'Erro ao carregar diagnóstico.')
+        setRows([])
         return
       }
-      setMembers((data as { members?: AttributionMember[] }).members ?? [])
-      setMeta({
-        slug: (data as { slug?: string }).slug,
-        title: (data as { title?: string }).title,
-      })
+      setRows((data as { rows?: DiagnosticRow[] }).rows ?? [])
+      setTruncated(Boolean((data as { truncated?: boolean }).truncated))
+      setSinceIso(typeof (data as { sinceIso?: string }).sinceIso === 'string' ? (data as { sinceIso: string }).sinceIso : null)
     } catch {
       setError('Erro de rede.')
-      setMembers([])
+      setRows([])
     } finally {
-      setLoadingData(false)
+      setLoading(false)
     }
-  }, [linkId])
+  }, [days])
 
   useEffect(() => {
-    if (!linkId || loadingLinks) return
-    void loadAttribution(false)
-  }, [linkId, loadingLinks, loadAttribution])
+    void load()
+  }, [load])
 
-  async function copyUrl(url: string) {
-    try {
-      await navigator.clipboard.writeText(url)
-    } catch {
-      /* ignore */
-    }
-  }
-
-  const filteredMembers = useMemo(() => {
+  const filteredRows = useMemo(() => {
     const q = tableQuery.trim().toLowerCase()
-    if (!q) return members
-    return members.filter((m) => {
-      const name = (m.displayName ?? '').toLowerCase()
-      const email = (m.email ?? '').toLowerCase()
-      const id = m.userId.toLowerCase()
-      return name.includes(q) || email.includes(q) || id.includes(q)
+    if (!q) return rows
+    return rows.filter((r) => {
+      const t = (r.title || '').toLowerCase()
+      const s = (r.slug || '').toLowerCase()
+      return t.includes(q) || s.includes(q)
     })
-  }, [members, tableQuery])
+  }, [rows, tableQuery])
+
+  const periodHint = sinceIso
+    ? `Últimos ${days} dias (desde ${new Date(sinceIso).toLocaleDateString('pt-BR')})`
+    : `Últimos ${days} dias`
 
   return (
-    <section className="overflow-hidden rounded-xl border border-blue-100 bg-white shadow-sm" aria-labelledby="pl-attribution-heading">
+    <section
+      className="overflow-hidden rounded-xl border border-blue-100 bg-white shadow-sm"
+      aria-labelledby="pl-links-diag-heading"
+    >
       <button
         type="button"
         onClick={() => setPanelOpen((v) => !v)}
@@ -120,24 +76,20 @@ export function ProLideresEquipeAttributionPanel() {
         aria-expanded={panelOpen}
       >
         <div className="min-w-0 space-y-1">
-          <p id="pl-attribution-heading" className="text-sm font-semibold text-gray-900">
-            Quem está usando cada ferramenta
+          <p id="pl-links-diag-heading" className="text-sm font-semibold text-gray-900">
+            Diagnóstico das ferramentas (equipe)
           </p>
           <p className="text-xs leading-relaxed text-gray-600">
-            É um <strong className="text-gray-800">ranking por pessoa</strong> para a mesma ferramenta: cada membro
-            recebe um link com código próprio. As visitas e os cliques no <strong className="text-gray-800">WhatsApp</strong>{' '}
-            entram na linha dele ou dela — você vê quem está divulgando de verdade e onde faz sentido dar um empurrão,
-            em vez de um número único misturando todo mundo.
+            Todas as ferramentas do catálogo numa só visão: <strong className="text-gray-800">aberturas</strong>,{' '}
+            <strong className="text-gray-800">quem começou o fluxo</strong>, <strong className="text-gray-800">conclusões / resultado</strong> e{' '}
+            <strong className="text-gray-800">cliques no WhatsApp</strong>. Em <strong className="text-gray-800">Pessoas neste espaço</strong>, expanda
+            cada membro para ver o ranking do que ele ou ela mais usa (com link rastreado).
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {!loadingLinks && links.length > 0 && members.length > 0 ? (
+          {!loading && rows.length > 0 ? (
             <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-gray-700 ring-1 ring-blue-100">
-              {members.length}
-            </span>
-          ) : !loadingLinks && links.length === 0 ? (
-            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-900 ring-1 ring-amber-100">
-              Sem links
+              {rows.length}
             </span>
           ) : null}
           <span className="text-gray-500" aria-hidden>
@@ -148,30 +100,31 @@ export function ProLideresEquipeAttributionPanel() {
 
       {panelOpen ? (
         <div className="space-y-4 border-t border-blue-100/80 p-4">
-          <div className="rounded-lg border border-gray-100 bg-gray-50/80 px-3 py-2.5 text-xs leading-relaxed text-gray-700">
-            <p className="font-medium text-gray-800">Como usar em três passos</p>
-            <ol className="mt-1.5 list-decimal space-y-1.5 pl-4">
-              <li>
-                Escolha na lista a <strong>ferramenta</strong> (quiz, calculadora, diagnóstico…) que quer acompanhar.
-              </li>
-              <li>
-                Clique em <strong>Criar ou atualizar links</strong>. O sistema gera um{' '}
-                <strong>endereço exclusivo para cada pessoa</strong> da equipe.
-              </li>
-              <li>
-                Peça para cada um divulgar <strong>só o link que copiar aqui</strong> (caminho no formato{' '}
-                <code className="rounded bg-white px-1">/l/…/…</code>
-                ). As colunas <strong>Aberturas do link</strong> e <strong>WhatsApp</strong> passam a mostrar números
-                separados por pessoa.
-              </li>
-            </ol>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-600">
+            <span>{periodHint}</span>
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => void load()}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+            >
+              {loading ? 'Atualizando…' : 'Atualizar'}
+            </button>
           </div>
+          {truncated ? (
+            <p className="text-xs text-amber-800">
+              Atenção: há muitos eventos no período; a contagem pode estar limitada. Reduza o intervalo no servidor em
+              versões futuras ou contate suporte se os números parecerem estranhos.
+            </p>
+          ) : null}
 
-          {loadingLinks ? (
-            <p className="text-sm text-gray-500">Carregando seus links…</p>
-          ) : links.length === 0 ? (
+          {error ? <p className="text-sm text-red-700">{error}</p> : null}
+
+          {loading ? (
+            <p className="text-sm text-gray-500">Carregando…</p>
+          ) : rows.length === 0 ? (
             <p className="text-sm text-gray-600">
-              Crie primeiro uma ferramenta em{' '}
+              Nenhuma ferramenta de quiz, calculadora, diagnóstico ou triagem encontrada. Crie em{' '}
               <a href="/pt/links" className="font-medium text-blue-700 underline">
                 Meus links
               </a>
@@ -179,102 +132,45 @@ export function ProLideresEquipeAttributionPanel() {
             </p>
           ) : (
             <>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                <label className="block min-w-0 flex-1 text-sm">
-                  <span className="mb-0.5 block font-medium text-gray-700">Qual ferramenta você quer acompanhar?</span>
-                  <span className="mb-2 block text-xs font-normal text-gray-500">
-                    A tabela lista todos que têm acesso a este espaço. Se for muita gente, filtre pelo nome ou e-mail
-                    abaixo.
-                  </span>
-                  <select
-                    value={linkId}
-                    onChange={(e) => setLinkId(e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-                  >
-                    {links.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {(l.title || l.slug || l.id).slice(0, 80)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <button
-                  type="button"
-                  disabled={loadingData}
-                  onClick={() => void loadAttribution(true)}
-                  className="min-h-[44px] shrink-0 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {loadingData ? 'Atualizando…' : 'Criar ou atualizar links'}
-                </button>
-              </div>
-
-              {error && <p className="text-sm text-red-700">{error}</p>}
-
-              {meta.title ? (
-                <p className="text-xs text-gray-600">
-                  Ferramenta selecionada: <span className="font-medium text-gray-800">{meta.title}</span>
-                </p>
-              ) : null}
-
               <div>
-                <label htmlFor="pl-attribution-table-search" className="mb-1.5 block text-xs font-semibold text-gray-700">
-                  Buscar por nome ou e-mail
+                <label htmlFor="pl-diag-search" className="mb-1.5 block text-xs font-semibold text-gray-700">
+                  Filtrar por nome
                 </label>
                 <input
-                  id="pl-attribution-table-search"
+                  id="pl-diag-search"
                   type="search"
                   value={tableQuery}
                   onChange={(e) => setTableQuery(e.target.value)}
-                  placeholder="Nome ou e-mail…"
+                  placeholder="Nome da ferramenta ou slug…"
                   autoComplete="off"
                   className="w-full max-w-md rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
                 />
-                {tableQuery.trim() ? (
-                  <p className="mt-1.5 text-xs text-gray-500">
-                    {filteredMembers.length === 0
-                      ? 'Nenhum resultado.'
-                      : `${filteredMembers.length} de ${members.length} na vista`}
-                  </p>
-                ) : null}
               </div>
 
               <div className="max-h-[min(60vh,28rem)] overflow-x-auto overflow-y-auto overscroll-contain rounded-lg border border-gray-100">
                 <table className="min-w-full text-left text-sm">
                   <thead className="sticky top-0 z-[1] bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500 shadow-sm">
                     <tr>
-                      <th className="px-3 py-2">Pessoa</th>
-                      <th className="px-3 py-2">Função</th>
-                      <th className="px-3 py-2 text-right">Aberturas do link</th>
+                      <th className="px-3 py-2">Ferramenta</th>
+                      <th className="px-3 py-2 text-right">Aberturas</th>
+                      <th className="px-3 py-2 text-right">Começou</th>
+                      <th className="px-3 py-2 text-right">Concluiu / viu resultado</th>
                       <th className="px-3 py-2 text-right">WhatsApp</th>
-                      <th className="px-3 py-2">Link para compartilhar</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {filteredMembers.map((m) => (
-                      <tr key={m.userId} className="align-top">
+                    {filteredRows.map((r) => (
+                      <tr key={r.linkId}>
                         <td className="px-3 py-2">
-                          <p className="font-medium text-gray-900">{m.displayName || m.email || m.userId.slice(0, 8)}</p>
-                          {m.email && m.displayName && <p className="text-xs text-gray-500">{m.email}</p>}
+                          <p className="font-medium text-gray-900">{r.title}</p>
+                          {r.slug ? (
+                            <p className="text-[11px] text-gray-500">{r.slug}</p>
+                          ) : null}
                         </td>
-                        <td className="px-3 py-2 text-gray-700">{m.role === 'leader' ? 'Líder' : 'Membro'}</td>
-                        <td className="px-3 py-2 text-right tabular-nums text-gray-900">{m.views}</td>
-                        <td className="px-3 py-2 text-right tabular-nums text-emerald-800">{m.whatsappClicks}</td>
-                        <td className="max-w-[200px] px-3 py-2">
-                          {m.shareUrl ? (
-                            <button
-                              type="button"
-                              onClick={() => void copyUrl(m.shareUrl!)}
-                              className="text-left text-xs font-medium text-blue-700 underline"
-                              title="Copie o link personalizado desta pessoa para enviar por mensagem ou redes sociais"
-                            >
-                              Copiar link desta pessoa
-                            </button>
-                          ) : (
-                            <span className="text-xs text-amber-800">
-                              Clique primeiro em «Criar ou atualizar links», acima.
-                            </span>
-                          )}
-                        </td>
+                        <td className="px-3 py-2 text-right tabular-nums text-gray-900">{r.views}</td>
+                        <td className="px-3 py-2 text-right tabular-nums text-gray-900">{r.starts}</td>
+                        <td className="px-3 py-2 text-right tabular-nums text-gray-900">{r.completions}</td>
+                        <td className="px-3 py-2 text-right tabular-nums text-emerald-800">{r.whatsappClicks}</td>
                       </tr>
                     ))}
                   </tbody>
