@@ -49,7 +49,7 @@ export function ProLideresEquipeAttributionPanel() {
           setLinkId((prev) => prev || (filtered[0]?.id ?? ''))
         }
       } catch {
-        if (!cancelled) setError('Não foi possível carregar os teus links YLADA.')
+        if (!cancelled) setError('Não foi possível carregar seus links YLADA.')
       } finally {
         if (!cancelled) setLoadingLinks(false)
       }
@@ -121,12 +121,13 @@ export function ProLideresEquipeAttributionPanel() {
       >
         <div className="min-w-0 space-y-1">
           <p id="pl-attribution-heading" className="text-sm font-semibold text-gray-900">
-            Quem está a usar cada ferramenta
+            Quem está usando cada ferramenta
           </p>
           <p className="text-xs leading-relaxed text-gray-600">
-            Escolhe uma ferramenta abaixo e vê, <strong className="text-gray-800">pessoa a pessoa</strong>, quantas
-            vezes o link foi aberto e quantas vezes alguém tocou no <strong className="text-gray-800">WhatsApp</strong> —
-            assim percebes quem está a divulgar e onde vale a pena apoiar.
+            É um <strong className="text-gray-800">ranking por pessoa</strong> para a mesma ferramenta: cada membro
+            recebe um link com código próprio. As visitas e os cliques no <strong className="text-gray-800">WhatsApp</strong>{' '}
+            entram na linha dele ou dela — você vê quem está divulgando de verdade e onde faz sentido dar um empurrão,
+            em vez de um número único misturando todo mundo.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -148,30 +149,29 @@ export function ProLideresEquipeAttributionPanel() {
       {panelOpen ? (
         <div className="space-y-4 border-t border-blue-100/80 p-4">
           <div className="rounded-lg border border-gray-100 bg-gray-50/80 px-3 py-2.5 text-xs leading-relaxed text-gray-700">
-            <p className="font-medium text-gray-800">Em três passos, sem complicação</p>
+            <p className="font-medium text-gray-800">Como usar em três passos</p>
             <ol className="mt-1.5 list-decimal space-y-1.5 pl-4">
               <li>
-                Escolhe na lista a <strong>ferramenta</strong> (quiz, calculadora, diagnóstico…) de que queres ver o
-                resultado.
+                Escolha na lista a <strong>ferramenta</strong> (quiz, calculadora, diagnóstico…) que quer acompanhar.
               </li>
               <li>
-                Carrega em <strong>Criar ou atualizar links</strong>. O sistema prepara um{' '}
-                <strong>endereço só para cada pessoa</strong> — assim consegues saber quem partilhou o quê.
+                Clique em <strong>Criar ou atualizar links</strong>. O sistema gera um{' '}
+                <strong>endereço exclusivo para cada pessoa</strong> da equipe.
               </li>
               <li>
-                Pede à tua equipe que use <strong>só o link que copiar desta página</strong> (formato{' '}
+                Peça para cada um divulgar <strong>só o link que copiar aqui</strong> (caminho no formato{' '}
                 <code className="rounded bg-white px-1">/l/…/…</code>
-                ) ao divulgar. As colunas <strong>Cliques</strong> e <strong>WhatsApp</strong> mostram números por
-                pessoa, não um total misturado.
+                ). As colunas <strong>Aberturas do link</strong> e <strong>WhatsApp</strong> passam a mostrar números
+                separados por pessoa.
               </li>
             </ol>
           </div>
 
           {loadingLinks ? (
-            <p className="text-sm text-gray-500">A carregar os teus links…</p>
+            <p className="text-sm text-gray-500">Carregando seus links…</p>
           ) : links.length === 0 ? (
             <p className="text-sm text-gray-600">
-              Cria primeiro uma ferramenta em{' '}
+              Crie primeiro uma ferramenta em{' '}
               <a href="/pt/links" className="font-medium text-blue-700 underline">
                 Meus links
               </a>
@@ -181,10 +181,10 @@ export function ProLideresEquipeAttributionPanel() {
             <>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
                 <label className="block min-w-0 flex-1 text-sm">
-                  <span className="mb-0.5 block font-medium text-gray-700">Qual ferramenta queres acompanhar?</span>
+                  <span className="mb-0.5 block font-medium text-gray-700">Qual ferramenta você quer acompanhar?</span>
                   <span className="mb-2 block text-xs font-normal text-gray-500">
-                    A tabela mostra toda a gente com acesso a este espaço. Se a lista for grande, usa a pesquisa por
-                    nome ou e-mail.
+                    A tabela lista todos que têm acesso a este espaço. Se for muita gente, filtre pelo nome ou e-mail
+                    abaixo.
                   </span>
                   <select
                     value={linkId}
@@ -204,7 +204,7 @@ export function ProLideresEquipeAttributionPanel() {
                   onClick={() => void loadAttribution(true)}
                   className="min-h-[44px] shrink-0 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {loadingData ? 'A atualizar…' : 'Criar ou atualizar links'}
+                  {loadingData ? 'Atualizando…' : 'Criar ou atualizar links'}
                 </button>
               </div>
 
@@ -246,7 +246,7 @@ export function ProLideresEquipeAttributionPanel() {
                       <th className="px-3 py-2">Função</th>
                       <th className="px-3 py-2 text-right">Aberturas do link</th>
                       <th className="px-3 py-2 text-right">WhatsApp</th>
-                      <th className="px-3 py-2">Link para partilhar</th>
+                      <th className="px-3 py-2">Link para compartilhar</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -265,13 +265,13 @@ export function ProLideresEquipeAttributionPanel() {
                               type="button"
                               onClick={() => void copyUrl(m.shareUrl!)}
                               className="text-left text-xs font-medium text-blue-700 underline"
-                              title="Copia o link personalizado desta pessoa para enviar por mensagem ou redes"
+                              title="Copie o link personalizado desta pessoa para enviar por mensagem ou redes sociais"
                             >
                               Copiar link desta pessoa
                             </button>
                           ) : (
                             <span className="text-xs text-amber-800">
-                              Carrega primeiro em «Criar ou atualizar links», acima.
+                              Clique primeiro em «Criar ou atualizar links», acima.
                             </span>
                           )}
                         </td>

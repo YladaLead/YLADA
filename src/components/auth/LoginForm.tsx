@@ -49,6 +49,8 @@ interface LoginFormProps {
   proEsteticaCorporalLogin?: boolean
   /** Login em /pro-estetica-capilar/entrar — destino fixo no painel vertical capilar (não matriz /pt). */
   proEsteticaCapilarLogin?: boolean
+  /** Pré-preenche o e-mail (ex.: fluxo pós-cadastro Pro Líderes). */
+  initialEmail?: string
 }
 
 function forgotPasswordHref(perfil: LoginFormPerfil): string {
@@ -71,10 +73,11 @@ export default function LoginForm({
   proLideresLogin = false,
   proEsteticaCorporalLogin = false,
   proEsteticaCapilarLogin = false,
+  initialEmail,
 }: LoginFormProps) {
   const router = useRouter()
   const { getLastVisitedPage, clearLastVisitedPage } = useLastVisitedPage()
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(() => initialEmail?.trim() ?? '')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

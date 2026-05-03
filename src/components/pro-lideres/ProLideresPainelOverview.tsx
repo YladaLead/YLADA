@@ -365,8 +365,8 @@ export function ProLideresPainelOverview() {
           </Link>
         </div>
         <p className="mb-4 text-xs text-gray-500">
-          Números gerais dos teus links neste período. Para ver <strong className="font-medium text-gray-600">quem da
-          equipe</strong> abriu cada ferramenta, usa <strong className="font-medium text-gray-600">Análise da equipe</strong>.
+          Números gerais dos seus links neste período. Para ver <strong className="font-medium text-gray-600">quem da
+          equipe</strong> abriu cada ferramenta, use <strong className="font-medium text-gray-600">Análise da equipe</strong>.
         </p>
         <div className="grid gap-3 sm:grid-cols-3">
           <FunnelCard label="Visualizações" value={data.funnel.linkViews} icon="👀" />
@@ -414,7 +414,7 @@ export function ProLideresPainelOverview() {
           {data.memberLinkActivity.filter((x) => x.views > 0 || x.whatsappClicks > 0).length === 0 ? (
             <p className="text-sm text-gray-600">
               Ainda não há aberturas contadas por pessoa. Em <strong className="font-medium text-gray-700">Análise da
-              equipe</strong>, cria os links e peça a cada um para partilhar só o link que copiar daí.
+              equipe</strong>, crie os links e peça para cada um compartilhar só o link que copiar dali.
             </p>
           ) : (
             <ul className="max-h-56 space-y-2 overflow-y-auto text-sm">

@@ -181,9 +181,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Só é possível retomar quem está pausado.' }, { status: 400 })
     }
 
+    const rawResumeDays = body.accessDays
+    if (rawResumeDays === undefined) {
+      const { error: updErr } = await supabaseAdmin
+        .from('leader_tenant_members')
+        .update({ team_access_state: 'active' })
+        .eq('id', row.id as string)
+        .eq('leader_tenant_id', ctx.tenant.id)
+        .eq('role', 'member')
+
+      if (updErr) {
+        console.error('[pro-lideres/equipe/members/access resume]', updErr)
+        return NextResponse.json({ error: 'Não foi possível atualizar o acesso.' }, { status: 500 })
+      }
+      return NextResponse.json({ ok: true })
+    }
+
+    let resumeExpiresAt: string | null = null
+    if (rawResumeDays !== null) {
+      if (typeof rawResumeDays !== 'number' || !Number.isFinite(rawResumeDays)) {
+        return NextResponse.json({ error: 'accessDays inválido.' }, { status: 400 })
+      }
+      const d = Math.floor(rawResumeDays)
+      if (d < 1 || d > 3660) {
+        return NextResponse.json(
+          { error: 'Indique entre 1 e 3660 dias de validade, ou deixe em branco para acesso sem data de fim.' },
+          { status: 400 }
+        )
+      }
+      const until = new Date()
+      until.setDate(until.getDate() + d)
+      resumeExpiresAt = until.toISOString()
+    }
+
     const { error: updErr } = await supabaseAdmin
       .from('leader_tenant_members')
-      .update({ team_access_state: 'active' })
+      .update({ team_access_state: 'active', team_access_expires_at: resumeExpiresAt })
       .eq('id', row.id as string)
       .eq('leader_tenant_id', ctx.tenant.id)
       .eq('role', 'member')

@@ -7,12 +7,13 @@ import LoginForm from '@/components/auth/LoginForm'
 export default async function ProLideresEntrarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>
+  searchParams: Promise<{ next?: string; email?: string }>
 }) {
   const sp = await searchParams
   const raw = sp.next
   const redirectPath =
     typeof raw === 'string' && raw.startsWith('/pro-lideres') ? raw : '/pro-lideres/painel'
+  const initialEmail = typeof sp.email === 'string' && sp.email.includes('@') ? sp.email.trim() : undefined
 
   return (
     <div className="flex min-h-[100dvh] min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
@@ -22,6 +23,7 @@ export default async function ProLideresEntrarPage({
           redirectPath={redirectPath}
           disableSignUp
           proLideresLogin
+          initialEmail={initialEmail}
         />
       </div>
     </div>

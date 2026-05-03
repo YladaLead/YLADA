@@ -4,7 +4,10 @@ import { redirect } from 'next/navigation'
 import { ProLideresEquipeAttributionPanel } from '@/components/pro-lideres/ProLideresEquipeAttributionPanel'
 import { ProLideresEquipeMembersCollapsible } from '@/components/pro-lideres/ProLideresEquipeMembersCollapsible'
 import { ensureLeaderTenantAccess } from '@/lib/pro-lideres-server'
-import { fetchProLideresMembersEnriched } from '@/lib/pro-lideres-members-enriched'
+import {
+  fetchProLideresMembersEnriched,
+  syncProLideresMemberExpiryPauses,
+} from '@/lib/pro-lideres-members-enriched'
 import { proLideresTeamViewPreviewFromCookies } from '@/lib/pro-lideres-team-preview'
 import type { ProLideresTenantRole } from '@/types/leader-tenant'
 
@@ -23,6 +26,7 @@ export default async function ProLideresEquipePage() {
     redirect('/pro-lideres/painel')
   }
 
+  await syncProLideresMemberExpiryPauses(gate.tenant.id)
   const members = await fetchProLideresMembersEnriched(gate.tenant.id)
   const ctx = { tenant: gate.tenant, role: gate.role }
 
@@ -34,16 +38,20 @@ export default async function ProLideresEquipePage() {
         <p className="mt-2 text-gray-700">
           {isLeader ? (
             <>
-              Aqui vês <strong className="text-gray-900">quem está contigo neste espaço</strong> e geres o acesso: convida
-              novas pessoas em <strong className="text-gray-800">Convites equipe</strong>. Quem acabou de entrar aparece como{' '}
-              <strong className="text-gray-800">aguarda ativação</strong> até confirmares o pagamento e clicares em{' '}
-              <strong className="text-gray-800">Ativar</strong>, definindo quantos dias o acesso fica válido (ou sem data de fim).
-              Depois podes <strong className="text-gray-800">pausar</strong>, <strong className="text-gray-800">retomar</strong> ou{' '}
-              <strong className="text-gray-800">remover</strong> — <strong className="text-gray-800">o que a pessoa já criou na conta YLADA não some</strong>.
+              Aqui você vê <strong className="text-gray-900">quem está com você neste espaço</strong> e gerencia o
+              acesso: convide novas pessoas em <strong className="text-gray-800">Convites equipe</strong>. Quem acabou de
+              entrar aparece como <strong className="text-gray-800">aguarda ativação</strong> até você confirmar o
+              pagamento e clicar em <strong className="text-gray-800">Ativar</strong>, definindo quantos dias o acesso fica
+              válido (ex.: 30 ou 31 dias, ou sem data de fim). Na lista você vê a{' '}
+              <strong className="text-gray-800">data de validade</strong>; quando essa data passa, o acesso{' '}
+              <strong className="text-gray-800">pausa automaticamente</strong> até você renovar. Use{' '}
+              <strong className="text-gray-800">Pausar</strong>, <strong className="text-gray-800">Ativar</strong> ou{' '}
+              <strong className="text-gray-800">Remover</strong> —{' '}
+              <strong className="text-gray-800">o que a pessoa já criou na conta YLADA não some</strong>.
             </>
           ) : (
             <>
-              Aqui vês quem partilha este espaço contigo. A gestão de novos acessos é feita pela operação.
+              Aqui você vê quem compartilha este espaço com você. A gestão de novos acessos é feita pela operação.
             </>
           )}
         </p>

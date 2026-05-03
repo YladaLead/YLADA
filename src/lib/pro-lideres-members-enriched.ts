@@ -1,6 +1,26 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import type { ProLideresTeamAccessState, ProLideresTenantRole } from '@/types/leader-tenant'
 
+/**
+ * Membros ativos com `team_access_expires_at` já passada passam a `paused` (sincronização ao abrir Análise da equipe).
+ */
+export async function syncProLideresMemberExpiryPauses(tenantId: string): Promise<void> {
+  if (!supabaseAdmin) return
+  const now = new Date().toISOString()
+  const { error } = await supabaseAdmin
+    .from('leader_tenant_members')
+    .update({ team_access_state: 'paused' })
+    .eq('leader_tenant_id', tenantId)
+    .eq('role', 'member')
+    .eq('team_access_state', 'active')
+    .not('team_access_expires_at', 'is', null)
+    .lt('team_access_expires_at', now)
+
+  if (error) {
+    console.error('[syncProLideresMemberExpiryPauses]', error.message)
+  }
+}
+
 export type ProLideresMemberListItem = {
   userId: string
   role: ProLideresTenantRole

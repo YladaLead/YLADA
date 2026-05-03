@@ -1,6 +1,6 @@
 'use client'
 
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -18,26 +18,8 @@ type ValidateOk = {
   tabulatorNames: string[]
 }
 
-/** Após cadastro/aceite: escolha Pix vs cartão ou abertura do link de pagamento. */
-type InvitePaymentFlowState =
-  | null
-  | { step: 'choose'; cardUrl: string; pixUrl: string }
-  | {
-      step: 'open_link'
-      url: string
-      kind: 'card' | 'pix'
-      /** Presente quando o utilizador veio do ecrã de escolha (dois links). */
-      chooseBack?: { cardUrl: string; pixUrl: string }
-    }
-
-function normalizePaymentUrl(raw: unknown): string | null {
-  const s = typeof raw === 'string' ? raw.trim() : ''
-  return s || null
-}
-
 export default function ProLideresConviteTokenPage() {
   const params = useParams()
-  const router = useRouter()
   const token = typeof params.token === 'string' ? params.token : ''
   const { user, loading: authLoading, signOut } = useAuth()
 
@@ -47,7 +29,6 @@ export default function ProLideresConviteTokenPage() {
 
   const [accepting, setAccepting] = useState(false)
   const [acceptError, setAcceptError] = useState<string | null>(null)
-  const [acceptOk, setAcceptOk] = useState(false)
 
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
@@ -60,7 +41,20 @@ export default function ProLideresConviteTokenPage() {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [registering, setRegistering] = useState(false)
   const [registerError, setRegisterError] = useState<string | null>(null)
-  const [invitePaymentFlow, setInvitePaymentFlow] = useState<InvitePaymentFlowState>(null)
+
+  const goToComoAccederComSaida = async (emailNorm: string) => {
+    try {
+      const supabase = createClient()
+      await signOut()
+      await supabase.auth.signOut()
+    } catch {
+      /* sessão pode já estar limpa */
+    }
+    const qs = new URLSearchParams()
+    qs.set('email', emailNorm.trim())
+    qs.set('next', '/pro-lideres/membro/ativacao')
+    window.location.assign(`/pro-lideres/membro/como-acceder?${qs.toString()}`)
+  }
 
   const validate = useCallback(async () => {
     if (!token) {
@@ -155,43 +149,11 @@ export default function ProLideresConviteTokenPage() {
         return
       }
       const email = (data as { email?: string }).email ?? valid?.invitedEmail
-      if (!email) {
-        setRegisterError('Conta criada, mas falhou o login automático. Entre manualmente.')
+      if (!email?.trim()) {
+        setRegisterError('Conta criada. Usa o e-mail do convite para entrar na página seguinte.')
         return
       }
-      const supabase = createClient()
-      if (user) {
-        await signOut()
-      }
-      const { error: signErr } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      if (signErr) {
-        setRegisterError('Conta criada. Entre com o e-mail e a senha que você cadastrou.')
-        return
-      }
-      const cardUrl = normalizePaymentUrl((data as { teamBankPaymentUrl?: string | null }).teamBankPaymentUrl)
-      const pixUrl = normalizePaymentUrl((data as { teamBankPixPaymentUrl?: string | null }).teamBankPixPaymentUrl)
-      if (cardUrl && pixUrl) {
-        setInvitePaymentFlow({ step: 'choose', cardUrl, pixUrl })
-        return
-      }
-      if (cardUrl || pixUrl) {
-        setInvitePaymentFlow({
-          step: 'open_link',
-          url: (cardUrl || pixUrl) as string,
-          kind: cardUrl ? 'card' : 'pix',
-        })
-        return
-      }
-      // Navegação completa evita ficar na área matriz (ex. /pt/estetica) se houver efeitos de sessão/última página.
-      if (typeof window !== 'undefined') {
-        window.location.assign('/pro-lideres/membro/ativacao')
-        return
-      }
-      router.push('/pro-lideres/membro/ativacao')
-      router.refresh()
+      await goToComoAccederComSaida(email)
     } catch {
       setRegisterError('Erro de rede.')
     } finally {
@@ -226,29 +188,12 @@ export default function ProLideresConviteTokenPage() {
         setAcceptError((data as { error?: string }).error || 'Não foi possível aceitar.')
         return
       }
-      const cardUrl = normalizePaymentUrl((data as { teamBankPaymentUrl?: string | null }).teamBankPaymentUrl)
-      const pixUrl = normalizePaymentUrl((data as { teamBankPixPaymentUrl?: string | null }).teamBankPixPaymentUrl)
-      if (cardUrl && pixUrl) {
-        setAcceptOk(true)
-        setInvitePaymentFlow({ step: 'choose', cardUrl, pixUrl })
+      const emailHint = (user?.email ?? valid?.invitedEmail ?? '').trim()
+      if (!emailHint.includes('@')) {
+        setAcceptError('Não foi possível identificar o e-mail. Entra em /pro-lideres/entrar manualmente.')
         return
       }
-      if (cardUrl || pixUrl) {
-        setAcceptOk(true)
-        setInvitePaymentFlow({
-          step: 'open_link',
-          url: (cardUrl || pixUrl) as string,
-          kind: cardUrl ? 'card' : 'pix',
-        })
-        return
-      }
-      setAcceptOk(true)
-      if (typeof window !== 'undefined') {
-        window.location.assign('/pro-lideres/membro/ativacao')
-        return
-      }
-      router.push('/pro-lideres/membro/ativacao')
-      router.refresh()
+      await goToComoAccederComSaida(emailHint)
     } catch {
       setAcceptError('Erro de rede.')
     } finally {
@@ -283,105 +228,6 @@ export default function ProLideresConviteTokenPage() {
             <Link href="/pro-lideres" className="text-sm font-semibold text-blue-600 underline">
               Voltar ao Pro Líderes
             </Link>
-          </div>
-        ) : valid && invitePaymentFlow?.step === 'choose' ? (
-          <div className="space-y-6 text-center">
-            <h1 className="text-xl font-bold text-gray-900">
-              Prefere fazer a sua assinatura pelo Pix ou pelo cartão?
-            </h1>
-            <div className="flex flex-col gap-3">
-              <button
-                type="button"
-                onClick={() =>
-                  setInvitePaymentFlow({
-                    step: 'open_link',
-                    url: invitePaymentFlow.pixUrl,
-                    kind: 'pix',
-                    chooseBack: {
-                      cardUrl: invitePaymentFlow.cardUrl,
-                      pixUrl: invitePaymentFlow.pixUrl,
-                    },
-                  })
-                }
-                className="inline-flex min-h-[48px] w-full items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-semibold text-white hover:bg-emerald-800"
-              >
-                Pix
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setInvitePaymentFlow({
-                    step: 'open_link',
-                    url: invitePaymentFlow.cardUrl,
-                    kind: 'card',
-                    chooseBack: {
-                      cardUrl: invitePaymentFlow.cardUrl,
-                      pixUrl: invitePaymentFlow.pixUrl,
-                    },
-                  })
-                }
-                className="inline-flex min-h-[48px] w-full items-center justify-center rounded-xl bg-amber-700 px-5 text-sm font-semibold text-white hover:bg-amber-800"
-              >
-                Cartão
-              </button>
-            </div>
-          </div>
-        ) : valid && invitePaymentFlow?.step === 'open_link' ? (
-          <div className="space-y-5 text-center">
-            <h1 className="text-xl font-bold text-gray-900">Tudo certo com o acesso</h1>
-            <p className="text-sm leading-relaxed text-gray-700">
-              {invitePaymentFlow.kind === 'pix' ? (
-                <>
-                  Use o <strong className="text-gray-900">link de pagamento via Pix</strong> abaixo, conclua o passo indicado e
-                  aguarde — em breve o teu acesso ao painel fica disponível.
-                </>
-              ) : (
-                <>
-                  Use o <strong className="text-gray-900">link de pagamento com cartão ou no Mercado Pago</strong> abaixo, conclua o
-                  passo indicado e aguarde — em breve o teu acesso ao painel fica disponível.
-                </>
-              )}
-            </p>
-            <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-left text-sm text-amber-950">
-              <p className="font-semibold">
-                {invitePaymentFlow.kind === 'pix' ? 'Link (Pix)' : 'Link (cartão / Mercado Pago)'}
-              </p>
-              <p className="mt-1 break-all font-mono text-xs">{invitePaymentFlow.url}</p>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-              <a
-                href={invitePaymentFlow.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-amber-700 px-5 text-sm font-semibold text-white hover:bg-amber-800"
-              >
-                Abrir link de pagamento
-              </a>
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof window !== 'undefined') {
-                    window.location.assign('/pro-lideres/membro/ativacao')
-                  }
-                }}
-                className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-gray-300 bg-white px-5 text-sm font-semibold text-gray-900 hover:bg-gray-50"
-              >
-                Ver página de espera do acesso
-              </button>
-            </div>
-            {invitePaymentFlow.chooseBack ? (
-              <button
-                type="button"
-                onClick={() => {
-                  const b = invitePaymentFlow.chooseBack
-                  if (!b) return
-                  setInvitePaymentFlow({ step: 'choose', cardUrl: b.cardUrl, pixUrl: b.pixUrl })
-                }}
-                className="text-sm font-medium text-blue-600 underline hover:text-blue-800"
-              >
-                Escolher outra forma de pagamento
-              </button>
-            ) : null}
           </div>
         ) : valid ? (
           <div className="space-y-5">
@@ -532,7 +378,7 @@ export default function ProLideresConviteTokenPage() {
                     disabled={registering || !tabulatorsReady}
                     className="w-full min-h-[48px] rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
                   >
-                    {registering ? 'Criando conta…' : 'Criar conta e entrar'}
+                    {registering ? 'Criando conta…' : 'Criar conta e continuar'}
                   </button>
                 </form>
                 <p className="text-center text-xs text-gray-500">
@@ -613,18 +459,14 @@ export default function ProLideresConviteTokenPage() {
                     {acceptError}
                   </div>
                 )}
-                {acceptOk ? (
-                  <p className="text-center text-sm text-green-700">A seguir: página de confirmação…</p>
-                ) : (
-                  <button
-                    type="button"
-                    disabled={accepting || !tabulatorsReady}
-                    onClick={() => void onAccept()}
-                    className="w-full min-h-[48px] rounded-xl bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-60"
-                  >
-                    {accepting ? 'Confirmando…' : 'Aceitar e entrar na equipe'}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  disabled={accepting || !tabulatorsReady}
+                  onClick={() => void onAccept()}
+                  className="w-full min-h-[48px] rounded-xl bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-60"
+                >
+                  {accepting ? 'Confirmando…' : 'Aceitar e continuar'}
+                </button>
               </div>
             )}
           </div>

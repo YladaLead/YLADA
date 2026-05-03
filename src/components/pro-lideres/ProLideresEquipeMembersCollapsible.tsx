@@ -17,6 +17,45 @@ function formatExpiryPt(iso: string | null): string | null {
   return d.toLocaleDateString('pt-BR', { dateStyle: 'long' })
 }
 
+/** Texto da coluna «Validade» para o líder. */
+function validadeResumo(m: ProLideresMemberListItem): string {
+  if (m.role === 'leader') return '—'
+  const exp = m.teamAccessExpiresAt
+  const expLabel = formatExpiryPt(exp)
+  if (m.teamAccessState === 'pending_activation') {
+    return expLabel ? `Após ativar (${expLabel})` : 'Após ativar'
+  }
+  if (!expLabel) {
+    return m.teamAccessState === 'active' ? 'Sem data de fim no sistema' : '—'
+  }
+  if (m.teamAccessState === 'active') {
+    const past = exp && new Date(exp).getTime() <= Date.now()
+    return past ? `Expirou (${expLabel})` : expLabel
+  }
+  if (m.teamAccessState === 'paused') {
+    return `Última validade: ${expLabel}`
+  }
+  return expLabel
+}
+
+/** Linha extra sob a validade: onde clicar e o que esperar. */
+function validadeAjuda(m: ProLideresMemberListItem, canManage: boolean): string | null {
+  if (!canManage || m.role === 'leader') return null
+  if (m.teamAccessState === 'pending_activation') {
+    return 'Clica em «Ativar» nas ações: abre o passo com atalhos 30 / 31 dias (ou outro prazo).'
+  }
+  if (m.teamAccessState === 'paused') {
+    return 'Clica em «Ativar»: o mesmo passo para escolher de novo quantos dias (ou sem data de fim).'
+  }
+  if (m.teamAccessState === 'active' && !m.teamAccessExpiresAt) {
+    return 'Sem data gravada — não há pausa automática por calendário. Para passar a ter data: «Pausar» e depois «Ativar» para definir os dias.'
+  }
+  if (m.teamAccessState === 'active' && m.teamAccessExpiresAt) {
+    return 'A pausa automática corre na data acima (se o acesso ainda estiver ativo).'
+  }
+  return null
+}
+
 export function ProLideresEquipeMembersCollapsible({
   members,
   viewerRoleLabel,
@@ -34,6 +73,8 @@ export function ProLideresEquipeMembersCollapsible({
   const [actionError, setActionError] = useState<string | null>(null)
 
   const [activateUserId, setActivateUserId] = useState<string | null>(null)
+  /** `pending` = primeira ativação; `paused` = retomar e gravar validade. */
+  const [activateFlow, setActivateFlow] = useState<'pending' | 'paused' | null>(null)
   const [activateDays, setActivateDays] = useState('30')
   const [activateNoEnd, setActivateNoEnd] = useState(false)
   const [copyMessage, setCopyMessage] = useState<string | null>(null)
@@ -72,7 +113,7 @@ export function ProLideresEquipeMembersCollapsible({
   }
 
   async function submitActivate() {
-    if (!activateUserId) return
+    if (!activateUserId || !activateFlow) return
     setActionError(null)
     let accessDays: number | null = null
     if (!activateNoEnd) {
@@ -86,22 +127,26 @@ export function ProLideresEquipeMembersCollapsible({
 
     setBusyUserId(activateUserId)
     try {
+      const action = activateFlow === 'pending' ? 'activate' : 'resume'
       const res = await fetch('/api/pro-lideres/equipe/members/access', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           targetUserId: activateUserId,
-          action: 'activate',
+          action,
           accessDays,
         }),
       })
       const data = (await res.json().catch(() => ({}))) as { error?: string; copyMessage?: string }
       if (!res.ok) {
-        setActionError(data.error || 'Não foi possível ativar.')
+        setActionError(data.error || 'Não foi possível concluir.')
         return
       }
-      setCopyMessage(typeof data.copyMessage === 'string' ? data.copyMessage : null)
+      if (activateFlow === 'pending') {
+        setCopyMessage(typeof data.copyMessage === 'string' ? data.copyMessage : null)
+      }
       setActivateUserId(null)
+      setActivateFlow(null)
       setActivateDays('30')
       setActivateNoEnd(false)
       router.refresh()
@@ -122,7 +167,7 @@ export function ProLideresEquipeMembersCollapsible({
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      {activateUserId ? (
+      {activateUserId && activateFlow ? (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
           role="dialog"
@@ -131,11 +176,38 @@ export function ProLideresEquipeMembersCollapsible({
         >
           <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-gray-200 bg-white p-5 shadow-xl">
             <h2 id="pro-lideres-ativar-titulo" className="text-lg font-bold text-gray-900">
-              Ativar acesso
+              {activateFlow === 'pending' ? 'Ativar acesso' : 'Retomar acesso'}
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Define por quanto tempo o acesso fica válido a partir de agora. Podes alterar ou renovar mais tarde na mesma lista.
+              {activateFlow === 'pending'
+                ? 'A partir deste momento, define por quantos dias o acesso fica válido (ou sem data de fim). A data passa a aparecer na coluna «Validade» desta lista.'
+                : 'Ao retomar, escolhe de novo o prazo: a nova data de fim fica visível na coluna «Validade» e a pausa automática usa essa data.'}
             </p>
+            <p className="mt-3 text-xs text-gray-500">Atalhos comuns (mês ~30/31 dias):</p>
+            <div className="mt-1 flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={activateNoEnd}
+                onClick={() => {
+                  setActivateDays('30')
+                  setActivateNoEnd(false)
+                }}
+                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-40"
+              >
+                30 dias
+              </button>
+              <button
+                type="button"
+                disabled={activateNoEnd}
+                onClick={() => {
+                  setActivateDays('31')
+                  setActivateNoEnd(false)
+                }}
+                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-40"
+              >
+                31 dias
+              </button>
+            </div>
             <label className="mt-4 block text-sm font-medium text-gray-800">
               Dias de validade
               <input
@@ -168,6 +240,7 @@ export function ProLideresEquipeMembersCollapsible({
                 className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
                 onClick={() => {
                   setActivateUserId(null)
+                  setActivateFlow(null)
                   setActionError(null)
                 }}
               >
@@ -179,7 +252,7 @@ export function ProLideresEquipeMembersCollapsible({
                 className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
                 onClick={() => void submitActivate()}
               >
-                {busyUserId ? 'A gravar…' : 'Confirmar ativação'}
+                {busyUserId ? 'A gravar…' : activateFlow === 'pending' ? 'Confirmar ativação' : 'Confirmar retomação'}
               </button>
             </div>
           </div>
@@ -272,11 +345,34 @@ export function ProLideresEquipeMembersCollapsible({
                 {actionError}
               </p>
             ) : null}
+            {canManageMembers ? (
+              <div className="mt-3 rounded-lg border border-blue-100 bg-blue-50/80 px-3 py-2.5 text-xs leading-relaxed text-blue-950">
+                <p className="font-semibold text-blue-900">Onde se define a data de validade</p>
+                <ul className="mt-1.5 list-inside list-disc space-y-1 text-blue-900/90">
+                  <li>
+                    <strong>Aguarda ativação</strong> ou <strong>Pausado</strong>: botão <strong>Ativar</strong> abre
+                    este passo — atalhos <strong>30 dias</strong> e <strong>31 dias</strong>, outro número, ou «sem
+                    data de fim».
+                  </li>
+                  <li>
+                    <strong>Já ativo</strong> sem data na coluna: o acesso ficou sem fim no sistema; para passar a ter
+                    data (e pausa automática), usa <strong>Pausar</strong> e depois <strong>Ativar</strong> de novo.
+                  </li>
+                </ul>
+              </div>
+            ) : null}
           </div>
           <ul
             className="max-h-[min(60vh,28rem)] divide-y divide-gray-100 overflow-y-auto overscroll-contain"
             aria-labelledby="pro-lideres-equipe-pessoas-heading"
           >
+            {canManageMembers ? (
+              <li className="hidden px-4 py-2 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,11rem)_auto] sm:gap-3 sm:bg-gray-50/80">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Pessoa</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Validade</span>
+                <span className="text-right text-[11px] font-semibold uppercase tracking-wide text-gray-500">Ações</span>
+              </li>
+            ) : null}
             {members.length === 0 ? (
               <li className="px-4 py-6 text-sm text-gray-600">Nenhuma pessoa listada.</li>
             ) : filtered.length === 0 ? (
@@ -287,99 +383,137 @@ export function ProLideresEquipeMembersCollapsible({
                 const subtitle = m.email && m.displayName ? m.email : m.userId
                 const showActions = canManageMembers && m.role === 'member'
                 const isBusy = busyUserId === m.userId
-                const expiryLabel = formatExpiryPt(m.teamAccessExpiresAt)
-                const showExpiry =
-                  m.role === 'member' && m.teamAccessState === 'active' && expiryLabel && m.teamAccessExpiresAt
-                const expired =
-                  showExpiry && m.teamAccessExpiresAt && new Date(m.teamAccessExpiresAt).getTime() <= Date.now()
+                const vText = validadeResumo(m)
+                const vAjuda = validadeAjuda(m, canManageMembers)
+                const canPause = m.teamAccessState === 'active'
+                const canAtivar =
+                  m.teamAccessState === 'pending_activation' || m.teamAccessState === 'paused'
 
                 return (
-                  <li
-                    key={m.userId}
-                    className="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-gray-900">{title}</p>
-                      <p className="truncate text-sm text-gray-500">{subtitle}</p>
-                      {showExpiry ? (
-                        <p className={`mt-1 text-xs ${expired ? 'font-semibold text-amber-800' : 'text-gray-600'}`}>
-                          {expired ? 'Validade expirada: ' : 'Vence em: '}
-                          {expiryLabel}
-                        </p>
-                      ) : null}
-                    </div>
-                    <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
-                      <div className="flex flex-wrap items-center justify-end gap-1.5">
-                        {m.role === 'leader' ? (
-                          <span className="inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
-                            {roleLabel(m.role)}
-                          </span>
-                        ) : null}
-                        {m.role === 'member' && m.teamAccessState === 'paused' ? (
-                          <span className="inline-flex w-fit rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900">
-                            Pausado
-                          </span>
-                        ) : null}
-                        {m.role === 'member' && m.teamAccessState === 'pending_activation' ? (
-                          <span className="inline-flex w-fit rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-semibold text-violet-900">
-                            Aguarda ativação
-                          </span>
+                  <li key={m.userId} className="px-4 py-4">
+                    <div className="flex flex-col gap-3 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,11rem)_auto] sm:items-center sm:gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-gray-900">{title}</p>
+                        <p className="truncate text-sm text-gray-500">{subtitle}</p>
+                        <div className="mt-2 flex flex-wrap gap-1.5 sm:hidden">
+                          {m.role === 'leader' ? (
+                            <span className="inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+                              {roleLabel(m.role)}
+                            </span>
+                          ) : null}
+                          {m.role === 'member' && m.teamAccessState === 'paused' ? (
+                            <span className="inline-flex w-fit rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900">
+                              Pausado
+                            </span>
+                          ) : null}
+                          {m.role === 'member' && m.teamAccessState === 'pending_activation' ? (
+                            <span className="inline-flex w-fit rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-semibold text-violet-900">
+                              Aguarda ativação
+                            </span>
+                          ) : null}
+                          {m.role === 'member' && m.teamAccessState === 'active' ? (
+                            <span className="inline-flex w-fit rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-900">
+                              Ativo
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      <div className="text-sm text-gray-800 sm:border-l sm:border-gray-100 sm:pl-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 sm:hidden">Validade</p>
+                        <p className="mt-0.5 font-medium leading-snug text-gray-900">{vText}</p>
+                        {vAjuda ? (
+                          <p className="mt-1.5 text-[11px] leading-snug text-gray-600">{vAjuda}</p>
                         ) : null}
                       </div>
-                      {showActions ? (
-                        <div className="flex flex-wrap justify-end gap-2">
-                          {m.teamAccessState === 'pending_activation' ? (
-                            <button
-                              type="button"
-                              disabled={isBusy}
-                              onClick={() => {
-                                setActionError(null)
-                                setActivateDays('30')
-                                setActivateNoEnd(false)
-                                setActivateUserId(m.userId)
-                              }}
-                              className="rounded-lg border border-green-600 bg-green-50 px-2.5 py-1.5 text-xs font-semibold text-green-900 hover:bg-green-100 disabled:opacity-50"
-                            >
-                              Ativar
-                            </button>
-                          ) : m.teamAccessState === 'active' ? (
-                            <button
-                              type="button"
-                              disabled={isBusy}
-                              onClick={() => void callAccessApi(m.userId, 'pause')}
-                              className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
-                            >
-                              {isBusy ? '…' : 'Pausar acesso'}
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              disabled={isBusy}
-                              onClick={() => void callAccessApi(m.userId, 'resume')}
-                              className="rounded-lg border border-green-200 bg-green-50 px-2.5 py-1.5 text-xs font-semibold text-green-900 hover:bg-green-100 disabled:opacity-50"
-                            >
-                              {isBusy ? '…' : 'Retomar acesso'}
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            disabled={isBusy}
-                            onClick={() => {
-                              if (
-                                !window.confirm(
-                                  'Remover esta pessoa da equipe? Ela deixa de ver o espaço Pro Líderes; links e ferramentas YLADA criados na conta dela não são apagados.'
-                                )
-                              ) {
-                                return
-                              }
-                              void callAccessApi(m.userId, 'remove')
-                            }}
-                            className="rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-100 disabled:opacity-50"
-                          >
-                            {isBusy ? '…' : 'Remover'}
-                          </button>
+
+                      <div className="flex flex-col items-stretch gap-2 sm:items-end">
+                        <div className="hidden flex-wrap justify-end gap-1.5 sm:flex">
+                          {m.role === 'leader' ? (
+                            <span className="inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+                              {roleLabel(m.role)}
+                            </span>
+                          ) : null}
+                          {m.role === 'member' && m.teamAccessState === 'paused' ? (
+                            <span className="inline-flex w-fit rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900">
+                              Pausado
+                            </span>
+                          ) : null}
+                          {m.role === 'member' && m.teamAccessState === 'pending_activation' ? (
+                            <span className="inline-flex w-fit rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-semibold text-violet-900">
+                              Aguarda ativação
+                            </span>
+                          ) : null}
+                          {m.role === 'member' && m.teamAccessState === 'active' ? (
+                            <span className="inline-flex w-fit rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-900">
+                              Ativo
+                            </span>
+                          ) : null}
                         </div>
-                      ) : null}
+
+                        {showActions ? (
+                          <div className="flex flex-wrap justify-stretch gap-2 sm:justify-end">
+                            <button
+                              type="button"
+                              title={canPause ? 'Suspender o acesso ao painel' : 'Só com acesso ativo'}
+                              disabled={isBusy || !canPause}
+                              onClick={() => void callAccessApi(m.userId, 'pause')}
+                              className="min-h-[36px] flex-1 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-950 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none sm:min-w-[5.5rem]"
+                            >
+                              {isBusy && canPause ? '…' : 'Pausar'}
+                            </button>
+                            <button
+                              type="button"
+                              title={
+                                m.teamAccessState === 'pending_activation'
+                                  ? 'Primeira liberação e validade'
+                                  : m.teamAccessState === 'paused'
+                                    ? 'Voltar a dar acesso'
+                                    : 'Já ativo'
+                              }
+                              disabled={isBusy || !canAtivar}
+                              onClick={() => {
+                                if (m.teamAccessState === 'pending_activation') {
+                                  setActionError(null)
+                                  setActivateDays('30')
+                                  setActivateNoEnd(false)
+                                  setActivateFlow('pending')
+                                  setActivateUserId(m.userId)
+                                  return
+                                }
+                                if (m.teamAccessState === 'paused') {
+                                  setActionError(null)
+                                  setActivateDays('30')
+                                  setActivateNoEnd(false)
+                                  setActivateFlow('paused')
+                                  setActivateUserId(m.userId)
+                                }
+                              }}
+                              className="min-h-[36px] flex-1 rounded-lg border border-green-600 bg-green-50 px-2.5 py-1.5 text-xs font-semibold text-green-950 hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none sm:min-w-[5.5rem]"
+                            >
+                              {isBusy && canAtivar ? '…' : 'Ativar'}
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isBusy}
+                              title="Retirar da equipe deste espaço"
+                              onClick={() => {
+                                if (
+                                  !window.confirm(
+                                    'Remover esta pessoa da equipe? Ela deixa de ver o espaço Pro Líderes; links e ferramentas YLADA criados na conta dela não são apagados.'
+                                  )
+                                ) {
+                                  return
+                                }
+                                void callAccessApi(m.userId, 'remove')
+                              }}
+                              className="min-h-[36px] flex-1 rounded-lg border border-red-300 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-900 hover:bg-red-100 disabled:opacity-50 sm:flex-none sm:min-w-[5.5rem]"
+                            >
+                              {isBusy ? '…' : 'Remover'}
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
                   </li>
                 )
