@@ -61,34 +61,58 @@ export async function POST(request: NextRequest) {
 
   const inv = invite as LeaderTenantInviteRow
 
+  /**
+   * Convite marcado como usado pela mesma conta: devolve rápido só se AINDA for membro.
+   * Caso contrário (ex.: líder removeu a linha na equipe), seguimos com reconcile:
+   * recriamos `leader_tenant_members` sem depender de `loadValidPending` (convite já não está pending).
+   */
+  let reconcileUsedInviteRemovedMember = false
+
   if (inv.status === 'used' && inv.used_by_user_id === user.id) {
-    if (nomeOpt || whatsappOpt) {
-      const patch: Record<string, string> = {}
-      if (nomeOpt && nomeOpt.length >= 2) patch.nome_completo = nomeOpt
-      if (whatsappOpt && whatsappMeetsProLideresMandatory(whatsappOpt)) patch.whatsapp = whatsappOpt
-      if (Object.keys(patch).length > 0) {
-        patch.updated_at = new Date().toISOString()
-        await supabaseAdmin.from('user_profiles').update(patch).eq('user_id', user.id)
+    const { data: memberStillThere } = await supabaseAdmin
+      .from('leader_tenant_members')
+      .select('id')
+      .eq('leader_tenant_id', inv.leader_tenant_id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (memberStillThere) {
+      if (nomeOpt || whatsappOpt) {
+        const patch: Record<string, string> = {}
+        if (nomeOpt && nomeOpt.length >= 2) patch.nome_completo = nomeOpt
+        if (whatsappOpt && whatsappMeetsProLideresMandatory(whatsappOpt)) patch.whatsapp = whatsappOpt
+        if (Object.keys(patch).length > 0) {
+          patch.updated_at = new Date().toISOString()
+          await supabaseAdmin.from('user_profiles').update(patch).eq('user_id', user.id)
+        }
       }
+      return NextResponse.json({ ok: true, alreadyAccepted: true })
     }
-    return NextResponse.json({ ok: true, alreadyAccepted: true })
-  }
-  if (inv.status === 'used' || inv.used_at) {
+
+    reconcileUsedInviteRemovedMember = true
+  } else if (inv.status === 'used' || inv.used_at) {
     return NextResponse.json({ error: 'Este convite já foi utilizado.' }, { status: 400 })
   }
 
-  const loaded = await loadValidPendingProLideresInvite(supabaseAdmin, token)
-  if (!loaded.ok) {
-    const msg =
-      loaded.reason === 'revoked'
-        ? 'Este convite foi revogado.'
-        : loaded.reason === 'expired'
-          ? 'Este convite expirou.'
-          : 'Convite indisponível.'
-    return NextResponse.json({ error: msg }, { status: 400 })
+  let effectiveInvite: LeaderTenantInviteRow
+
+  if (reconcileUsedInviteRemovedMember) {
+    effectiveInvite = inv
+  } else {
+    const loaded = await loadValidPendingProLideresInvite(supabaseAdmin, token)
+    if (!loaded.ok) {
+      const msg =
+        loaded.reason === 'revoked'
+          ? 'Este convite foi revogado.'
+          : loaded.reason === 'expired'
+            ? 'Este convite expirou.'
+            : 'Convite indisponível.'
+      return NextResponse.json({ error: msg }, { status: 400 })
+    }
+    effectiveInvite = loaded.invite
   }
 
-  if (normalizeInviteEmail(loaded.invite.invited_email) !== sessionEmail) {
+  if (normalizeInviteEmail(effectiveInvite.invited_email) !== sessionEmail) {
     return NextResponse.json(
       {
         error: 'Faça login com a conta do e-mail convidado. O convite foi enviado para outro endereço.',
@@ -97,10 +121,12 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  const tenantIdForInvite = effectiveInvite.leader_tenant_id as string
+
   const { data: tenant } = await supabaseAdmin
     .from('leader_tenants')
     .select('id, owner_user_id, team_bank_payment_url, team_bank_pix_payment_url')
-    .eq('id', inv.leader_tenant_id)
+    .eq('id', tenantIdForInvite)
     .maybeSingle()
 
   if (!tenant) {
@@ -124,7 +150,7 @@ export async function POST(request: NextRequest) {
   const { data: existingMember } = await supabaseAdmin
     .from('leader_tenant_members')
     .select('id')
-    .eq('leader_tenant_id', inv.leader_tenant_id)
+    .eq('leader_tenant_id', tenantIdForInvite)
     .eq('user_id', user.id)
     .maybeSingle()
 
@@ -159,7 +185,7 @@ export async function POST(request: NextRequest) {
 
   const slugTaken = await isProLideresShareSlugTakenInTenant(
     supabaseAdmin,
-    inv.leader_tenant_id as string,
+    tenantIdForInvite,
     slugRes.value,
     user.id
   )
@@ -175,7 +201,7 @@ export async function POST(request: NextRequest) {
   }
   const canonicalTabulator = await resolveCanonicalTabulatorLabelForTenant(
     supabaseAdmin,
-    inv.leader_tenant_id as string,
+    tenantIdForInvite,
     tabulatorRaw
   )
   if (!canonicalTabulator) {
@@ -183,7 +209,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { error: insErr } = await supabaseAdmin.from('leader_tenant_members').insert({
-    leader_tenant_id: inv.leader_tenant_id,
+    leader_tenant_id: tenantIdForInvite,
     user_id: user.id,
     role: 'member',
     team_access_state: 'pending_activation',
@@ -217,7 +243,7 @@ export async function POST(request: NextRequest) {
       used_at: now.toISOString(),
       used_by_user_id: user.id,
     })
-    .eq('id', inv.id)
+    .eq('id', effectiveInvite.id)
     .eq('status', 'pending')
 
   if (updErr) {
@@ -233,7 +259,7 @@ export async function POST(request: NextRequest) {
 
   await syncProLideresMemberLinkTokensShareSlug(
     supabaseAdmin,
-    inv.leader_tenant_id as string,
+    tenantIdForInvite,
     user.id,
     slugRes.value
   )
