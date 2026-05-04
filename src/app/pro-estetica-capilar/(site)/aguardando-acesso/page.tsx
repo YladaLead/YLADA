@@ -5,8 +5,7 @@ export default function ProEsteticaCapilarAguardandoPage() {
     <div className="mx-auto max-w-md space-y-6 text-center">
       <h1 className="text-2xl font-bold text-gray-900">Acesso — Terapia capilar</h1>
       <p className="text-base text-gray-600">
-        Sua conta ainda nao tem este espaco ativo. Fale com o time para implantacao ou use uma conta ja associada a
-        esta edicao.
+        Sua conta ainda não tem este espaço ativo. Confirme o convite ou entre com outra conta já associada a esta edição.
       </p>
       <div className="mx-auto flex w-full max-w-xs flex-col gap-3">
         <Link

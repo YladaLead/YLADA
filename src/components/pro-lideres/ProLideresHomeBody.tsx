@@ -2,10 +2,7 @@
 
 import Link from 'next/link'
 
-import { getProLideresWhatsappUrl } from '@/lib/pro-lideres-whatsapp'
-
 export function ProLideresHomeBody() {
-  const whatsappHref = getProLideresWhatsappUrl()
   return (
     <div className="space-y-10">
       <div className="space-y-3">
@@ -45,19 +42,6 @@ export function ProLideresHomeBody() {
         <p className="mt-2 text-sm leading-relaxed text-gray-700 sm:text-base">
           Nós te mostramos como estruturar o que o time fala, como abordar e como manter consistência todos os dias.
         </p>
-        <div className="mt-4 space-y-2">
-          <a
-            href={whatsappHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-[#25D366] px-5 py-3 text-center text-sm font-semibold text-white hover:bg-[#20bd5a] sm:w-auto"
-          >
-            Quero aumentar a performance da minha equipe
-          </a>
-          <p className="text-xs text-gray-600 sm:text-sm">
-            Você vai entender como aplicar isso na prática em poucos minutos.
-          </p>
-        </div>
       </section>
 
       <section className="space-y-3" aria-labelledby="pro-lideres-dor-heading">
