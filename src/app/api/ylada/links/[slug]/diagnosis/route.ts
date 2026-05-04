@@ -412,9 +412,9 @@ export async function POST(
         : ((metaRaw.theme as Record<string, unknown>)?.raw as string | undefined) ?? ''
     const linkTitleForCache = (config.title as string) || ''
 
-    // Cache: v16 — + pacotes PROJECTION calculadoras corporais (mig. 405)
+    // Cache: v18 — + pacotes PROJECTION diagnóstico capilar biblioteca (mig. 408)
     const answers_hash = hashAnswersForCache(visitor_answers, themeForCache, linkTitleForCache, diagnosisVertical)
-    const TEMPLATE_VERSION = 16
+    const TEMPLATE_VERSION = 18
     const { data: cached } = await supabaseAdmin
       .from('ylada_diagnosis_cache')
       .select('diagnosis_json')
