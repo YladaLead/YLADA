@@ -7,7 +7,10 @@ import {
   resolveEsteticaCorporalTenantContext,
   shouldProvisionEsteticaCorporalTenant,
 } from '@/lib/pro-estetica-corporal-server'
-import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import {
+  fetchProLideresViewerDisplayNameForNonOwner,
+  resolveProLideresTenantContext,
+} from '@/lib/pro-lideres-server'
 import { parseMessageTonePatchBody } from '@/lib/leader-tenant-message-tone'
 
 const MAX_LEN = 500
@@ -61,11 +64,15 @@ export async function GET(request: NextRequest) {
   }
 
   const canEditTenantProfile = ctx.tenant.owner_user_id === user.id
+  const viewerDisplayName = canEditTenantProfile
+    ? (ctx.tenant.display_name ?? '').trim()
+    : await fetchProLideresViewerDisplayNameForNonOwner(supabaseAdmin, user, ctx.tenant.id)
 
   return NextResponse.json({
     tenant: ctx.tenant,
     role: ctx.role,
     canEditTenantProfile,
+    viewerDisplayName,
   })
 }
 
@@ -136,5 +143,6 @@ export async function PATCH(request: NextRequest) {
     tenant: tenant as LeaderTenantRow,
     role: 'leader' as const,
     canEditTenantProfile: true,
+    viewerDisplayName: ((tenant as LeaderTenantRow).display_name ?? '').trim(),
   })
 }

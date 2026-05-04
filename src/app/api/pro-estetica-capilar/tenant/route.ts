@@ -7,7 +7,10 @@ import {
   proEsteticaCapilarAutoProvisionEnabled,
   resolveEsteticaCapilarTenantContext,
 } from '@/lib/pro-estetica-capilar-server'
-import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import {
+  fetchProLideresViewerDisplayNameForNonOwner,
+  resolveProLideresTenantContext,
+} from '@/lib/pro-lideres-server'
 
 const MAX_LEN = 500
 
@@ -36,10 +39,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Tenant nao encontrado' }, { status: 404 })
   }
 
+  const canEditTenantProfile = ctx.tenant.owner_user_id === user.id
+  const viewerDisplayName = canEditTenantProfile
+    ? (ctx.tenant.display_name ?? '').trim()
+    : await fetchProLideresViewerDisplayNameForNonOwner(supabaseAdmin, user, ctx.tenant.id)
+
   return NextResponse.json({
     tenant: ctx.tenant,
     role: ctx.role,
-    canEditTenantProfile: ctx.tenant.owner_user_id === user.id,
+    canEditTenantProfile,
+    viewerDisplayName,
   })
 }
 
@@ -84,5 +93,11 @@ export async function PATCH(request: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: 'Erro ao atualizar' }, { status: 500 })
-  return NextResponse.json({ tenant: tenant as LeaderTenantRow, role: 'leader' as const, canEditTenantProfile: true })
+  const updated = tenant as LeaderTenantRow
+  return NextResponse.json({
+    tenant: updated,
+    role: 'leader' as const,
+    canEditTenantProfile: true,
+    viewerDisplayName: (updated.display_name ?? '').trim(),
+  })
 }

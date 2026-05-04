@@ -64,6 +64,49 @@ export function resolvedUserEmail(user: User): string | null {
   return null
 }
 
+/**
+ * Nome no campo «Nome para exibição» do perfil Pro: o dono do tenant vê/edita o `display_name` da operação;
+ * membro (ou quem não é owner) deve ver o nome da própria conta, não o do líder.
+ */
+export function resolveProLideresViewerDisplayName(
+  user: User,
+  opts: { nomeCompleto?: string | null; tabulatorName?: string | null }
+): string {
+  const nc = typeof opts.nomeCompleto === 'string' ? opts.nomeCompleto.trim() : ''
+  if (nc) return nc
+  const meta = user.user_metadata
+  const fromMeta =
+    (typeof meta?.full_name === 'string' && meta.full_name.trim()) ||
+    (typeof meta?.name === 'string' && meta.name.trim()) ||
+    ''
+  if (fromMeta) return fromMeta
+  const tab = typeof opts.tabulatorName === 'string' ? opts.tabulatorName.trim() : ''
+  if (tab) return tab
+  const email = resolvedUserEmail(user)
+  if (email?.includes('@')) return email.split('@')[0]!.trim()
+  return ''
+}
+
+export async function fetchProLideresViewerDisplayNameForNonOwner(
+  supabase: SupabaseClient,
+  user: User,
+  tenantId: string
+): Promise<string> {
+  const [{ data: prof }, { data: mem }] = await Promise.all([
+    supabase.from('user_profiles').select('nome_completo').eq('user_id', user.id).maybeSingle(),
+    supabase
+      .from('leader_tenant_members')
+      .select('pro_lideres_tabulator_name')
+      .eq('leader_tenant_id', tenantId)
+      .eq('user_id', user.id)
+      .maybeSingle(),
+  ])
+  return resolveProLideresViewerDisplayName(user, {
+    nomeCompleto: (prof as { nome_completo?: string | null } | null)?.nome_completo ?? null,
+    tabulatorName: (mem as { pro_lideres_tabulator_name?: string | null } | null)?.pro_lideres_tabulator_name ?? null,
+  })
+}
+
 /** Bootstrap por e-mail, por UUID (env ou built-in) ou metadata. */
 export function isProLideresBootstrapLeader(user: User): boolean {
   const envIds =

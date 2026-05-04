@@ -86,11 +86,12 @@ export function ProLideresPerfilForm({
         setTenant(null)
         return
       }
-      const d = data as { tenant: LeaderTenantRow; canEditTenantProfile?: boolean }
+      const d = data as { tenant: LeaderTenantRow; canEditTenantProfile?: boolean; viewerDisplayName?: string }
       const t = d.tenant
       setCanEditTenantProfile(d.canEditTenantProfile !== false)
       setTenant(t)
-      setDisplayName(t.display_name ?? '')
+      const nameForField = (d.viewerDisplayName ?? t.display_name ?? '').trim()
+      setDisplayName(nameForField)
       setTeamName(t.team_name ?? '')
       const wa = t.whatsapp ?? ''
       setWhatsapp(wa)
@@ -156,8 +157,10 @@ export function ProLideresPerfilForm({
         setError((data as { error?: string }).error || 'Não foi possível guardar.')
         return
       }
-      const t = (data as { tenant: LeaderTenantRow }).tenant
+      const d = data as { tenant: LeaderTenantRow; viewerDisplayName?: string }
+      const t = d.tenant
       setTenant(t)
+      setDisplayName((d.viewerDisplayName ?? t.display_name ?? '').trim())
       if (copyProfile === 'pro_lideres') {
         setTeamBankPaymentUrl(
           typeof t.team_bank_payment_url === 'string' ? t.team_bank_payment_url.trim() : ''
