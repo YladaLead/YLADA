@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
-import { PRO_LIDERES_MENU_GROUPS, proLideresItemHref, type ProLideresMenuItem } from '@/config/pro-lideres-menu'
+import { PRO_LIDERES_MENU_GROUPS, proLideresItemHrefWithBase, type ProLideresMenuItem } from '@/config/pro-lideres-menu'
 import { useAuth } from '@/hooks/useAuth'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
 import { setProLideresTeamViewPreviewCookie } from '@/lib/pro-lideres-team-preview'
@@ -16,7 +16,8 @@ interface ProLideresSidebarProps {
 export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose }: ProLideresSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const { role, teamViewPreview, dailyTasksVisibleToTeam } = useProLideresPainel()
+  const { canManageAsLeader, isLeaderWorkspace, teamViewPreview, dailyTasksVisibleToTeam, painelBasePath } =
+    useProLideresPainel()
   const { signOut, user, userProfile } = useAuth()
   const userName =
     userProfile?.nome_completo ||
@@ -32,35 +33,36 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
       .toUpperCase()
       .slice(0, 2) || 'L'
 
-  /** Só utilizadores com papel líder (sem «ver como equipe») vêem entradas leaderOnly — regra explícita por `role`. */
-  const showLeaderOnlyNav = role === 'leader' && !teamViewPreview
-
   const filteredMenu = useMemo(() => {
     return PRO_LIDERES_MENU_GROUPS.map((g) => ({
       ...g,
       items: g.items.filter((item) => {
-        if (item.key === 'tarefas' && !showLeaderOnlyNav && !dailyTasksVisibleToTeam) {
+        if (item.key === 'tarefas' && !isLeaderWorkspace && !dailyTasksVisibleToTeam) {
           return false
         }
-        return showLeaderOnlyNav || !item.leaderOnly
+        return isLeaderWorkspace || !item.leaderOnly
       }),
     })).filter((g) => g.items.length > 0)
-  }, [showLeaderOnlyNav, dailyTasksVisibleToTeam, role, teamViewPreview])
+  }, [isLeaderWorkspace, dailyTasksVisibleToTeam])
 
-  const itemHref = useCallback((item: ProLideresMenuItem) => proLideresItemHref(item.path), [])
+  const itemHref = useCallback(
+    (item: ProLideresMenuItem) => proLideresItemHrefWithBase(painelBasePath, item.path),
+    [painelBasePath]
+  )
 
   const itemIsActive = useCallback(
     (item: ProLideresMenuItem) => {
       const href = itemHref(item)
+      const base = painelBasePath.replace(/\/$/, '')
       if (item.key === 'visao') {
-        return pathname === '/pro-lideres/painel' || pathname === '/pro-lideres/painel/'
+        return pathname === base || pathname === `${base}/`
       }
       return pathname === href || pathname?.startsWith(`${href}/`)
     },
-    [pathname, itemHref]
+    [pathname, itemHref, painelBasePath]
   )
 
-  const perfilPath = '/pro-lideres/painel/perfil'
+  const perfilPath = `${painelBasePath.replace(/\/$/, '')}/perfil`
   const perfilActive = pathname === perfilPath || pathname?.startsWith(`${perfilPath}/`)
 
   const renderItemLink = (item: ProLideresMenuItem) => {
@@ -140,7 +142,7 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
         </div>
 
         <div className="shrink-0 space-y-1 border-t border-gray-200 p-2">
-          {role === 'leader' && (
+          {canManageAsLeader && (
             <>
               {!teamViewPreview ? (
                 <button
@@ -148,7 +150,7 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
                   onClick={() => {
                     setProLideresTeamViewPreviewCookie(true)
                     onMobileClose?.()
-                    router.push('/pro-lideres/painel')
+                    router.push(painelBasePath)
                     router.refresh()
                   }}
                   className="flex min-h-[40px] w-full items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-2 py-2 text-left text-sm font-semibold text-emerald-900 transition-colors touch-manipulation hover:bg-emerald-100"
@@ -162,7 +164,7 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
                   onClick={() => {
                     setProLideresTeamViewPreviewCookie(false)
                     onMobileClose?.()
-                    router.push('/pro-lideres/painel')
+                    router.push(painelBasePath)
                     router.refresh()
                   }}
                   className="flex min-h-[40px] w-full items-center gap-2 rounded-lg border border-blue-200 bg-blue-50/90 px-2 py-2 text-left text-sm font-semibold text-blue-900 transition-colors touch-manipulation hover:bg-blue-100"

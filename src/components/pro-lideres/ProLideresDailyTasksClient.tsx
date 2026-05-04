@@ -54,7 +54,7 @@ type TaskRowEdit = {
 
 export function ProLideresDailyTasksClient() {
   const router = useRouter()
-  const { isLeaderWorkspace: isLeader, dailyTasksVisibleToTeam } = useProLideresPainel()
+  const { isLeaderWorkspace: isLeader, dailyTasksVisibleToTeam, painelBasePath } = useProLideresPainel()
   const { user } = useAuth()
   const myUserId = user?.id ?? ''
 
@@ -356,7 +356,7 @@ export function ProLideresDailyTasksClient() {
   const applicableToday =
     data?.tasks.filter((t) => (t.execution_weekdays ?? []).includes(todayDow)) ?? []
 
-  const execucaoHref = '/pro-lideres/painel/tarefas/execucao'
+  const execucaoHref = `${painelBasePath.replace(/\/$/, '')}/tarefas/execucao`
 
   const navPill =
     'inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors'

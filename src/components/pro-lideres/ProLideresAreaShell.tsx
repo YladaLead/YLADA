@@ -7,6 +7,7 @@ import ProLideresSidebar from './ProLideresSidebar'
 import { ProLideresPainelProvider, type ProLideresPainelContextValue } from './pro-lideres-painel-context'
 import { useAuth } from '@/hooks/useAuth'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
+import { PRO_LIDERES_MEMBER_BASE_PATH } from '@/config/pro-lideres-menu'
 
 const YLADA_LOGO = YLADA_OG_FALLBACK_LOGO_PATH
 
@@ -33,7 +34,10 @@ export default function ProLideresAreaShell({
       .toUpperCase()
       .slice(0, 2) || 'L'
 
-  const { isLeaderWorkspace, operationLabel, devStubPanel, teamViewPreview } = painelContext
+  const { isLeaderWorkspace, operationLabel, devStubPanel, teamViewPreview, painelBasePath } = painelContext
+  const base = painelBasePath.replace(/\/$/, '')
+  const memberBase = PRO_LIDERES_MEMBER_BASE_PATH.replace(/\/$/, '')
+  const isMemberAreaShell = base === memberBase
 
   return (
     <ProLideresPainelProvider value={painelContext}>
@@ -73,10 +77,10 @@ export default function ProLideresAreaShell({
               </svg>
             </button>
             <Link
-              href="/pro-lideres/painel"
+              href={base}
               title={
                 operationLabel
-                  ? `Pro Líderes — ${isLeaderWorkspace ? 'Líder' : 'Equipe'} — ${operationLabel}`
+                  ? `Pro Líderes — ${isMemberAreaShell ? 'Equipe' : isLeaderWorkspace ? 'Líder' : 'Equipe'} — ${operationLabel}`
                   : undefined
               }
               className="flex min-w-0 flex-col gap-0.5 touch-manipulation sm:flex-row sm:items-center sm:gap-2"
@@ -91,23 +95,31 @@ export default function ProLideresAreaShell({
               />
               <div className="flex min-w-0 flex-col leading-tight sm:flex-row sm:items-baseline sm:gap-2">
                 <span className="truncate text-sm font-medium text-gray-500">Pro Líderes</span>
-                <span
-                  className={`truncate text-xs font-semibold ${
-                    isLeaderWorkspace ? 'text-blue-700' : 'text-emerald-700'
-                  }`}
-                >
-                  {isLeaderWorkspace ? 'Ambiente do líder' : 'Ambiente da equipe'}
-                </span>
-                {operationLabel ? (
-                  <span className="hidden max-w-[10rem] truncate text-xs text-gray-400 lg:inline">
-                    · {operationLabel}
-                  </span>
-                ) : null}
+                {isMemberAreaShell ? (
+                  operationLabel ? (
+                    <span className="truncate text-xs font-medium text-gray-600">{operationLabel}</span>
+                  ) : null
+                ) : (
+                  <>
+                    <span
+                      className={`truncate text-xs font-semibold ${
+                        isLeaderWorkspace ? 'text-blue-700' : 'text-emerald-700'
+                      }`}
+                    >
+                      {isLeaderWorkspace ? 'Ambiente do líder' : 'Ambiente da equipe'}
+                    </span>
+                    {operationLabel ? (
+                      <span className="hidden max-w-[10rem] truncate text-xs text-gray-400 lg:inline">
+                        · {operationLabel}
+                      </span>
+                    ) : null}
+                  </>
+                )}
               </div>
             </Link>
           </div>
           <Link
-            href="/pro-lideres/painel/perfil"
+            href={`${base}/perfil`}
             className="touch-manipulation flex shrink-0 items-center gap-2 rounded-lg p-1 text-gray-700 hover:bg-gray-50 sm:pr-2"
             aria-label={`Perfil: ${userName}`}
           >

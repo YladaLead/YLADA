@@ -10,9 +10,17 @@ import {
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { getProLideresMemberMandatoryProfileGap } from '@/lib/pro-lideres-member-mandatory-profile'
 import ProLideresAreaShell from '@/components/pro-lideres/ProLideresAreaShell'
-import { PRO_LIDERES_BASE_PATH, mapProLideresPathToMemberArea } from '@/config/pro-lideres-menu'
+import {
+  PRO_LIDERES_MEMBER_BASE_PATH,
+  mapProLideresPathToLeaderArea,
+} from '@/config/pro-lideres-menu'
 
-export default async function ProLideresPainelLayout({ children }: { children: ReactNode }) {
+/**
+ * Área autenticada só para equipa (convidados). Líderes reais são enviados para `/pro-lideres/painel`.
+ * Nota: não usar `cookies().delete()` aqui — no App Router só Route Handlers / Server Actions podem alterar cookies.
+ * O modo «ver como equipe» já fica desligado na UI via `teamViewPreview: false` e `canManageAsLeader: false`.
+ */
+export default async function ProLideresMembroAreaLayout({ children }: { children: ReactNode }) {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) {
     redirect(gate.redirect)
@@ -35,6 +43,10 @@ export default async function ProLideresPainelLayout({ children }: { children: R
           isLeaderWorkspace: false,
         }
 
+  if (ui.canManageAsLeader) {
+    redirect(mapProLideresPathToLeaderArea(pathname))
+  }
+
   if (
     user &&
     ui.isActiveMemberRow &&
@@ -49,10 +61,6 @@ export default async function ProLideresPainelLayout({ children }: { children: R
     }
   }
 
-  if (!ui.canManageAsLeader) {
-    redirect(mapProLideresPathToMemberArea(pathname))
-  }
-
   const operationLabel =
     gate.tenant.display_name?.trim() || gate.tenant.team_name?.trim() || null
   const verticalCode = (gate.tenant.vertical_code ?? 'h-lider').trim() || 'h-lider'
@@ -62,14 +70,14 @@ export default async function ProLideresPainelLayout({ children }: { children: R
     <ProLideresAreaShell
       painelContext={{
         role: gate.role,
-        canManageAsLeader: ui.canManageAsLeader,
-        isLeaderWorkspace: ui.isLeaderWorkspace,
-        teamViewPreview: ui.teamViewPreview,
+        canManageAsLeader: false,
+        isLeaderWorkspace: false,
+        teamViewPreview: false,
         operationLabel,
         devStubPanel: isProLideresDevStubTenant(gate.tenant),
         verticalCode,
         dailyTasksVisibleToTeam,
-        painelBasePath: PRO_LIDERES_BASE_PATH,
+        painelBasePath: PRO_LIDERES_MEMBER_BASE_PATH,
       }}
     >
       {children}

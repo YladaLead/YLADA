@@ -1,14 +1,12 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import { ProLideresEquipeAttributionPanel } from '@/components/pro-lideres/ProLideresEquipeAttributionPanel'
 import { ProLideresEquipeMembersCollapsible } from '@/components/pro-lideres/ProLideresEquipeMembersCollapsible'
-import { ensureLeaderTenantAccess } from '@/lib/pro-lideres-server'
+import { ensureLeaderTenantAccess, loadProLideresPainelUiForRequest } from '@/lib/pro-lideres-server'
 import {
   fetchProLideresMembersEnriched,
   syncProLideresMemberExpiryPauses,
 } from '@/lib/pro-lideres-members-enriched'
-import { proLideresTeamViewPreviewFromCookies } from '@/lib/pro-lideres-team-preview'
 import type { ProLideresTenantRole } from '@/types/leader-tenant'
 
 function roleLabel(role: ProLideresTenantRole): string {
@@ -19,9 +17,8 @@ export default async function ProLideresEquipePage() {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) redirect(gate.redirect)
 
-  const cookieStore = await cookies()
-  const teamViewPreview = proLideresTeamViewPreviewFromCookies(gate.role, cookieStore)
-  const isLeader = gate.role === 'leader' && !teamViewPreview
+  const ui = await loadProLideresPainelUiForRequest(gate)
+  const isLeader = ui.isLeaderWorkspace
   if (!isLeader) {
     redirect('/pro-lideres/painel')
   }

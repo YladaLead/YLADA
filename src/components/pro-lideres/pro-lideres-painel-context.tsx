@@ -5,6 +5,11 @@ import type { ProLideresTenantRole } from '@/types/leader-tenant'
 
 export type ProLideresPainelContextValue = {
   role: ProLideresTenantRole
+  /**
+   * Confirmado na BD (dono ou co-líder): menu completo e «ver como equipe».
+   * Membro convidado fica sempre false mesmo que `role` no gate falhe.
+   */
+  canManageAsLeader: boolean
   /** Dono do tenant (consultoria) — menu e rotas completas de gestão. */
   isLeaderWorkspace: boolean
   /**
@@ -25,6 +30,11 @@ export type ProLideresPainelContextValue = {
    * Líder e pré-visualização «ver como equipe» seguem a mesma regra da equipe.
    */
   dailyTasksVisibleToTeam: boolean
+  /**
+   * Prefixo das rotas deste shell (`/pro-lideres/painel` ou `/pro-lideres/membro`).
+   * Links do menu, logo e perfil usam isto.
+   */
+  painelBasePath: string
 }
 
 const ProLideresPainelContext = createContext<ProLideresPainelContextValue | null>(null)

@@ -2,18 +2,21 @@ import { redirect } from 'next/navigation'
 import {
   createProLideresServerClient,
   ensureLeaderTenantAccess,
+  loadProLideresPainelUiForRequest,
 } from '@/lib/pro-lideres-server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { getProLideresMemberMandatoryProfileGap } from '@/lib/pro-lideres-member-mandatory-profile'
-import { DadosObrigatoriosClient } from './DadosObrigatoriosClient'
+import { DadosObrigatoriosClient } from '@/app/pro-lideres/painel/equipe/dados-obrigatorios/DadosObrigatoriosClient'
 
-export default async function ProLideresDadosObrigatoriosPage() {
+export default async function ProLideresMembroDadosObrigatoriosPage() {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) {
     redirect(gate.redirect)
   }
-  if (gate.role !== 'member') {
-    redirect('/pro-lideres/painel')
+
+  const ui = await loadProLideresPainelUiForRequest(gate)
+  if (ui.canManageAsLeader) {
+    redirect('/pro-lideres/painel/equipe/dados-obrigatorios')
   }
 
   const supabase = await createProLideresServerClient()
@@ -36,7 +39,5 @@ export default async function ProLideresDadosObrigatoriosPage() {
   const spaceLabel =
     gate.tenant.display_name?.trim() || gate.tenant.team_name?.trim() || 'Esta equipe'
 
-  return (
-    <DadosObrigatoriosClient spaceLabel={spaceLabel} initialGap={gap} homeHref="/pro-lideres/membro" />
-  )
+  return <DadosObrigatoriosClient spaceLabel={spaceLabel} initialGap={gap} homeHref="/pro-lideres/membro" />
 }

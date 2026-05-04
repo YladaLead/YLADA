@@ -1,16 +1,13 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import { ProLideresTabuladoresPanel } from '@/components/pro-lideres/ProLideresTabuladoresPanel'
-import { ensureLeaderTenantAccess } from '@/lib/pro-lideres-server'
-import { proLideresTeamViewPreviewFromCookies } from '@/lib/pro-lideres-team-preview'
+import { ensureLeaderTenantAccess, loadProLideresPainelUiForRequest } from '@/lib/pro-lideres-server'
 
 export default async function ProLideresTabuladoresPage() {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) redirect(gate.redirect)
-  const cookieStore = await cookies()
-  const teamViewPreview = proLideresTeamViewPreviewFromCookies(gate.role, cookieStore)
-  if (gate.role !== 'leader' || teamViewPreview) redirect('/pro-lideres/painel')
+  const ui = await loadProLideresPainelUiForRequest(gate)
+  if (!ui.isLeaderWorkspace) redirect('/pro-lideres/painel')
 
   return (
     <div className="max-w-2xl space-y-6">

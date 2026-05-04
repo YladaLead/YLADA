@@ -369,6 +369,18 @@ function calcProjection(answers: Record<string, unknown>): {
   }
 }
 
+/** Nível para arquétipo (leve|moderado|urgente): meta agressiva → alto; meta calma → baixo. */
+function riskLevelFromProjectionAnswers(answers: Record<string, unknown>): RiskLevel {
+  const proj = calcProjection(answers)
+  if (proj.warning) return 'alto'
+  const cur = getNum(answers, 'current_value', 0)
+  const tgt = getNum(answers, 'target_value', cur)
+  const days = getNum(answers, 'days', 30)
+  const delta = Math.abs(tgt - cur)
+  if (delta <= 6 && days >= 30) return 'baixo'
+  return 'medio'
+}
+
 /** Templates main_blocker para RISK_DIAGNOSIS: Indícios → Sinais → Desequilíbrio. */
 const RISK_MAIN_BLOCKER: Record<RiskLevel, { withTheme: string; fallback: string }> = {
   baixo: {
@@ -549,6 +561,9 @@ export function getDiagnosisDecision(input: DiagnosisInput): {
       const b = calcBlocker(visitor_answers)
       return { blocker_type: b.blocker_type, architecture: meta.architecture }
     }
+    case 'PROJECTION_CALCULATOR': {
+      return { level: riskLevelFromProjectionAnswers(visitor_answers), architecture: meta.architecture }
+    }
     default:
       return { architecture: meta.architecture }
   }
@@ -634,6 +649,7 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
       slots.DELTA = Math.round(Math.abs(tgt - cur))
       const unitRaw = (visitor_answers.unit as string)?.trim()
       slots.UNIT = unitRaw || 'kg'
+      level = riskLevelFromProjectionAnswers(visitor_answers)
       next_step = getNextStep(meta.architecture, { warning: proj.warning })
       break
     }

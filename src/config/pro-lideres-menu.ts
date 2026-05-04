@@ -4,6 +4,9 @@
  */
 export const PRO_LIDERES_BASE_PATH = '/pro-lideres/painel'
 
+/** Área só da equipa (convites): URL distinta do painel do líder. */
+export const PRO_LIDERES_MEMBER_BASE_PATH = '/pro-lideres/membro'
+
 export type ProLideresMenuItem = {
   key: string
   label: string
@@ -51,6 +54,27 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
 ]
 
 export function proLideresItemHref(path: string): string {
-  if (!path) return PRO_LIDERES_BASE_PATH
-  return `${PRO_LIDERES_BASE_PATH}/${path}`
+  return proLideresItemHrefWithBase(PRO_LIDERES_BASE_PATH, path)
+}
+
+export function proLideresItemHrefWithBase(basePath: string, path: string): string {
+  const base = basePath.replace(/\/$/, '')
+  if (!path) return base
+  return `${base}/${path}`
+}
+
+/** Converte `/pro-lideres/painel/...` → `/pro-lideres/membro/...` (mantém sufixo). */
+export function mapProLideresPathToMemberArea(pathname: string): string {
+  const normalized = (pathname || '').replace(/\/+$/, '') || '/'
+  if (!normalized.startsWith(PRO_LIDERES_BASE_PATH)) return PRO_LIDERES_MEMBER_BASE_PATH
+  const rest = normalized.slice(PRO_LIDERES_BASE_PATH.length)
+  return `${PRO_LIDERES_MEMBER_BASE_PATH}${rest}` || PRO_LIDERES_MEMBER_BASE_PATH
+}
+
+/** Converte `/pro-lideres/membro/...` → `/pro-lideres/painel/...`. */
+export function mapProLideresPathToLeaderArea(pathname: string): string {
+  const normalized = (pathname || '').replace(/\/+$/, '') || '/'
+  if (!normalized.startsWith(PRO_LIDERES_MEMBER_BASE_PATH)) return PRO_LIDERES_BASE_PATH
+  const rest = normalized.slice(PRO_LIDERES_MEMBER_BASE_PATH.length)
+  return `${PRO_LIDERES_BASE_PATH}${rest}` || PRO_LIDERES_BASE_PATH
 }

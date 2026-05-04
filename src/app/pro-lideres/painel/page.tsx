@@ -1,17 +1,14 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import { ensureLeaderTenantAccess } from '@/lib/pro-lideres-server'
-import { proLideresTeamViewPreviewFromCookies } from '@/lib/pro-lideres-team-preview'
+import { ensureLeaderTenantAccess, loadProLideresPainelUiForRequest } from '@/lib/pro-lideres-server'
 import { ProLideresPainelOverview } from '@/components/pro-lideres/ProLideresPainelOverview'
 
 export default async function ProLideresPainelVisaoPage() {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) redirect(gate.redirect)
 
-  const cookieStore = await cookies()
-  const teamViewPreview = proLideresTeamViewPreviewFromCookies(gate.role, cookieStore)
-  const isLeader = gate.role === 'leader' && !teamViewPreview
+  const ui = await loadProLideresPainelUiForRequest(gate)
+  const isLeader = ui.isLeaderWorkspace
   const op =
     gate.tenant.display_name?.trim() ||
     gate.tenant.team_name?.trim() ||

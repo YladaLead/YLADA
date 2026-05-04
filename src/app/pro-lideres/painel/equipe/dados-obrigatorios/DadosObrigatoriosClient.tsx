@@ -8,9 +8,12 @@ import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 export function DadosObrigatoriosClient({
   spaceLabel,
   initialGap,
+  homeHref = '/pro-lideres/painel',
 }: {
   spaceLabel: string
   initialGap: ProLideresMemberMandatoryGap
+  /** Destino após guardar (equipa → `/pro-lideres/membro`). */
+  homeHref?: string
 }) {
   const router = useRouter()
   const [slug, setSlug] = useState('')
@@ -38,7 +41,7 @@ export function DadosObrigatoriosClient({
         setError((data as { error?: string }).error || 'Não foi possível guardar.')
         return
       }
-      router.replace('/pro-lideres/painel')
+      router.replace(homeHref)
       router.refresh()
     } catch {
       setError('Erro de rede.')

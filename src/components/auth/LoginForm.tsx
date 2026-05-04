@@ -525,6 +525,27 @@ export default function LoginForm({
 
         let baseRedirectPath = redirectPath
 
+        if (proLideresLogin && session.access_token) {
+          try {
+            const nextQ = encodeURIComponent(baseRedirectPath)
+            const res = await fetch(`/api/pro-lideres/post-login-destination?next=${nextQ}`, {
+              headers: { Authorization: `Bearer ${session.access_token}` },
+              credentials: 'include',
+            })
+            if (res.ok) {
+              const data = (await res.json()) as { redirectTo?: string }
+              if (typeof data.redirectTo === 'string' && data.redirectTo.startsWith('/pro-lideres')) {
+                baseRedirectPath = data.redirectTo
+                console.log('🔄 Pro Líderes: destino pós-login (líder vs equipa):', baseRedirectPath)
+              }
+            } else {
+              console.warn('⚠️ post-login-destination HTTP', res.status)
+            }
+          } catch (e) {
+            console.warn('⚠️ post-login-destination falhou, usando redirectPath', e)
+          }
+        }
+
         // Login em /pt/login (ylada): todos vão para YLADA (matriz). Priorizar onboarding se perfil não preenchido.
         // Pro Líderes (/pro-lideres/entrar): não aplicar esta lógica — respeita redirectPath (ex.: convite).
         // Dono de tenant Pro Líderes / Pro Estética corporal: mesmo que entre por /pt/login, não mandar para onboarding da matriz.

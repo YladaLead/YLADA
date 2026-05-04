@@ -4,6 +4,10 @@ import type { SupabaseClient, User } from '@supabase/supabase-js'
 import type { LeaderTenantRow, ProLideresTenantRole } from '@/types/leader-tenant'
 import { applyCompletedLeaderOnboardingForEmail } from '@/lib/pro-lideres-leader-onboarding'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import {
+  proLideresTeamViewPreviewFromCaps,
+  type ProLideresCookieStoreLike,
+} from '@/lib/pro-lideres-team-preview'
 
 export type { LeaderTenantRow, ProLideresTenantRole }
 
@@ -123,19 +127,41 @@ function membershipExpiryStillValid(expiresAt: string | null | undefined): boole
  * `.limit(1)` sem ordenação nem `.maybeSingle()` na lista inteira — o PostgREST devolve erro
  * ao haver mais de uma linha e o utilizador cai em /aguardando-acesso mesmo estando «Ativo»
  * noutra equipa.
+ *
+ * Se existir `role = member` ativo num tenant cuja dona **não** é este utilizador, prefere-se
+ * essa equipa a um papel de líder no próprio tenant (evita auto-provisionamento / linha `leader`
+ * no tenant pessoal ganhar por `created_at` mais recente e esconder o convite real noutra operação).
  */
-function pickResolvableMembership(rows: LeaderMemberLite[]): LeaderMemberLite | null {
+function pickResolvableMembership(
+  rows: LeaderMemberLite[],
+  userId: string,
+  ownerByTenantId: Map<string, string>
+): LeaderMemberLite | null {
   if (!rows.length) return null
   const actives = rows.filter((r) => accessStateOf(r) === 'active')
-  actives.sort((a, b) => {
-    const av = membershipExpiryStillValid(a.team_access_expires_at) ? 0 : 1
-    const bv = membershipExpiryStillValid(b.team_access_expires_at) ? 0 : 1
-    if (av !== bv) return av - bv
-    const ta = new Date(a.created_at ?? 0).getTime()
-    const tb = new Date(b.created_at ?? 0).getTime()
-    return tb - ta
+  if (!actives.length) return null
+
+  const sortPool = (pool: LeaderMemberLite[]) => {
+    pool.sort((a, b) => {
+      const av = membershipExpiryStillValid(a.team_access_expires_at) ? 0 : 1
+      const bv = membershipExpiryStillValid(b.team_access_expires_at) ? 0 : 1
+      if (av !== bv) return av - bv
+      const ta = new Date(a.created_at ?? 0).getTime()
+      const tb = new Date(b.created_at ?? 0).getTime()
+      return tb - ta
+    })
+    return pool
+  }
+
+  const foreignTeamMembers = actives.filter((r) => {
+    if ((r.role as string) !== 'member') return false
+    const owner = ownerByTenantId.get(String(r.leader_tenant_id))
+    return owner != null && owner !== userId
   })
-  return actives.find((r) => membershipExpiryStillValid(r.team_access_expires_at)) ?? null
+
+  const pool = foreignTeamMembers.length > 0 ? foreignTeamMembers : actives
+  const sorted = sortPool([...pool])
+  return sorted.find((r) => membershipExpiryStillValid(r.team_access_expires_at)) ?? null
 }
 
 /** Quando não há tenant resolvível (ctx null), onde enviar antes de `/aguardando-acesso`. */
@@ -216,6 +242,12 @@ async function tenantContextFromMembership(
   return { tenant: resolvedTenant as LeaderTenantRow, role }
 }
 
+/** Service role se existir; senão cliente servidor com JWT (RLS) — necessário em dev sem `SUPABASE_SERVICE_ROLE_KEY`. */
+async function supabaseForMembershipLookup(preferAdmin: SupabaseClient | null): Promise<SupabaseClient> {
+  if (preferAdmin) return preferAdmin
+  return createProLideresServerClient()
+}
+
 /**
  * Quem tem convite ativo (`leader_tenant_members.role = member`) para este tenant nunca deve ser tratado
  * como líder na UI/API, mesmo que `leader_tenants.owner_user_id` coincida (dados incoerentes ou resolução antiga).
@@ -225,10 +257,9 @@ async function reconcileProLideresCtxForMemberRow(
   userId: string
 ): Promise<ProLideresTenantContext> {
   if (ctx.role === 'member') return ctx
-  const admin = getSupabaseAdmin()
-  if (!admin) return ctx
+  const client = await supabaseForMembershipLookup(getSupabaseAdmin())
 
-  const { data: row, error } = await admin
+  const { data: row, error } = await client
     .from('leader_tenant_members')
     .select('role, team_access_state, team_access_expires_at')
     .eq('user_id', userId)
@@ -242,6 +273,84 @@ async function reconcileProLideresCtxForMemberRow(
   if (!membershipExpiryStillValid(row.team_access_expires_at as string | null | undefined)) return ctx
 
   return { tenant: ctx.tenant, role: 'member' }
+}
+
+export type ProLideresPainelLeaderCapabilities = {
+  /** Dono do tenant ou `leader_tenant_members.role = leader` ativo — menu gestão + cookie «ver como equipe». */
+  canManageAsLeader: boolean
+  /** Convite com `role = member` e acesso ativo neste tenant. */
+  isActiveMemberRow: boolean
+}
+
+/**
+ * Crava capacidades a partir da BD: membro convidado nunca `canManageAsLeader`, mesmo que `gate.role` esteja errado.
+ * Sem service role, usa o cliente servidor + RLS (obrigatório em localhost; antes caía no `gateRoleFallback` e liberava o menu de líder).
+ */
+export async function getProLideresPainelLeaderCapabilities(
+  admin: SupabaseClient | null,
+  userId: string,
+  tenant: Pick<LeaderTenantRow, 'id' | 'owner_user_id'>,
+  _gateRoleFallback: ProLideresTenantRole
+): Promise<ProLideresPainelLeaderCapabilities> {
+  const client = await supabaseForMembershipLookup(admin)
+
+  const { data: row } = await client
+    .from('leader_tenant_members')
+    .select('role, team_access_state, team_access_expires_at')
+    .eq('user_id', userId)
+    .eq('leader_tenant_id', tenant.id)
+    .maybeSingle()
+
+  if (row?.role === 'member') {
+    const st = (row.team_access_state as string | undefined) ?? 'active'
+    const active =
+      st === 'active' && membershipExpiryStillValid(row.team_access_expires_at as string | null | undefined)
+    return { canManageAsLeader: false, isActiveMemberRow: active }
+  }
+
+  if (row?.role === 'leader') {
+    const st = (row.team_access_state as string | undefined) ?? 'active'
+    return { canManageAsLeader: st === 'active', isActiveMemberRow: false }
+  }
+
+  return { canManageAsLeader: tenant.owner_user_id === userId, isActiveMemberRow: false }
+}
+
+export type ProLideresPainelUiState = ProLideresPainelLeaderCapabilities & {
+  teamViewPreview: boolean
+  isLeaderWorkspace: boolean
+}
+
+export async function resolveProLideresPainelUiState(
+  gate: { tenant: LeaderTenantRow; role: ProLideresTenantRole },
+  userId: string,
+  cookieStore: ProLideresCookieStoreLike,
+  adminClient?: SupabaseClient | null
+): Promise<ProLideresPainelUiState> {
+  const admin = adminClient ?? getSupabaseAdmin()
+  const caps = await getProLideresPainelLeaderCapabilities(admin, userId, gate.tenant, gate.role)
+  const teamViewPreview = proLideresTeamViewPreviewFromCaps(caps.canManageAsLeader, cookieStore)
+  const isLeaderWorkspace = caps.canManageAsLeader && !teamViewPreview
+  return { ...caps, teamViewPreview, isLeaderWorkspace }
+}
+
+/** Após `ensureLeaderTenantAccess` com `ok: true` — cookies + sessão no servidor. */
+export async function loadProLideresPainelUiForRequest(
+  gate: { tenant: LeaderTenantRow; role: ProLideresTenantRole }
+): Promise<ProLideresPainelUiState> {
+  const cookieStore = await cookies()
+  const supabase = await createProLideresServerClient()
+  const { data: userData } = await supabase.auth.getUser()
+  const user = userData.user
+  if (!user?.id) {
+    return {
+      canManageAsLeader: false,
+      isActiveMemberRow: false,
+      teamViewPreview: false,
+      isLeaderWorkspace: false,
+    }
+  }
+  return resolveProLideresPainelUiState(gate, user.id, cookieStore, getSupabaseAdmin())
 }
 
 function devStubLeaderTenant(userId: string): LeaderTenantRow {
@@ -322,6 +431,8 @@ export async function isProLideresLeaderForYladaLinkApis(userId: string): Promis
  * Resolve tenant + papel (dono = líder na consultoria; user_id em leader_tenant_members = equipe ou líder registado).
  *
  * - Memberships ativas têm prioridade sobre `leader_tenants.owner_user_id` (evita membro com tenant pessoal em dev).
+ * - Entre várias memberships ativas, `member` na equipa de **outro** dono ganha a linha `leader` no
+ *   tenant onde o utilizador é `owner_user_id` (caso típico: convidado que também tem tenant auto-criado).
  * - Leitura de `leader_tenant_members` com service role quando existir: o JWT por vezes não devolve linhas como o esperado;
  *   sem isto o utilizador cai só em `asOwner` e vê sidebar de líder.
  * - Se existem linhas em `leader_tenant_members` mas nenhuma ativa/resolvível (ex.: pending_activation), não usar `asOwner`:
@@ -350,7 +461,21 @@ export async function resolveProLideresTenantContext(
   }
 
   const rows = (memberships ?? []) as LeaderMemberLite[]
-  const membership = pickResolvableMembership(rows)
+  const tenantIds = [...new Set(rows.map((r) => String(r.leader_tenant_id)))]
+  const ownerByTenantId = new Map<string, string>()
+  if (tenantIds.length > 0) {
+    const { data: tenantRows } = await membershipClient
+      .from('leader_tenants')
+      .select('id, owner_user_id')
+      .in('id', tenantIds)
+    for (const t of tenantRows ?? []) {
+      const id = t.id as string
+      const ou = t.owner_user_id as string
+      if (id && ou) ownerByTenantId.set(id, ou)
+    }
+  }
+
+  const membership = pickResolvableMembership(rows, user.id, ownerByTenantId)
   if (membership) {
     const fromTeam = await tenantContextFromMembership(supabase, membership)
     return finish(fromTeam)

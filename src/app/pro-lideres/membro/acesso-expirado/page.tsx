@@ -52,7 +52,7 @@ export default async function ProLideresMembroAcessoExpiradoPage() {
   const expired = st === 'active' && exp && !Number.isNaN(expMs) && expMs <= Date.now()
 
   if (!expired) {
-    redirect('/pro-lideres/painel')
+    redirect('/pro-lideres/membro')
   }
 
   const expLabel = new Date(exp as string).toLocaleDateString('pt-BR', { dateStyle: 'long' })

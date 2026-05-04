@@ -1,18 +1,17 @@
 import { redirect } from 'next/navigation'
 
 import { ProLideresDailyTasksClient } from '@/components/pro-lideres/ProLideresDailyTasksClient'
-import { ensureLeaderTenantAccess, loadProLideresPainelUiForRequest } from '@/lib/pro-lideres-server'
+import { ensureLeaderTenantAccess } from '@/lib/pro-lideres-server'
 
-export default async function ProLideresTarefasPage() {
+export default async function ProLideresMembroTarefasPage() {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) redirect(gate.redirect)
 
   const ui = await loadProLideresPainelUiForRequest(gate)
-  const isLeaderWorkspace = ui.isLeaderWorkspace
   const visibleForTeam = gate.tenant.daily_tasks_visible_to_team !== false
 
-  if (!isLeaderWorkspace && !visibleForTeam) {
-    redirect('/pro-lideres/painel')
+  if (!visibleForTeam) {
+    redirect('/pro-lideres/membro')
   }
 
   return <ProLideresDailyTasksClient />

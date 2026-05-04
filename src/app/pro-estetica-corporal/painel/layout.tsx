@@ -31,12 +31,14 @@ export default async function ProEsteticaCorporalPainelLayout({ children }: { ch
     <ProEsteticaCorporalAreaShell
       painelContext={{
         role: gate.role,
+        canManageAsLeader: gate.role === 'leader',
         isLeaderWorkspace: gate.role === 'leader',
         operationLabel,
         devStubPanel: isDevStubEsteticaCorporalPanel(gate.tenant) || previewWithoutLogin,
         previewWithoutLogin,
         verticalCode,
         dailyTasksVisibleToTeam: true,
+        painelBasePath: '/pro-estetica-corporal/painel',
       }}
     >
       {children}

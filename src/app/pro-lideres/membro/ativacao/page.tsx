@@ -41,7 +41,7 @@ export default async function ProLideresMembroAtivacaoPage() {
 
   const st = (m.team_access_state as string) ?? 'active'
   if (st === 'active') {
-    redirect('/pro-lideres/painel')
+    redirect('/pro-lideres/membro')
   }
   if (st === 'paused') {
     redirect('/pro-lideres/acesso-pausado')

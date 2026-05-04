@@ -412,9 +412,9 @@ export async function POST(
         : ((metaRaw.theme as Record<string, unknown>)?.raw as string | undefined) ?? ''
     const linkTitleForCache = (config.title as string) || ''
 
-    // Cache: v11 — normalização p1…p5 + escala; recrutamento Pro Líderes via RISK + pacotes flow_id
+    // Cache: v16 — + pacotes PROJECTION calculadoras corporais (mig. 405)
     const answers_hash = hashAnswersForCache(visitor_answers, themeForCache, linkTitleForCache, diagnosisVertical)
-    const TEMPLATE_VERSION = 11
+    const TEMPLATE_VERSION = 16
     const { data: cached } = await supabaseAdmin
       .from('ylada_diagnosis_cache')
       .select('diagnosis_json')
@@ -521,7 +521,7 @@ export async function POST(
     let level: Awaited<ReturnType<typeof generateDiagnosis>>['level']
 
     const arch = architecture as DiagnosisArchitecture
-    if (arch === 'RISK_DIAGNOSIS' || arch === 'BLOCKER_DIAGNOSIS') {
+    if (arch === 'RISK_DIAGNOSIS' || arch === 'BLOCKER_DIAGNOSIS' || arch === 'PROJECTION_CALCULATOR') {
       const decision = getDiagnosisDecision(input)
       const archetypeCode = getArchetypeCode(decision.level, decision.blocker_type)
       const themeDisplay = themeForSlots || 'seu perfil'

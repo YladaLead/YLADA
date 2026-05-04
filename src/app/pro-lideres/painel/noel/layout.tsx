@@ -1,18 +1,15 @@
 import type { ReactNode } from 'react'
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import { ensureLeaderTenantAccess } from '@/lib/pro-lideres-server'
-import { proLideresTeamViewPreviewFromCookies } from '@/lib/pro-lideres-team-preview'
+import { ensureLeaderTenantAccess, loadProLideresPainelUiForRequest } from '@/lib/pro-lideres-server'
 
 /** Noel Pro Líderes: apenas líder (não equipe nem modo «ver como equipe»). */
 export default async function ProLideresNoelLayout({ children }: { children: ReactNode }) {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) redirect(gate.redirect)
 
-  const cookieStore = await cookies()
-  const teamViewPreview = proLideresTeamViewPreviewFromCookies(gate.role, cookieStore)
-  const canUseNoel = gate.role === 'leader' && !teamViewPreview
+  const ui = await loadProLideresPainelUiForRequest(gate)
+  const canUseNoel = ui.isLeaderWorkspace
   if (!canUseNoel) {
     redirect('/pro-lideres/painel')
   }

@@ -258,7 +258,8 @@ function CatalogRowCard({
 
 export function ProLideresCatalogoClient({
   flowsApiBase = '/api/pro-lideres',
-  painelHomeHref = '/pro-lideres/painel',
+  /** Se omitido, usa `painelBasePath` do contexto (painel do líder vs `/membro`). */
+  painelHomeHref: painelHomeHrefProp,
   /** Pro Estética: só o separador de vendas/fluxos — sem recrutamento MMN. */
   hideRecruitmentTab = false,
   salesTabLabel = 'Vendas',
@@ -276,7 +277,8 @@ export function ProLideresCatalogoClient({
   /** Parágrafo introdutório abaixo do título. */
   catalogIntro?: string
 } = {}) {
-  const { isLeaderWorkspace, verticalCode } = useProLideresPainel()
+  const { isLeaderWorkspace, verticalCode, painelBasePath } = useProLideresPainel()
+  const painelHomeHref = painelHomeHrefProp ?? painelBasePath
   const brandDisplay = verticalCode === 'h-lider' ? PRO_LIDERES_VERTICAL_BRAND_LABEL : verticalCode
   const [catalog, setCatalog] = useState<ProLideresCatalogItem[]>([])
   const [loading, setLoading] = useState(true)

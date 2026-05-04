@@ -1,6 +1,7 @@
 /**
  * Pro Estética Corporal — biblioteca (`subscope=estetica_corporal`):
  * **lista fechada por `template_id`**: calculadoras + quizzes corporais (migrations 236, 242, 293, 308, **333**, **342**, **347**, **348**).
+ * Pacotes de resultado RISK por template (leve|moderado|urgente) + `diagnosis_vertical = corporal`: migrações **401** (b1000121,122,124,125,126), **402** (b1000142–151), **403** (b1000119, b1000120, b1000127), **404** (b1000038, b1000044, b1000046, b1000048, b1000050). Calculadoras **405** (`PROJECTION_CALCULATOR`: b1000025,26,27,28,31, b1000123).
  * Tópicos prontos + links que a pessoa cria continuam noutras áreas da UI; aqui só estes itens globais passam no filtro.
  */
 

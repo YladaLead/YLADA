@@ -19,12 +19,14 @@ export default async function ProEsteticaCapilarPainelLayout({ children }: { chi
     <ProEsteticaCapilarAreaShell
       painelContext={{
         role: gate.role,
+        canManageAsLeader: gate.role === 'leader',
         isLeaderWorkspace: gate.role === 'leader',
         operationLabel,
         devStubPanel: isDevStubEsteticaCapilarPanel(gate.tenant) || previewWithoutLogin,
         previewWithoutLogin,
         verticalCode,
         dailyTasksVisibleToTeam: true,
+        painelBasePath: '/pro-estetica-capilar/painel',
       }}
     >
       {children}
