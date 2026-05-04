@@ -1,5 +1,6 @@
 /**
  * Copy de diagnóstico por vertical de entrega (Pro Terapia Capilar, Pro Estética Corporal, Pro Líderes).
+ * Filosofia do arco narrativo: `@/config/ylada-diagnosis-result-standard`
  * Usado pelo motor quando `meta.diagnosis_vertical` está definido no link.
  */
 import type { BlockerType, RiskLevel } from './diagnosis-types'
@@ -378,82 +379,88 @@ export const BLOCKER_VARIANTS_CORPORAL: Record<BlockerType, BlockerVerticalCopy>
   },
 }
 
-/** RISK — Pro Líderes: conversa com quem enviou o link / próximo passo com o líder. */
+/** RISK — Pro Líderes: espelho → tensão → possibilidade → convite (padrão YLADA). */
 export const RISK_LEVEL_VARIANTS_PRO_LIDERES: Record<RiskLevel, RiskLevelCopy> = {
   baixo: {
     explanation:
-      'Pelas suas respostas, há espaço para organizar melhor seu próximo passo — com apoio de quem te enviou este link.',
+      'Pelas suas respostas, dá pra perceber um padrão: você já intuiu que algo precisa mudar, mas ainda falta dar nome ao próximo passo com alguém que caminha com você.',
     consequence:
-      'Sem um direcionamento rápido, tendências boas não viram plano e oportunidades passam mais despercebidas.',
+      'Se isso ficar só na cabeça, a tendência é repetir a mesma semana: boa vontade sem direção costuma cansar antes de virar resultado.',
     possibility:
-      'Uma conversa curta com seu consultor ou líder costuma destravar prioridade e próximo passo prático.',
+      'O caminho mais simples é uma conversa honesta com quem te enviou este link — em minutos dá pra traduzir intenção em uma ação clara para os próximos dias.',
     cta_imperative: 'Quero conversar com quem me enviou este link',
   },
   medio: {
     explanation:
-      'Pelas suas respostas, há sinais de que consistência e clareza no caminho fazem diferença — e isso se acelera com orientação próxima.',
+      'Pelas suas respostas, parece que você já investiu esforço, mas sente que falta tração: esforço sem apoio próximo vira roda que gira no mesmo lugar.',
     consequence:
-      'Continuar sozinho(a) tende a manter o mesmo ritmo de tentativas sem um plano que acompanhe seu contexto.',
+      'Continuar sozinho(a) nesse ritmo tende a aumentar frustração e adiar decisões que fariam diferença já neste mês.',
     possibility:
-      'Falar com quem te enviou o link ajuda a montar um plano simples e sustentável para as próximas semanas.',
-    cta_imperative: 'Quero alinhar meu próximo passo com meu líder',
+      'Quem te enviou o link conhece o passo a passo no mundo real — pedir um plano enxuto (o que fazer primeiro, e o que deixar pra depois) costuma destravar.',
+    cta_imperative: 'Quero alinhar meu próximo passo com quem me enviou',
   },
   alto: {
     explanation:
-      'Pelas suas respostas, é importante não deixar isso só no papel: o próximo passo pede conversa direta com quem te acompanha.',
+      'Pelas suas respostas, o momento pede conversa direta: não é sobre “mais informação”, é sobre decidir com apoio de quem já fez esse caminho.',
     consequence:
-      'Adiar a conversa tende a manter incertezas e postergar decisões que fariam diferença agora.',
+      'Adiar o contato costuma manter dúvida, comparação e sensação de que “não é pra mim” — e com isso some o ímpeto que você já demonstrou ao responder.',
     possibility:
-      'Priorize retornar o contato de quem te enviou este link — é a forma mais rápida de clareza e direção.',
-    cta_imperative: 'Quero que meu líder me oriente no próximo passo',
+      'Priorize hoje retomar o contato com quem te enviou este link: uma ligação ou mensagem curta já recoloca você no jogo com clareza.',
+    cta_imperative: 'Quero que meu líder me ajude a decidir o próximo passo',
   },
 }
 
 export const RISK_VARIANTS_EXTRA_PRO_LIDERES: Record<RiskLevel, RiskExtraCopy> = {
   baixo: {
     causa_provavel:
-      'A causa provável: falta de um plano curto e de follow-up — pequenos ajustes já mudam resultado quando há apoio.',
-    preocupacoes: 'Sem alinhamento, boas intenções não viram hábito de execução.',
+      'A causa provável: intenção sem ritmo de acompanhamento — muita gente trava não por falta de vontade, mas por falta de conversa que transforme intenção em calendário.',
+    preocupacoes:
+      'Deixar passar sem combinar um próximo passo tende a diluir o momento em que você estava mais aberto(a) a mudar.',
     providencias:
-      'Pedir uma conversa de 10 minutos para definir “uma ação esta semana” já muda o ritmo.',
+      'Peça uma conversa objetiva: “quais seriam as 2 ações mais inteligentes pra mim nesta semana?” — isso muda a sensação de estar parado(a).',
     specific_actions: [
-      'Enviar mensagem para quem te enviou o link com seu principal objetivo.',
-      'Perguntar qual seria o primeiro passo recomendado para o seu caso.',
-      'Combinar dia/horário para falar com calma.',
+      'Enviar mensagem para quem te enviou o link dizendo seu objetivo em uma frase.',
+      'Perguntar qual seria o primeiro passo recomendado para o seu perfil.',
+      'Combinar dia e horário curtos para falar sem distração.',
     ],
-    dica_rapida: 'Em liderança e negócio, clareza vem de conversa — não de adivinhar sozinho o próximo passo.',
+    dica_rapida:
+      'Clareza vem de áudio ou mensagem com pessoa viva — não de mais um PDF ou vídeo solto.',
     frase_identificacao:
-      'Se você se identificou com esse resultado, provavelmente sente que falta um empurrão organizado no próximo passo.',
+      'Se você se identificou com esse resultado, provavelmente já sentiu que “sabe o que quer” mas ainda não “sabe o que fazer primeiro”.',
   },
   medio: {
     causa_provavel:
-      'A causa provável: rotina e prioridades competindo — sem calendário com o líder, o plano perde força.',
-    preocupacoes: 'Continuar sem alinhamento mantém esforço disperso.',
+      'A causa provável: esforço sem prioridade — quando tudo parece importante, nada vira urgente de verdade no seu calendário.',
+    preocupacoes:
+      'Sem prioridade combinada com quem te orienta, a semana enche de tarefas e esvazia de resultado.',
     providencias:
-      'Agendar check-in com quem te enviou o link costuma recolocar foco em 1–2 prioridades.',
+      'Um check-in de 15 minutos com quem te enviou o link costuma cortar a lista ao que realmente move agora.',
     specific_actions: [
-      'Listar suas 3 maiores dúvidas antes da conversa.',
-      'Pedir um modelo simples de acompanhamento (meta semanal).',
-      'Confirmar o melhor canal (ligação ou mensagem) para respostas rápidas.',
+      'Listar só as 3 dúvidas que mais pesam hoje (não dez).',
+      'Pedir ao líder um modelo simples de meta semanal com um indicador fácil de cumprir.',
+      'Definir o canal preferido para resposta rápida (ligação ou WhatsApp).',
     ],
-    dica_rapida: 'Quem já caminhou o caminho encurta trial-and-error — use o contato que você já tem.',
+    dica_rapida:
+      'Quem já vendeu, recrutou ou cuidou de gente no seu perfil encurta o caminho — use essa alavanca.',
     frase_identificacao:
-      'Se você se identificou com esse resultado, consistência e prioridade provavelmente são o foco da conversa com seu líder.',
+      'Se você se identificou com esse resultado, a sensação de “correr pra lugar nenhum” provavelmente já apareceu.',
   },
   alto: {
     causa_provavel:
-      'A causa provável: decisões importantes pedindo conversa direta — texto sozinho não substitui alinhamento.',
-    preocupacoes: 'Postergar o contato tende a aumentar dúvida e reduzir momentum.',
+      'A causa provável: decisão postergada — você já tem informação suficiente para dar o próximo passo, mas falta o empurrão da conversa.',
+    preocupacoes:
+      'Quanto mais tempo sem alinhamento, mais o medo e a comparação ocupam o lugar da ação.',
     providencias:
-      'Ligar ou pedir retorno imediato a quem te enviou o link é o passo mais eficiente agora.',
+      'Pedir retorno hoje a quem te enviou o link é o gesto mais barato e mais poderoso que você pode fazer.',
     specific_actions: [
-      'Enviar mensagem curta pedindo ligação ou horário para falar hoje.',
-      'Dizer em uma frase o que você quer decidir (ex.: começar, entender produto, ver oportunidade).',
-      'Anote 2 perguntas que não podem ficar em aberto.',
+      'Mandar mensagem curta: “quero decidir X — podemos falar hoje?”',
+      'Escrever em uma linha o que você quer fechar (começar, entender produto ou oportunidade).',
+      'Anotar duas perguntas que não podem ficar em aberto.',
     ],
-    dica_rapida: 'Momentum importa: quanto antes falar com seu líder, mais rápido você sai do “talvez”.',
+    dica_rapida:
+      'Momentum: quem decidir nas próximas horas costuma sair na frente de quem “vê depois”.',
     frase_identificacao:
-      'Se você se identificou com esse resultado, provavelmente já sabe que precisa de uma conversa, não de mais uma informação solta.',
+      'Se você se identificou com esse resultado, você provavelmente já sabe que a conversa é o próximo passo — não mais um quiz.',
   },
 }
 
@@ -563,7 +570,7 @@ export const RISK_MAIN_BLOCKER_CORPORAL: Record<RiskLevel, string> = {
 }
 
 export const RISK_MAIN_BLOCKER_PRO_LIDERES: Record<RiskLevel, string> = {
-  baixo: 'Próximo passo ainda precisa ser organizado com quem te acompanha',
-  medio: 'Consistência e clareza pedem alinhamento com seu líder',
-  alto: 'Decisão e direção pedem conversa direta com quem te enviou este link',
+  baixo: 'Boa intenção sem conversa costuma travar o primeiro passo prático',
+  medio: 'Esforço sem prioridade com quem te orienta tende a virar cansaço',
+  alto: 'Decidir com apoio de quem te enviou este link é o que destrava agora',
 }

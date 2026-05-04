@@ -1,6 +1,7 @@
 -- Pacotes de diagnóstico por modelo de quiz (template_id) ou catálogo (flow_id) + arquétipo.
 -- Prioridade na API: ylada_link_diagnosis_content → esta tabela → ylada_diagnosis_archetypes → motor em código.
 -- diagnosis_vertical NULL = aplica a qualquer vertical; valor = só para links com meta.diagnosis_vertical igual.
+-- Filosofia dos textos (espelho → tensão → consequência → possibilidade → convite): src/config/ylada-diagnosis-result-standard.ts
 
 CREATE TABLE IF NOT EXISTS public.ylada_flow_diagnosis_outcomes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

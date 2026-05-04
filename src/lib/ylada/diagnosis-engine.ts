@@ -1,6 +1,7 @@
 /**
  * Strong Diagnosis Engine — motor de decisão (contrato fixo).
  * Saída: profile_title, profile_summary, main_blocker, consequence, growth_potential, cta_text, whatsapp_prefill.
+ * Narrativa YLADA (espelho → tensão → …): ver `src/config/ylada-diagnosis-result-standard.ts`.
  * Regras D1–D6 + validação semântica (perda/risco em consequence, ganho em growth_potential, CTA imperativo).
  */
 import type {

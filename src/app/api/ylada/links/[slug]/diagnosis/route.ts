@@ -391,9 +391,9 @@ export async function POST(
         : ((metaRaw.theme as Record<string, unknown>)?.raw as string | undefined) ?? ''
     const linkTitleForCache = (config.title as string) || ''
 
-    // Cache: v8 — pacotes por template/flow em ylada_flow_diagnosis_outcomes
+    // Cache: v9 — copy Pro Líderes alinhada ao padrão narrativo YLADA (config)
     const answers_hash = hashAnswersForCache(visitor_answers, themeForCache, linkTitleForCache, diagnosisVertical)
-    const TEMPLATE_VERSION = 8
+    const TEMPLATE_VERSION = 9
     const { data: cached } = await supabaseAdmin
       .from('ylada_diagnosis_cache')
       .select('diagnosis_json')
