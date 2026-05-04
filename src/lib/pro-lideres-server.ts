@@ -99,6 +99,69 @@ export function isProLideresDevStubTenant(tenant: Pick<LeaderTenantRow, 'id'>): 
   return tenant.id === PRO_LIDERES_DEV_STUB_TENANT_ID
 }
 
+type LeaderMemberLite = {
+  leader_tenant_id: string
+  role: string
+  team_access_state: string | null | undefined
+  team_access_expires_at: string | null | undefined
+  created_at?: string | null
+}
+
+function accessStateOf(m: LeaderMemberLite): string {
+  return (m.team_access_state as string | undefined) ?? 'active'
+}
+
+/** true se não há data de fim ou se ainda não passou */
+function membershipExpiryStillValid(expiresAt: string | null | undefined): boolean {
+  if (!expiresAt) return true
+  const end = new Date(expiresAt).getTime()
+  return Number.isNaN(end) || end > Date.now()
+}
+
+/**
+ * Com várias linhas em `leader_tenant_members` (vários tenants), não podemos usar
+ * `.limit(1)` sem ordenação nem `.maybeSingle()` na lista inteira — o PostgREST devolve erro
+ * ao haver mais de uma linha e o utilizador cai em /aguardando-acesso mesmo estando «Ativo»
+ * noutra equipa.
+ */
+function pickResolvableMembership(rows: LeaderMemberLite[]): LeaderMemberLite | null {
+  if (!rows.length) return null
+  const actives = rows.filter((r) => accessStateOf(r) === 'active')
+  actives.sort((a, b) => {
+    const av = membershipExpiryStillValid(a.team_access_expires_at) ? 0 : 1
+    const bv = membershipExpiryStillValid(b.team_access_expires_at) ? 0 : 1
+    if (av !== bv) return av - bv
+    const ta = new Date(a.created_at ?? 0).getTime()
+    const tb = new Date(b.created_at ?? 0).getTime()
+    return tb - ta
+  })
+  return actives.find((r) => membershipExpiryStillValid(r.team_access_expires_at)) ?? null
+}
+
+/** Quando não há tenant resolvível (ctx null), onde enviar antes de `/aguardando-acesso`. */
+function pickEnsureRedirectAmongMemberships(rows: LeaderMemberLite[]): string | null {
+  if (!rows.length) return null
+
+  const hasActiveValid = rows.some(
+    (r) =>
+      accessStateOf(r) === 'active' && membershipExpiryStillValid(r.team_access_expires_at)
+  )
+  if (hasActiveValid) return null
+
+  const hasPending = rows.some((r) => accessStateOf(r) === 'pending_activation')
+  if (hasPending) return '/pro-lideres/membro/ativacao'
+
+  const hasPaused = rows.some((r) => accessStateOf(r) === 'paused')
+  if (hasPaused) return '/pro-lideres/acesso-pausado'
+
+  const hasExpiredWhileActive = rows.some(
+    (r) => accessStateOf(r) === 'active' && !membershipExpiryStillValid(r.team_access_expires_at)
+  )
+  if (hasExpiredWhileActive) return '/pro-lideres/membro/acesso-expirado'
+
+  return null
+}
+
 function devStubLeaderTenant(userId: string): LeaderTenantRow {
   const now = new Date().toISOString()
   return {
@@ -190,16 +253,21 @@ export async function resolveProLideresTenantContext(
     return { tenant: asOwner as LeaderTenantRow, role: 'leader' }
   }
 
-  const { data: membership } = await supabase
+  const { data: memberships, error: memErr } = await supabase
     .from('leader_tenant_members')
-    .select('leader_tenant_id, role, team_access_state, team_access_expires_at')
+    .select('leader_tenant_id, role, team_access_state, team_access_expires_at, created_at')
     .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle()
 
+  if (memErr) {
+    console.error('[resolveProLideresTenantContext] memberships:', memErr.message, resolvedUserEmail(user))
+    return null
+  }
+
+  const rows = (memberships ?? []) as LeaderMemberLite[]
+  const membership = pickResolvableMembership(rows)
   if (!membership) return null
 
-  const accessStateRaw = (membership.team_access_state as string | undefined) ?? 'active'
+  const accessStateRaw = accessStateOf(membership)
   if (accessStateRaw === 'paused') return null
   if (accessStateRaw === 'pending_activation') return null
 
@@ -221,9 +289,27 @@ export async function resolveProLideresTenantContext(
     .eq('id', membership.leader_tenant_id as string)
     .maybeSingle()
 
-  if (!tenant) return null
+  let resolvedTenant = tenant
 
-  return { tenant: tenant as LeaderTenantRow, role }
+  /**
+   * RLS pode não devolver o tenant mesmo havendo membership ativa — evita falso `/aguardando-acesso`;
+   * fallback com service role só após termos membership válida na mesma conta.
+   */
+  if (!resolvedTenant) {
+    const admin = getSupabaseAdmin()
+    if (admin) {
+      const { data: bypass } = await admin
+        .from('leader_tenants')
+        .select('*')
+        .eq('id', membership.leader_tenant_id as string)
+        .maybeSingle()
+      resolvedTenant = bypass
+    }
+  }
+
+  if (!resolvedTenant) return null
+
+  return { tenant: resolvedTenant as LeaderTenantRow, role }
 }
 
 /**
@@ -244,11 +330,11 @@ export async function ensureLeaderTenantAccess(): Promise<
   let ctx = await resolveProLideresTenantContext(supabase, user)
 
   if (!ctx) {
-    const { data: selfMembership, error: selfMembershipErr } = await supabase
+    const { data: memberships, error: selfMembershipErr } = await supabase
       .from('leader_tenant_members')
-      .select('team_access_state, team_access_expires_at')
+      .select('leader_tenant_id, role, team_access_state, team_access_expires_at, created_at')
       .eq('user_id', user.id)
-      .maybeSingle()
+
     if (selfMembershipErr) {
       console.error(
         '[ensureLeaderTenantAccess] leader_tenant_members lookup:',
@@ -256,23 +342,11 @@ export async function ensureLeaderTenantAccess(): Promise<
         resolvedUserEmail(user)
       )
     }
-    if (selfMembership) {
-      const st = (selfMembership.team_access_state as string | undefined) ?? 'active'
-      if (st === 'paused') {
-        return { ok: false, redirect: '/pro-lideres/acesso-pausado' }
-      }
-      if (st === 'pending_activation') {
-        return { ok: false, redirect: '/pro-lideres/membro/ativacao' }
-      }
-      if (st === 'active') {
-        const expRaw = selfMembership.team_access_expires_at as string | null | undefined
-        if (expRaw) {
-          const end = new Date(expRaw).getTime()
-          if (!Number.isNaN(end) && end <= Date.now()) {
-            return { ok: false, redirect: '/pro-lideres/membro/acesso-expirado' }
-          }
-        }
-      }
+
+    const list = (memberships ?? []) as LeaderMemberLite[]
+    const redirect = pickEnsureRedirectAmongMemberships(list)
+    if (redirect) {
+      return { ok: false, redirect }
     }
   }
 
