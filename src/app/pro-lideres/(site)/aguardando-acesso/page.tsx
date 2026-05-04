@@ -15,9 +15,9 @@ export default function ProLideresAguardandoAcessoPage() {
     <div className="mx-auto max-w-md space-y-6 text-center">
       <h1 className="text-2xl font-bold text-gray-900">Acesso Pro Líderes</h1>
       <p className="text-base text-gray-600">
-        Esta conta ainda não tem acesso ao Pro Líderes (espaço de líder ou de equipe). Se você foi convidado(a), confirme que
-        está a entrar com o <strong className="text-gray-800">mesmo e-mail</strong> do convite e que já concluiu o registo pelo
-        link recebido. Se você é líder e ainda não tem espaço ativo na YLADA, fale conosco.
+        Esta conta ainda não tem acesso ao Pro Líderes (espaço de líder ou de equipe). Se você foi convidado(a), confira se
+        está entrando com o <strong className="text-gray-800">mesmo e-mail</strong> do convite e se já concluiu o cadastro pelo
+        link que recebeu. Se você é líder e ainda não tem espaço ativo na YLADA, fale conosco.
       </p>
       <div className="mx-auto flex w-full max-w-xs flex-col gap-3">
         <a

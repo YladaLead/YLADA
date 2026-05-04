@@ -22,11 +22,18 @@ export default async function ProLideresMembroAtivacaoPage() {
     redirect('/pro-lideres/painel')
   }
 
-  const { data: m } = await supabase
+  const { data: memberRows, error: memberErr } = await supabase
     .from('leader_tenant_members')
     .select('team_access_state, leader_tenant_id')
     .eq('user_id', user.id)
-    .maybeSingle()
+    .order('created_at', { ascending: false })
+    .limit(1)
+
+  if (memberErr) {
+    console.error('[pro-lideres/membro/ativacao] membership:', memberErr.message)
+  }
+
+  const m = memberRows?.[0]
 
   if (!m) {
     redirect('/pro-lideres/aguardando-acesso')
@@ -52,7 +59,7 @@ export default async function ProLideresMembroAtivacaoPage() {
   const spaceLabel =
     (tenant?.display_name as string | undefined)?.trim() ||
     (tenant?.team_name as string | undefined)?.trim() ||
-    'o teu espaço Pro Líderes'
+    'seu espaço Pro Líderes'
 
   const cardUrl =
     typeof tenant?.team_bank_payment_url === 'string' && tenant.team_bank_payment_url.trim()
@@ -76,17 +83,15 @@ export default async function ProLideresMembroAtivacaoPage() {
             priority
           />
         </div>
-        <h1 className="text-center text-xl font-bold text-gray-900">Obrigado!</h1>
+        <h1 className="text-center text-xl font-bold text-gray-900">Próximo passo: pagamento</h1>
         <p className="mt-3 text-center text-sm leading-relaxed text-gray-700">
-          O teu registo em <strong className="text-gray-900">{spaceLabel}</strong> foi recebido com sucesso.
-        </p>
-        <p className="mt-2 text-center text-sm font-medium text-gray-800">
-          Em breve o teu acesso ao painel Pro Líderes será libertado.
+          Seu cadastro em <strong className="text-gray-900">{spaceLabel}</strong> foi recebido. Para liberar o acesso ao painel,
+          conclua o pagamento com a sua equipe (Pix ou cartão/Mercado Pago), conforme as opções abaixo.
         </p>
 
         {cardUrl || pixUrl ? (
           <div className="mt-6 space-y-3">
-            <p className="text-center text-xs text-gray-500">Se ainda precisares de pagar, usa uma destas opções:</p>
+            <p className="text-center text-sm font-medium text-gray-800">Escolha como pagar</p>
             {pixUrl ? (
               <a
                 href={pixUrl}
@@ -104,17 +109,18 @@ export default async function ProLideresMembroAtivacaoPage() {
                 rel="noopener noreferrer"
                 className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-amber-700 px-4 text-sm font-semibold text-white hover:bg-amber-800"
               >
-                Cartão
+                Cartão ou Mercado Pago
               </a>
             ) : null}
           </div>
         ) : (
           <p className="mt-6 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center text-sm text-gray-700">
-            Se precisares de combinar o pagamento, fala com a tua equipa. Em breve voltamos aqui contigo.
+            Não encontramos link de pagamento configurado para esta equipe. Fale com quem te convidou para combinar o pagamento;
+            depois o acesso é liberado pelo líder.
           </p>
         )}
 
-        <p className="mt-6 text-center text-sm text-gray-500">Podes fechar esta página e voltar mais tarde.</p>
+        <p className="mt-6 text-center text-sm text-gray-500">Você pode fechar esta página e voltar quando quiser.</p>
 
         <p className="mt-8 text-center text-xs text-gray-500">
           <Link href="/pro-lideres/entrar" className="font-medium text-blue-600 underline hover:text-blue-800">

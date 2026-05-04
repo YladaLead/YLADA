@@ -7,6 +7,8 @@ import Image from 'next/image'
 import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { createClient } from '@/lib/supabase-client'
+
+const ATIVACAO_PATH = '/pro-lideres/membro/ativacao'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
@@ -21,7 +23,7 @@ type ValidateOk = {
 export default function ProLideresConviteTokenPage() {
   const params = useParams()
   const token = typeof params.token === 'string' ? params.token : ''
-  const { user, loading: authLoading, signOut } = useAuth()
+  const { user, loading: authLoading } = useAuth()
 
   const [validating, setValidating] = useState(true)
   const [valid, setValid] = useState<ValidateOk | null>(null)
@@ -42,18 +44,24 @@ export default function ProLideresConviteTokenPage() {
   const [registering, setRegistering] = useState(false)
   const [registerError, setRegisterError] = useState<string | null>(null)
 
-  const goToComoAccederComSaida = async (emailNorm: string) => {
-    try {
-      const supabase = createClient()
-      await signOut()
-      await supabase.auth.signOut()
-    } catch {
-      /* sessão pode já estar limpa */
+  /**
+   * Após cadastro: entra na conta na hora e vai para pagamento/ativação (evita logout + tela extra).
+   * Se o login automático falhar, cai na página de link manual (como-acessar).
+   */
+  const signInAndGoToAtivacao = async (emailNorm: string, pwd: string) => {
+    const supabase = createClient()
+    const { error: signInErr } = await supabase.auth.signInWithPassword({
+      email: emailNorm.trim(),
+      password: pwd,
+    })
+    if (signInErr) {
+      const qs = new URLSearchParams()
+      qs.set('email', emailNorm.trim())
+      qs.set('next', ATIVACAO_PATH)
+      window.location.assign(`/pro-lideres/membro/como-acessar?${qs.toString()}`)
+      return
     }
-    const qs = new URLSearchParams()
-    qs.set('email', emailNorm.trim())
-    qs.set('next', '/pro-lideres/membro/ativacao')
-    window.location.assign(`/pro-lideres/membro/como-acceder?${qs.toString()}`)
+    window.location.assign(ATIVACAO_PATH)
   }
 
   const validate = useCallback(async () => {
@@ -150,10 +158,10 @@ export default function ProLideresConviteTokenPage() {
       }
       const email = (data as { email?: string }).email ?? valid?.invitedEmail
       if (!email?.trim()) {
-        setRegisterError('Conta criada. Usa o e-mail do convite para entrar na página seguinte.')
+        setRegisterError('Conta criada. Use o e-mail do convite para entrar na próxima página.')
         return
       }
-      await goToComoAccederComSaida(email)
+      await signInAndGoToAtivacao(email, password)
     } catch {
       setRegisterError('Erro de rede.')
     } finally {
@@ -190,10 +198,10 @@ export default function ProLideresConviteTokenPage() {
       }
       const emailHint = (user?.email ?? valid?.invitedEmail ?? '').trim()
       if (!emailHint.includes('@')) {
-        setAcceptError('Não foi possível identificar o e-mail. Entra em /pro-lideres/entrar manualmente.')
+        setAcceptError('Não foi possível identificar o e-mail. Acesse /pro-lideres/entrar manualmente.')
         return
       }
-      await goToComoAccederComSaida(emailHint)
+      window.location.assign(ATIVACAO_PATH)
     } catch {
       setAcceptError('Erro de rede.')
     } finally {
@@ -242,8 +250,8 @@ export default function ProLideresConviteTokenPage() {
 
             {!tabulatorsReady && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
-                Ainda não há tabuladores disponíveis neste convite. Volta a tentar mais tarde ou fala com quem te enviou o link se
-                precisares de ajuda.
+                Ainda não há tabuladores disponíveis neste convite. Tente de novo mais tarde ou fale com quem enviou o link se
+                precisar de ajuda.
               </div>
             )}
 
@@ -282,7 +290,7 @@ export default function ProLideresConviteTokenPage() {
                       disabled={!tabulatorsReady}
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 disabled:bg-gray-100"
                     >
-                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — tenta mais tarde'}</option>
+                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — tente mais tarde'}</option>
                       {tabulatorOptions.map((opt) => (
                         <option key={opt} value={opt}>
                           {opt}
@@ -414,7 +422,7 @@ export default function ProLideresConviteTokenPage() {
                       disabled={!tabulatorsReady}
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 disabled:bg-gray-100"
                     >
-                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — tenta mais tarde'}</option>
+                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — tente mais tarde'}</option>
                       {tabulatorOptions.map((opt) => (
                         <option key={opt} value={opt}>
                           {opt}

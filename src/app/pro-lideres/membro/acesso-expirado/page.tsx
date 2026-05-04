@@ -22,11 +22,18 @@ export default async function ProLideresMembroAcessoExpiradoPage() {
     redirect('/pro-lideres/painel')
   }
 
-  const { data: m } = await supabase
+  const { data: memberRows, error: memberErr } = await supabase
     .from('leader_tenant_members')
     .select('team_access_state, team_access_expires_at, leader_tenant_id')
     .eq('user_id', user.id)
-    .maybeSingle()
+    .order('created_at', { ascending: false })
+    .limit(1)
+
+  if (memberErr) {
+    console.error('[pro-lideres/membro/acesso-expirado] membership:', memberErr.message)
+  }
+
+  const m = memberRows?.[0]
 
   if (!m) {
     redirect('/pro-lideres/aguardando-acesso')
@@ -65,12 +72,12 @@ export default async function ProLideresMembroAcessoExpiradoPage() {
         </div>
         <h1 className="text-center text-xl font-bold text-gray-900">Período de acesso terminado</h1>
         <p className="mt-3 text-center text-sm leading-relaxed text-gray-700">
-          O período de acesso associado ao teu plano terminou em <strong className="text-gray-900">{expLabel}</strong>. Fala com a
-          tua equipa para renovares ou alinhares um novo período.
+          O período de acesso associado ao seu plano terminou em <strong className="text-gray-900">{expLabel}</strong>. Fale com a
+          sua equipe para renovar ou alinhar um novo período.
         </p>
         <p className="mt-6 text-center text-sm text-gray-600">
           <Link href="/pro-lideres/entrar" className="font-semibold text-blue-600 underline hover:text-blue-800">
-            Voltar ao início de sessão
+            Voltar ao login
           </Link>
         </p>
       </div>

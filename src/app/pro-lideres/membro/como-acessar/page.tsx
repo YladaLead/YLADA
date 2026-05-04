@@ -1,6 +1,6 @@
-import { ProLideresMembroComoAccederClient } from './ComoAccederClient'
+import { ProLideresMembroComoAcessarClient } from './ComoAcessarClient'
 
-export default async function ProLideresMembroComoAccederPage({
+export default async function ProLideresMembroComoAcessarPage({
   searchParams,
 }: {
   searchParams: Promise<{ email?: string; next?: string }>
@@ -14,9 +14,9 @@ export default async function ProLideresMembroComoAccederPage({
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
         <p className="text-center text-sm text-gray-600">
-          Link incompleto. Abre o convite a partir do e-mail que recebeste ou{' '}
+          Link incompleto. Abra o convite pelo e-mail que você recebeu ou{' '}
           <a href="/pro-lideres/entrar" className="font-semibold text-blue-600 underline">
-            vai ao início de sessão
+            vá para o login
           </a>
           .
         </p>
@@ -24,5 +24,5 @@ export default async function ProLideresMembroComoAccederPage({
     )
   }
 
-  return <ProLideresMembroComoAccederClient email={rawEmail} nextPath={nextPath} />
+  return <ProLideresMembroComoAcessarClient email={rawEmail} nextPath={nextPath} />
 }

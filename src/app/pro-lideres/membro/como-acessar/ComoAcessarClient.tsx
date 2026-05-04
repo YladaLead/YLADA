@@ -17,7 +17,7 @@ function publicOrigin(): string {
   )
 }
 
-export function ProLideresMembroComoAccederClient({
+export function ProLideresMembroComoAcessarClient({
   email,
   nextPath,
 }: {
@@ -55,8 +55,8 @@ export function ProLideresMembroComoAccederClient({
 
         <h1 className="text-center text-xl font-bold text-gray-900">Conta criada</h1>
         <p className="mt-3 text-center text-sm leading-relaxed text-gray-700">
-          Guarda este acesso no telemóvel: assim entras sempre com o <strong className="text-gray-900">mesmo e-mail</strong> e a{' '}
-          <strong className="text-gray-900">mesma palavra-passe</strong> que acabaste de definir.
+          Guarde este acesso no celular: use sempre o <strong className="text-gray-900">mesmo e-mail</strong> e a{' '}
+          <strong className="text-gray-900">mesma senha</strong> que acabou de criar.
         </p>
 
         <div className="mt-6 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
@@ -71,20 +71,18 @@ export function ProLideresMembroComoAccederClient({
           </button>
         </div>
 
-        <div className="mt-6 space-y-4 rounded-xl border border-blue-100 bg-blue-50/80 px-4 py-4 text-sm text-blue-950">
-          <p className="font-semibold text-blue-900">Pôr no ecrã principal (como uma app)</p>
-          <div className="space-y-3 text-left text-blue-900/95">
-            <p>
-              <span className="font-semibold text-blue-950">iPhone (Safari):</span> toca no botão{' '}
-              <span className="whitespace-nowrap font-medium">Partilhar</span> (quadrado com seta) → desce até{' '}
-              <span className="font-medium">Adicionar ao ecrã principal</span>.
-            </p>
-            <p>
-              <span className="font-semibold text-blue-950">Android (Chrome):</span> toca nos{' '}
-              <span className="font-medium">três pontos</span> ⋮ → <span className="font-medium">Instalar app</span> ou{' '}
-              <span className="font-medium">Adicionar à página inicial</span> (o nome pode mudar um pouco consoante o telemóvel).
-            </p>
-          </div>
+        <div className="mt-6 space-y-3 rounded-xl border border-blue-100 bg-blue-50/80 px-4 py-4 text-sm text-blue-950">
+          <p className="font-semibold text-blue-900">Atalho na tela inicial (estilo app)</p>
+          <p className="text-left text-blue-900/95">
+            <span className="font-semibold text-blue-950">iPhone (Safari):</span> toque em{' '}
+            <span className="whitespace-nowrap font-medium">Compartilhar</span> →{' '}
+            <span className="font-medium">Adicionar à Tela de Início</span>.
+          </p>
+          <p className="text-left text-blue-900/95">
+            <span className="font-semibold text-blue-950">Android (Chrome):</span> menu ⋮ →{' '}
+            <span className="font-medium">Instalar app</span> ou <span className="font-medium">Adicionar à página inicial</span>{' '}
+            (o nome pode variar conforme o aparelho).
+          </p>
         </div>
 
         <Link
@@ -95,7 +93,7 @@ export function ProLideresMembroComoAccederClient({
         </Link>
 
         <p className="mt-4 text-center text-xs text-gray-500">
-          Depois de entrares, segues para os próximos passos no Pro Líderes.
+          Depois de entrar, você segue para o pagamento e a ativação no Pro Líderes.
         </p>
       </div>
     </div>

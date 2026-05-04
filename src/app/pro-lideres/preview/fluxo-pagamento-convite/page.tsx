@@ -106,29 +106,28 @@ export default function ProLideresPreviewFluxoPagamentoConvitePage() {
             </div>
           ) : scenario === 'ativacao_links' || scenario === 'ativacao_sem_links' ? (
             <>
-              <h1 className="text-center text-xl font-bold text-gray-900">Obrigado!</h1>
+              <h1 className="text-center text-xl font-bold text-gray-900">Próximo passo: pagamento</h1>
               <p className="mt-3 text-center text-sm leading-relaxed text-gray-700">
-                O teu registo em <strong className="text-gray-900">{MOCK_SPACE}</strong> foi recebido com sucesso.
-              </p>
-              <p className="mt-2 text-center text-sm font-medium text-gray-800">
-                Em breve o teu acesso ao painel Pro Líderes será libertado.
+                Seu cadastro em <strong className="text-gray-900">{MOCK_SPACE}</strong> foi recebido. Para liberar o acesso ao
+                painel, conclua o pagamento com a sua equipe (Pix ou cartão/Mercado Pago), conforme as opções abaixo.
               </p>
               {scenario === 'ativacao_links' ? (
                 <div className="mt-6 space-y-3">
-                  <p className="text-center text-xs text-gray-500">Se ainda precisares de pagar, usa uma destas opções:</p>
+                  <p className="text-center text-sm font-medium text-gray-800">Escolha como pagar</p>
                   <span className="flex min-h-[48px] w-full cursor-default items-center justify-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white opacity-90">
                     Pix
                   </span>
                   <span className="flex min-h-[48px] w-full cursor-default items-center justify-center rounded-xl bg-amber-700 px-4 text-sm font-semibold text-white opacity-90">
-                    Cartão
+                    Cartão ou Mercado Pago
                   </span>
                 </div>
               ) : (
                 <p className="mt-6 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center text-sm text-gray-700">
-                  Se precisares de combinar o pagamento, fala com a tua equipa. Em breve voltamos aqui contigo.
+                  Não encontramos link de pagamento configurado para esta equipe. Fale com quem te convidou para combinar o
+                  pagamento; depois o acesso é liberado pelo líder.
                 </p>
               )}
-              <p className="mt-6 text-center text-sm text-gray-500">Podes fechar esta página e voltar mais tarde.</p>
+              <p className="mt-6 text-center text-sm text-gray-500">Você pode fechar esta página e voltar quando quiser.</p>
               <p className="mt-8 text-center text-xs text-gray-500">
                 <span className="font-medium text-blue-600">Sair e entrar com outra conta</span>
               </p>
@@ -140,12 +139,12 @@ export default function ProLideresPreviewFluxoPagamentoConvitePage() {
                 {openLinkState.kind === 'pix' ? (
                   <>
                     Use o <strong className="text-gray-900">link de pagamento via Pix</strong> abaixo, conclua o passo indicado e
-                    aguarde — em breve o teu acesso ao painel fica disponível.
+                    aguarde — em breve seu acesso ao painel fica disponível.
                   </>
                 ) : (
                   <>
                     Use o <strong className="text-gray-900">link de pagamento com cartão ou no Mercado Pago</strong> abaixo, conclua o
-                    passo indicado e aguarde — em breve o teu acesso ao painel fica disponível.
+                    passo indicado e aguarde — em breve seu acesso ao painel fica disponível.
                   </>
                 )}
               </p>
@@ -172,9 +171,9 @@ export default function ProLideresPreviewFluxoPagamentoConvitePage() {
       </div>
 
       <div className="mx-auto mt-10 max-w-3xl rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
-        <p className="font-semibold text-gray-900">No convite, após «Aceitar e entrar» (fluxo já logado)</p>
+        <p className="font-semibold text-gray-900">No convite, após «Aceitar e continuar» (já logado)</p>
         <p className="mt-2 text-gray-600">
-          Mensagem verde no convite: <strong>«A seguir: página de confirmação…»</strong>
+          O fluxo real envia direto para <code className="rounded bg-gray-100 px-1">/pro-lideres/membro/ativacao</code> (pagamento).
         </p>
       </div>
     </div>

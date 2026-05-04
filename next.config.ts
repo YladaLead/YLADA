@@ -14,11 +14,18 @@ const nextConfig: NextConfig = {
       'nutra',
       'perfumaria',
     ]
-    return areas.map((area) => ({
-      source: `/pt/pilot/${area}`,
-      destination: `/pt/${area}`,
-      permanent: true,
-    }))
+    return [
+      ...areas.map((area) => ({
+        source: `/pt/pilot/${area}`,
+        destination: `/pt/${area}`,
+        permanent: true,
+      })),
+      {
+        source: '/pro-lideres/membro/como-acceder',
+        destination: '/pro-lideres/membro/como-acessar',
+        permanent: true,
+      },
+    ]
   },
   /* config options here */
   typescript: {
