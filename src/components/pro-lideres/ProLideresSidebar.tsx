@@ -16,7 +16,7 @@ interface ProLideresSidebarProps {
 export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose }: ProLideresSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const { isLeaderWorkspace, role, teamViewPreview, dailyTasksVisibleToTeam } = useProLideresPainel()
+  const { role, teamViewPreview, dailyTasksVisibleToTeam } = useProLideresPainel()
   const { signOut, user, userProfile } = useAuth()
   const userName =
     userProfile?.nome_completo ||
@@ -32,17 +32,20 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
       .toUpperCase()
       .slice(0, 2) || 'L'
 
+  /** Só utilizadores com papel líder (sem «ver como equipe») vêem entradas leaderOnly — regra explícita por `role`. */
+  const showLeaderOnlyNav = role === 'leader' && !teamViewPreview
+
   const filteredMenu = useMemo(() => {
     return PRO_LIDERES_MENU_GROUPS.map((g) => ({
       ...g,
       items: g.items.filter((item) => {
-        if (item.key === 'tarefas' && !isLeaderWorkspace && !dailyTasksVisibleToTeam) {
+        if (item.key === 'tarefas' && !showLeaderOnlyNav && !dailyTasksVisibleToTeam) {
           return false
         }
-        return isLeaderWorkspace || !item.leaderOnly
+        return showLeaderOnlyNav || !item.leaderOnly
       }),
     })).filter((g) => g.items.length > 0)
-  }, [isLeaderWorkspace, dailyTasksVisibleToTeam])
+  }, [showLeaderOnlyNav, dailyTasksVisibleToTeam, role, teamViewPreview])
 
   const itemHref = useCallback((item: ProLideresMenuItem) => proLideresItemHref(item.path), [])
 

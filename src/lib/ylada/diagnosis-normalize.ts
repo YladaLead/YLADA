@@ -39,6 +39,52 @@ function optionIndex(v: unknown): number | null {
 }
 
 /**
+ * MCQ 0–3 ou escala 0–10 (Wellness / Pro Líderes com ids p1…p5) → contribuição 0–3 para score genérico RISK.
+ */
+function quizAnswerIndexForRisk(v: unknown): number | null {
+  const direct = optionIndex(v)
+  if (direct !== null) return direct
+  if (typeof v === 'number' && !Number.isNaN(v)) {
+    const n = Math.round(v)
+    if (n >= 0 && n <= 10) {
+      if (n <= 2) return 0
+      if (n <= 5) return 1
+      if (n <= 8) return 2
+      return 3
+    }
+  }
+  if (typeof v === 'string') {
+    const n = parseInt(v.trim(), 10)
+    if (!Number.isNaN(n) && n >= 0 && n <= 10) {
+      if (n <= 2) return 0
+      if (n <= 5) return 1
+      if (n <= 8) return 2
+      return 3
+    }
+  }
+  return null
+}
+
+/** Índices de pergunta presentes em q1… / p1… (ordem numérica; qN ganha de pN se ambos existirem). */
+function sortedQuizQuestionIndices(answers: Record<string, unknown>): number[] {
+  const seen = new Set<number>()
+  for (const k of Object.keys(answers)) {
+    const m = /^[qp](\d+)$/i.exec(k)
+    if (m) seen.add(parseInt(m[1], 10))
+  }
+  return Array.from(seen).sort((a, b) => a - b)
+}
+
+function answerAtQuestionIndex(answers: Record<string, unknown>, i: number): unknown {
+  return (
+    answers[`q${i}`] ??
+    answers[`Q${i}`] ??
+    answers[`p${i}`] ??
+    answers[`P${i}`]
+  )
+}
+
+/**
  * Converte índice de opção (0-3) em score 1-10 para BLOCKER_DIAGNOSIS.
  * Índice 0 (primeira opção) = pior = score baixo (2) → dimensão ganha pontos.
  * Índice 3 (última opção) = melhor = score alto (8) → dimensão não ganha pontos.
@@ -56,17 +102,13 @@ function impactFromText(v: unknown): 'baixo' | 'medio' | 'alto' {
   return 'medio'
 }
 
-/** Score genérico: soma dos índices (0-3) das opções. Faixas: leve 0-33%, moderado 34-66%, alto 67-100%. */
+/** Score genérico: soma das contribuições 0–3 por pergunta (qN ou pN). Faixas: terços do máximo. */
 function calcGenericScoreAndLevel(answers: Record<string, unknown>): { score: number; level: RiskLevel } | null {
-  const keys = Object.keys(answers).filter((k) => /^q\d+$/i.test(k)).sort((a, b) => {
-    const na = parseInt(a.slice(1), 10)
-    const nb = parseInt(b.slice(1), 10)
-    return na - nb
-  })
+  const indices = sortedQuizQuestionIndices(answers)
   let sum = 0
   let count = 0
-  for (const k of keys) {
-    const idx = optionIndex(answers[k])
+  for (const i of indices) {
+    const idx = quizAnswerIndexForRisk(answerAtQuestionIndex(answers, i))
     if (idx !== null) {
       sum += idx
       count++
@@ -110,11 +152,11 @@ export function normalizeVisitorAnswers(
   options?: { themeRaw?: string; formFields?: FormFieldForNormalize[] }
 ): Record<string, unknown> {
   const formFields = options?.formFields
-  const q1Raw = answers.q1 ?? answers.Q1
-  const q2Raw = answers.q2 ?? answers.Q2
-  const q3Raw = answers.q3 ?? answers.Q3
-  const q4Raw = answers.q4 ?? answers.Q4
-  const q5Raw = answers.q5 ?? answers.Q5
+  const q1Raw = answers.q1 ?? answers.Q1 ?? answers.p1 ?? answers.P1
+  const q2Raw = answers.q2 ?? answers.Q2 ?? answers.p2 ?? answers.P2
+  const q3Raw = answers.q3 ?? answers.Q3 ?? answers.p3 ?? answers.P3
+  const q4Raw = answers.q4 ?? answers.Q4 ?? answers.p4 ?? answers.P4
+  const q5Raw = answers.q5 ?? answers.Q5 ?? answers.p5 ?? answers.P5
 
   // PERFUME_PROFILE: mapear índice → texto antes de usar (motor espera "Floral", não "0")
   const q1 = architecture === 'PERFUME_PROFILE' ? mapOptionToText(q1Raw, formFields, 'q1') : q1Raw

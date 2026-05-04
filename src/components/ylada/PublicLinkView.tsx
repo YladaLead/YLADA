@@ -793,6 +793,9 @@ function ConfigDrivenLinkView({
   const resultConfig = (config.result as ResultConfig) || {}
   const meta = (config.meta as Record<string, unknown>) || {}
   const archMeta = typeof meta.architecture === 'string' ? meta.architecture : ''
+  /** Preset recrutamento legado na config: tratar como RISK para API de diagnóstico. */
+  const archForDiagnosisApi =
+    archMeta === 'PRO_LIDERES_RECRUITMENT_STATIC' ? 'RISK_DIAGNOSIS' : archMeta
   const segmentCodeForUi =
     typeof meta.segment_code === 'string' ? String(meta.segment_code).toLowerCase().trim() : ''
   const useCommercePublicCopy =
@@ -892,9 +895,8 @@ function ConfigDrivenLinkView({
   }, [diagnosis, metricsId, step, loading])
 
   const useDiagnosisApi =
-    !isProLideresRecruitmentLink &&
-    typeof meta.architecture === 'string' &&
-    DIAGNOSIS_ARCHITECTURES.includes(meta.architecture as (typeof DIAGNOSIS_ARCHITECTURES)[number])
+    typeof archForDiagnosisApi === 'string' &&
+    DIAGNOSIS_ARCHITECTURES.includes(archForDiagnosisApi as (typeof DIAGNOSIS_ARCHITECTURES)[number])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -1220,7 +1222,7 @@ function ConfigDrivenLinkView({
   }
 
   if (step === 'result') {
-    if (diagnosis && metricsId && !isProLideresRecruitmentLink) {
+    if (diagnosis && metricsId) {
       const isPerfumery = meta.architecture === 'PERFUME_PROFILE' || meta.segment_code === 'perfumaria'
       const areaProf = typeof meta.area_profissional === 'string' ? meta.area_profissional : ''
       const useEspecialista =
@@ -1303,7 +1305,7 @@ function ConfigDrivenLinkView({
           <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-sky-100/50 border border-sky-100/60 p-6 sm:p-8">
             <div className="mb-4">
               <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
-                {t.yourResult}
+                {isProLideresRecruitmentLink ? t.recruitmentYourResult : t.yourResult}
               </span>
             </div>
             {contextTitle && (
@@ -1320,7 +1322,7 @@ function ConfigDrivenLinkView({
               <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-sky-400 to-sky-600 rounded-l-2xl" />
               <div className="pl-5 pr-5 py-5 sm:pl-6 sm:pr-6 sm:py-6">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-                  {t.diagnosis}
+                  {isProLideresRecruitmentLink ? t.recruitmentBadge : t.diagnosis}
                 </p>
                 <p className="text-lg sm:text-xl font-bold text-gray-900 leading-snug mb-2">
                   {impactDiagnosisTextForUi}
@@ -1422,13 +1424,17 @@ function ConfigDrivenLinkView({
 
                 <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-                    {t.moreFactors}
+                    {isProLideresRecruitmentLink ? t.recruitmentBoxTitle : t.moreFactors}
                   </p>
                   <p className="text-gray-600 text-sm leading-relaxed mb-2">
-                    {t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
+                    {isProLideresRecruitmentLink
+                      ? t.recruitmentBoxDisclaimer
+                      : t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
                   </p>
                   <p className="text-gray-700 text-sm font-medium">
-                    {t.talkToPro.replace('{pessoa}', pessoaLabel)}
+                    {isProLideresRecruitmentLink
+                      ? t.recruitmentBoxHint
+                      : t.talkToPro.replace('{pessoa}', pessoaLabel)}
                   </p>
                 </div>
               </>
@@ -1436,7 +1442,9 @@ function ConfigDrivenLinkView({
 
             {whatsappUrl ? (
               <div className="space-y-3">
-                <p className="text-center text-sm text-gray-600">{t.quizResultHelperLine}</p>
+                <p className="text-center text-sm text-gray-600">
+                  {isProLideresRecruitmentLink ? t.recruitmentBoxHint : t.quizResultHelperLine}
+                </p>
                 <button
                   type="button"
                   onClick={() =>
@@ -1448,7 +1456,7 @@ function ConfigDrivenLinkView({
                   }
                   className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
                 >
-                  {ctaText || t.talkNow}
+                  {ctaText || (isProLideresRecruitmentLink ? t.recruitmentTalkNow : t.talkNow)}
                 </button>
                 <button
                   type="button"

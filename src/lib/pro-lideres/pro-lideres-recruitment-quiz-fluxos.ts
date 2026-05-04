@@ -2,6 +2,7 @@
  * Quizzes de recrutamento Pro Líderes (contexto equipe Herbalife / oportunidade de negócio).
  * Copy focada em perfil e conversa — sem tom clínico nem kit de bem-estar no resultado.
  * Tag `pro-lideres` ativa disclaimer e textos de UI específicos em FluxoDiagnostico.
+ * Resultado no link público: RISK_DIAGNOSIS + pacotes `ylada_flow_diagnosis_outcomes` (via preset).
  */
 import type { FluxoCliente } from '@/types/wellness-system'
 

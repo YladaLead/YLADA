@@ -162,6 +162,88 @@ function pickEnsureRedirectAmongMemberships(rows: LeaderMemberLite[]): string | 
   return null
 }
 
+/**
+ * Monta o contexto a partir de uma membership já escolhida (ex. por pickResolvableMembership).
+ * Não usar como fallback para dono de tenant quando membership !== null e isto devolver null —
+ * evita dar painel de líder do tenant “pessoal” a quem tem equipa.
+ */
+async function tenantContextFromMembership(
+  supabase: SupabaseClient,
+  membership: LeaderMemberLite
+): Promise<ProLideresTenantContext | null> {
+  const accessStateRaw = accessStateOf(membership)
+  if (accessStateRaw === 'paused') return null
+  if (accessStateRaw === 'pending_activation') return null
+
+  const dbRole = membership.role as string
+  const role: ProLideresTenantRole =
+    dbRole === 'leader' || dbRole === 'member' ? (dbRole as ProLideresTenantRole) : 'member'
+
+  if (role === 'member' && accessStateRaw === 'active') {
+    const expRaw = membership.team_access_expires_at as string | null | undefined
+    if (expRaw) {
+      const end = new Date(expRaw).getTime()
+      if (!Number.isNaN(end) && end <= Date.now()) return null
+    }
+  }
+
+  const { data: tenant } = await supabase
+    .from('leader_tenants')
+    .select('*')
+    .eq('id', membership.leader_tenant_id as string)
+    .maybeSingle()
+
+  let resolvedTenant = tenant
+
+  /**
+   * RLS pode não devolver o tenant mesmo havendo membership ativa — evita falso `/aguardando-acesso`;
+   * fallback com service role só após termos membership válida na mesma conta.
+   */
+  if (!resolvedTenant) {
+    const admin = getSupabaseAdmin()
+    if (admin) {
+      const { data: bypass } = await admin
+        .from('leader_tenants')
+        .select('*')
+        .eq('id', membership.leader_tenant_id as string)
+        .maybeSingle()
+      resolvedTenant = bypass
+    }
+  }
+
+  if (!resolvedTenant) return null
+
+  return { tenant: resolvedTenant as LeaderTenantRow, role }
+}
+
+/**
+ * Quem tem convite ativo (`leader_tenant_members.role = member`) para este tenant nunca deve ser tratado
+ * como líder na UI/API, mesmo que `leader_tenants.owner_user_id` coincida (dados incoerentes ou resolução antiga).
+ */
+async function reconcileProLideresCtxForMemberRow(
+  ctx: ProLideresTenantContext,
+  userId: string
+): Promise<ProLideresTenantContext> {
+  if (ctx.role === 'member') return ctx
+  const admin = getSupabaseAdmin()
+  if (!admin) return ctx
+
+  const { data: row, error } = await admin
+    .from('leader_tenant_members')
+    .select('role, team_access_state, team_access_expires_at')
+    .eq('user_id', userId)
+    .eq('leader_tenant_id', ctx.tenant.id)
+    .maybeSingle()
+
+  if (error || !row || row.role !== 'member') return ctx
+
+  const st = (row.team_access_state as string | undefined) ?? 'active'
+  if (st !== 'active') return ctx
+  if (!membershipExpiryStillValid(row.team_access_expires_at as string | null | undefined)) return ctx
+
+  return { tenant: ctx.tenant, role: 'member' }
+}
+
 function devStubLeaderTenant(userId: string): LeaderTenantRow {
   const now = new Date().toISOString()
   return {
@@ -238,22 +320,26 @@ export async function isProLideresLeaderForYladaLinkApis(userId: string): Promis
 
 /**
  * Resolve tenant + papel (dono = líder na consultoria; user_id em leader_tenant_members = equipe ou líder registado).
+ *
+ * - Memberships ativas têm prioridade sobre `leader_tenants.owner_user_id` (evita membro com tenant pessoal em dev).
+ * - Leitura de `leader_tenant_members` com service role quando existir: o JWT por vezes não devolve linhas como o esperado;
+ *   sem isto o utilizador cai só em `asOwner` e vê sidebar de líder.
+ * - Se existem linhas em `leader_tenant_members` mas nenhuma ativa/resolvível (ex.: pending_activation), não usar `asOwner`:
+ *   senão um tenant pessoal transforma convite pendente em “líder” no painel.
  */
 export async function resolveProLideresTenantContext(
   supabase: SupabaseClient,
   user: User
 ): Promise<ProLideresTenantContext | null> {
-  const { data: asOwner } = await supabase
-    .from('leader_tenants')
-    .select('*')
-    .eq('owner_user_id', user.id)
-    .maybeSingle()
-
-  if (asOwner) {
-    return { tenant: asOwner as LeaderTenantRow, role: 'leader' }
+  const finish = async (ctx: ProLideresTenantContext | null): Promise<ProLideresTenantContext | null> => {
+    if (!ctx) return null
+    return reconcileProLideresCtxForMemberRow(ctx, user.id)
   }
 
-  const { data: memberships, error: memErr } = await supabase
+  const admin = getSupabaseAdmin()
+  const membershipClient = admin ?? supabase
+
+  const { data: memberships, error: memErr } = await membershipClient
     .from('leader_tenant_members')
     .select('leader_tenant_id, role, team_access_state, team_access_expires_at, created_at')
     .eq('user_id', user.id)
@@ -265,51 +351,37 @@ export async function resolveProLideresTenantContext(
 
   const rows = (memberships ?? []) as LeaderMemberLite[]
   const membership = pickResolvableMembership(rows)
-  if (!membership) return null
-
-  const accessStateRaw = accessStateOf(membership)
-  if (accessStateRaw === 'paused') return null
-  if (accessStateRaw === 'pending_activation') return null
-
-  const dbRole = membership.role as string
-  const role: ProLideresTenantRole =
-    dbRole === 'leader' || dbRole === 'member' ? (dbRole as ProLideresTenantRole) : 'member'
-
-  if (role === 'member' && accessStateRaw === 'active') {
-    const expRaw = membership.team_access_expires_at as string | null | undefined
-    if (expRaw) {
-      const end = new Date(expRaw).getTime()
-      if (!Number.isNaN(end) && end <= Date.now()) return null
-    }
+  if (membership) {
+    const fromTeam = await tenantContextFromMembership(supabase, membership)
+    return finish(fromTeam)
   }
 
-  const { data: tenant } = await supabase
+  if (rows.length > 0) {
+    return null
+  }
+
+  const { data: asOwner } = await supabase
     .from('leader_tenants')
     .select('*')
-    .eq('id', membership.leader_tenant_id as string)
+    .eq('owner_user_id', user.id)
     .maybeSingle()
 
-  let resolvedTenant = tenant
+  if (asOwner) {
+    return finish({ tenant: asOwner as LeaderTenantRow, role: 'leader' })
+  }
 
-  /**
-   * RLS pode não devolver o tenant mesmo havendo membership ativa — evita falso `/aguardando-acesso`;
-   * fallback com service role só após termos membership válida na mesma conta.
-   */
-  if (!resolvedTenant) {
-    const admin = getSupabaseAdmin()
-    if (admin) {
-      const { data: bypass } = await admin
-        .from('leader_tenants')
-        .select('*')
-        .eq('id', membership.leader_tenant_id as string)
-        .maybeSingle()
-      resolvedTenant = bypass
+  if (admin) {
+    const { data: ownerBypass } = await admin
+      .from('leader_tenants')
+      .select('*')
+      .eq('owner_user_id', user.id)
+      .maybeSingle()
+    if (ownerBypass) {
+      return finish({ tenant: ownerBypass as LeaderTenantRow, role: 'leader' })
     }
   }
 
-  if (!resolvedTenant) return null
-
-  return { tenant: resolvedTenant as LeaderTenantRow, role }
+  return null
 }
 
 /**
@@ -352,27 +424,13 @@ export async function ensureLeaderTenantAccess(): Promise<
 
   const admin = getSupabaseAdmin()
 
-  /** Com JWT, RLS por vezes não devolve linha; com service role lemos o tenant real (bootstrap). */
-  if (!ctx && isProLideresBootstrapLeader(user) && admin) {
-    ctx = await resolveProLideresTenantContext(admin, user)
-  }
-
   /**
-   * Dono com tenant já criado (ex.: cadastro manual no admin) mas SELECT com JWT falhou:
-   * localizar sempre com service role — não depender de `shouldProvisionProLideresTenant`.
+   * JWT/RLS por vezes não devolve memberships ou `leader_tenants`.
+   * Resolver com service role aplica a mesma regra (equipa antes de dono) — evita forçar papel de líder
+   * só porque existe `leader_tenants.owner_user_id` ignorando `leader_tenant_members`.
    */
   if (!ctx && admin) {
-    const { data: ownerRow, error: ownerFetchErr } = await admin
-      .from('leader_tenants')
-      .select('*')
-      .eq('owner_user_id', user.id)
-      .maybeSingle()
-    if (ownerFetchErr) {
-      console.error('[ensureLeaderTenantAccess] admin lookup owner_tenant:', ownerFetchErr.message, resolvedUserEmail(user))
-    }
-    if (ownerRow) {
-      ctx = { tenant: ownerRow as LeaderTenantRow, role: 'leader' }
-    }
+    ctx = await resolveProLideresTenantContext(admin, user)
   }
 
   if (!ctx && shouldProvisionProLideresTenant(user)) {
@@ -391,7 +449,10 @@ export async function ensureLeaderTenantAccess(): Promise<
       )
     }
     if (!error && inserted) {
-      ctx = { tenant: inserted as LeaderTenantRow, role: 'leader' }
+      ctx = await reconcileProLideresCtxForMemberRow(
+        { tenant: inserted as LeaderTenantRow, role: 'leader' },
+        user.id
+      )
     }
   }
 
@@ -415,7 +476,10 @@ export async function ensureLeaderTenantAccess(): Promise<
       )
     }
     if (!insErr && ins) {
-      ctx = { tenant: ins as LeaderTenantRow, role: 'leader' }
+      ctx = await reconcileProLideresCtxForMemberRow(
+        { tenant: ins as LeaderTenantRow, role: 'leader' },
+        user.id
+      )
     }
   }
 

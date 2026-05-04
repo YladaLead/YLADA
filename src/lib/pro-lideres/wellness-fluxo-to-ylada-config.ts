@@ -74,8 +74,8 @@ export function wellnessFluxoToYladaConfigJson(
       when_to_use: pageObjetivo,
     },
     meta: {
-      // Recrutamento: não usar RISK_DIAGNOSIS (API gera copy clínica). Resultado só a partir de `result` estático.
-      architecture: kind === 'recruitment' ? 'PRO_LIDERES_RECRUITMENT_STATIC' : 'RISK_DIAGNOSIS',
+      // Vendas e recrutamento: RISK_DIAGNOSIS + pacotes em ylada_flow_diagnosis_outcomes (tom negócio/convite, não clínico).
+      architecture: 'RISK_DIAGNOSIS',
       theme_raw: fluxo.nome,
       theme_display: fluxo.nome,
       objective: kind === 'recruitment' ? 'propagar' : 'educar',
@@ -83,7 +83,7 @@ export function wellnessFluxoToYladaConfigJson(
       pro_lideres_preset: true,
       pro_lideres_fluxo_id: fluxo.id,
       pro_lideres_kind: kind,
-      ...(kind === 'sales' && { diagnosis_vertical: 'pro_lideres' }),
+      diagnosis_vertical: 'pro_lideres',
     },
     form: {
       fields,

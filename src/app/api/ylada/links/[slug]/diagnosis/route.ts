@@ -378,6 +378,17 @@ export async function POST(
     }
 
     let architecture = metaRaw.architecture as string | undefined
+    // Links preset antigos: recrutamento era estático na UI — alinhar a RISK + pacotes ylada_flow_diagnosis_outcomes.
+    if (architecture === 'PRO_LIDERES_RECRUITMENT_STATIC') {
+      architecture = 'RISK_DIAGNOSIS'
+      const hasV =
+        typeof metaRaw.diagnosis_vertical === 'string' && metaRaw.diagnosis_vertical.trim().length > 0
+      metaRaw = {
+        ...metaRaw,
+        architecture: 'RISK_DIAGNOSIS',
+        ...(!hasV && { diagnosis_vertical: 'pro_lideres' }),
+      }
+    }
     // Fallback: links criados com meta vazio (248) usaram RISK_DIAGNOSIS — corrigir via registry
     if (architecture === 'RISK_DIAGNOSIS') {
       const title = (config.title as string) || (metaRaw.theme_raw as string) || ''
@@ -401,9 +412,9 @@ export async function POST(
         : ((metaRaw.theme as Record<string, unknown>)?.raw as string | undefined) ?? ''
     const linkTitleForCache = (config.title as string) || ''
 
-    // Cache: v10 — pacotes por flow_id (lotes wellness vendas) + correção lookup pro_lideres_fluxo_id
+    // Cache: v11 — normalização p1…p5 + escala; recrutamento Pro Líderes via RISK + pacotes flow_id
     const answers_hash = hashAnswersForCache(visitor_answers, themeForCache, linkTitleForCache, diagnosisVertical)
-    const TEMPLATE_VERSION = 10
+    const TEMPLATE_VERSION = 11
     const { data: cached } = await supabaseAdmin
       .from('ylada_diagnosis_cache')
       .select('diagnosis_json')
