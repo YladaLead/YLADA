@@ -21,6 +21,9 @@ export function ProLideresTabuladoresPanel() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [removingId, setRemovingId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editDraft, setEditDraft] = useState('')
+  const [savingEditId, setSavingEditId] = useState<string | null>(null)
   const [listSearch, setListSearch] = useState('')
 
   const sortedAll = useMemo(() => sortTabulatorsAlpha(items), [items])
@@ -74,6 +77,43 @@ export function ProLideresTabuladoresPanel() {
       setError('Erro de rede.')
     } finally {
       setSaving(false)
+    }
+  }
+
+  function startEdit(row: LeaderTenantTabulatorRow) {
+    setEditingId(row.id)
+    setEditDraft(row.label)
+    setError(null)
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setEditDraft('')
+  }
+
+  async function onSaveEdit(id: string) {
+    const trimmed = editDraft.trim()
+    if (!trimmed) return
+    setSavingEditId(id)
+    setError(null)
+    try {
+      const res = await fetch(`/api/pro-lideres/tabuladores/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label: trimmed }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Não foi possível renomear.')
+        return
+      }
+      cancelEdit()
+      await load()
+    } catch {
+      setError('Erro de rede.')
+    } finally {
+      setSavingEditId(null)
     }
   }
 
@@ -166,16 +206,64 @@ export function ProLideresTabuladoresPanel() {
             )}
             <ul className="max-h-[min(22rem,55vh)] divide-y divide-gray-100 overflow-y-auto rounded-xl border border-gray-200 bg-white">
               {filteredMain.map((row) => (
-                <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                  <span className="text-sm font-medium text-gray-900">{row.label}</span>
-                  <button
-                    type="button"
-                    disabled={removingId === row.id}
-                    onClick={() => void onRemove(row.id)}
-                    className="shrink-0 text-sm font-semibold text-red-600 hover:text-red-800 disabled:opacity-50"
-                  >
-                    {removingId === row.id ? 'Removendo…' : 'Remover'}
-                  </button>
+                <li key={row.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                  {editingId === row.id ? (
+                    <input
+                      value={editDraft}
+                      onChange={(e) => setEditDraft(e.target.value)}
+                      maxLength={120}
+                      className="w-full min-w-0 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-900"
+                      disabled={savingEditId === row.id}
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') cancelEdit()
+                        if (e.key === 'Enter') void onSaveEdit(row.id)
+                      }}
+                    />
+                  ) : (
+                    <span className="text-sm font-medium text-gray-900">{row.label}</span>
+                  )}
+                  <div className="flex shrink-0 flex-wrap items-center justify-end gap-3 sm:gap-4">
+                    {editingId === row.id ? (
+                      <>
+                        <button
+                          type="button"
+                          disabled={savingEditId === row.id || !editDraft.trim()}
+                          onClick={() => void onSaveEdit(row.id)}
+                          className="text-sm font-semibold text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                        >
+                          {savingEditId === row.id ? 'Salvando…' : 'Salvar'}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={savingEditId === row.id}
+                          onClick={cancelEdit}
+                          className="text-sm font-semibold text-gray-600 hover:text-gray-800 disabled:opacity-50"
+                        >
+                          Cancelar
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          disabled={removingId === row.id || editingId !== null}
+                          onClick={() => startEdit(row)}
+                          className="text-sm font-semibold text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                        >
+                          Renomear
+                        </button>
+                        <button
+                          type="button"
+                          disabled={removingId === row.id || editingId !== null}
+                          onClick={() => void onRemove(row.id)}
+                          className="text-sm font-semibold text-red-600 hover:text-red-800 disabled:opacity-50"
+                        >
+                          {removingId === row.id ? 'Removendo…' : 'Remover'}
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
