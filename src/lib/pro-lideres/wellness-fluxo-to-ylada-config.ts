@@ -83,6 +83,7 @@ export function wellnessFluxoToYladaConfigJson(
       pro_lideres_preset: true,
       pro_lideres_fluxo_id: fluxo.id,
       pro_lideres_kind: kind,
+      ...(kind === 'sales' && { diagnosis_vertical: 'pro_lideres' }),
     },
     form: {
       fields,

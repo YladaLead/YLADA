@@ -87,6 +87,16 @@ function parseDiagnosisVertical(meta: Record<string, unknown> | undefined): Diag
   return undefined
 }
 
+/** Catálogo: `flow_id` explícito ou preset Pro Líderes (`pro_lideres_fluxo_id`). */
+function resolveCatalogFlowId(meta: Record<string, unknown> | undefined): string | null {
+  if (!meta) return null
+  const fromFlow = typeof meta.flow_id === 'string' ? meta.flow_id.trim() : ''
+  if (fromFlow) return fromFlow
+  const fromPreset =
+    typeof meta.pro_lideres_fluxo_id === 'string' ? meta.pro_lideres_fluxo_id.trim() : ''
+  return fromPreset || null
+}
+
 /** Extrai formFields do config (form.fields ou questions) para mapear índice→texto. */
 function extractFormFieldsFromConfig(config: Record<string, unknown>): FormFieldForNormalize[] | undefined {
   const form = config.form as Record<string, unknown> | undefined
@@ -391,9 +401,9 @@ export async function POST(
         : ((metaRaw.theme as Record<string, unknown>)?.raw as string | undefined) ?? ''
     const linkTitleForCache = (config.title as string) || ''
 
-    // Cache: v9 — copy Pro Líderes alinhada ao padrão narrativo YLADA (config)
+    // Cache: v10 — pacotes por flow_id (lotes wellness vendas) + correção lookup pro_lideres_fluxo_id
     const answers_hash = hashAnswersForCache(visitor_answers, themeForCache, linkTitleForCache, diagnosisVertical)
-    const TEMPLATE_VERSION = 9
+    const TEMPLATE_VERSION = 10
     const { data: cached } = await supabaseAdmin
       .from('ylada_diagnosis_cache')
       .select('diagnosis_json')
@@ -414,7 +424,7 @@ export async function POST(
         .from('ylada_diagnosis_metrics')
         .insert({
           link_id: link.id,
-          flow_id: typeof metaRaw.flow_id === 'string' ? metaRaw.flow_id : null,
+          flow_id: resolveCatalogFlowId(metaRaw),
           architecture,
           level: null,
           main_blocker: (cachedDiag.main_blocker as string) ?? '',
@@ -471,7 +481,7 @@ export async function POST(
       ? (metaRaw.area_profissional as AreaProfissional)
       : 'geral'
 
-    const flow_id = typeof metaRaw.flow_id === 'string' ? metaRaw.flow_id : null
+    const flow_id = resolveCatalogFlowId(metaRaw)
     const objectiveMeta = typeof metaRaw.objective === 'string' ? metaRaw.objective : null
 
     // Bloco 2: normalizar q1,q2... para chaves esperadas pelo motor
