@@ -1,6 +1,6 @@
--- Calculadora de IMC (link público /l/[slug]): inclui idade e sexo no formulário
--- (contexto para o profissional; a fórmula do IMC continua só peso + altura).
--- Atualiza o template da biblioteca e sincroniza links já criados que ainda tinham só 2 campos.
+-- Calculadora de IMC (b1000027): garantir idade + sexo no template e em links legados.
+-- A fórmula do IMC continua só peso + altura; idade/sexo são contexto para o profissional.
+-- Idempotente: só atualiza template se faltar campo `sexo`; links se tiverem < 4 campos em `fields`.
 
 UPDATE ylada_link_templates
 SET
@@ -20,7 +20,12 @@ SET
     "ctaDefault": "Quero falar no WhatsApp"
   }'::jsonb,
   updated_at = NOW()
-WHERE id = 'b1000027-0027-4000-8000-000000000027';
+WHERE id = 'b1000027-0027-4000-8000-000000000027'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM jsonb_array_elements(COALESCE(schema_json->'fields', '[]'::jsonb)) AS el
+    WHERE el->>'id' = 'sexo'
+  );
 
 UPDATE ylada_links y
 SET
@@ -33,4 +38,4 @@ SET
   updated_at = NOW()
 WHERE y.template_id = 'b1000027-0027-4000-8000-000000000027'
   AND jsonb_typeof(COALESCE(y.config_json->'fields', '[]'::jsonb)) = 'array'
-  AND jsonb_array_length(COALESCE(y.config_json->'fields', '[]'::jsonb)) = 2;
+  AND jsonb_array_length(COALESCE(y.config_json->'fields', '[]'::jsonb)) < 4;

@@ -232,9 +232,18 @@ const PUBLIC_LINK_UI: Record<Language, {
   },
 }
 
-/** Exibe textos de template sem travessão longa (substituição suave para leitura em tela). */
+/** Exibe textos de template sem travessão longa ou "--" (leitura mais limpa em mobile). */
 function softenTemplateEmDashes(text: string): string {
-  return text.replace(/\s*—\s*/g, ': ').replace(/\s*–\s*/g, ', ')
+  if (!text) return text
+  let s = text
+  // Travessão (U+2014), meia-linha (U+2013) e hífen duplo estilo "amigos -- mas"
+  s = s.replace(/\s*[\u2014\u2013]\s*/g, ', ')
+  s = s.replace(/\s*-{2,}\s*/g, ', ')
+  // "amigos--mas" ou "amigos —mas" já cobertos em parte; reforço para hífens colados entre palavras
+  s = s.replace(/(\w)-{2,}(\w)/g, '$1, $2')
+  s = s.replace(/(\w)[\u2014\u2013](\w)/g, '$1, $2')
+  s = s.replace(/,\s*,/g, ', ')
+  return s.replace(/,\s*$/g, '').trim()
 }
 
 /** Remove marcadores no texto quando a lista HTML já usa `list-disc` (evita bolinhas duplicadas em `summary_bullets`). */
@@ -401,7 +410,7 @@ function sanitizeResultTitle(text: string): string {
   cleaned = cleaned.replace(/^seu resultado inicial em\s+/i, '')
   cleaned = cleaned.replace(/^seu resultado em\s+/i, '')
   cleaned = cleaned.replace(/^resultado em\s+/i, '')
-  return cleaned.trim()
+  return softenTemplateEmDashes(cleaned.trim())
 }
 
 function normalizeForCompare(text: string): string {
@@ -548,7 +557,7 @@ function toImpactDiagnosisText(text: string, themeHint = ''): string {
     /rotina de cuidados|hidratacao|hidratação|sol|protecao|proteção/i.test(trimmed) &&
     /pele/i.test(trimmed)
   ) {
-    return 'Sua pele já está dando sinais claros — e esse quadro tende a se intensificar sem ajuste.'
+    return 'Sua pele já está dando sinais claros, e esse quadro tende a se intensificar sem ajuste.'
   }
   const cleaned = trimmed
     .replace(/em relacao a sua pele com frequencia/gi, 'com frequência')
@@ -1269,9 +1278,15 @@ function ConfigDrivenLinkView({
         commercePublicCopy && commerceQuizLabels.length >= 2
           ? buildMatrixCommerceNarrativeFromSelectedLabels(locale, commerceQuizLabels, segmentCodeForUi)
           : null
-      const profileTitleForUi = commerceNarrative?.profileTitle ?? formattedProfileTitle
-      const impactDiagnosisTextForUi = commerceNarrative?.impactLine ?? impactDiagnosisText
-      const primaryInsightTextForUi = commerceNarrative?.supportingLine ?? primaryInsightText
+      const profileTitleForUi = softenTemplateEmDashes(
+        String(commerceNarrative?.profileTitle ?? formattedProfileTitle).trim()
+      )
+      const impactDiagnosisTextForUi = softenTemplateEmDashes(
+        String(commerceNarrative?.impactLine ?? impactDiagnosisText).trim()
+      )
+      const primaryInsightTextForUi = softenTemplateEmDashes(
+        String(commerceNarrative?.supportingLine ?? primaryInsightText).trim()
+      )
 
       const handleShareResult = async () => {
         trackLinkEvent(slug, 'share_click', { metrics_id: metricsId })
@@ -1329,7 +1344,7 @@ function ConfigDrivenLinkView({
                 </p>
                 {diagnosis.espelho_comportamental && (
                   <p className="text-sm text-sky-700 font-medium italic">
-                    {diagnosis.espelho_comportamental}
+                    {softenTemplateEmDashes(diagnosis.espelho_comportamental)}
                   </p>
                 )}
               </div>
@@ -1348,7 +1363,7 @@ function ConfigDrivenLinkView({
               <>
                 {diagnosis.frase_identificacao && (
                   <p className="text-gray-600 text-sm leading-relaxed mb-4 italic">
-                    {diagnosis.frase_identificacao}
+                    {softenTemplateEmDashes(diagnosis.frase_identificacao)}
                   </p>
                 )}
 
@@ -1379,7 +1394,7 @@ function ConfigDrivenLinkView({
                     {isPerfumery ? t.benefit : t.consequence}
                   </p>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    {diagnosis.consequence}
+                    {softenTemplateEmDashes(diagnosis.consequence ?? '')}
                   </p>
                 </div>
 
@@ -1411,7 +1426,7 @@ function ConfigDrivenLinkView({
                           <span className="flex-shrink-0 w-5 h-5 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-xs font-semibold">
                             {idx + 1}
                           </span>
-                          {action}
+                          {softenTemplateEmDashes(String(action))}
                         </li>
                       ))}
                     </ul>
@@ -1540,7 +1555,7 @@ function ConfigDrivenLinkView({
             {summaryBullets.length > 0 && (
               <ul className="list-disc list-inside text-gray-600 mt-2 space-y-1">
                 {summaryBullets.map((b, i) => (
-                  <li key={i}>{stripLeadingListMarkers(String(b))}</li>
+                  <li key={i}>{softenTemplateEmDashes(stripLeadingListMarkers(String(b)))}</li>
                 ))}
               </ul>
             )}
@@ -1945,8 +1960,11 @@ function DiagnosticoQuiz({
   const sortedResults = [...results].sort((a, b) => (b.minScore ?? 0) - (a.minScore ?? 0))
   const result = sortedResults.find((r) => score >= (r.minScore ?? 0)) ?? sortedResults[sortedResults[0] ? 0 : 0]
   const resultHeadline = (result?.headline ?? '').trim()
-  const resultDescriptionRaw = softenTemplateEmDashes((result?.description ?? '').trim())
-  const resultDescription = enrichCommerceResultDescriptionIfGeneric(locale, segmentCode, resultDescriptionRaw)
+  const resultDescriptionTrimmed = (result?.description ?? '').trim()
+  const descIsLibraryPlaceholder = isGenericCommerceLibraryDescription(resultDescriptionTrimmed, locale)
+  const resultDescription = softenTemplateEmDashes(
+    enrichCommerceResultDescriptionIfGeneric(locale, segmentCode, resultDescriptionTrimmed)
+  )
   const selectedOptionLabels = questions
     .map((q) => {
       const idx = answers[q.id]
@@ -1958,13 +1976,16 @@ function DiagnosticoQuiz({
     commerceUi != null && selectedOptionLabels.length >= 2
       ? buildMatrixCommerceNarrativeFromSelectedLabels(locale, selectedOptionLabels, segmentCode)
       : null
-  const displayQuizResultHeadline = commerceQuizNarrative?.profileTitle ?? resultHeadline
-  const descIsLibraryPlaceholder = isGenericCommerceLibraryDescription(resultDescriptionRaw, locale)
-  const displayQuizResultDescription = commerceQuizNarrative
-    ? descIsLibraryPlaceholder
-      ? `${commerceQuizNarrative.impactLine}\n\n${commerceQuizNarrative.supportingLine}`
-      : `${resultDescription}\n\n${commerceQuizNarrative.supportingLine}`
-    : resultDescription
+  const displayQuizResultHeadline = softenTemplateEmDashes(
+    (commerceQuizNarrative?.profileTitle ?? resultHeadline).trim()
+  )
+  const displayQuizResultDescription = softenTemplateEmDashes(
+    commerceQuizNarrative
+      ? descIsLibraryPlaceholder
+        ? `${commerceQuizNarrative.impactLine}\n\n${commerceQuizNarrative.supportingLine}`
+        : `${resultDescription}\n\n${commerceQuizNarrative.supportingLine}`
+      : resultDescription
+  )
 
   if (step === 'intro') {
     const introTitle = (cfg.introTitle as string)?.trim() || quizTitle
@@ -2660,7 +2681,7 @@ function CalculatorBlock({
                   <div className="space-y-3 rounded-xl border border-violet-100 bg-violet-50/60 p-4">
                     {imcFullAnalysis.map((p, i) => (
                       <p key={i} className="text-sm leading-relaxed text-gray-700">
-                        {p}
+                        {softenTemplateEmDashes(p)}
                       </p>
                     ))}
                   </div>

@@ -62,7 +62,9 @@ VALUES
       "title": "Calculadora de IMC",
       "fields": [
         {"id": "peso", "label": "Peso atual (kg)", "type": "number", "min": 20, "max": 300},
-        {"id": "altura", "label": "Altura (cm) — em pé, sem sapatos", "type": "number", "min": 100, "max": 250}
+        {"id": "altura", "label": "Altura (cm) — em pé, sem sapatos", "type": "number", "min": 100, "max": 250},
+        {"id": "idade", "label": "Idade (anos completos)", "type": "number", "min": 10, "max": 120},
+        {"id": "sexo", "label": "Sexo registrado ao nascer (opcional — não altera o IMC; ajuda na consulta)", "type": "select", "options": [{"value": 2, "label": "Prefiro não informar"}, {"value": 0, "label": "Masculino"}, {"value": 1, "label": "Feminino"}]}
       ],
       "formula": "Math.round((peso / ((altura / 100) * (altura / 100))) * 100) / 100",
       "resultLabel": "Seu IMC:",
