@@ -87,13 +87,23 @@ export function resolveProLideresViewerDisplayName(
   return ''
 }
 
-export async function fetchProLideresViewerDisplayNameForNonOwner(
+export type ProLideresViewerTenantOverlay = {
+  displayName: string
+  contactEmail: string
+  whatsapp: string
+}
+
+/**
+ * Dados de contacto e nome a mostrar no perfil quando a conta não é dona do tenant:
+ * vêm do cadastro (user_profiles no convite) e do auth, não do leader_tenants.
+ */
+export async function fetchProLideresViewerTenantOverlayForNonOwner(
   supabase: SupabaseClient,
   user: User,
   tenantId: string
-): Promise<string> {
+): Promise<ProLideresViewerTenantOverlay> {
   const [{ data: prof }, { data: mem }] = await Promise.all([
-    supabase.from('user_profiles').select('nome_completo').eq('user_id', user.id).maybeSingle(),
+    supabase.from('user_profiles').select('nome_completo, email, whatsapp').eq('user_id', user.id).maybeSingle(),
     supabase
       .from('leader_tenant_members')
       .select('pro_lideres_tabulator_name')
@@ -101,10 +111,15 @@ export async function fetchProLideresViewerDisplayNameForNonOwner(
       .eq('user_id', user.id)
       .maybeSingle(),
   ])
-  return resolveProLideresViewerDisplayName(user, {
-    nomeCompleto: (prof as { nome_completo?: string | null } | null)?.nome_completo ?? null,
+  const p = prof as { nome_completo?: string | null; email?: string | null; whatsapp?: string | null } | null
+  const displayName = resolveProLideresViewerDisplayName(user, {
+    nomeCompleto: p?.nome_completo ?? null,
     tabulatorName: (mem as { pro_lideres_tabulator_name?: string | null } | null)?.pro_lideres_tabulator_name ?? null,
   })
+  const profileEmail = typeof p?.email === 'string' ? p.email.trim() : ''
+  const contactEmail = profileEmail || resolvedUserEmail(user) || ''
+  const whatsapp = typeof p?.whatsapp === 'string' ? p.whatsapp.trim() : ''
+  return { displayName, contactEmail, whatsapp }
 }
 
 /** Bootstrap por e-mail, por UUID (env ou built-in) ou metadata. */

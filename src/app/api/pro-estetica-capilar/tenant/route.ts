@@ -8,7 +8,7 @@ import {
   resolveEsteticaCapilarTenantContext,
 } from '@/lib/pro-estetica-capilar-server'
 import {
-  fetchProLideresViewerDisplayNameForNonOwner,
+  fetchProLideresViewerTenantOverlayForNonOwner,
   resolveProLideresTenantContext,
 } from '@/lib/pro-lideres-server'
 
@@ -40,15 +40,27 @@ export async function GET(request: NextRequest) {
   }
 
   const canEditTenantProfile = ctx.tenant.owner_user_id === user.id
-  const viewerDisplayName = canEditTenantProfile
-    ? (ctx.tenant.display_name ?? '').trim()
-    : await fetchProLideresViewerDisplayNameForNonOwner(supabaseAdmin, user, ctx.tenant.id)
+  let viewerDisplayName: string
+  let viewerContactEmail: string
+  let viewerWhatsapp: string
+  if (canEditTenantProfile) {
+    viewerDisplayName = (ctx.tenant.display_name ?? '').trim()
+    viewerContactEmail = (ctx.tenant.contact_email ?? '').trim()
+    viewerWhatsapp = (ctx.tenant.whatsapp ?? '').trim()
+  } else {
+    const o = await fetchProLideresViewerTenantOverlayForNonOwner(supabaseAdmin, user, ctx.tenant.id)
+    viewerDisplayName = o.displayName
+    viewerContactEmail = o.contactEmail
+    viewerWhatsapp = o.whatsapp
+  }
 
   return NextResponse.json({
     tenant: ctx.tenant,
     role: ctx.role,
     canEditTenantProfile,
     viewerDisplayName,
+    viewerContactEmail,
+    viewerWhatsapp,
   })
 }
 
@@ -99,5 +111,7 @@ export async function PATCH(request: NextRequest) {
     role: 'leader' as const,
     canEditTenantProfile: true,
     viewerDisplayName: (updated.display_name ?? '').trim(),
+    viewerContactEmail: (updated.contact_email ?? '').trim(),
+    viewerWhatsapp: (updated.whatsapp ?? '').trim(),
   })
 }
