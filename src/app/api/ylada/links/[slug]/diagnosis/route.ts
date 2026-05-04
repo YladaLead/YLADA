@@ -10,6 +10,7 @@ import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase'
 import { generateDiagnosis, getDiagnosisDecision } from '@/lib/ylada'
 import type { DiagnosisInput, DiagnosisArchitecture, LinkObjective, AreaProfissional } from '@/lib/ylada'
+import type { DiagnosisVertical } from '@/lib/ylada/diagnosis-types'
 import { getArchetypeCode, fillArchetypeSlots } from '@/lib/ylada/diagnosis-archetypes'
 import { normalizeVisitorAnswers, type FormFieldForNormalize } from '@/lib/ylada/diagnosis-normalize'
 import type { StrategicProfile } from '@/lib/ylada/strategic-profile'
@@ -27,6 +28,7 @@ import {
 import { isYladaLinkHiddenFromPublicDueToFreemium } from '@/lib/ylada-freemium-public-link'
 import { recordFreemiumLimitHit } from '@/lib/freemium-behavioral-events'
 import { storeDiagnosisAnswers } from '@/lib/ylada/diagnosis-answers-store'
+import { fetchPackagedDiagnosisOutcome } from '@/lib/ylada/fetch-packaged-diagnosis-outcome'
 
 const ARCHITECTURES: DiagnosisArchitecture[] = [
   'RISK_DIAGNOSIS',
@@ -71,11 +73,18 @@ function hashAnswers(answers: Record<string, unknown>): string {
 function hashAnswersForCache(
   answers: Record<string, unknown>,
   themeRaw: string,
-  linkTitle: string
+  linkTitle: string,
+  diagnosisVertical?: string,
 ): string {
   const base = hashAnswers(answers)
-  const salt = `${themeRaw.trim()}|${linkTitle.trim()}`
+  const salt = `${themeRaw.trim()}|${linkTitle.trim()}|${diagnosisVertical ?? ''}`
   return createHash('sha256').update(`${base}|${salt}`).digest('hex').slice(0, 32)
+}
+
+function parseDiagnosisVertical(meta: Record<string, unknown> | undefined): DiagnosisVertical | undefined {
+  const v = typeof meta?.diagnosis_vertical === 'string' ? meta.diagnosis_vertical.trim().toLowerCase() : ''
+  if (v === 'capilar' || v === 'corporal' || v === 'pro_lideres') return v
+  return undefined
 }
 
 /** Extrai formFields do config (form.fields ou questions) para mapear índice→texto. */
@@ -236,7 +245,7 @@ export async function POST(
 
     const { data: link, error: linkError } = await supabaseAdmin
       .from('ylada_links')
-      .select('id, user_id, config_json')
+      .select('id, user_id, config_json, template_id')
       .eq('slug', slug.trim())
       .eq('status', 'active')
       .maybeSingle()
@@ -372,6 +381,8 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'Arquitetura de diagnóstico não suportada' }, { status: 400 })
     }
 
+    const diagnosisVertical = parseDiagnosisVertical(metaRaw)
+
     const formFields = extractFormFieldsFromConfig(config)
 
     const themeForCache =
@@ -380,9 +391,9 @@ export async function POST(
         : ((metaRaw.theme as Record<string, unknown>)?.raw as string | undefined) ?? ''
     const linkTitleForCache = (config.title as string) || ''
 
-    // Cache: v6 — fingerprint inclui tema + título do link (evita reuso com tema antigo)
-    const answers_hash = hashAnswersForCache(visitor_answers, themeForCache, linkTitleForCache)
-    const TEMPLATE_VERSION = 6
+    // Cache: v8 — pacotes por template/flow em ylada_flow_diagnosis_outcomes
+    const answers_hash = hashAnswersForCache(visitor_answers, themeForCache, linkTitleForCache, diagnosisVertical)
+    const TEMPLATE_VERSION = 8
     const { data: cached } = await supabaseAdmin
       .from('ylada_diagnosis_cache')
       .select('diagnosis_json')
@@ -478,6 +489,7 @@ export async function POST(
         area_profissional,
         architecture: architecture as DiagnosisArchitecture,
         ...(segment_code && { segment_code }),
+        ...(diagnosisVertical && { diagnosis_vertical: diagnosisVertical }),
       },
       professional: {},
       visitor_answers: normalizedAnswers,
@@ -510,27 +522,44 @@ export async function POST(
         fallbackUsed = false
         level = decision.level
       } else {
-        // 2) Fallback: archetypes globais da biblioteca
-        const segmentForArchetype = segment_code ?? 'geral'
-        const { data: archetype } = await supabaseAdmin
-          .from('ylada_diagnosis_archetypes')
-          .select('content_json')
-          .eq('archetype_code', archetypeCode)
-          .eq('segment_code', segmentForArchetype)
-          .maybeSingle()
-
-        if (archetype?.content_json) {
-          diagnosis = fillArchetypeSlots(archetype.content_json as Record<string, unknown>, {
+        // 2) Pacote por modelo (template_id) ou catálogo (flow_id) + arquétipo — migração 386
+        const packaged = await fetchPackagedDiagnosisOutcome(supabaseAdmin, {
+          templateId: link.template_id as string | undefined,
+          flowId: flow_id,
+          diagnosisVertical,
+          architecture: arch,
+          archetypeCode,
+        })
+        if (packaged) {
+          diagnosis = fillArchetypeSlots(packaged, {
             THEME: themeDisplay,
             NAME: '',
           })
           fallbackUsed = false
           level = decision.level
         } else {
-          const result = generateDiagnosis(input)
-          diagnosis = result.diagnosis
-          fallbackUsed = result.fallbackUsed
-          level = result.level
+          // 3) Arquétipos globais (vertical dedicada evita copy genérica de `aesthetics`)
+          const segmentForArchetype = diagnosisVertical ?? segment_code ?? 'geral'
+          const { data: archetype } = await supabaseAdmin
+            .from('ylada_diagnosis_archetypes')
+            .select('content_json')
+            .eq('archetype_code', archetypeCode)
+            .eq('segment_code', segmentForArchetype)
+            .maybeSingle()
+
+          if (archetype?.content_json) {
+            diagnosis = fillArchetypeSlots(archetype.content_json as Record<string, unknown>, {
+              THEME: themeDisplay,
+              NAME: '',
+            })
+            fallbackUsed = false
+            level = decision.level
+          } else {
+            const result = generateDiagnosis(input)
+            diagnosis = result.diagnosis
+            fallbackUsed = result.fallbackUsed
+            level = result.level
+          }
         }
       }
     } else if (arch === 'PERFUME_PROFILE') {

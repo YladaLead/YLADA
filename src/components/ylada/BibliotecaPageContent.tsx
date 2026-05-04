@@ -383,6 +383,8 @@ function BibliotecaCard({
   isTemaMaisUsado,
   badge,
   stayOnProEsteticaPanel = false,
+  /** Vertical de diagnóstico gravada no link (Pro capilar / corporal). */
+  diagnosisVertical,
   onRefreshMeusLinks,
 }: {
   item: BibliotecaItemRow
@@ -411,6 +413,8 @@ function BibliotecaCard({
   isTemaMaisUsado: (t: string) => boolean
   /** Biblioteca embutida no painel Pro Estética: não redirecionar para a matriz `/pt/estetica/links`. */
   stayOnProEsteticaPanel?: boolean
+  /** `diagnosis_vertical` enviado ao `/api/ylada/links/generate` (capilar | corporal). */
+  diagnosisVertical?: 'capilar' | 'corporal' | null
   /** Após criar link em modo “copiar”, atualiza a lista em “Seus links” sem navegar. */
   onRefreshMeusLinks?: () => void
 }) {
@@ -466,6 +470,7 @@ function BibliotecaCard({
           : ''
       const segmentToSend = (apiSegment || segmentFromMeta || '').trim() || null
       if (segmentToSend) body.segment = segmentToSend
+      if (diagnosisVertical) body.diagnosis_vertical = diagnosisVertical
       const res = await fetch('/api/ylada/links/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1014,6 +1019,11 @@ function BibliotecaPageContentInner({
   esteticaCapilarScope = false,
 }: BibliotecaPageContentProps) {
   const proEsteticaNarrow = esteticaCorporalScope || esteticaCapilarScope
+  const diagnosisVerticalForGenerate = esteticaCapilarScope
+    ? 'capilar'
+    : esteticaCorporalScope
+      ? 'corporal'
+      : null
   const prefix = getYladaAreaPathPrefix(areaCodigo)
   const linksPath = `${prefix}/links`
   /** Mesmo `segment` que o Noel envia ao generate — grava em ylada_links e alinha WhatsApp/perfil. */
@@ -1427,6 +1437,7 @@ function BibliotecaPageContentInner({
             metaI && typeof metaI.segment_code === 'string' ? metaI.segment_code.trim() : ''
           const segIdeia = (segmentForLinkGenerate || segMeta || '').trim()
           if (segIdeia) body.segment = segIdeia
+          if (diagnosisVerticalForGenerate) body.diagnosis_vertical = diagnosisVerticalForGenerate
           const res = await fetch('/api/ylada/links/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1912,6 +1923,7 @@ function BibliotecaPageContentInner({
                         isTemaMaisUsado={isTemaMaisUsado}
                         badge={badges[idx]}
                         stayOnProEsteticaPanel={stayInProEsteticaHub}
+                        diagnosisVertical={diagnosisVerticalForGenerate}
                         onRefreshMeusLinks={
                           stayInProEsteticaHub ? () => setMeusLinksRefreshTick((n) => n + 1) : undefined
                         }
@@ -1953,6 +1965,7 @@ function BibliotecaPageContentInner({
                             getTituloAdaptado={getTituloAdaptado}
                             isTemaMaisUsado={isTemaMaisUsado}
                             stayOnProEsteticaPanel={stayInProEsteticaHub}
+                            diagnosisVertical={diagnosisVerticalForGenerate}
                             onRefreshMeusLinks={
                               stayInProEsteticaHub ? () => setMeusLinksRefreshTick((n) => n + 1) : undefined
                             }
@@ -1999,6 +2012,7 @@ function BibliotecaPageContentInner({
                               getTituloAdaptado={getTituloAdaptado}
                               isTemaMaisUsado={isTemaMaisUsado}
                               stayOnProEsteticaPanel={stayInProEsteticaHub}
+                              diagnosisVertical={diagnosisVerticalForGenerate}
                               onRefreshMeusLinks={
                                 stayInProEsteticaHub ? () => setMeusLinksRefreshTick((n) => n + 1) : undefined
                               }
@@ -2033,6 +2047,7 @@ function BibliotecaPageContentInner({
                         getTituloAdaptado={getTituloAdaptado}
                         isTemaMaisUsado={isTemaMaisUsado}
                         stayOnProEsteticaPanel={stayInProEsteticaHub}
+                        diagnosisVertical={diagnosisVerticalForGenerate}
                         onRefreshMeusLinks={
                           stayInProEsteticaHub ? () => setMeusLinksRefreshTick((n) => n + 1) : undefined
                         }

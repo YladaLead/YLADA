@@ -6,8 +6,18 @@
  * @see docs/DIAGNOSTICO-FASE1-MAPEAMENTO.md
  */
 
-import type { DiagnosisArchitecture, BlockerType } from './diagnosis-types'
-import type { RiskLevel } from './diagnosis-types'
+import type { DiagnosisArchitecture, BlockerType, DiagnosisVertical, RiskLevel } from './diagnosis-types'
+import {
+  BLOCKER_VARIANTS_CAPILAR,
+  BLOCKER_VARIANTS_CORPORAL,
+  BLOCKER_VARIANTS_PRO_LIDERES,
+  RISK_LEVEL_VARIANTS_CAPILAR,
+  RISK_LEVEL_VARIANTS_CORPORAL,
+  RISK_LEVEL_VARIANTS_PRO_LIDERES,
+  RISK_VARIANTS_EXTRA_CAPILAR,
+  RISK_VARIANTS_EXTRA_CORPORAL,
+  RISK_VARIANTS_EXTRA_PRO_LIDERES,
+} from './diagnosis-vertical-variants'
 
 /** Variação por nível para RISK_DIAGNOSIS (5 blocos: nome, leitura, consequência, direção, CTA). */
 export interface RiskLevelVariants {
@@ -893,8 +903,12 @@ function isPerfumariaContext(themeRaw: string): boolean {
 /** Retorna variantes BLOCKER por contexto: dentistry, aesthetics, nutrition, fitness, perfumaria ou genérico. */
 export function getBlockerVariants(
   themeRaw: string,
-  segmentCode?: string
+  segmentCode?: string,
+  diagnosisVertical?: DiagnosisVertical,
 ): typeof BLOCKER_VARIANTS {
+  if (diagnosisVertical === 'capilar') return BLOCKER_VARIANTS_CAPILAR
+  if (diagnosisVertical === 'corporal') return BLOCKER_VARIANTS_CORPORAL
+  if (diagnosisVertical === 'pro_lideres') return BLOCKER_VARIANTS_PRO_LIDERES
   if (segmentCode === 'dentistry' || segmentCode === 'odonto' || isDentalContext(themeRaw)) return BLOCKER_VARIANTS_ODONTO
   if (segmentCode === 'aesthetics' || isAestheticsContext(themeRaw)) return BLOCKER_VARIANTS_AESTHETICS
   if (segmentCode === 'nutrition' || isNutritionContext(themeRaw)) return BLOCKER_VARIANTS_NUTRITION
@@ -904,14 +918,28 @@ export function getBlockerVariants(
 }
 
 /** Retorna templates por nível para RISK_DIAGNOSIS. Fallback para RISK base se level ausente. */
-export function getRiskLevelVariants(level: RiskLevel | undefined, themeRaw?: string): RiskLevelVariants {
+export function getRiskLevelVariants(
+  level: RiskLevel | undefined,
+  themeRaw?: string,
+  diagnosisVertical?: DiagnosisVertical,
+): RiskLevelVariants {
+  if (level && diagnosisVertical === 'capilar') return RISK_LEVEL_VARIANTS_CAPILAR[level]
+  if (level && diagnosisVertical === 'corporal') return RISK_LEVEL_VARIANTS_CORPORAL[level]
+  if (level && diagnosisVertical === 'pro_lideres') return RISK_LEVEL_VARIANTS_PRO_LIDERES[level]
   if (level && isAestheticsContext(themeRaw ?? '')) return RISK_LEVEL_VARIANTS_AESTHETICS[level]
   if (level && RISK_LEVEL_VARIANTS[level]) return RISK_LEVEL_VARIANTS[level]
   return RISK_LEVEL_VARIANTS.medio
 }
 
 /** Retorna variantes extra (causa, preocupações, etc.) para RISK_DIAGNOSIS. */
-export function getRiskVariantsExtra(level: RiskLevel | undefined, themeRaw?: string): typeof RISK_VARIANTS_EXTRA[RiskLevel] {
+export function getRiskVariantsExtra(
+  level: RiskLevel | undefined,
+  themeRaw?: string,
+  diagnosisVertical?: DiagnosisVertical,
+): typeof RISK_VARIANTS_EXTRA[RiskLevel] {
+  if (level && diagnosisVertical === 'capilar') return RISK_VARIANTS_EXTRA_CAPILAR[level]
+  if (level && diagnosisVertical === 'corporal') return RISK_VARIANTS_EXTRA_CORPORAL[level]
+  if (level && diagnosisVertical === 'pro_lideres') return RISK_VARIANTS_EXTRA_PRO_LIDERES[level]
   if (level && isAestheticsContext(themeRaw ?? '')) return RISK_VARIANTS_EXTRA_AESTHETICS[level]
   if (level && RISK_VARIANTS_EXTRA[level]) return RISK_VARIANTS_EXTRA[level]
   return RISK_VARIANTS_EXTRA.medio

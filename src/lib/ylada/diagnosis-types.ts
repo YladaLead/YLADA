@@ -5,6 +5,9 @@
 
 export type LinkObjective = 'captar' | 'educar' | 'reter' | 'propagar' | 'indicar'
 
+/** Vertical de entrega do diagnóstico (Pro Terapia Capilar, Pro Estética Corporal, Pro Líderes). */
+export type DiagnosisVertical = 'capilar' | 'corporal' | 'pro_lideres'
+
 export type AreaProfissional = 'saude' | 'profissional_liberal' | 'vendas' | 'wellness' | 'geral'
 
 export type DiagnosisArchitecture =
@@ -43,6 +46,8 @@ export interface DiagnosisInput {
     architecture: DiagnosisArchitecture
     /** segment_code para variantes por segmento (dentistry, aesthetics, nutrition, fitness, wellness). */
     segment_code?: string
+    /** Quando definido, o motor usa copy específica da vertical (capilar / corporal / pró líderes). */
+    diagnosis_vertical?: DiagnosisVertical
   }
   professional: { name?: string; whatsapp?: string }
   visitor_answers: Record<string, unknown>

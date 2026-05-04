@@ -7,12 +7,18 @@ import type {
   DiagnosisInput,
   DiagnosisDecisionOutput,
   DiagnosisGenerationResult,
+  DiagnosisVertical,
   RiskLevel,
   BlockerType,
   ProfileTypeName,
   PerfumeProfileCode,
   PerfumeUsage,
 } from './diagnosis-types'
+import {
+  RISK_MAIN_BLOCKER_CAPILAR,
+  RISK_MAIN_BLOCKER_CORPORAL,
+  RISK_MAIN_BLOCKER_PRO_LIDERES,
+} from './diagnosis-vertical-variants'
 import { DiagnosisValidationError } from './diagnosis-types'
 import {
   DIAGNOSIS_TEMPLATES,
@@ -402,6 +408,7 @@ function getMainBlocker(
     score?: number
     warning?: boolean
     theme?: string
+    diagnosis_vertical?: DiagnosisVertical
   }
 ): string {
   switch (arch) {
@@ -409,6 +416,10 @@ function getMainBlocker(
       const level = payload.level ?? 'medio'
       const themeRaw = (payload.theme ?? '').trim()
       const theme = sanitizeThemeForMainBlocker(themeRaw)
+      const dv = payload.diagnosis_vertical
+      if (dv === 'capilar') return RISK_MAIN_BLOCKER_CAPILAR[level]
+      if (dv === 'corporal') return RISK_MAIN_BLOCKER_CORPORAL[level]
+      if (dv === 'pro_lideres') return RISK_MAIN_BLOCKER_PRO_LIDERES[level]
       if (isAestheticsContext(theme)) return RISK_MAIN_BLOCKER_AESTHETICS[level]
       const t = RISK_MAIN_BLOCKER[level]
       const useTheme = theme.length > 2 && !/^seu\s+objetivo$/i.test(theme)
@@ -639,9 +650,13 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
 
   const arch = meta.architecture
   const t = DIAGNOSIS_TEMPLATES[arch]
-  const titleSlots = isAestheticsContext(theme)
-    ? { ...slots, THEME: 'sua pele' }
-    : slots
+  const dv = meta.diagnosis_vertical
+  const titleSlots =
+    dv === 'capilar' || dv === 'corporal' || dv === 'pro_lideres'
+      ? slots
+      : isAestheticsContext(theme)
+        ? { ...slots, THEME: 'sua pele' }
+        : slots
   const profile_title = pickTitle(arch, titleSlots)
 
   // RISK_DIAGNOSIS: usa variação por nível (leve/moderado/alto)
@@ -650,7 +665,7 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
   let growth_potential: string
   let cta_text: string
   if (arch === 'RISK_DIAGNOSIS' && level) {
-    const variants = getRiskLevelVariants(level, theme)
+    const variants = getRiskLevelVariants(level, theme, meta.diagnosis_vertical)
     explanation = fillSlots(variants.explanation, slots)
     consequence = fillSlots(variants.consequence, slots)
     growth_potential = fillSlots(variants.possibility, slots)
@@ -671,7 +686,7 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
   let frase_identificacao: string | undefined
 
   if (arch === 'BLOCKER_DIAGNOSIS' && blocker_type) {
-    const variants = getBlockerVariants(theme, (meta as { segment_code?: string }).segment_code)
+    const variants = getBlockerVariants(theme, (meta as { segment_code?: string }).segment_code, meta.diagnosis_vertical)
     const v = variants[blocker_type]
     profile_summary = v.leitura
     causa_provavel = v.causa_provavel
@@ -687,7 +702,7 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
     growth_potential = t.possibility ? fillSlots(t.possibility, slots) : undefined
     cta_text = t.cta_imperative
   } else if (arch === 'RISK_DIAGNOSIS' && level) {
-    const r = getRiskVariantsExtra(level, theme)
+    const r = getRiskVariantsExtra(level, theme, meta.diagnosis_vertical)
     causa_provavel = r.causa_provavel
     preocupacoes = r.preocupacoes
     growth_potential = r.providencias
@@ -710,6 +725,7 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
     score,
     warning,
     theme,
+    diagnosis_vertical: meta.diagnosis_vertical,
   })
   const whatsapp_prefill = fillSlots(t.whatsapp_prefill, {
     ...slots,

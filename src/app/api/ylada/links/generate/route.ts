@@ -29,6 +29,13 @@ import {
   buildProjectionFormFields,
   projectionQuestionsOverrideAllowed,
 } from '@/lib/ylada/projection-form-fields'
+import type { DiagnosisVertical } from '@/lib/ylada/diagnosis-types'
+
+function parseDiagnosisVerticalFromBody(body: Record<string, unknown>): DiagnosisVertical | undefined {
+  const v = typeof body.diagnosis_vertical === 'string' ? body.diagnosis_vertical.trim().toLowerCase() : ''
+  if (v === 'capilar' || v === 'corporal' || v === 'pro_lideres') return v
+  return undefined
+}
 
 function normalizeOptionText(value: string): string {
   return value
@@ -134,7 +141,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Backend não configurado' }, { status: 503 })
     }
 
-    const body = await request.json().catch(() => ({}))
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
+    const diagnosisVertical = parseDiagnosisVerticalFromBody(body)
     const flowId = typeof body.flow_id === 'string' ? body.flow_id.trim() : ''
     const interpretacao = body.interpretacao && typeof body.interpretacao === 'object' ? body.interpretacao as Record<string, unknown> : null
     /** Perguntas customizadas do interpret unificado; se ausente, usa question_labels do catálogo. */
@@ -295,6 +303,7 @@ export async function POST(request: NextRequest) {
               architecture,
               area_profissional: 'geral',
               ...(segmentCode && { segment_code: segmentCode }),
+              ...(diagnosisVertical && { diagnosis_vertical: diagnosisVertical }),
             },
             form: {
               fields: formFields,
@@ -472,6 +481,7 @@ export async function POST(request: NextRequest) {
           architecture: flow.architecture,
           type: flow.type,
           segment_code,
+          ...(diagnosisVertical && { diagnosis_vertical: diagnosisVertical }),
         },
         page: {
           title: pageTitle,

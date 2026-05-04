@@ -446,6 +446,7 @@ export async function runProLideresNoelLinkPipeline(params: {
             questions: questions.length > 0 ? questions : undefined,
             title: requestedTitle ?? undefined,
             segment: yladaSegment,
+            diagnosis_vertical: 'pro_lideres',
             ...(locale && { locale }),
           }),
         })
@@ -510,6 +511,7 @@ export async function runProLideresNoelLinkPipeline(params: {
             questions: questions.length > 0 ? questions : undefined,
             title: requestedTitle ?? undefined,
             segment: yladaSegment,
+            diagnosis_vertical: 'pro_lideres',
             ...(locale && { locale }),
           }),
         })
