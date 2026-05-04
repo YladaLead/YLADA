@@ -184,9 +184,15 @@ export const proLideresSalesBlock4Fluxos: FluxoCliente[] = [
   {
     id: 'calc-hidratacao',
     nome: 'Calculadora de Água',
-    objetivo: 'Quantificar hidratação ideal e facilitar decisão prática de rotina.',
+    objetivo:
+      'Estimar uma meta simples de hidratação no dia a dia (referência prática; não substitui orientação individualizada).',
     perguntas: [
-      { id: 'peso', texto: 'Qual é seu peso (kg)?', tipo: 'escala', escalaMin: 35, escalaMax: 180 },
+      {
+        id: 'peso',
+        texto: 'Qual é o seu peso aproximado?',
+        tipo: 'multipla_escolha',
+        opcoes: ['Até 55 kg', '56–70 kg', '71–85 kg', '86–100 kg', 'Acima de 100 kg'],
+      },
       { id: 'atividade', texto: 'Seu nível de atividade é alto?', tipo: 'sim_nao' },
       { id: 'clima', texto: 'Você vive em clima quente na maior parte do tempo?', tipo: 'sim_nao' },
       { id: 'sede', texto: 'Sente sede com frequência durante o dia?', tipo: 'sim_nao' },
@@ -228,10 +234,21 @@ export const proLideresSalesBlock4Fluxos: FluxoCliente[] = [
   {
     id: 'calc-imc',
     nome: 'Calculadora de IMC',
-    objetivo: 'Oferecer indicador inicial para conversa e plano personalizado.',
+    objetivo:
+      'Recolher faixas de peso e altura para contextualizar bem-estar e abrir conversa (no link público em calculadora YLADA o IMC é calculado com valores exatos).',
     perguntas: [
-      { id: 'peso', texto: 'Qual seu peso (kg)?', tipo: 'escala', escalaMin: 35, escalaMax: 180 },
-      { id: 'altura', texto: 'Qual sua altura (cm)?', tipo: 'escala', escalaMin: 140, escalaMax: 210 },
+      {
+        id: 'peso',
+        texto: 'Qual faixa melhor descreve o seu peso aproximado?',
+        tipo: 'multipla_escolha',
+        opcoes: ['Até 59 kg', '60–74 kg', '75–89 kg', '90 kg ou mais'],
+      },
+      {
+        id: 'altura',
+        texto: 'Qual faixa melhor descreve a sua altura?',
+        tipo: 'multipla_escolha',
+        opcoes: ['Até 154 cm', '155–164 cm', '165–174 cm', '175 cm ou mais'],
+      },
       { id: 'rotina', texto: 'Consegue manter rotina semanal de cuidado?', tipo: 'sim_nao' },
       { id: 'energia', texto: 'Sua energia atual está abaixo do que gostaria?', tipo: 'sim_nao' },
       { id: 'objetivo', texto: 'Quer usar esse indicador para orientar seus próximos passos?', tipo: 'sim_nao' },

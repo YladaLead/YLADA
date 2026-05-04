@@ -8,6 +8,9 @@ import { getProLideresRecruitmentPresetFluxos } from '@/lib/pro-lideres/pro-lide
 import { getProLideresSalesPresetFluxos } from '@/lib/pro-lideres/pro-lideres-sales-preset-fluxos'
 import type { FluxoCliente } from '@/types/wellness-system'
 
+/** Template biblioteca YLADA: calculadora IMC (peso, altura cm, idade, sexo → IMC). */
+const CALC_IMC_YLADA_TEMPLATE_ID = 'b1000027-0027-4000-8000-000000000027' as const
+
 type PresetPack = {
   kind: 'sales' | 'recruitment'
   fluxos: FluxoCliente[]
@@ -40,6 +43,24 @@ export async function ensureProLideresPresetYladaLinks(ownerUserId: string): Pro
   ]
   if (!packs.some((p) => p.fluxos.length > 0)) return
 
+  const { data: imcTemplateRow } = await supabaseAdmin
+    .from('ylada_link_templates')
+    .select('schema_json')
+    .eq('id', CALC_IMC_YLADA_TEMPLATE_ID)
+    .maybeSingle()
+
+  const imcSchemaJson = imcTemplateRow?.schema_json
+  const imcCalculatorSchema: Record<string, unknown> | null =
+    imcSchemaJson && typeof imcSchemaJson === 'object' && !Array.isArray(imcSchemaJson)
+      ? { ...(imcSchemaJson as Record<string, unknown>) }
+      : null
+
+  if (!imcCalculatorSchema) {
+    console.warn(
+      '[ensureProLideresPresetYladaLinks] schema_json do template IMC não encontrado; preset calc-imc cairá no fluxo diagnóstico legado.'
+    )
+  }
+
   const { data: existingRows, error: listError } = await supabaseAdmin
     .from('ylada_links')
     .select('slug')
@@ -57,11 +78,24 @@ export async function ensureProLideresPresetYladaLinks(ownerUserId: string): Pro
       const slug = proLideresPresetSlug(ownerUserId, pack.kind, fluxo.id)
       if (existingSlugs.has(slug)) continue
 
-      const config_json = wellnessFluxoToYladaConfigJson(fluxo, pack.kind)
+      const useRealImcCalculator = fluxo.id === 'calc-imc' && imcCalculatorSchema !== null
+      const config_json: Record<string, unknown> = useRealImcCalculator
+        ? {
+            ...imcCalculatorSchema,
+            title: fluxo.nome,
+            meta: {
+              pro_lideres_preset: true,
+              pro_lideres_fluxo_id: fluxo.id,
+              pro_lideres_kind: pack.kind,
+              objective: pack.kind === 'recruitment' ? 'propagar' : 'educar',
+              area_profissional: 'wellness',
+            },
+          }
+        : wellnessFluxoToYladaConfigJson(fluxo, pack.kind)
 
       const { error: insertError } = await supabaseAdmin.from('ylada_links').insert({
         user_id: ownerUserId,
-        template_id: DIAGNOSTICO_TEMPLATE_ID,
+        template_id: useRealImcCalculator ? CALC_IMC_YLADA_TEMPLATE_ID : DIAGNOSTICO_TEMPLATE_ID,
         slug,
         title: fluxo.nome,
         segment: pack.segment,
