@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { formatDisplayTitle, getStrategicIntro, patientFacingTitleFromStoredPageTitle } from '@/lib/ylada/strategic-intro'
+import {
+  formatDisplayTitle,
+  getStrategicIntro,
+  patientFacingTitleFromStoredPageTitle,
+  sanitizeProLideresVisitorSubtitle,
+} from '@/lib/ylada/strategic-intro'
 import {
   FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK,
   YLADA_FREEMIUM_WHATSAPP_MONTHLY_LIMIT_MESSAGE_VISITOR,
@@ -51,7 +56,7 @@ const PUBLIC_LINK_UI: Record<Language, {
   shareResult: string
   shareLoveCta: string
   profileLabel: string
-  /** Pro Líderes: quiz recrutamento (negócio Herbalife — sem tom clínico) */
+  /** Pro Líderes: quiz recrutamento (sem tom clínico; copy neutra para quem responde) */
   recruitmentBadge: string
   recruitmentIntroTitle: string
   recruitmentIntroSubtitle: string
@@ -811,8 +816,8 @@ function ConfigDrivenLinkView({
     isMatrixCommercePublicLinkSegment(segmentCodeForUi) && archMeta !== 'PERFUME_PROFILE'
   const commercePublicCopy = useCommercePublicCopy ? getMatrixCommercePublicLinkCopy(locale) : null
   const t = commercePublicCopy ? { ...PUBLIC_LINK_UI[locale], ...commercePublicCopy } : PUBLIC_LINK_UI[locale]
-  const isProLideresRecruitmentLink =
-    meta.pro_lideres_preset === true && meta.pro_lideres_kind === 'recruitment'
+  const isProLideresPreset = meta.pro_lideres_preset === true
+  const isProLideresRecruitmentLink = isProLideresPreset && meta.pro_lideres_kind === 'recruitment'
   const fieldsRaw = (formConfig.fields as FormField[]) || []
   const submitLabel = (formConfig.submit_label as string) || t.seeResult
   /** Calculadora de projeção: nunca injetar opções Sim/Não — sempre entrada numérica (corrige links antigos mal gerados). */
@@ -854,10 +859,13 @@ function ConfigDrivenLinkView({
   const pageTitleRaw = (page.title as string) ?? (config.title as string) ?? 'Link'
   const pageTitle = patientFacingTitleFromStoredPageTitle(pageTitleRaw)
   const displayTitle = formatDisplayTitle(pageTitle)
-  const subtitle = (page.subtitle as string) || ''
+  const subtitleRaw = (page.subtitle as string) || ''
+  const subtitle = isProLideresPreset ? sanitizeProLideresVisitorSubtitle(subtitleRaw) : subtitleRaw
 
   const [values, setValues] = useState<Record<string, string>>({})
-  const [step, setStep] = useState<'intro' | 'form' | 'result' | 'limit_reached' | 'access_paused'>('intro')
+  const [step, setStep] = useState<'intro' | 'form' | 'result' | 'limit_reached' | 'access_paused'>(() =>
+    isProLideresPreset ? 'form' : 'intro'
+  )
   const [formStep, setFormStep] = useState(0)
   const [diagnosis, setDiagnosis] = useState<DiagnosisResultState | null>(null)
   const [metricsId, setMetricsId] = useState<string | null>(null)

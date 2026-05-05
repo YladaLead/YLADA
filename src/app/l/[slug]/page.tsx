@@ -26,6 +26,7 @@ export default async function PublicLinkPage({ params, searchParams }: PageProps
   const sp = searchParams ? await searchParams : {}
   const plM = pickPlM(sp)
 
-  const payload = await fetchPublicLinkPayload(slug)
-  return <PublicLinkView payload={payload} shareAttributionToken={plM} />
+  const payload = await fetchPublicLinkPayload(slug, plM ? { memberShareSegment: plM } : undefined)
+  const shareTok = payload.proLideresAttributionToken ?? plM
+  return <PublicLinkView payload={payload} shareAttributionToken={shareTok} />
 }

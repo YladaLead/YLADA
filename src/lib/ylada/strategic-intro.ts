@@ -32,6 +32,25 @@ export interface StrategicIntroContext {
 }
 
 /**
+ * Remove blocos de subtítulo voltados ao operador (ex. texto antigo com marca) do que o visitante vê em /l/.
+ * Usado para links preset Pro Líderes até a BD estar só com copy neutra.
+ */
+export function sanitizeProLideresVisitorSubtitle(text: string): string {
+  const raw = (text ?? '').trim()
+  if (!raw) return ''
+  const blocks = raw.split(/\n\n+/).map((b) => b.trim()).filter(Boolean)
+  const isOperatorBlock = (b: string) =>
+    /\bherbalife\b/i.test(b) ||
+    /h[-–]?\s*l[ií]der/i.test(b) ||
+    /consultor\s+independente/i.test(b) ||
+    /\bárea\s+h[-–]?\s*l/i.test(b)
+  const cleaned = blocks.filter((b) => !isOperatorBlock(b))
+  if (cleaned.length > 0) return cleaned.join('\n\n')
+  const first = blocks[0] ?? raw
+  return first.replace(/\s*\n\s*Área\s+H[-–]?\s*L[ií]der.*$/is, '').trim() || first
+}
+
+/**
  * Remove termos de objetivo profissional (captação de pacientes/clientes, marketing do consultório) do tema.
  * O paciente não deve ver isso no resultado — só o tema dele (ex.: cáries, saúde bucal).
  */

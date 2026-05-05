@@ -7,13 +7,13 @@ import type { FluxoCliente } from '@/types/wellness-system'
 const DIAGNOSTICO_TEMPLATE_ID = 'a0000001-0001-4000-8000-000000000001' as const
 export { DIAGNOSTICO_TEMPLATE_ID }
 
-/** Texto fixo na área H-Líder (líderes Herbalife): presets Pro Líderes — vendas (bem-estar / nutrição). */
-export const PRO_LIDERES_HLIDER_VENDAS_CONTEXTO =
-  'Área H-Líder (Herbalife): o próximo passo é conversar com o Consultor Independente Herbalife que te enviou este link — hábitos, nutrição e bem-estar.'
+/** Texto neutro no link público (visitante): sem marca operador. */
+export const PRO_LIDERES_PUBLIC_VISITOR_CONTEXTO_VENDAS =
+  'O próximo passo é conversar com quem te enviou este link — hábitos, nutrição e bem-estar.'
 
-/** Mesmo contexto H-Líder para presets de recrutamento (oportunidade de negócio). */
-const PRO_LIDERES_HLIDER_RECRUTAMENTO_CONTEXTO =
-  'Área H-Líder (Herbalife): próximo passo é continuar no WhatsApp com quem te enviou este link sobre oportunidade de negócio independente.'
+/** Recrutamento: mesmo princípio — linguagem genérica para quem preenche. */
+const PRO_LIDERES_PUBLIC_VISITOR_CONTEXTO_RECRUTAMENTO =
+  'O próximo passo é continuar no WhatsApp com quem te enviou este link.'
 
 function perguntaToFormField(p: FluxoCliente['perguntas'][number]) {
   switch (p.tipo) {
@@ -55,8 +55,8 @@ export function wellnessFluxoToYladaConfigJson(
   const objetivoBase = fluxo.objetivo.trim()
   const pageObjetivo =
     kind === 'sales'
-      ? `${objetivoBase}\n\n${PRO_LIDERES_HLIDER_VENDAS_CONTEXTO}`
-      : `${objetivoBase}\n\n${PRO_LIDERES_HLIDER_RECRUTAMENTO_CONTEXTO}`
+      ? `${objetivoBase}\n\n${PRO_LIDERES_PUBLIC_VISITOR_CONTEXTO_VENDAS}`
+      : `${objetivoBase}\n\n${PRO_LIDERES_PUBLIC_VISITOR_CONTEXTO_RECRUTAMENTO}`
   // Sem "•" no texto: `<ul class="list-disc">` já desenha o marcador (evita duas bolinhas).
   const summary_bullets: string[] = [
     ...d.sintomas.slice(0, 5),

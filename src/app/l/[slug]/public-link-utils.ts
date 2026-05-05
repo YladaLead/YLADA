@@ -128,10 +128,8 @@ export async function fetchPublicLinkPayload(
       notFound()
     }
     proLideresAttributionToken = row.token
-    const memberWa = await fetchWhatsappE164ForUserId(supabaseAdmin, row.member_user_id)
-    if (memberWa) {
-      ctaWhatsapp = memberWa
-    }
+    /** Sempre o número do membro (ou vazio) — nunca manter o WhatsApp do líder quando o link é atribuído a um membro. */
+    ctaWhatsapp = await fetchWhatsappE164ForUserId(supabaseAdmin, row.member_user_id)
   }
 
   return {
