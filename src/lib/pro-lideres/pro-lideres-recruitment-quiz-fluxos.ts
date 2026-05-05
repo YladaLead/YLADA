@@ -3,6 +3,11 @@
  * Copy focada em perfil e conversa — sem tom clínico nem kit de bem-estar no resultado.
  * Tag `pro-lideres` ativa disclaimer e textos de UI específicos em FluxoDiagnostico.
  * Resultado no link público: RISK_DIAGNOSIS + pacotes `ylada_flow_diagnosis_outcomes` (via preset).
+ *
+ * Idioma: português do Brasil (você, equipe, compartilhar — não usar PT de Portugal neste arquivo).
+ *
+ * Ordem das opções (sempre 4 por pergunta): índice 0 = menos aberto / mais fechado → 3 = mais aberto.
+ * O motor de diagnóstico soma os índices: soma mais alta → arquétipo `urgente` (copy de maior motivação).
  */
 import type { FluxoCliente } from '@/types/wellness-system'
 
@@ -11,79 +16,82 @@ export const proLideresRecruitmentQuizFluxos: FluxoCliente[] = [
     id: 'quiz-recrut-ganhos-prosperidade',
     nome: 'Quiz: Ganhos e Prosperidade',
     objetivo:
-      'Descobrir o potencial para ganhos e prosperidade e abrir conversa com quem partilhou o link.',
+      'Descobrir o potencial para ganhos e prosperidade e abrir conversa com quem compartilhou o link.',
     perguntas: [
       {
         id: 'p1',
-        texto: 'Você sente que seu estilo de vida atual permite ganhar mais e prosperar financeiramente?',
+        texto:
+          'Nos últimos meses, como você se sente em relação ao dinheiro e ao ritmo que seu dia a dia exige?',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Não, sinto que preciso de novas oportunidades para prosperar',
-          'Parcialmente, mas vejo potencial para ganhar muito mais',
-          'Bastante, mas sempre há espaço para crescimento',
-          'Sim, estou muito satisfeito com minha situação financeira',
+          'Razoavelmente estável; não sinto urgência de mudar nada grande.',
+          'Não está ruim, mas gostaria de mais folga ou de ganhar mais sem sacrificar ainda mais horas.',
+          'Sinto que o esforço não corresponde ao que sobra pra mim no fim do mês.',
+          'Sinto aperto ou vontade forte de criar outra fonte de renda com mais controle.',
         ],
       },
       {
         id: 'p2',
-        texto: 'Você está aberto(a) para conhecer oportunidades que podem melhorar sua situação financeira?',
+        texto:
+          'Se existisse forma de explorar renda extra com flexibilidade, sem largar o que você tem hoje, o que mais faz sentido pra você?',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Sim, estou muito aberto(a) para novas oportunidades!',
-          'Sim, gostaria de conhecer opções que podem me ajudar',
-          'Talvez, se for algo que realmente faça sentido',
-          'Não, prefiro manter minha situação atual',
+          'Agora não faz sentido; não estou procurando nada nesse sentido.',
+          'Talvez; depende do que é, do tempo exigido e de quão transparente for.',
+          'Faz sentido ouvir com calma; tenho dúvidas mas quero entender sem compromisso.',
+          'Faz sentido explorar; quero ver como outras pessoas começaram em paralelo.',
         ],
       },
       {
         id: 'p3',
-        texto: 'Você valoriza ter liberdade financeira e tempo para dedicar às coisas que realmente importam?',
+        texto: 'O que mais pesa neste momento em relação a trabalho e renda?',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Muito, é um dos meus maiores objetivos',
-          'Bastante, gostaria de ter mais liberdade',
-          'Moderadamente, seria interessante',
-          'Pouco, não é uma prioridade para mim',
+          'Pouco ou nada; me sinto equilibrado(a) nesse aspecto.',
+          'Falta de tempo pra família, saúde ou projetos pessoais.',
+          'Pouca margem de decisão ou sensação de estagnação no que faço.',
+          'Cansaço com a rotina e sensação de esforço alto com retorno que parece pequeno.',
         ],
       },
       {
         id: 'p4',
-        texto: 'Você acredita que pode criar uma renda adicional trabalhando com algo que também melhora a vida das pessoas?',
+        texto:
+          'Como você encara a ideia de construir algo em paralelo que também ajude outras pessoas (hábitos, bem-estar)?',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Sim, acredito muito nessa possibilidade!',
-          'Sim, gostaria de conhecer como isso funciona',
-          'Talvez, se for algo confiável e comprovado',
-          'Não, não acredito nisso',
+          'Desconfio ou não me imagino nesse tipo de papel.',
+          'Pode fazer sentido, mas só com provas reais, regras claras e zero “promessa fácil”.',
+          'Faz sentido se houver equipe, formação e caminho definido.',
+          'Acredito nisso e quero ver se encaixa na minha vida com ética e consistência.',
         ],
       },
       {
         id: 'p5',
-        texto: 'Você está interessado(a) em conversar com quem te enviou este quiz sobre oportunidades de crescimento?',
+        texto: 'Falar com quem te enviou este quiz sobre o próximo passo e o modelo — como você vê isso agora?',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Sim, estou muito interessado(a) em saber mais!',
-          'Sim, gostaria de entender melhor as oportunidades',
-          'Talvez, se for algo que realmente possa me ajudar',
-          'Não, não tenho interesse no momento',
+          'Não faz sentido pra mim neste momento.',
+          'Talvez mais tarde, se o contexto mudar.',
+          'Faz sentido uma conversa breve pra ver encaixe e tirar dúvidas.',
+          'Faz sentido falar em breve pra alinhar expectativas e entender o que pede tempo na prática.',
         ],
       },
     ],
     diagnostico: {
-      titulo: 'Alto Potencial para Ganhos e Prosperidade',
+      titulo: 'Perfil com margem para prosperar com mais intenção',
       descricao:
-        'Com base nas respostas, faz sentido conversar com quem te enviou o link para explorar oportunidades alinhadas aos teus objetivos.',
-      sintomas: ['Abertura a novas oportunidades', 'Interesse em crescimento e flexibilidade'],
+        'Pelas respostas, há espaço pra clarificar números, tempo e possibilidades — uma conversa com quem te enviou o link costuma ser o atalho mais honesto.',
+      sintomas: ['Tensão entre esforço e resultado', 'Curiosidade sobre flexibilidade e renda extra'],
       beneficios: [
-        'Conversa personalizada com a tua liderança na equipe',
-        'Modelo de negócio com suporte da comunidade',
-        'Caminhos simples e duplicáveis para construir ao teu ritmo',
+        'Mapa realista do que o modelo pede no começo',
+        'Exemplos de quem começou em paralelo ao emprego',
+        'Próximo passo alinhado ao seu ritmo, sem pressão solta',
       ],
       mensagemPositiva:
-        'Pessoas com o teu perfil costumam encontrar encaixe quando exploram o modelo certo — fala com quem te partilhou esta avaliação.',
+        'Muita gente só precisa entender o bloqueio certo e o formato do apoio — o quiz já mostrou onde vale aprofundar na conversa.',
     },
     kitRecomendado: 'energia',
-    cta: 'Quero saber mais',
+    cta: 'Quero conhecer novas oportunidades',
     tags: ['quiz', 'ganhos', 'prosperidade', 'recrutamento', 'pro-lideres'],
   },
   {
@@ -94,71 +102,76 @@ export const proLideresRecruitmentQuizFluxos: FluxoCliente[] = [
     perguntas: [
       {
         id: 'p1',
-        texto: 'Você sente que seu potencial está sendo bem aproveitado atualmente?',
+        texto: 'Você sente que seu potencial está sendo bem aproveitado no dia a dia?',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Não, sinto que tenho muito mais potencial não explorado',
-          'Parcialmente, mas vejo muito espaço para crescimento',
-          'Bastante, mas sempre posso melhorar',
-          'Sim, sinto que estou aproveitando bem meu potencial',
+          'Sim; sinto que uso bem o que sei e o contexto ajuda.',
+          'Razoável; há espaço mas também alguma frustração.',
+          'Sinto que poderia dar mais valor, mas o contexto limita ou desmotiva.',
+          'Sinto muito potencial pra explorar e vontade de crescer com direção.',
         ],
       },
       {
         id: 'p2',
-        texto: 'Você está aberto(a) para conhecer caminhos que podem ajudar você a alcançar seu máximo potencial?',
+        texto:
+          'Caminhos novos de crescimento — com metas, mentoria e grupo — encaixam onde pra você nesta fase da vida?',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Sim, estou muito interessado(a) em descobrir!',
-          'Sim, gostaria de conhecer opções de crescimento',
-          'Talvez, se for algo que realmente me ajude',
-          'Não, prefiro manter como está',
+          'Não procuro isso; prefiro manter o foco onde já estou.',
+          'Talvez, se for algo sério e compatível com pouco tempo livre.',
+          'Quero ver opções com suporte; não quero “inventar tudo” sozinho.',
+          'Quero ativamente encontrar onde investir energia com guia e clareza.',
         ],
       },
       {
         id: 'p3',
-        texto: 'Você valoriza ter suporte e mentoria para acelerar seu crescimento pessoal e profissional?',
+        texto: 'Apoio regular de quem já percorreu o caminho (mentoria, equipe) — o que é verdade pra você?',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Muito, é essencial para meu crescimento',
-          'Bastante, acredito que faria diferença',
-          'Moderadamente, pode ser útil',
-          'Pouco, prefiro fazer sozinho(a)',
+          'Prefiro autonomia quase total; pouco apoio contínuo.',
+          'Ajuda pontual já ajuda; não preciso de acompanhamento denso.',
+          'Faria grande diferença ter guia nas primeiras fases e depois ritmo próprio.',
+          'Mentoria, treino e cultura de equipe são decisivos pra eu avançar.',
         ],
       },
       {
         id: 'p4',
-        texto: 'Você acredita que pode crescer trabalhando com algo que também ajuda outras pessoas a melhorarem de vida?',
+        texto: 'Crescer profissionalmente num projeto que também melhore a vida de outras pessoas soa pra você…',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Sim, acredito muito nessa possibilidade!',
-          'Sim, gostaria de entender como isso funciona',
-          'Talvez, se for algo genuíno e comprovado',
-          'Não, não acredito nisso',
+          'Pouco ou nada; não é o que me move neste momento.',
+          'Possível, mas só se for genuíno, ético e sem pressão de resultado falso.',
+          'Faz sentido; gostaria de ver casos reais e rotinas de quem já faz.',
+          'Faz muito sentido; propósito pesa tanto quanto renda na decisão.',
         ],
       },
       {
         id: 'p5',
-        texto: 'Você está interessado(a) em conversar com quem te enviou este quiz sobre seu potencial de crescimento?',
+        texto: 'Sobre falar com quem te enviou o quiz sobre seu potencial e o próximo passo prático:',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Sim, estou muito interessado(a) em saber mais!',
-          'Sim, gostaria de entender melhor as possibilidades',
-          'Talvez, se for algo que realmente possa me ajudar',
-          'Não, não tenho interesse no momento',
+          'Não é prioridade pra mim agora.',
+          'Só se for algo muito objetivo e curto.',
+          'Quero uma conversa simples pra ver se o encaixe faz sentido.',
+          'Quero avançar em breve com clareza de suporte, ritmo e expectativas.',
         ],
       },
     ],
     diagnostico: {
-      titulo: 'Alto Potencial para Crescimento',
+      titulo: 'Perfil com tração para crescer com propósito',
       descricao:
-        'As tuas respostas indicam abertura para desenvolvimento — uma conversa com quem partilhou o link pode acelerar o próximo passo.',
-      sintomas: ['Vontade de crescer', 'Interesse em suporte e mentoria'],
-      beneficios: ['Clareza sobre caminhos', 'Modelo com propósito', 'Flexibilidade'],
+        'As respostas apontam vontade de desenvolvimento e valorização de caminho estruturado — vale alinhar com quem compartilhou o link o “como”, sem romper o que você já tem.',
+      sintomas: ['Ambição de crescimento', 'Busca de suporte e modelo claro'],
+      beneficios: [
+        'Visão do onboarding e da mentoria na prática',
+        'Exemplos de ritmo de trabalho e primeiras semanas',
+        'Conversa focada no seu estilo de aprendizado',
+      ],
       mensagemPositiva:
-        'Quem te enviou o quiz pode ajudar a traduzir esse potencial em ação — envia uma mensagem quando fizer sentido.',
+        'Potencial sem conversa honesta tende a ficar na lista de desejos — quem te enviou o quiz consegue traduzir isso em passos concretos.',
     },
     kitRecomendado: 'energia',
-    cta: 'Quero saber mais',
+    cta: 'Quero conhecer novas oportunidades',
     tags: ['quiz', 'potencial', 'crescimento', 'recrutamento', 'pro-lideres'],
   },
   {
@@ -169,71 +182,78 @@ export const proLideresRecruitmentQuizFluxos: FluxoCliente[] = [
     perguntas: [
       {
         id: 'p1',
-        texto: 'Você sente que seu dia a dia está alinhado com seus sonhos e propósito de vida?',
+        texto:
+          'Sua rotina de hoje te aproxima da vida que você quer daqui a dois ou três anos?',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Não, sinto que estou muito distante dos meus sonhos',
-          'Parcialmente, mas gostaria de estar mais alinhado',
-          'Bastante, mas sempre posso melhorar o equilíbrio',
-          'Sim, sinto que estou muito alinhado com meu propósito',
+          'No geral sim; me sinto alinhado(a) com prioridades e tempo.',
+          'Tem partes boas e partes que eu gostaria de mudar aos poucos.',
+          'Sinto distância entre o dia a dia e o que realmente valorizo.',
+          'Sinto desalinhamento forte; quero reorganizar tempo, energia e sentido.',
         ],
       },
       {
         id: 'p2',
-        texto: 'Você está aberto(a) para conhecer caminhos que podem te ajudar a viver mais alinhado com seu propósito?',
+        texto:
+          'Explorar caminhos que unam trabalho, tempo livre e significado — como você vê isso pra você neste momento?',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Sim, estou muito interessado(a) em descobrir!',
-          'Sim, gostaria de conhecer opções que me ajudem',
-          'Talvez, se for algo que realmente faça sentido',
-          'Não, prefiro manter como está',
+          'Não estou procurando mudanças nesse eixo.',
+          'Tenho curiosidade cautelosa; preciso de contexto real, não discurso.',
+          'Quero ouvir histórias de quem reorganizou a rotina sem “largar tudo” de um dia pro outro.',
+          'Quero ativamente encontrar um encaixe que una propósito, flexibilidade e sustentabilidade.',
         ],
       },
       {
         id: 'p3',
-        texto: 'Você valoriza ter equilíbrio entre vida pessoal, profissional e tempo para o que realmente importa?',
+        texto: 'Equilíbrio entre vida pessoal, trabalho e energia pro que importa — onde você está?',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Muito, é um dos meus maiores objetivos',
-          'Bastante, gostaria de ter mais equilíbrio',
-          'Moderadamente, seria interessante',
-          'Pouco, não é uma prioridade para mim',
+          'Razoável; não é o tema que mais me tira o sono.',
+          'Gostaria de melhorar; ainda não é urgência mas incomoda.',
+          'É prioridade este ano; sinto que preciso de mudança estruturada.',
+          'É prioridade urgente; sinto desgaste e falta de fôlego pra continuar igual.',
         ],
       },
       {
         id: 'p4',
-        texto: 'Você acredita que pode viver seu propósito trabalhando com algo que também transforma a vida de outras pessoas?',
+        texto:
+          'Viver com mais propósito num trabalho que também impacte positivamente outras pessoas — o que soa pra você?',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Sim, acredito muito nessa possibilidade!',
-          'Sim, gostaria de entender como isso funciona',
-          'Talvez, se for algo genuíno e significativo',
-          'Não, não acredito nisso',
+          'Pouco; neste momento outros critérios pesam mais.',
+          'Soa com ressalvas; quero ver exemplos concretos e limites realistas.',
+          'Soa bem; quero entender como isso vira rotina semana a semana.',
+          'Soa muito; é peça central em qualquer decisão profissional que eu considere.',
         ],
       },
       {
         id: 'p5',
-        texto: 'Você está interessado(a) em conversar com quem te enviou este quiz sobre propósito e equilíbrio?',
+        texto: 'Uma conversa com quem te convidou sobre propósito, flexibilidade e próximo passo — faz sentido?',
         tipo: 'multipla_escolha',
         opcoes: [
-          'Sim, estou muito interessado(a) em saber mais!',
-          'Sim, gostaria de entender melhor as possibilidades',
-          'Talvez, se for algo que realmente possa me ajudar',
-          'Não, não tenho interesse no momento',
+          'Não faz sentido pra mim nesta fase.',
+          'Talvez mais tarde, quando eu tiver mais clareza pessoal.',
+          'Faz sentido uma conversa breve e honesta sobre encaixe e limites.',
+          'Faz sentido falar em breve com intenção de entender plano e ritmo realistas.',
         ],
       },
     ],
     diagnostico: {
-      titulo: 'Alto Potencial para Propósito e Equilíbrio',
+      titulo: 'Perfil em busca de sentido e equilíbrio sustentável',
       descricao:
-        'Há espaço para alinhar rotina, significado e flexibilidade — falar com quem partilhou o link costuma ser o melhor próximo passo.',
-      sintomas: ['Busca de significado', 'Desejo de mais equilíbrio'],
-      beneficios: ['Visão de caminhos possíveis', 'Modelo flexível', 'Impacto nas pessoas'],
+        'Pelas respostas, há tensão saudável entre o que você vive hoje e o que quer construir — falar com quem enviou o link ajuda a ver se um modelo flexível encaixa na sua definição de equilíbrio.',
+      sintomas: ['Desejo de mais alinhamento', 'Foco em tempo e energia bem gastos'],
+      beneficios: [
+        'Exemplos de rotina de quem concilia família, trabalho e projeto paralelo',
+        'Transparência sobre flexibilidade e expectativas iniciais',
+        'Conversa centrada nos seus valores, não em promessa vazia',
+      ],
       mensagemPositiva:
-        'Uma conversa simples pode mostrar como unir propósito e resultado prático — fala com quem te enviou esta avaliação.',
+        'Reorganizar vida e trabalho com sentido costuma começar com uma conversa franca — o quiz já mostrou o tom do que te move.',
     },
     kitRecomendado: 'energia',
-    cta: 'Quero saber mais',
+    cta: 'Quero conhecer novas oportunidades',
     tags: ['quiz', 'propósito', 'equilíbrio', 'recrutamento', 'pro-lideres'],
   },
 ]

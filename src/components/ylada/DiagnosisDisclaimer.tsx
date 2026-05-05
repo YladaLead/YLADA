@@ -38,14 +38,14 @@ const TEXTS: Record<DisclaimerVariant, string[]> = {
     'Caso esteja enfrentando sintomas ou dificuldades, procure orientação de um profissional qualificado.',
   ],
   recrutamento: [
-    'Este resultado é uma avaliação orientativa com base nas tuas respostas; não é consulta nem avaliação de saúde.',
+    'Este resultado é uma avaliação orientativa com base nas suas respostas; não é consulta nem avaliação de saúde.',
     'Foca-se em interesse e perfil para conversa sobre oportunidade de negócio — não indica produtos de bem-estar nem tratamentos.',
-    'Para próximos passos e esclarecimentos, fala com a pessoa que partilhou este link.',
+    'Para próximos passos e esclarecimentos, converse com a pessoa que compartilhou este link.',
   ],
   recrutamento_pro_lideres: [
-    'Este resultado é uma avaliação informal com base nas tuas respostas, para apoiar conversa sobre oportunidade de negócio — sem compromisso.',
-    'Não substitui aconselhamento jurídico, fiscal ou contabilístico nem avaliação médica; não constitui promessa de ganhos.',
-    'Para próximos passos, produto ou modelo em concreto, fala com quem te enviou este link.',
+    'Este resultado é uma avaliação informal com base nas suas respostas, para apoiar conversa sobre oportunidade de negócio — sem compromisso.',
+    'Não substitui aconselhamento jurídico, fiscal ou contábil nem avaliação médica; não constitui promessa de ganhos.',
+    'Para próximos passos, produto ou modelo em concreto, converse com quem te enviou este link.',
   ],
   commerce: [...COMMERCE_DISCLAIMER_PT],
 }

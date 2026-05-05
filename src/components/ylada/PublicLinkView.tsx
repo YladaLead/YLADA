@@ -29,6 +29,10 @@ import { parseProLideresMemberPathSegment } from '@/lib/ylada-public-link-path'
 const publicLinkShareButtonClassName =
   'w-full py-3.5 px-4 rounded-xl border-2 border-sky-300 bg-sky-100/80 text-sky-700 font-semibold shadow-sm shadow-sky-300/35 transition-colors hover:bg-sky-100 hover:border-sky-400'
 
+/** Botão “Ver / ocultar análise completa”: destaque em verde para chamar mais atenção que o secundário azul. */
+const publicLinkFullAnalysisToggleClassName =
+  'w-full rounded-xl border-2 border-emerald-500 bg-emerald-50 px-4 py-3.5 font-semibold text-emerald-900 shadow-md shadow-emerald-200/45 transition-colors hover:bg-emerald-100 hover:border-emerald-600'
+
 const PUBLIC_LINK_UI: Record<Language, {
   start: string
   back: string
@@ -69,6 +73,8 @@ const PUBLIC_LINK_UI: Record<Language, {
   recruitmentBoxDisclaimer: string
   recruitmentBoxHint: string
   recruitmentTalkNow: string
+  /** Pro Líderes recrutamento: CTA principal no WhatsApp (tom de curiosidade sobre a oportunidade). */
+  recruitmentPrimaryCta: string
   recruitmentYourResult: string
   /** Intro antes do quiz por template (`DiagnosticoQuiz`) */
   quizIntroBadge: string
@@ -83,6 +89,12 @@ const PUBLIC_LINK_UI: Record<Language, {
   calculatorImcRecapLead: string
   /** Calculadora IMC: linha curta antes do botão WhatsApp (ponte para o objetivo do link). */
   calculatorImcCtaLead: string
+  /** Calculadora IMC: rótulo do primeiro cartão após o número (impacto na vida). */
+  calculatorImcImpactLabel: string
+  /** Calculadora IMC: rótulo do segundo cartão (possibilidade com apoio). */
+  calculatorImcPossibilityLabel: string
+  /** Calculadora IMC: texto do botão principal quando há WhatsApp (convite à conversa). */
+  calculatorImcPrimaryCta: string
   /** Calculadoras: rótulo do segundo bloco, tom de precaução prática. */
   calculatorPrecautionLabel: string
   /** Calculadoras genéricas: linha antes do WhatsApp quando não é IMC. */
@@ -122,14 +134,16 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentBadge: 'Avaliação de perfil',
     recruitmentIntroTitle: 'Algumas perguntas rápidas',
     recruitmentIntroSubtitle:
-      'Vamos alinhar o teu perfil e o teu interesse em conversar sobre oportunidade de negócio — sem compromisso.',
+      'Vamos alinhar seu perfil e seu interesse em conversar sobre oportunidade de negócio, sem compromisso.',
     recruitmentIntroMicro: 'Tempo estimado: 2 a 3 minutos',
     recruitmentBoxTitle: 'Próximo passo',
     recruitmentBoxDisclaimer:
-      'Este resumo reflete as tuas respostas. Para o modelo de negócio, próximos passos e dúvidas sobre a oportunidade com a equipe, fala com quem te enviou este link.',
-    recruitmentBoxHint: 'Usa o WhatsApp abaixo para continuar a conversa com a pessoa que partilhou o quiz.',
+      'Este resumo reflete suas respostas. Para o modelo de negócio, próximos passos e dúvidas sobre a oportunidade com a equipe, converse com quem te enviou este link.',
+    recruitmentBoxHint:
+      'Use o WhatsApp abaixo para seguir conversando com a pessoa que compartilhou o quiz.',
     recruitmentTalkNow: '💬 Falar no WhatsApp',
-    recruitmentYourResult: 'O teu resultado',
+    recruitmentPrimaryCta: 'Quero conhecer novas oportunidades',
+    recruitmentYourResult: 'Seu resultado',
     quizIntroBadge: 'Análise guiada',
     quizIntroLead:
       'Em poucos cliques você vê um primeiro recorte sobre o que o seu corpo e a sua rotina pedem neste tema: o que pesa no dia a dia e por onde costuma fazer sentido começar. Rápido, direto e pensado para quem quer se entender melhor.',
@@ -142,10 +156,13 @@ const PUBLIC_LINK_UI: Record<Language, {
     calculatorIntroMicro: 'Tempo estimado: cerca de 1 minuto · sem cadastro: preencher e ver o resultado.',
     calculatorImcRecapLead: 'Com os dados que você trouxe:',
     calculatorImcCtaLead:
-      'IMC no papel não mexe na sua rotina sozinho. Quem trabalha com isso junta número, sono e hábitos no mesmo plano, e isso costuma adiantar bem mais.',
+      'Seu resultado pede um próximo passo humano, não mais conta na cabeça. Chama no WhatsApp quem te enviou o link pra receber orientação inicial e ver onde ajustar antes que o cansaço vire rotina.',
+    calculatorImcImpactLabel: 'O que isso costuma pesar em você',
+    calculatorImcPossibilityLabel: 'O que dá pra aliviar com apoio',
+    calculatorImcPrimaryCta: 'Quero minha orientação inicial',
     calculatorPrecautionLabel: 'Precaução que ajuda',
     calculatorCtaLead:
-      'Esse resultado é só um recorte. Quem entende do assunto encaixa na sua vida real e aponta por onde começar, sem você precisar chutar sozinho.',
+      'Esse número é só o começo da história. Chamar no WhatsApp quem te enviou o link costuma ser o jeito mais rápido de encaixar isso na sua rotina real.',
   },
   en: {
     start: 'Start',
@@ -188,6 +205,7 @@ const PUBLIC_LINK_UI: Record<Language, {
       'This summary reflects your answers. For the business model, next steps and questions about the opportunity with the team, talk to whoever sent you this link.',
     recruitmentBoxHint: 'Use WhatsApp below to continue the conversation with the person who shared the quiz.',
     recruitmentTalkNow: '💬 Continue on WhatsApp',
+    recruitmentPrimaryCta: 'I want to learn about the opportunity',
     recruitmentYourResult: 'Your result',
     quizIntroBadge: 'Guided check-in',
     quizIntroLead:
@@ -201,10 +219,13 @@ const PUBLIC_LINK_UI: Record<Language, {
     calculatorIntroMicro: 'Estimated time: about 1 minute · no sign-up: fill in and see your result.',
     calculatorImcRecapLead: 'From what you shared:',
     calculatorImcCtaLead:
-      'BMI on paper does not change your routine by itself. Someone who does this work usually lines up the number, sleep, and habits in one plan, and that tends to move things faster.',
+      'Your result asks for a human next step, not more math in your head. Message whoever sent you this link on WhatsApp for initial guidance and a clearer place to adjust before low energy becomes your default.',
+    calculatorImcImpactLabel: 'What this often costs you day to day',
+    calculatorImcPossibilityLabel: 'What can get lighter with support',
+    calculatorImcPrimaryCta: 'I want my initial guidance',
     calculatorPrecautionLabel: 'A practical safeguard',
     calculatorCtaLead:
-      'This result is only a slice. Someone who knows the field can fit it to your real life and show where to start without you guessing alone.',
+      'That number is only the opening line. Messaging whoever sent you this link on WhatsApp is usually the fastest way to fit it into your real routine.',
   },
   es: {
     start: 'Comenzar',
@@ -247,6 +268,7 @@ const PUBLIC_LINK_UI: Record<Language, {
       'Este resumen refleja tus respuestas. Para el modelo de negocio, próximos pasos y dudas sobre la oportunidad con el equipo, habla con quien te envió este enlace.',
     recruitmentBoxHint: 'Usa el WhatsApp abajo para seguir la conversación con quien compartió el quiz.',
     recruitmentTalkNow: '💬 Hablar por WhatsApp',
+    recruitmentPrimaryCta: 'Quiero conocer la oportunidad',
     recruitmentYourResult: 'Tu resultado',
     quizIntroBadge: 'Análisis guiado',
     quizIntroLead:
@@ -260,10 +282,13 @@ const PUBLIC_LINK_UI: Record<Language, {
     calculatorIntroMicro: 'Tiempo estimado: cerca de 1 minuto · sin registro: rellenar y ver el resultado.',
     calculatorImcRecapLead: 'Con los datos que compartiste:',
     calculatorImcCtaLead:
-      'El IMC en el papel no cambia tu rutina solo. Quien trabaja esto suele juntar número, sueño y hábitos en un mismo plan, y eso suele avanzar más.',
+      'Tu resultado pide un siguiente paso humano, no más números en la cabeza. Escríbele por WhatsApp a quien te envió el enlace para una orientación inicial y ver dónde ajustar antes de que el cansancio se vuelva rutina.',
+    calculatorImcImpactLabel: 'Qué suele pesarte en el día a día',
+    calculatorImcPossibilityLabel: 'Qué puede aliviarse con acompañamiento',
+    calculatorImcPrimaryCta: 'Quiero mi orientación inicial',
     calculatorPrecautionLabel: 'Precaución útil',
     calculatorCtaLead:
-      'Este resultado es solo un recorte. Quien domina el tema lo encaja en tu vida real y marca por dónde empezar sin que tengas que adivinar solo.',
+      'Ese número es solo el arranque. Escribir por WhatsApp a quien te envió el enlace suele ser la forma más rápida de encajarlo en tu rutina real.',
   },
 }
 /** Exibe textos de template sem travessão longa ou "--" (leitura mais limpa em mobile). */
@@ -1534,7 +1559,9 @@ function ConfigDrivenLinkView({
                   }
                   className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
                 >
-                  {ctaText || (isProLideresRecruitmentLink ? t.recruitmentTalkNow : t.talkNow)}
+                  {isProLideresRecruitmentLink
+                    ? (diagnosis.cta_text?.trim() || t.recruitmentPrimaryCta)
+                    : (ctaText || t.talkNow)}
                 </button>
                 <button
                   type="button"
@@ -1553,7 +1580,7 @@ function ConfigDrivenLinkView({
                       return !prev
                     })
                   }}
-                  className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-xl transition-colors"
+                  className={publicLinkFullAnalysisToggleClassName}
                 >
                   {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
                 </button>
@@ -1647,7 +1674,7 @@ function ConfigDrivenLinkView({
                 onClick={() => onCtaClick()}
                 className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
               >
-                {isProLideresRecruitmentLink ? t.recruitmentTalkNow : t.talkNow}
+                {isProLideresRecruitmentLink ? t.recruitmentPrimaryCta : t.talkNow}
               </button>
               <button
                 type="button"
@@ -1944,6 +1971,9 @@ function DiagnosticoQuiz({
       : ''
   const commerceUi = isMatrixCommercePublicLinkSegment(segmentCode) ? getMatrixCommercePublicLinkCopy(locale) : null
   const t = commerceUi ? { ...PUBLIC_LINK_UI[locale], ...commerceUi } : PUBLIC_LINK_UI[locale]
+  const cfgMeta = (config as { meta?: Record<string, unknown> }).meta ?? {}
+  const isProLideresRecruitmentQuiz =
+    cfgMeta.pro_lideres_preset === true && cfgMeta.pro_lideres_kind === 'recruitment'
   const cfg = config as DiagnosticoConfig
   const questions = Array.isArray(cfg.questions) ? cfg.questions : []
   const results = Array.isArray(cfg.results) ? cfg.results : []
@@ -2150,7 +2180,7 @@ function DiagnosticoQuiz({
                 onClick={() => onCtaClick()}
                 className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
               >
-                {ctaText}
+                {isProLideresRecruitmentQuiz ? t.recruitmentPrimaryCta : ctaText}
               </button>
               <button
                 type="button"
@@ -2162,7 +2192,7 @@ function DiagnosticoQuiz({
               <button
                 type="button"
                 onClick={toggleFullAnalysis}
-                className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-xl transition-colors"
+                className={publicLinkFullAnalysisToggleClassName}
               >
                 {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
               </button>
@@ -2173,7 +2203,7 @@ function DiagnosticoQuiz({
               <button
                 type="button"
                 onClick={toggleFullAnalysis}
-                className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-xl transition-colors"
+                className={publicLinkFullAnalysisToggleClassName}
               >
                 {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
               </button>
@@ -2454,117 +2484,126 @@ function buildImcRecapMidSentence(profile: ImcProfile, locale: Language): string
   return `${out ?? ''}${sexFrag}` || null
 }
 
-function getImcEngagementHeadline(imc: number, locale: Language, _profile: ImcProfile | null): string {
+function getImcEngagementHeadline(imc: number, locale: Language, profile: ImcProfile | null): string {
   const band = imcOmsBand(imc)
+  const ageY =
+    profile?.idade !== undefined && Number.isFinite(profile.idade) ? Math.round(profile.idade) : undefined
+  const enAge = ageY !== undefined ? `At ${ageY}, ` : ''
+  const esAge = ageY !== undefined ? `A los ${ageY} años, ` : ''
+  const ptAge = ageY !== undefined ? `Com ${ageY} anos, ` : ''
+
   if (locale === 'en') {
-    if (band === 'low') return 'Shows the underweight range on common population charts. Gentle support beats pushing harder alone.'
-    if (band === 'normal') return 'Falls in the usual healthy weight range on those charts. Small routine choices still steer how you feel.'
+    if (band === 'low')
+      return `${enAge}your BMI points to underweight here. Notice if energy dropped, meals feel stressful, or your body asks for gentleness before you push harder alone.`
+    if (band === 'normal')
+      return `${enAge}your BMI sits in the range many people first read as healthy. Still, sleep, appetite, and mood often speak louder than the digit on the screen.`
     if (band === 'over')
-      return 'Falls in the overweight range people use most for quick screening. It is a cue to tighten routine with backup, not a verdict.'
-    return 'Falls in the obesity range used in screening. Steady structured help is usually safer than solo extremes.'
+      return `${enAge}your BMI reads overweight here. People in this band often feel lower drive, clothes tightening quietly, and routines feeling heavier week by week.`
+    return `${enAge}your BMI reads in the obesity range here. Breath on small efforts, rough nights, and worry about long-term health are common companions, not personal failure.`
   }
   if (locale === 'es') {
     if (band === 'low')
-      return 'Aparece en la franja de bajo peso en las tablas más usadas. Acompañamiento tranquilo ayuda más que exigirse en solitario.'
+      return `${esAge}tu IMC apunta a bajo peso aquí. Fíjate si la energía cayó, la comida se volvió estrés o el cuerpo pide calma antes de exigirte más solo.`
     if (band === 'normal')
-      return 'Cae en peso dentro de lo que suele llamarse sanas en esa referencia. La rutina cotidiana sigue marcando la diferencia.'
+      return `${esAge}tu IMC cae en la franja que mucha gente lee primero como adecuada. Aun así sueño, hambre y ánimo cuentan más que el número aislado.`
     if (band === 'over')
-      return 'Marca sobrepeso en la referencia que más se usa como pantalla rápida. Es aviso para ordenar hábitos con apoyo, no sentencia.'
-    return 'Marca obesidad en esa referencia. El cambio con seguimiento constante suele ser más seguro que medidas fuertes en solitario.'
+      return `${esAge}tu IMC marca sobrepeso aquí. Suele ir con menos ganas, ropa apretando sin drama y la rutina pesando más cada semana.`
+    return `${esAge}tu IMC marca obesidad aquí. Es frecuente sentir aire corto con poco esfuerzo, noches mal dormidas y miedo a que la salud pida tregua de verdad.`
   }
   if (band === 'low')
-    return 'Aparece na faixa de baixo peso nas tabelas que mais se usam. Acolher com ajuda vale mais que se cobrar forte sozinho.'
+    return `${ptAge}seu IMC sugere baixo peso neste primeiro recorte. Preste atenção se a disposição sumiu, se comida virou nervoso ou se o corpo pede calma antes de você cobrar mais sozinho.`
   if (band === 'normal')
-    return 'Cai na faixa de peso dentro do que mais se chama adequado em triagem rápida. A rotina do dia continua sendo quem molda bem-estar.'
+    return `${ptAge}seu IMC fica na faixa que muita gente lê como ok neste primeiro recorte. Mesmo assim sono, fome e humor costumam falar mais alto que o número na tela.`
   if (band === 'over')
-    return 'Indica sobrepeso na mesma referência que muitos profissionais usam como primeira tela. É um aviso pra alinhar hábitos com apoio, não uma sentença.'
-  return 'Indica faixa de obesidade na referência de triagem mais comum. Mudança com acompanhamento firme costuma ser mais segura do que radicalizar sozinho.'
+    return `${ptAge}seu IMC indica sobrepeso neste primeiro recorte. Muita gente sente junto disposição mais baixa, roupa apertando devagar e a rotina pesando mais a cada semana.`
+  return `${ptAge}seu IMC indica obesidade neste primeiro recorte. Falta de ar com pouco esforço, noite mal dormida e medo de deixar saúde de lado costumam aparecer, e não são falha pessoal.`
 }
 
 function getImcCalculatorPersonalCopy(
-  _imc: number,
+  imc: number,
   locale: Language,
-  profile: ImcProfile | null,
+  _unusedProfile: ImcProfile | null,
 ): { insight: string; tip: string } {
+  void _unusedProfile
   const band = imcOmsBand(imc)
-  const idade = profile?.idade !== undefined && Number.isFinite(profile.idade) ? Math.round(profile.idade) : undefined
 
   if (locale === 'en') {
-    const ageCue =
-      idade !== undefined ? `Around ${idade}, hormones, sleep, and stress reshape how weight behaves. ` : ''
     let insight = ''
     let tip = ''
     if (band === 'low') {
-      insight = `${ageCue}A BMI this low usually lines up with a stretch of low intake, illness, overload, or a body type that eats little and still burns a lot; it rarely comes from caring “too much” overnight.`
+      insight =
+        'Low weight often rides in with stress, illness, or meals quietly shrinking. Energy and confidence usually feel it before any technical talk.'
       tip =
-        'Hold off on long fasting or punishing cardio to “fix” the scale. Bring appetite changes, dizziness, or lost cycles to whoever guides you before going extreme.'
+        'Before long fasts or punishment cardio, open this with whoever sent you the link. A guided first step usually protects your energy while you unpack what is underneath.'
     } else if (band === 'normal') {
-      insight = `${ageCue}The math says your weight and height pair like most charts call healthy, yet sleep debt, digestion, or a heavy week can feel worse than this number admits.`
+      insight =
+        'Short sleep, a packed calendar, or a cranky gut can hit hard even when the scale looks fine. The body sometimes waves flags outside the BMI line.'
       tip =
-        'Still flag new meds, thyroid issues, swelling, or big mood shifts; those steer interpretation more than fine-tuning decimals on BMI.'
+        'For two mornings note how you wake, breakfast timing, and mood swings. Send that snapshot to whoever shared the link, small guided tweaks often calm this without extremes.'
     } else if (band === 'over') {
-      insight = `${ageCue}This range often stacks from months sitting more, shrinking sleep, and meals drifting late, rather than “one cheat day”; the body stores the drift.`
+      insight =
+        'Sitting longer, sleeping short, and late dinners stack month after month more than one indulgent weekend. That mix drains drive and makes solo fixes feel heavier.'
       tip =
-        'Skip crash diets or weekend-only extremes. Notice waist, bedtime, and how hunger swings for two days, then unpack it with someone who oversees the whole picture.'
+        'Good news: steady guidance usually brings control back without miracle promises. Track waist, dinner cut-off, and morning energy for two days, then WhatsApp whoever sent you this link for an initial steer.'
     } else {
-      insight = `${ageCue}At this bracket the storyline is usually genetics plus years of routine signals such as creeping blood pressure, louder snoring, or stamina dipping before the mirror catches up.`
+      insight =
+        'Old habits, family history, and years of quiet signals often sit behind this, not a single weak-will day.'
       tip =
-        'Before aggressive protocols mention breathlessness at rest, pounding headaches, or cardiac family history. Oversight catches what BMI cannot reveal.'
+        'Big solo swings are usually the riskier play. Tell whoever sent you this link about breathlessness on small efforts, chest pressure, or rising blood pressure, and ask for a first supported plan.'
     }
     return { insight: softenTemplateEmDashes(insight), tip: softenTemplateEmDashes(tip) }
   }
 
   if (locale === 'es') {
-    const ageCue =
-      idade !== undefined ?
-        `A los ${idade} años hormonas, estrés y sueño marcan rápido cómo cambia tu peso. `
-      : ''
     let insight = ''
     let tip = ''
     if (band === 'low') {
-      insight = `${ageCue}Lo más frecuente es que aparezca después de rachas comiendo poco, pasar por enfermedad fuerte o vivir mucha carga de estrés, no porque alguien haya estado perfecto un solo día.`
+      insight =
+        'El peso bajo suele venir con estrés fuerte, enfermedad o comida que se esconde sin que lo notes. La energía y la confianza lo sienten antes que cualquier teoría.'
       tip =
-        'Evita ayunos largos o cardio de castigo solo para mover el número. Si el apetito se apagó, hubo vértigos o cambios grandes de ánimo, díselo antes a quien te guíe y recién después ajusta con fuerza.'
+        'Antes de ayuno largo o cardio de castigo, cuéntaselo a quien te envió el enlace. Una orientación inicial suele cuidar tu energía mientras entiendes qué pasa detrás.'
     } else if (band === 'normal') {
-      insight = `${ageCue}El par peso-altura cae donde la mayoría de tablas lo llama esperado y aún así el sueño roto o la barriga cansada llegan igual o antes que el índice.`
+      insight =
+        'Sueño corto, agenda densa o tripa rebelde pueden pegar fuerte aunque la báscula se vea bien. El cuerpo a veces avisa por otros caminos.'
       tip =
-        'Anota medicación nueva, tiroides, hinchazón rara y cambios bruscos de humor, porque eso mueve más la historia que repetir solo el número en pantalla.'
+        'Anota dos mañanas cómo amaneces, hora del desayuno y cambios de ánimo. Mándalo a quien compartió el enlace: ajustes guiados suelen calmar esto sin radicalismo.'
     } else if (band === 'over') {
-      insight = `${ageCue}Lo más repetido atrás suele ser muchas horas quieto, pocas noches que descansen de verdad y la última comida cayendo tarde, mes tras mes, antes de que el finde pague todas las culpas.`
+      insight =
+        'Muchas horas quieto, pocas noches que descansen y la última comida tarde se acumulan mes a mes más que un finde suelto. Eso baja ganas y pesa la rutina.'
       tip =
-        'No entres al plan de borrar todo de golpe. Durante dos días mide cintura, horario de la última comida y cómo llegas por la mañana, y cuenta eso abierto en la primera charla con un profesional.'
+        'Buena noticia: guía y compañía clara suelen devolver control sin milagros. Dos días mide cintura, horario de la cena y energía al levantar, y envíalo a quien te mandó el enlace para un primer direccionamiento.'
     } else {
-      insight = `${ageCue}En esta franja aparece historia familiar junto con años de presión subiendo suave, ronco en la noche o aire que falta al subir escaleras, a veces antes de que el espejo sea la queja principal.`
+      insight =
+        'Hábitos viejos, historia familiar y años de señales silenciosas suelen estar detrás, no un solo día flojo.'
       tip =
-        'Antes de protocolos fuertes comenta falta de aire en reposo, dolor intenso de pecho o pariente cercano con enfermedad de corazón. Quien te conoce entero lee lo que el número no dice.'
+        'Cambiar fuerte en solitario suele ser la peor apuesta. Escribe a quien te envió el enlace sobre falta de aire con poco esfuerzo, dolor de pecho o presión inestable, y pide un primer plan con apoyo.'
     }
     return { insight: softenTemplateEmDashes(insight), tip: softenTemplateEmDashes(tip) }
   }
-
-  const ageCuePt =
-    idade !== undefined ?
-      `Com ${idade} anos hormônio, estresse e sono mudam rápido o jeito como o corpo ganha ou solta peso. `
-    : ''
 
   let insightPt = ''
   let tipPt = ''
 
   if (band === 'low') {
-    insightPt = `${ageCuePt}Na maioria das vezes isso aparece depois que o corpo passou um bom tempo com menos comida do que precisava, doente demais ou sob estresse demais, quase nunca porque alguém ficou certinho só vinte e quatro horas.`
+    insightPt =
+      'Peso baixo costuma vir com estresse forte, doença ou comida sumindo sem você perceber direito. Disposição e confiança costumam sentir antes de qualquer explicação técnica.'
     tipPt =
-      'Segura aquele jejum comprido ou treino só como punição esperando resultado na hora. Se o apetite sumiu rápido, veio muita tonteira ou o ciclo sumiu sem causa clara, avisa primeiro quem vai te orientar antes de apertar tudo forte.'
+      'Antes de jejum longo ou treino punitivo, abre isso com quem te mandou o link. Um direcionamento inicial costuma proteger sua energia enquanto você entende o que está por trás.'
   } else if (band === 'normal') {
-    insightPt = `${ageCuePt}A conta bate onde a maioria das tabelas chama peso e altura dentro do combinado, e ainda assim sono curto, digestão rebelde ou semana dura aparecem igual ou antes da balança.`
+    insightPt =
+      'Sono curto, rotina densa e intestino rebelde podem bater forte mesmo com número ok na balança. Às vezes o corpo pede atenção em outros sinais.'
     tipPt =
-      'Liste remédio novo, tireoide, corpo mais inchando ou humor fugindo rápido, porque isso puxa a leitura bem mais do que ficar repetindo fórmula na cabeça.'
+      'Lista dois dias como você acorda, horário do café e se o humor oscila. Manda isso pra quem te enviou o link: pequenos ajustes guiados costumam acalmar isso sem radicalismo.'
   } else if (band === 'over') {
-    insightPt = `${ageCuePt}Bastante comum ficar bem mais tempo parado no dia, dormir menos do que recupera direito e a última refeição escapando pra madrugada mês após mês, antes da culpa cair só no fim de semana.`
+    insightPt =
+      'Com o tempo, ficar muito parado, dormir mal e jantar tarde demais somam mais que parece. Isso puxa energia pra baixo, humor oscilando e sensação de que cada tentativa sozinha esfria rápido.'
     tipPt =
-      'Evita o roteiro de segunda zerar tudo sozinho. Observa dois dias seguidos cintura, horário que fecha o jantar e como você acorda, e leva isso aberto pra primeira conversa com um profissional.'
+      'A boa notícia é que ajuste guiado e companhia certa costumam devolver controle sem milagre. Anota dois dias cintura, horário do jantar e como você acorda, e manda isso pra quem te passou o link pedindo um direcionamento inicial.'
   } else {
-    insightPt = `${ageCuePt}Esse nível costuma aparecer junto com histórico familiar e sinais que foram ficando velados, pressão oscilando, ronco crescendo ou cansaço com esforço pequeno, às vezes antes do espelho virar a queixa principal.`
+    insightPt =
+      'Hábitos antigos, histórico familiar e anos de sinais quietos costumam estar por trás, não falta de força de vontade de um dia pro outro.'
     tipPt =
-      'Antes de um plano agressivo, fala sobre falta de ar parada, dor forte no peito ou parente próximo com problema de coração. Quem te vê inteiro fecha o que só o número não mostra.'
+      'Mudança brusca sozinha costuma ser o pior negócio. Conta no WhatsApp pra quem te passou o link cansaço com esforço pequeno, dor no peito ou pressão oscilando, e pede um primeiro plano com apoio.'
   }
 
   return { insight: softenTemplateEmDashes(insightPt), tip: softenTemplateEmDashes(tipPt) }
@@ -2661,54 +2700,54 @@ function getCalculatorImcFullAnalysisParagraphs(
   const p = profile ?? {}
   const recap = buildImcRecapMidSentence(p, locale)
   const imcFmt = formatImcValue(imc, locale)
-  const idHint = p.idade !== undefined && Number.isFinite(p.idade) ? Math.round(p.idade) : undefined
+  const band = imcOmsBand(imc)
 
   if (locale === 'en') {
-    const bucket =
-      imc < 18.5 ? 'underweight' : imc < 25 ? 'healthy range for screening' : imc < 30 ? 'overweight' : 'obesity'
-    const opener = recap ? `Taking ${recap} first, ` : ''
-    const p1 = softenTemplateEmDashes(
-      `${opener}BMI ${imcFmt} aligns with large population charts grouped as ${bucket} for quick screenings. Think population snapshot, never a personal stamp.`,
-    )
-    const p2Middle =
-      idHint !== undefined ?
-        ` Mention you are ${idHint}, along with waist, steady sleep, and real meal times.` :
-        ` Talk about waist circumference, nightly sleep, and how hunger shows up in real life.`
+    const opener = recap ? `With ${recap}, ` : ''
+    const body =
+      band === 'low' ?
+        `BMI ${imcFmt} flags underweight on this first pass. People here often feel fragile energy, food anxiety, or clothes hanging loose before any big lecture.`
+      : band === 'normal' ?
+        `BMI ${imcFmt} reads in the healthy band on this first pass. Mood, sleep, and digestion can still shout even when the scale looks polite.`
+      : band === 'over' ?
+        `BMI ${imcFmt} reads overweight on this first pass. It often pairs with quieter confidence, heavier routines, and the sense that “later” keeps sliding away.`
+      : `BMI ${imcFmt} reads in the obesity range on this first pass. Breath on stairs, rough nights, and worry about the long arc are common, and they deserve a real conversation.`
+    const p1 = softenTemplateEmDashes(`${opener}${body}`)
     const p2 = softenTemplateEmDashes(
-      `Age and sex sit outside that ratio yet steer how clinicians read hormones, muscles, and life chapters.${p2Middle} Bringing those pieces alongside the number keeps big mistakes off the table, so professional eyes usually pay for themselves.`,
+      `Keeping this only in your head usually makes change lonelier. Whoever sent you this link can translate it into a light first plan focused on energy, daily rhythm, and what is realistic next, without miracle hype.`,
     )
     return [p1, p2]
   }
 
   if (locale === 'es') {
-    const bucketEs =
-      imc < 18.5 ? 'bajo peso' : imc < 25 ? 'peso habitualmente estable en triajes rápidos' : imc < 30 ? 'sobrepeso' : 'obesidad'
-    const opener = recap ? `Partiendo de ${recap}, ` : ''
-    const p1 = softenTemplateEmDashes(
-      `${opener}tu IMC ${imcFmt} se alinea con tablas grandes que muestran ${bucketEs} cuando se hace triaje rápido. Habla de poblaciones numerosas, no de una sentencia personal.`,
-    )
-    const mid =
-      idHint !== undefined ?
-        ` Trae esos ${idHint} años, el sexo que marcaste arriba, la cintura, un sueño honesto y los horarios donde aparece la hambre porque el índice jamás mete eso solo dentro de la cuenta.`
-      : ` Trae cintura, sueño honesto y los horarios donde aparece la hambre porque el índice jamás mete eso solo dentro de la cuenta.`
+    const opener = recap ? `Con ${recap}, ` : ''
+    const body =
+      band === 'low' ?
+        `tu IMC ${imcFmt} marca bajo peso en este primer paso. Muchas personas sienten energía frágil, comida como estrés o ropa holgada antes de cualquier teoría larga.`
+      : band === 'normal' ?
+        `tu IMC ${imcFmt} cae en la franja que aquí se lee primero como adecuada. Sueño, humor y digestión pueden gritar aunque la báscula se vea tranquila.`
+      : band === 'over' ?
+        `tu IMC ${imcFmt} marca sobrepeso en este primer paso. Suele ir con confianza más baja, rutina pesada y sensación de que el “después” se corre solo.`
+      : `tu IMC ${imcFmt} marca obesidad en este primer paso. Falta de aire en escaleras, noches mal dormidas y miedo al largo plazo son frecuentes, y merecen conversación real.`
+    const p1 = softenTemplateEmDashes(`${opener}${body}`)
     const p2 = softenTemplateEmDashes(
-      `Quien trabaja contigo junta edad, sexo y ese paquete con vida real antes de mover tu rutina, porque ahí aparecen músculo, hormonas y etapas grandes que el número oculta.${mid} Ese encaje cerrado evita que reorganices todo en modo pánico.`,
+      `Guardarlo solo en la cabeza suele alargar el camino. Quien te envió el enlace puede traducirlo en un primer plan ligero con foco en energía, ritmo diario y un siguiente paso realista, sin promesas milagrosas.`,
     )
     return [p1, p2]
   }
 
-  const faixaPb =
-    imc < 18.5 ? 'baixo peso' : imc < 25 ? 'peso dentro do que as tabelas mais usadas chamam adequado nesta triagem' : imc < 30 ? 'sobrepeso' : 'obesidade'
   const openerPt = recap ? `Somando ${recap}, ` : ''
-  const p1 = softenTemplateEmDashes(
-    `${openerPt}o IMC ${imcFmt} aparece mesmo na área onde a Organização Mundial da Saúde costuma agrupar ${faixaPb} quando olha grandes estudos rápidos. É panorama de grupo, não rótulo colado só em você.`,
-  )
-  const p2Start =
-    idHint !== undefined ?
-      `Seus ${idHint} anos somados ao sexo que você marcou no começo, mais cintura, sono de verdade e horário onde a fome aparece, mostram peças que a fórmula não enxerga sozinha. `
-    : `Repetir idade, sexo do formulário e rotina real de cintura, sono e horário de comida mostra cenário inteiro, porque a conta isolada fica sempre pequena demais. `
+  const bodyPt =
+    band === 'low' ?
+      `seu IMC ${imcFmt} aponta baixo peso neste primeiro recorte. Costuma bater junto com energia frágil, comida virando nervoso ou roupa folgada antes de qualquer aula longa.`
+    : band === 'normal' ?
+      `seu IMC ${imcFmt} fica na faixa que aqui a gente lê primeiro como adequada. Mesmo assim humor, sono e digestão podem gritar alto com balança aparentemente calma.`
+    : band === 'over' ?
+      `seu IMC ${imcFmt} indica sobrepeso neste primeiro recorte. Muita gente sente confiança mais baixa, rotina pesando mais e sensação de que o depois fica sempre escorregando.`
+    : `seu IMC ${imcFmt} indica obesidade neste primeiro recorte. Falta de ar em esforço pequeno, noite mal dormida e medo do longo prazo são comuns, e merecem conversa de verdade.`
+  const p1 = softenTemplateEmDashes(`${openerPt}${bodyPt}`)
   const p2 = softenTemplateEmDashes(
-    `${p2Start}Por isso bate forte a diferença de sentar com especialista antes de reorganizar vida inteira no susto. Quem lê esse conjunto fecha brechas que papel nenhum mostra.`,
+    `Deixar isso só na cabeça costuma deixar o caminho mais solitário. Quem te mandou o link consegue traduzir isso em um primeiro plano leve, com foco em energia, ritmo do dia e próximo passo realista, sem promessa milagrosa.`,
   )
 
   return [p1, p2]
@@ -2811,14 +2850,6 @@ function CalculatorBlock({
         ? extraCfg.calculatorIntroBadge.trim()
         : ''
   const introBadge = introBadgeFromCfg || t.calculatorIntroBadge
-  const ctaLabel =
-    /quero falar no whatsapp/i.test(ctaText)
-      ? locale === 'en'
-        ? 'I want to talk to a professional'
-        : locale === 'es'
-          ? 'Quiero hablar con un profesional'
-          : 'Quero falar com um profissional'
-      : ctaText
 
   const [values, setValues] = useState<Record<string, number | undefined>>(() => {
     const init: Record<string, number | undefined> = {}
@@ -2847,6 +2878,16 @@ function CalculatorBlock({
 
   const resultNum = evaluateCalculatorFormula(formula, fieldsParaCalculadora, values)
   const isImcCalculator = title.toLowerCase().includes('imc')
+  const ctaLabel =
+    isImcCalculator && String(whatsappUrl || '').trim()
+      ? t.calculatorImcPrimaryCta
+      : /quero falar no whatsapp/i.test(ctaText)
+        ? locale === 'en'
+          ? 'I want to talk to a professional'
+          : locale === 'es'
+            ? 'Quiero hablar con un profesional'
+            : 'Quero falar com um profissional'
+        : ctaText
   const imcProfile = isImcCalculator ? extractImcProfile(fieldsParaCalculadora, values) : null
   const resultCopy = getCalculatorResultCopy(title, resultNum, locale, { imcProfile })
   const imcFullAnalysis =
@@ -3039,13 +3080,13 @@ function CalculatorBlock({
               <div className="mb-5 space-y-3">
                 <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
                   <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                    {t.probableCause}
+                    {isImcCalculator ? t.calculatorImcImpactLabel : t.probableCause}
                   </p>
                   <p className="text-sm leading-relaxed text-gray-700">{resultCopy.insight}</p>
                 </div>
                 <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4">
                   <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
-                    {t.calculatorPrecautionLabel}
+                    {isImcCalculator ? t.calculatorImcPossibilityLabel : t.calculatorPrecautionLabel}
                   </p>
                   <p className="text-sm leading-relaxed text-gray-700">{resultCopy.tip}</p>
                 </div>
@@ -3096,7 +3137,7 @@ function CalculatorBlock({
                       return !prev
                     })
                   }}
-                  className="w-full rounded-xl border border-sky-200 px-4 py-3 font-semibold text-sky-700 transition-colors hover:bg-sky-50"
+                  className={publicLinkFullAnalysisToggleClassName}
                 >
                   {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
                 </button>

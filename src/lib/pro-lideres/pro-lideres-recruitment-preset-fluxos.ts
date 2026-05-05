@@ -28,6 +28,7 @@ const PRO_LIDERES_RECRUITMENT_CLASSIC_IDS = [
 function upgradeFluxoForNoel(fluxo: FluxoCliente): FluxoCliente {
   const objetivosNoel = `${fluxo.objetivo} Com leitura estratégica das inteligências Noel para priorizar o próximo passo comercial.`
   const descricaoNoel = `${fluxo.diagnostico.descricao} A análise Noel ajuda a transformar esse perfil em plano de ação simples e rápido.`
+  const ctaNoel = 'Quero conhecer novas oportunidades'
 
   return {
     ...fluxo,
@@ -38,7 +39,7 @@ function upgradeFluxoForNoel(fluxo: FluxoCliente): FluxoCliente {
       beneficios: [...fluxo.diagnostico.beneficios, 'Direcionamento com inteligência Noel para abordagem e fechamento'],
       mensagemPositiva: `${fluxo.diagnostico.mensagemPositiva} Com a inteligência Noel, o próximo passo fica mais claro e personalizado.`,
     },
-    cta: 'Quero ver meu plano de negócio',
+    cta: ctaNoel,
     tags: Array.from(
       new Set([...fluxo.tags, 'pro-lideres', 'noel', 'inteligencia-noel', 'recrutamento-moderno', 'negocio'])
     ),
