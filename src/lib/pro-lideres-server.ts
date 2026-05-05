@@ -91,6 +91,8 @@ export type ProLideresViewerTenantOverlay = {
   displayName: string
   contactEmail: string
   whatsapp: string
+  /** Slug nos links públicos do membro (`/l/.../slug`). */
+  memberShareSlug: string
 }
 
 /**
@@ -106,20 +108,24 @@ export async function fetchProLideresViewerTenantOverlayForNonOwner(
     supabase.from('user_profiles').select('nome_completo, email, whatsapp').eq('user_id', user.id).maybeSingle(),
     supabase
       .from('leader_tenant_members')
-      .select('pro_lideres_tabulator_name')
+      .select('pro_lideres_tabulator_name, pro_lideres_share_slug')
       .eq('leader_tenant_id', tenantId)
       .eq('user_id', user.id)
       .maybeSingle(),
   ])
   const p = prof as { nome_completo?: string | null; email?: string | null; whatsapp?: string | null } | null
+  const memRow = mem as { pro_lideres_tabulator_name?: string | null; pro_lideres_share_slug?: string | null } | null
   const displayName = resolveProLideresViewerDisplayName(user, {
     nomeCompleto: p?.nome_completo ?? null,
-    tabulatorName: (mem as { pro_lideres_tabulator_name?: string | null } | null)?.pro_lideres_tabulator_name ?? null,
+    tabulatorName: memRow?.pro_lideres_tabulator_name ?? null,
   })
   const profileEmail = typeof p?.email === 'string' ? p.email.trim() : ''
   const contactEmail = profileEmail || resolvedUserEmail(user) || ''
   const whatsapp = typeof p?.whatsapp === 'string' ? p.whatsapp.trim() : ''
-  return { displayName, contactEmail, whatsapp }
+  const slugRaw =
+    typeof memRow?.pro_lideres_share_slug === 'string' ? memRow.pro_lideres_share_slug.trim().toLowerCase() : ''
+  const memberShareSlug = slugRaw
+  return { displayName, contactEmail, whatsapp, memberShareSlug }
 }
 
 /** Bootstrap por e-mail, por UUID (env ou built-in) ou metadata. */

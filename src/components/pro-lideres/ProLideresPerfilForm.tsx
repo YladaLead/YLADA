@@ -50,13 +50,17 @@ const PERFIL_COPY: Record<
 export function ProLideresPerfilForm({
   tenantApiPath = '/api/pro-lideres/tenant',
   copyProfile = 'pro_lideres',
+  /** Área `/pro-lideres/membro/perfil`: formulário simplificado + guardar via API do membro. */
+  memberTeamProfile = false,
 }: {
   /** ex.: `/api/pro-estetica-corporal/tenant` */
   tenantApiPath?: string
   /** Textos alinhados ao contexto: rede (Pro Líderes) vs clínica (Pro Estética). */
   copyProfile?: ProLideresPerfilCopyProfile
+  memberTeamProfile?: boolean
 } = {}) {
   const c = PERFIL_COPY[copyProfile]
+  const isMemberTeamProfile = Boolean(memberTeamProfile) && copyProfile === 'pro_lideres'
   const [tenant, setTenant] = useState<LeaderTenantRow | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -74,6 +78,7 @@ export function ProLideresPerfilForm({
   const [teamBankPaymentUrl, setTeamBankPaymentUrl] = useState('')
   const [teamBankPixPaymentUrl, setTeamBankPixPaymentUrl] = useState('')
   const [canEditTenantProfile, setCanEditTenantProfile] = useState(true)
+  const [memberShareSlug, setMemberShareSlug] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -92,6 +97,7 @@ export function ProLideresPerfilForm({
         viewerDisplayName?: string
         viewerContactEmail?: string
         viewerWhatsapp?: string
+        memberShareSlug?: string
       }
       const t = d.tenant
       setCanEditTenantProfile(d.canEditTenantProfile !== false)
@@ -116,12 +122,13 @@ export function ProLideresPerfilForm({
           ? t.team_bank_pix_payment_url.trim()
           : ''
       )
+      setMemberShareSlug(typeof d.memberShareSlug === 'string' ? d.memberShareSlug.trim() : '')
     } catch {
       setError('Erro de rede ao carregar.')
     } finally {
       setLoading(false)
     }
-  }, [tenantApiPath, copyProfile])
+  }, [tenantApiPath, copyProfile, memberTeamProfile])
 
   useEffect(() => {
     load()
@@ -129,11 +136,44 @@ export function ProLideresPerfilForm({
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!canEditTenantProfile) return
+    if (!canEditTenantProfile && !isMemberTeamProfile) return
     setSaving(true)
     setError(null)
     setSavedAt(null)
     try {
+      if (isMemberTeamProfile) {
+        const res = await fetch('/api/pro-lideres/membro/profile', {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nome_completo: displayName.trim(),
+            contact_email: contactEmail.trim(),
+            whatsapp,
+            pro_lideres_share_slug: memberShareSlug.trim(),
+          }),
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          setError((data as { error?: string }).error || 'Não foi possível guardar.')
+          return
+        }
+        const d = data as {
+          viewerDisplayName?: string
+          viewerContactEmail?: string
+          viewerWhatsapp?: string
+          memberShareSlug?: string
+        }
+        setDisplayName((d.viewerDisplayName ?? displayName).trim())
+        setContactEmail((d.viewerContactEmail ?? contactEmail).trim())
+        const wa = (d.viewerWhatsapp ?? whatsapp).trim()
+        setWhatsapp(wa)
+        setWhatsappCountryCode(inferCountryIsoFromLeadingDigits(wa, 'BR'))
+        setMemberShareSlug(typeof d.memberShareSlug === 'string' ? d.memberShareSlug.trim() : memberShareSlug.trim())
+        setSavedAt(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }))
+        return
+      }
+
       const res = await fetch(tenantApiPath, {
         method: 'PATCH',
         credentials: 'include',
@@ -207,13 +247,23 @@ export function ProLideresPerfilForm({
     )
   }
 
+  const personalFieldsEditable = canEditTenantProfile || isMemberTeamProfile
+
   return (
     <form onSubmit={onSubmit} className="space-y-5">
       {error && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">{error}</div>
       )}
       {savedAt && <p className="text-sm font-medium text-green-700">Guardado às {savedAt}.</p>}
-      {!canEditTenantProfile && (
+      {isMemberTeamProfile ? (
+        <p className="rounded-lg border border-sky-100 bg-sky-50/90 px-3 py-2.5 text-sm text-gray-800">
+          <span className="font-medium text-sky-900">Editar o teu perfil</span>
+          <span className="mt-1.5 block text-xs text-gray-700">
+            Nome, e-mail, WhatsApp e slug de divulgação podem ser alterados aqui. O nome da operação é definido pelo
+            líder (só leitura).
+          </span>
+        </p>
+      ) : !canEditTenantProfile ? (
         <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700">
           {c.readOnlyMessage}
           <span className="mt-2 block text-xs text-gray-600">
@@ -222,13 +272,13 @@ export function ProLideresPerfilForm({
               : 'Nome, e-mail e WhatsApp são os da tua conta. Os outros campos são da clínica.'}
           </span>
         </p>
-      )}
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block sm:col-span-2">
           <span className="mb-1 block text-sm font-medium text-gray-700">Nome para exibição</span>
           <input
-            disabled={!canEditTenantProfile}
+            disabled={!personalFieldsEditable}
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
@@ -251,7 +301,7 @@ export function ProLideresPerfilForm({
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-gray-700">WhatsApp</span>
           <PhoneInputWithCountry
-            disabled={!canEditTenantProfile}
+            disabled={!personalFieldsEditable}
             className="w-full disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
             value={whatsapp}
             defaultCountryCode={whatsappCountryCode || 'BR'}
@@ -265,15 +315,16 @@ export function ProLideresPerfilForm({
           <span className="mb-1 block text-sm font-medium text-gray-700">E-mail de contacto</span>
           <input
             type="email"
-            disabled={!canEditTenantProfile}
+            disabled={!personalFieldsEditable}
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
             value={contactEmail}
             onChange={(e) => setContactEmail(e.target.value)}
-            placeholder="opcional"
+            placeholder={isMemberTeamProfile ? 'email@exemplo.com' : 'opcional'}
             maxLength={320}
             autoComplete="email"
           />
         </label>
+        {!isMemberTeamProfile ? (
         <label className="block sm:col-span-2">
           <span className="mb-1 block text-sm font-medium text-gray-700">{c.focusSectionLabel}</span>
           {copyProfile === 'estetica_clinica' && c.focusSectionHint ? (
@@ -288,8 +339,9 @@ export function ProLideresPerfilForm({
             maxLength={2000}
           />
         </label>
+        ) : null}
 
-        {copyProfile === 'estetica_clinica' ? (
+        {copyProfile === 'estetica_clinica' && !isMemberTeamProfile ? (
           <>
             <div className="sm:col-span-2">
               <span className="mb-2 block text-sm font-medium text-gray-700">Tom das mensagens</span>
@@ -339,7 +391,7 @@ export function ProLideresPerfilForm({
           </>
         ) : null}
 
-        {copyProfile === 'pro_lideres' ? (
+        {copyProfile === 'pro_lideres' && !isMemberTeamProfile ? (
           <>
             <label className="block sm:col-span-2">
               <span className="mb-1 block text-sm font-medium text-gray-700">
@@ -379,13 +431,33 @@ export function ProLideresPerfilForm({
             </label>
           </>
         ) : null}
+
+        {isMemberTeamProfile ? (
+          <label className="block sm:col-span-2">
+            <span className="mb-1 block text-sm font-medium text-gray-700">Slug de divulgação (nos teus links)</span>
+            <span className="mb-1.5 block text-xs text-gray-500">
+              Só letras minúsculas, números e hífens (ex.: maria-silva). Usado na URL quando partilhas um link da equipa.
+            </span>
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              value={memberShareSlug}
+              onChange={(e) => setMemberShareSlug(e.target.value)}
+              placeholder="o-teu-slug"
+              maxLength={40}
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </label>
+        ) : null}
       </div>
 
-      <p className="text-xs text-gray-500">
-        Slug interno: <code className="rounded bg-gray-100 px-1">{tenant?.slug}</code>
-      </p>
+      {!isMemberTeamProfile ? (
+        <p className="text-xs text-gray-500">
+          Slug interno: <code className="rounded bg-gray-100 px-1">{tenant?.slug}</code>
+        </p>
+      ) : null}
 
-      {canEditTenantProfile && (
+      {(canEditTenantProfile || isMemberTeamProfile) && (
         <button
           type="submit"
           disabled={saving}

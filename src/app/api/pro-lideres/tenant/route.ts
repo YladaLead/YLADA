@@ -52,15 +52,18 @@ export async function GET(request: NextRequest) {
   let viewerDisplayName: string
   let viewerContactEmail: string
   let viewerWhatsapp: string
+  let memberShareSlug: string
   if (canEditTenantProfile) {
     viewerDisplayName = (ctx.tenant.display_name ?? '').trim()
     viewerContactEmail = (ctx.tenant.contact_email ?? '').trim()
     viewerWhatsapp = (ctx.tenant.whatsapp ?? '').trim()
+    memberShareSlug = ''
   } else {
     const o = await fetchProLideresViewerTenantOverlayForNonOwner(supabaseAdmin, user, ctx.tenant.id)
     viewerDisplayName = o.displayName
     viewerContactEmail = o.contactEmail
     viewerWhatsapp = o.whatsapp
+    memberShareSlug = o.memberShareSlug
   }
 
   return NextResponse.json({
@@ -71,6 +74,7 @@ export async function GET(request: NextRequest) {
     viewerDisplayName,
     viewerContactEmail,
     viewerWhatsapp,
+    memberShareSlug,
   })
 }
 
@@ -186,5 +190,6 @@ export async function PATCH(request: NextRequest) {
     viewerDisplayName: (updated.display_name ?? '').trim(),
     viewerContactEmail: (updated.contact_email ?? '').trim(),
     viewerWhatsapp: (updated.whatsapp ?? '').trim(),
+    memberShareSlug: '',
   })
 }
