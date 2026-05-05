@@ -285,8 +285,10 @@ export async function POST(
       )
     }
 
-    // Freemium: verificar limite de contatos WhatsApp mensais antes de processar (bloquear antes do custo de IA)
-    if (ownerId) {
+    // Freemium: verificar limite de contatos WhatsApp mensais antes de processar (bloquear antes do custo de IA).
+    // Links preset Pro Líderes (meta.pro_lideres_preset): o funil da equipa não deve consumir o teto Freedom
+    // do user_id do link na matriz — o produto Pro Líderes já é pago no tenant.
+    if (ownerId && !isProLideresPresetLink) {
       const isPro = await hasYladaProPlan(ownerId)
       if (!isPro) {
         const now = new Date()

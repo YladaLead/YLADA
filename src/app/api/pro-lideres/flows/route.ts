@@ -5,6 +5,7 @@ import { proLideresApiDevHint } from '@/lib/pro-lideres-api-dev-hints'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import { buildProLideresCatalog, type ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
+import { personalizeProLideresCatalogUrlsForMember } from '@/lib/pro-lideres-member-catalog-share-urls'
 import {
   isProLideresFlowHrefAllowed,
   PRO_LIDERES_FLOW_HREF_MAX,
@@ -96,6 +97,11 @@ export async function GET(request: NextRequest) {
 
   if (ctx.role === 'member') {
     catalog = catalog.filter((item) => item.visibleToTeam)
+    catalog = await personalizeProLideresCatalogUrlsForMember(supabaseAdmin, catalog, {
+      leaderTenantId: ctx.tenant.id,
+      memberUserId: user.id,
+      baseUrl,
+    })
   }
 
   return NextResponse.json({

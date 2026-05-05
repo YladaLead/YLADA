@@ -3,6 +3,7 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveEsteticaCorporalTenantContext } from '@/lib/pro-estetica-corporal-server'
 import { buildProLideresCatalog, type ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
+import { personalizeProLideresCatalogUrlsForMember } from '@/lib/pro-lideres-member-catalog-share-urls'
 import { ensureEsteticaCorporalPresetFlowEntries } from '@/lib/pro-estetica-corporal/ensure-estetica-preset-catalog'
 import {
   isProLideresFlowHrefAllowed,
@@ -87,6 +88,11 @@ export async function GET(request: NextRequest) {
 
   if (ctx.role === 'member') {
     catalog = catalog.filter((item) => item.visibleToTeam)
+    catalog = await personalizeProLideresCatalogUrlsForMember(supabaseAdmin, catalog, {
+      leaderTenantId: ctx.tenant.id,
+      memberUserId: user.id,
+      baseUrl,
+    })
   }
 
   return NextResponse.json({
