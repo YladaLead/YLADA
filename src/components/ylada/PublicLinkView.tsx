@@ -83,6 +83,10 @@ const PUBLIC_LINK_UI: Record<Language, {
   calculatorImcRecapLead: string
   /** Calculadora IMC: linha curta antes do botão WhatsApp (ponte para o objetivo do link). */
   calculatorImcCtaLead: string
+  /** Calculadoras: rótulo do segundo bloco, tom de precaução prática. */
+  calculatorPrecautionLabel: string
+  /** Calculadoras genéricas: linha antes do WhatsApp quando não é IMC. */
+  calculatorCtaLead: string
 }> = {
   pt: {
     start: 'Começar',
@@ -138,7 +142,10 @@ const PUBLIC_LINK_UI: Record<Language, {
     calculatorIntroMicro: 'Tempo estimado: cerca de 1 minuto · sem cadastro: preencher e ver o resultado.',
     calculatorImcRecapLead: 'Com os dados que você trouxe:',
     calculatorImcCtaLead:
-      'Você já tem o número; o que falta é encaixar isso na sua rotina real — e é aí que um profissional acelera o próximo passo.',
+      'IMC no papel não mexe na sua rotina sozinho. Quem trabalha com isso junta número, sono e hábitos no mesmo plano, e isso costuma adiantar bem mais.',
+    calculatorPrecautionLabel: 'Precaução que ajuda',
+    calculatorCtaLead:
+      'Esse resultado é só um recorte. Quem entende do assunto encaixa na sua vida real e aponta por onde começar, sem você precisar chutar sozinho.',
   },
   en: {
     start: 'Start',
@@ -194,7 +201,10 @@ const PUBLIC_LINK_UI: Record<Language, {
     calculatorIntroMicro: 'Estimated time: about 1 minute · no sign-up: fill in and see your result.',
     calculatorImcRecapLead: 'From what you shared:',
     calculatorImcCtaLead:
-      'You have the number; what’s missing is how it fits your real life — that’s where a professional speeds up the next step.',
+      'BMI on paper does not change your routine by itself. Someone who does this work usually lines up the number, sleep, and habits in one plan, and that tends to move things faster.',
+    calculatorPrecautionLabel: 'A practical safeguard',
+    calculatorCtaLead:
+      'This result is only a slice. Someone who knows the field can fit it to your real life and show where to start without you guessing alone.',
   },
   es: {
     start: 'Comenzar',
@@ -250,10 +260,12 @@ const PUBLIC_LINK_UI: Record<Language, {
     calculatorIntroMicro: 'Tiempo estimado: cerca de 1 minuto · sin registro: rellenar y ver el resultado.',
     calculatorImcRecapLead: 'Con los datos que compartiste:',
     calculatorImcCtaLead:
-      'Ya tienes el dato; falta encajarlo en tu rutina real — ahí es donde un profesional acelera el siguiente paso.',
+      'El IMC en el papel no cambia tu rutina solo. Quien trabaja esto suele juntar número, sueño y hábitos en un mismo plan, y eso suele avanzar más.',
+    calculatorPrecautionLabel: 'Precaución útil',
+    calculatorCtaLead:
+      'Este resultado es solo un recorte. Quien domina el tema lo encaja en tu vida real y marca por dónde empezar sin que tengas que adivinar solo.',
   },
 }
-
 /** Exibe textos de template sem travessão longa ou "--" (leitura mais limpa em mobile). */
 function softenTemplateEmDashes(text: string): string {
   if (!text) return text
@@ -2380,7 +2392,19 @@ function buildImcRecapLine(profile: ImcProfile, locale: Language): string | null
     parts.push(locale === 'en' ? `${y} years` : locale === 'es' ? `${y} años` : `${y} anos`)
   }
   if (profile.sexoLabel && !profile.sexoPreferNot) {
-    parts.push(profile.sexoLabel)
+    const lab = profile.sexoLabel.trim()
+    const lower = lab.toLowerCase()
+    if (locale === 'pt') {
+      if (lower.includes('masc')) parts.push('sexo masculino')
+      else if (lower.includes('fem')) parts.push('sexo feminino')
+      else parts.push(`sexo ${lab.toLowerCase()}`)
+    } else if (locale === 'es') {
+      if (lower.includes('masc')) parts.push('sexo masculino')
+      else if (lower.includes('fem')) parts.push('sexo femenino')
+      else parts.push(`sexo ${lab.toLowerCase()}`)
+    } else {
+      parts.push(`sex: ${lab}`)
+    }
   } else if (profile.sexoPreferNot) {
     parts.push(locale === 'en' ? 'sex not specified' : locale === 'es' ? 'sexo no indicado' : 'sexo não informado')
   }
@@ -2412,12 +2436,19 @@ function buildImcRecapMidSentence(profile: ImcProfile, locale: Language): string
   }
   let sexFrag = ''
   if (profile.sexoLabel && !profile.sexoPreferNot) {
-    sexFrag =
-      locale === 'en'
-        ? ` (${profile.sexoLabel})`
-        : locale === 'es'
-          ? ` (${profile.sexoLabel})`
-          : ` (${profile.sexoLabel})`
+    const lab = profile.sexoLabel.trim()
+    const lower = lab.toLowerCase()
+    if (locale === 'pt') {
+      if (lower.includes('masc')) sexFrag = ', sexo masculino'
+      else if (lower.includes('fem')) sexFrag = ', sexo feminino'
+      else sexFrag = `, sexo ${lab.toLowerCase()}`
+    } else if (locale === 'es') {
+      if (lower.includes('masc')) sexFrag = ', sexo masculino'
+      else if (lower.includes('fem')) sexFrag = ', sexo femenino'
+      else sexFrag = `, sexo ${lab.toLowerCase()}`
+    } else {
+      sexFrag = `, sex: ${lab}`
+    }
   }
   if (!out && !sexFrag) return null
   return `${out ?? ''}${sexFrag}` || null
@@ -2426,79 +2457,117 @@ function buildImcRecapMidSentence(profile: ImcProfile, locale: Language): string
 function getImcEngagementHeadline(imc: number, locale: Language, _profile: ImcProfile | null): string {
   const band = imcOmsBand(imc)
   if (locale === 'en') {
-    if (band === 'low') return 'Underweight band (common WHO screen) — worth discussing calmly with support.'
-    if (band === 'normal') return 'Normal-weight band — solid base; small wins in routine still compound.'
-    if (band === 'over') return 'Overweight band — a clear signal to align habits with someone in your corner.'
-    return 'Obesity band — structured change with steady support is usually the safer path.'
+    if (band === 'low') return 'Shows the underweight range on common population charts. Gentle support beats pushing harder alone.'
+    if (band === 'normal') return 'Falls in the usual healthy weight range on those charts. Small routine choices still steer how you feel.'
+    if (band === 'over')
+      return 'Falls in the overweight range people use most for quick screening. It is a cue to tighten routine with backup, not a verdict.'
+    return 'Falls in the obesity range used in screening. Steady structured help is usually safer than solo extremes.'
   }
   if (locale === 'es') {
-    if (band === 'low') return 'Franja de bajo peso (referencia OMS habitual) — háblalo con tranquilidad y guía.'
-    if (band === 'normal') return 'Franja de peso normal — buena base; los pequeños hábitos igual suman.'
-    if (band === 'over') return 'Franja de sobrepeso — señal clara para ordenar hábitos con apoyo.'
-    return 'Franja de obesidad — suele ir mejor con cambios estructurados y acompañamiento.'
+    if (band === 'low')
+      return 'Aparece en la franja de bajo peso en las tablas más usadas. Acompañamiento tranquilo ayuda más que exigirse en solitario.'
+    if (band === 'normal')
+      return 'Cae en peso dentro de lo que suele llamarse sanas en esa referencia. La rutina cotidiana sigue marcando la diferencia.'
+    if (band === 'over')
+      return 'Marca sobrepeso en la referencia que más se usa como pantalla rápida. Es aviso para ordenar hábitos con apoyo, no sentencia.'
+    return 'Marca obesidad en esa referencia. El cambio con seguimiento constante suele ser más seguro que medidas fuertes en solitario.'
   }
-  if (band === 'low') return 'Faixa de baixo peso (referência OMS comum) — vale acolher com orientação e calma.'
-  if (band === 'normal') return 'Faixa de peso normal — ótima base; hábitos bem pequenos ainda somam.'
-  if (band === 'over') return 'Faixa de sobrepeso — sinal direto pra alinhar rotina com quem te apoia.'
-  return 'Faixa de obesidade — mudança estruturada com acompanhamento costuma ser o caminho mais seguro.'
+  if (band === 'low')
+    return 'Aparece na faixa de baixo peso nas tabelas que mais se usam. Acolher com ajuda vale mais que se cobrar forte sozinho.'
+  if (band === 'normal')
+    return 'Cai na faixa de peso dentro do que mais se chama adequado em triagem rápida. A rotina do dia continua sendo quem molda bem-estar.'
+  if (band === 'over')
+    return 'Indica sobrepeso na mesma referência que muitos profissionais usam como primeira tela. É um aviso pra alinhar hábitos com apoio, não uma sentença.'
+  return 'Indica faixa de obesidade na referência de triagem mais comum. Mudança com acompanhamento firme costuma ser mais segura do que radicalizar sozinho.'
 }
 
 function getImcCalculatorPersonalCopy(
-  imc: number,
+  _imc: number,
   locale: Language,
   profile: ImcProfile | null,
 ): { insight: string; tip: string } {
-  const imcFmt = formatImcValue(imc, locale)
   const band = imcOmsBand(imc)
   const idade = profile?.idade !== undefined && Number.isFinite(profile.idade) ? Math.round(profile.idade) : undefined
 
   if (locale === 'en') {
-    const life =
-      idade !== undefined ?
-        ` At ${idade}, how you sleep and your energy often matter as much as the scale.`
-      : ' How you sleep and your day-to-day energy still matter as much as the scale.'
-    const insight = softenTemplateEmDashes(`BMI ${imcFmt} is a quick screen, not your whole story.${life}`)
-    let tip =
-      'Next win: jot waist circumference and how rested you wake for 2–3 days — bring it to the conversation.'
-    if (band === 'low') tip = 'Small, steady meals beat skipping — mention appetite stress early in the chat.'
-    else if (band === 'over' || band === 'obese')
+    const ageCue =
+      idade !== undefined ? `Around ${idade}, hormones, sleep, and stress reshape how weight behaves. ` : ''
+    let insight = ''
+    let tip = ''
+    if (band === 'low') {
+      insight = `${ageCue}A BMI this low usually lines up with a stretch of low intake, illness, overload, or a body type that eats little and still burns a lot; it rarely comes from caring “too much” overnight.`
       tip =
-        'Repeatable rhythms (movement you like + predictable meal windows) beat one-off bursts of discipline.'
-    else tip = 'Keep stacking sleep and strength so the metric matches how you feel.'
-    return { insight, tip: softenTemplateEmDashes(tip) }
+        'Hold off on long fasting or punishing cardio to “fix” the scale. Bring appetite changes, dizziness, or lost cycles to whoever guides you before going extreme.'
+    } else if (band === 'normal') {
+      insight = `${ageCue}The math says your weight and height pair like most charts call healthy, yet sleep debt, digestion, or a heavy week can feel worse than this number admits.`
+      tip =
+        'Still flag new meds, thyroid issues, swelling, or big mood shifts; those steer interpretation more than fine-tuning decimals on BMI.'
+    } else if (band === 'over') {
+      insight = `${ageCue}This range often stacks from months sitting more, shrinking sleep, and meals drifting late, rather than “one cheat day”; the body stores the drift.`
+      tip =
+        'Skip crash diets or weekend-only extremes. Notice waist, bedtime, and how hunger swings for two days, then unpack it with someone who oversees the whole picture.'
+    } else {
+      insight = `${ageCue}At this bracket the storyline is usually genetics plus years of routine signals such as creeping blood pressure, louder snoring, or stamina dipping before the mirror catches up.`
+      tip =
+        'Before aggressive protocols mention breathlessness at rest, pounding headaches, or cardiac family history. Oversight catches what BMI cannot reveal.'
+    }
+    return { insight: softenTemplateEmDashes(insight), tip: softenTemplateEmDashes(tip) }
   }
 
   if (locale === 'es') {
-    const life =
+    const ageCue =
       idade !== undefined ?
-        ` Con ${idade} años, sueño y energía suelen pesar igual que la báscula.`
-      : ' Sueño y energía día a día siguen pesando igual que la báscula.'
-    const insight = softenTemplateEmDashes(`El IMC ${imcFmt} es cribado rápido, no toda tu historia.${life}`)
-    let tip =
-      'Próximo paso útil: 2–3 días midiendo cintura y cómo amanece tu descanso; llévalo al primer contacto.'
-    if (band === 'low')
-      tip = 'Comidas pequeñas y estables ganan antes que saltarte comidas — di si el apetito va justo.'
-    else if (band === 'over' || band === 'obese')
+        `A los ${idade} años hormonas, estrés y sueño marcan rápido cómo cambia tu peso. `
+      : ''
+    let insight = ''
+    let tip = ''
+    if (band === 'low') {
+      insight = `${ageCue}Lo más frecuente es que aparezca después de rachas comiendo poco, pasar por enfermedad fuerte o vivir mucha carga de estrés, no porque alguien haya estado perfecto un solo día.`
       tip =
-        'Ritmos repetibles (movimiento que guste + horarios más predecibles) vencen sólo fuerza de voluntad.'
-    else tip = 'Sigue fortaleciendo sueño y fuerza para que el número refleje cómo te sientes.'
-    return { insight, tip: softenTemplateEmDashes(tip) }
+        'Evita ayunos largos o cardio de castigo solo para mover el número. Si el apetito se apagó, hubo vértigos o cambios grandes de ánimo, díselo antes a quien te guíe y recién después ajusta con fuerza.'
+    } else if (band === 'normal') {
+      insight = `${ageCue}El par peso-altura cae donde la mayoría de tablas lo llama esperado y aún así el sueño roto o la barriga cansada llegan igual o antes que el índice.`
+      tip =
+        'Anota medicación nueva, tiroides, hinchazón rara y cambios bruscos de humor, porque eso mueve más la historia que repetir solo el número en pantalla.'
+    } else if (band === 'over') {
+      insight = `${ageCue}Lo más repetido atrás suele ser muchas horas quieto, pocas noches que descansen de verdad y la última comida cayendo tarde, mes tras mes, antes de que el finde pague todas las culpas.`
+      tip =
+        'No entres al plan de borrar todo de golpe. Durante dos días mide cintura, horario de la última comida y cómo llegas por la mañana, y cuenta eso abierto en la primera charla con un profesional.'
+    } else {
+      insight = `${ageCue}En esta franja aparece historia familiar junto con años de presión subiendo suave, ronco en la noche o aire que falta al subir escaleras, a veces antes de que el espejo sea la queja principal.`
+      tip =
+        'Antes de protocolos fuertes comenta falta de aire en reposo, dolor intenso de pecho o pariente cercano con enfermedad de corazón. Quien te conoce entero lee lo que el número no dice.'
+    }
+    return { insight: softenTemplateEmDashes(insight), tip: softenTemplateEmDashes(tip) }
   }
 
-  const life =
+  const ageCuePt =
     idade !== undefined ?
-      ` Aos ${idade} anos, sono e energia costumam pesar tanto quanto a balança.`
-    : ' Sono e energia no dia a dia continuam pesando tanto quanto a balança.'
-  const insight = softenTemplateEmDashes(`O IMC ${imcFmt} é triagem rápida, não a história inteira.${life}`)
-  let tip =
-    'Próximo passo leve: 2–3 dias com medida de cintura + como você acordou; leve na primeira conversa.'
-  if (band === 'low')
-    tip = 'Refeições pequenas e frequentes ganham de ficar no vácuo — diz logo se apetite apertou.'
-  else if (band === 'over' || band === 'obese')
-    tip =
-      'Ritmo repetível (movimento que você curte + horários mais previsíveis) vale mais que pico esporádico de força.'
-  else tip = 'Reforça sono e força pra manter número e sensação corporal em sintonia.'
-  return { insight, tip: softenTemplateEmDashes(tip) }
+      `Com ${idade} anos hormônio, estresse e sono mudam rápido o jeito como o corpo ganha ou solta peso. `
+    : ''
+
+  let insightPt = ''
+  let tipPt = ''
+
+  if (band === 'low') {
+    insightPt = `${ageCuePt}Na maioria das vezes isso aparece depois que o corpo passou um bom tempo com menos comida do que precisava, doente demais ou sob estresse demais, quase nunca porque alguém ficou certinho só vinte e quatro horas.`
+    tipPt =
+      'Segura aquele jejum comprido ou treino só como punição esperando resultado na hora. Se o apetite sumiu rápido, veio muita tonteira ou o ciclo sumiu sem causa clara, avisa primeiro quem vai te orientar antes de apertar tudo forte.'
+  } else if (band === 'normal') {
+    insightPt = `${ageCuePt}A conta bate onde a maioria das tabelas chama peso e altura dentro do combinado, e ainda assim sono curto, digestão rebelde ou semana dura aparecem igual ou antes da balança.`
+    tipPt =
+      'Liste remédio novo, tireoide, corpo mais inchando ou humor fugindo rápido, porque isso puxa a leitura bem mais do que ficar repetindo fórmula na cabeça.'
+  } else if (band === 'over') {
+    insightPt = `${ageCuePt}Bastante comum ficar bem mais tempo parado no dia, dormir menos do que recupera direito e a última refeição escapando pra madrugada mês após mês, antes da culpa cair só no fim de semana.`
+    tipPt =
+      'Evita o roteiro de segunda zerar tudo sozinho. Observa dois dias seguidos cintura, horário que fecha o jantar e como você acorda, e leva isso aberto pra primeira conversa com um profissional.'
+  } else {
+    insightPt = `${ageCuePt}Esse nível costuma aparecer junto com histórico familiar e sinais que foram ficando velados, pressão oscilando, ronco crescendo ou cansaço com esforço pequeno, às vezes antes do espelho virar a queixa principal.`
+    tipPt =
+      'Antes de um plano agressivo, fala sobre falta de ar parada, dor forte no peito ou parente próximo com problema de coração. Quem te vê inteiro fecha o que só o número não mostra.'
+  }
+
+  return { insight: softenTemplateEmDashes(insightPt), tip: softenTemplateEmDashes(tipPt) }
 }
 
 function getCalculatorResultCopy(
@@ -2514,31 +2583,31 @@ function getCalculatorResultCopy(
       return {
         insight:
           locale === 'en'
-            ? 'This target is lower than what many active people need, which can worsen hunger and recovery.'
+            ? 'Daily protein this thin usually shows up as louder afternoon hunger, slower recovery, or mood swings when training or stress stack on top.'
             : locale === 'es'
-              ? 'Esta meta está por debajo de lo que muchas personas activas necesitan y puede empeorar hambre y recuperación.'
-              : 'Esse alvo está abaixo do que muita gente ativa precisa e pode piorar fome e recuperação.',
+              ? 'Con proteína tan baja el cuerpo suele avisar con hambre fuerte en la tarde o recuperación lenta cuando entrenas o cargas mucho estrés.'
+              : 'Proteína nessa altura costuma aparecer como fome insistindo no meio da tarde, treino demorando a recuperar ou humor oscilando quando o dia aperta.',
         tip:
           locale === 'en'
-            ? 'Practical tip: split your protein into 3-5 meals and include one high-protein source in each.'
+            ? 'Precaution: split it across three or four meals instead of one giant dinner, and flag kidney or digestion issues before you leap much higher overnight.'
             : locale === 'es'
-              ? 'Consejo práctico: distribuye la proteína en 3-5 comidas e incluye una fuente proteica en cada una.'
-              : 'Dica prática: distribua a proteína em 3-5 refeições e inclua uma fonte proteica em cada uma.',
+              ? 'Precaución: reparte en tres o cuatro tomas y comenta riñón o digestión pesada antes de subir fuerte de golpe.'
+              : 'Precaução: espalha em três ou quatro refeições em vez de um jantar gigante, e comenta rim ou digestão pesada antes de subir muito do nada.',
       }
     }
     return {
       insight:
         locale === 'en'
-          ? 'This target can improve satiety and consistency, especially when your routine is busy.'
+          ? 'This range usually supports steady energy and calmer snacking when the calendar is packed and sweets call the loudest.'
           : locale === 'es'
-            ? 'Esta meta puede mejorar saciedad y constancia, especialmente con una rutina intensa.'
-            : 'Esse alvo pode melhorar saciedade e constância, principalmente em rotina corrida.',
+            ? 'Ese rango suele sostener energía estable y picoteo más tranquilo cuando el calendario aprieta y lo dulce grita primero.'
+            : 'Essa faixa costuma segurar energia mais estável e um lanche menos impulsivo quando o dia aperta e o doce chama mais alto.',
       tip:
         locale === 'en'
-          ? 'Practical tip: keep one easy protein option ready (yogurt, eggs, tuna, whey) for your hardest times.'
+          ? 'Keep one easy protein anchor ready for your worst hour, yogurt, eggs, tuna, or similar, so willpower is not doing all the work alone.'
           : locale === 'es'
-            ? 'Consejo práctico: deja una opción proteica fácil lista para los momentos de más prisa.'
-            : 'Dica prática: deixe uma opção proteica fácil pronta para os horários mais difíceis.',
+            ? 'Deja un ancla proteica fácil para tu peor horario, yogur huevo lata de pescado, para que no cargue solo la fuerza de voluntad.'
+            : 'Deixa uma âncora proteica fácil pro teu pior horário, iogurte, ovo, lata de peixe, pra vontade não carregar tudo sozinha.',
     }
   }
 
@@ -2546,16 +2615,16 @@ function getCalculatorResultCopy(
     return {
       insight:
         locale === 'en'
-          ? 'When hydration is below ideal, fatigue, headache and appetite confusion are common.'
+          ? 'When intake trails what sweat, breath, and digestion spend, foggy head, dry mouth, and fake hunger usually arrive before obvious thirst.'
           : locale === 'es'
-            ? 'Cuando la hidratación queda por debajo de lo ideal, son comunes cansancio, dolor de cabeza y hambre confusa.'
-            : 'Quando a hidratação fica abaixo do ideal, é comum sentir cansaço, dor de cabeça e fome confusa.',
+            ? 'Cuando entra menos de lo que sudas respiras y digieres suelen aparecer cabeza empañada boca seca y hambre confusa antes que la sed clara.'
+            : 'Quando entra menos líquido do que suor, respiração e digestão gastam, costuma vir cabeça pesada, boca seca e fome confusa antes da sede gritar.',
       tip:
         locale === 'en'
-          ? 'Practical tip: split the total in 4 blocks during the day and start with one glass right after waking.'
+          ? 'Precaution: spread glasses through the day, start with one after waking, and mention diuretics or heart meds before chugging huge volumes at once.'
           : locale === 'es'
-            ? 'Consejo práctico: divide el total en 4 bloques al día y empieza con un vaso al despertar.'
-            : 'Dica prática: divida o total em 4 blocos no dia e comece com um copo logo ao acordar.',
+            ? 'Precaución: reparte vasos en el día, empieza con uno al levantar y comenta diuréticos o corazón antes de beber litros de golpe.'
+            : 'Precaução: espalha copos no dia, começa com um ao levantar, e comenta diurético ou coração antes de tomar litros de uma vez.',
     }
   }
 
@@ -2567,23 +2636,23 @@ function getCalculatorResultCopy(
     return {
       insight:
         locale === 'en'
-          ? 'This estimate gives a starting point to avoid both excess and an unsustainable low intake.'
+          ? 'Very high averages stack weight fast, razor-thin totals spark rebounds and sluggish days, the middle corridor is usually where people stay consistent longest.'
           : locale === 'es'
-            ? 'Esta estimación da un punto de partida para evitar tanto exceso como ingesta insuficiente difícil de sostener.'
-            : 'Essa estimativa dá um ponto de partida para evitar tanto excesso quanto restrição difícil de sustentar.',
+              ? 'Promedios muy altos acumulan kilos rápido. Totales demasiado bajos disparan arrebatos de hambre y días lánguidos. Lo equilibrado suele aguantar semanas enteras.'
+            : 'Número muito alto acumula peso rápido demais; número raspado demais vira estouro de fome e dia arrastando. O meio costuma ser onde dá para ficar semanas seguidas.',
       tip:
         locale === 'en'
-          ? 'Practical tip: adjust every 2 weeks based on body response and adherence, not only on the number.'
+          ? 'Precaution: adjust every week or two using sleep quality, cravings, and training response, never the scale spike alone.'
           : locale === 'es'
-            ? 'Consejo práctico: ajusta cada 2 semanas según respuesta del cuerpo y adherencia, no solo por el número.'
-            : 'Dica prática: ajuste a cada 2 semanas com base na resposta do corpo e adesão, não só no número.',
+            ? 'Precaución mueve ese número cada una o dos semanas mirando sueño antojos y respuesta real al entrenamiento no sólo báscula de un día.'
+            : 'Precaução: mexe nesse número a cada uma ou duas semanas olhando sono vontade de doce e treino, nunca só estalo da balança de um dia.',
     }
   }
 
   return null
 }
 
-/** Texto expandido “análise completa” só para calculadora de IMC no link público (2 blocos curtos; disclaimer completo fica no rodapé). */
+/** Texto expandido “análise completa” só para calculadora de IMC no link público. */
 function getCalculatorImcFullAnalysisParagraphs(
   imc: number,
   locale: Language,
@@ -2594,57 +2663,55 @@ function getCalculatorImcFullAnalysisParagraphs(
   const imcFmt = formatImcValue(imc, locale)
   const idHint = p.idade !== undefined && Number.isFinite(p.idade) ? Math.round(p.idade) : undefined
 
-  let faixa = ''
   if (locale === 'en') {
-    if (imc < 18.5) faixa = 'underweight'
-    else if (imc < 25) faixa = 'normal weight'
-    else if (imc < 30) faixa = 'overweight'
-    else faixa = 'obesity'
-    const p1 = recap
-      ? `With ${recap}, BMI ${imcFmt} usually maps to “${faixa}” in WHO-style screening — population context, not your personal label.`
-      : `BMI ${imcFmt} usually maps to “${faixa}” in WHO-style screening — population context, not your personal label.`
-    const tail =
-      idHint !== undefined ?
-        ` Mentioning you are ${idHint} alongside waist, sleep, and habits is what typically closes the loop in practice.`
-      : ' Waist, sleep, and strength next to BMI are what typically close the loop in practice.'
-    const p2 =
-      softenTemplateEmDashes(
-        `Age and sex markers (when you choose to share them) sit outside the BMI formula but change how a clinician reads muscle, hormones, and life stage.${tail}`,
-      )
-    return [softenTemplateEmDashes(p1), p2]
-  }
-  if (locale === 'es') {
-    if (imc < 18.5) faixa = 'bajo peso'
-    else if (imc < 25) faixa = 'peso normal'
-    else if (imc < 30) faixa = 'sobrepeso'
-    else faixa = 'obesidad'
-    const p1 = recap
-      ? `Con ${recap}, el IMC ${imcFmt} suele ubicarse en “${faixa}” (referencia tipo OMS): señal poblacional, no etiqueta personal.`
-      : `El IMC ${imcFmt} suele caer en “${faixa}” (referencia tipo OMS): señal poblacional, no etiqueta personal.`
-    const tail =
-      idHint !== undefined ?
-        ` Comentar ${idHint} años sumado a cintura, sueño y rutina es lo que suele cerrar el círculo.`
-      : ' Cintura, sueño y hábitos junto al IMC son lo que suele cerrar el círculo.'
-    const p2 = softenTemplateEmDashes(
-      `Edad y sexo declarado (si te sientes bien compartiéndolo) no cambian la fórmula, pero sí la lectura profesional de músculo, hormonas y etapa vital.${tail}`,
+    const bucket =
+      imc < 18.5 ? 'underweight' : imc < 25 ? 'healthy range for screening' : imc < 30 ? 'overweight' : 'obesity'
+    const opener = recap ? `Taking ${recap} first, ` : ''
+    const p1 = softenTemplateEmDashes(
+      `${opener}BMI ${imcFmt} aligns with large population charts grouped as ${bucket} for quick screenings. Think population snapshot, never a personal stamp.`,
     )
-    return [softenTemplateEmDashes(p1), p2]
+    const p2Middle =
+      idHint !== undefined ?
+        ` Mention you are ${idHint}, along with waist, steady sleep, and real meal times.` :
+        ` Talk about waist circumference, nightly sleep, and how hunger shows up in real life.`
+    const p2 = softenTemplateEmDashes(
+      `Age and sex sit outside that ratio yet steer how clinicians read hormones, muscles, and life chapters.${p2Middle} Bringing those pieces alongside the number keeps big mistakes off the table, so professional eyes usually pay for themselves.`,
+    )
+    return [p1, p2]
   }
-  if (imc < 18.5) faixa = 'baixo peso'
-  else if (imc < 25) faixa = 'peso normal'
-  else if (imc < 30) faixa = 'sobrepeso'
-  else faixa = 'obesidade'
-  const p1 = recap
-    ? `Com ${recap}, o IMC ${imcFmt} costuma cair em “${faixa}” (referência OMS habitual): triagem em população, não rótulo pessoal.`
-    : `O IMC ${imcFmt} costuma cair em “${faixa}” (referência OMS habitual): triagem em população, não rótulo pessoal.`
-  const tail =
-    idHint !== undefined ?
-      ` Mencionar ${idHint} anos junto de cintura, sono e hábitos é o que mais costuma fechar o circuito.`
-    : ' Cruzar cintura, sono e hábitos com o IMC é o que mais costuma fechar o circuito.'
-  const p2 = softenTemplateEmDashes(
-    `Idade e sexo informado (quando fizer sentido pra você) ficam fora da fórmula, mas mudam como se lê músculo, hormônio e fase da vida.${tail}`,
+
+  if (locale === 'es') {
+    const bucketEs =
+      imc < 18.5 ? 'bajo peso' : imc < 25 ? 'peso habitualmente estable en triajes rápidos' : imc < 30 ? 'sobrepeso' : 'obesidad'
+    const opener = recap ? `Partiendo de ${recap}, ` : ''
+    const p1 = softenTemplateEmDashes(
+      `${opener}tu IMC ${imcFmt} se alinea con tablas grandes que muestran ${bucketEs} cuando se hace triaje rápido. Habla de poblaciones numerosas, no de una sentencia personal.`,
+    )
+    const mid =
+      idHint !== undefined ?
+        ` Trae esos ${idHint} años, el sexo que marcaste arriba, la cintura, un sueño honesto y los horarios donde aparece la hambre porque el índice jamás mete eso solo dentro de la cuenta.`
+      : ` Trae cintura, sueño honesto y los horarios donde aparece la hambre porque el índice jamás mete eso solo dentro de la cuenta.`
+    const p2 = softenTemplateEmDashes(
+      `Quien trabaja contigo junta edad, sexo y ese paquete con vida real antes de mover tu rutina, porque ahí aparecen músculo, hormonas y etapas grandes que el número oculta.${mid} Ese encaje cerrado evita que reorganices todo en modo pánico.`,
+    )
+    return [p1, p2]
+  }
+
+  const faixaPb =
+    imc < 18.5 ? 'baixo peso' : imc < 25 ? 'peso dentro do que as tabelas mais usadas chamam adequado nesta triagem' : imc < 30 ? 'sobrepeso' : 'obesidade'
+  const openerPt = recap ? `Somando ${recap}, ` : ''
+  const p1 = softenTemplateEmDashes(
+    `${openerPt}o IMC ${imcFmt} aparece mesmo na área onde a Organização Mundial da Saúde costuma agrupar ${faixaPb} quando olha grandes estudos rápidos. É panorama de grupo, não rótulo colado só em você.`,
   )
-  return [softenTemplateEmDashes(p1), p2]
+  const p2Start =
+    idHint !== undefined ?
+      `Seus ${idHint} anos somados ao sexo que você marcou no começo, mais cintura, sono de verdade e horário onde a fome aparece, mostram peças que a fórmula não enxerga sozinha. `
+    : `Repetir idade, sexo do formulário e rotina real de cintura, sono e horário de comida mostra cenário inteiro, porque a conta isolada fica sempre pequena demais. `
+  const p2 = softenTemplateEmDashes(
+    `${p2Start}Por isso bate forte a diferença de sentar com especialista antes de reorganizar vida inteira no susto. Quem lê esse conjunto fecha brechas que papel nenhum mostra.`,
+  )
+
+  return [p1, p2]
 }
 
 function buildCalculatorWhatsAppPrefill(
@@ -2971,11 +3038,15 @@ function CalculatorBlock({
             {resultCopy ? (
               <div className="mb-5 space-y-3">
                 <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500">{t.whatItMeans}</p>
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+                    {t.probableCause}
+                  </p>
                   <p className="text-sm leading-relaxed text-gray-700">{resultCopy.insight}</p>
                 </div>
                 <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">{t.quickTip}</p>
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
+                    {t.calculatorPrecautionLabel}
+                  </p>
                   <p className="text-sm leading-relaxed text-gray-700">{resultCopy.tip}</p>
                 </div>
                 {showFullAnalysis && imcFullAnalysis ? (
@@ -2994,7 +3065,7 @@ function CalculatorBlock({
               {whatsappUrl ? (
                 <>
                   <p className="text-center text-sm font-medium leading-relaxed text-gray-800">
-                    {isImcCalculator ? t.calculatorImcCtaLead : t.quizResultHelperLine}
+                    {isImcCalculator ? t.calculatorImcCtaLead : t.calculatorCtaLead}
                   </p>
                   <button
                     type="button"
