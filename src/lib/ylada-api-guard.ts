@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { proLideresContextUnlocksYladaMatrixApis } from '@/lib/pro-lideres-server'
 import { supabaseAdmin } from '@/lib/supabase'
 
 /** Perfis do produto Wellness (Herbalife / coach bem-estar) — não usam /api/ylada/*. */
@@ -19,6 +20,7 @@ export async function yladaApiRejectWellnessProductUser(userId: string): Promise
   if (up.is_admin || up.is_support) return null
   const p = typeof up.perfil === 'string' ? up.perfil.toLowerCase().trim() : ''
   if (WELLNESS_PRODUCT_PROFILES.has(p)) {
+    if (await proLideresContextUnlocksYladaMatrixApis(userId)) return null
     return NextResponse.json(
       {
         success: false,

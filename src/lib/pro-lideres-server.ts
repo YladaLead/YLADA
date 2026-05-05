@@ -492,6 +492,51 @@ export async function isProLideresLeaderForYladaLinkApis(userId: string): Promis
 }
 
 /**
+ * Membro de equipa (`role = member`) ativo noutro tenant — ex.: conta Wellness convidada por Lilian/Alexandre.
+ * Usado para liberar `/api/ylada/*` sem alterar `user_profiles.perfil`.
+ */
+export async function isProLideresActiveForeignTeamMember(userId: string): Promise<boolean> {
+  const admin = getSupabaseAdmin()
+  if (!admin) return false
+
+  const { data: memberships, error } = await admin
+    .from('leader_tenant_members')
+    .select('leader_tenant_id, role, team_access_state, team_access_expires_at')
+    .eq('user_id', userId)
+    .eq('role', 'member')
+
+  if (error || !memberships?.length) return false
+
+  const tenantIds = [...new Set(memberships.map((r) => String(r.leader_tenant_id)))]
+  const { data: tenantRows } = await admin
+    .from('leader_tenants')
+    .select('id, owner_user_id')
+    .in('id', tenantIds)
+
+  const ownerByTenantId = new Map<string, string>()
+  for (const t of tenantRows ?? []) {
+    const id = t.id as string
+    const ou = t.owner_user_id as string
+    if (id && ou) ownerByTenantId.set(id, ou)
+  }
+
+  for (const m of memberships) {
+    const st = (m.team_access_state as string | undefined) ?? 'active'
+    if (st !== 'active') continue
+    if (!membershipExpiryStillValid(m.team_access_expires_at as string | null | undefined)) continue
+    const owner = ownerByTenantId.get(String(m.leader_tenant_id))
+    if (owner && owner !== userId) return true
+  }
+  return false
+}
+
+/** Dono/líder Pro ou membro ativo de equipa alheia — pode usar APIs da matriz YLADA apesar de `perfil` Wellness. */
+export async function proLideresContextUnlocksYladaMatrixApis(userId: string): Promise<boolean> {
+  if (await isProLideresLeaderForYladaLinkApis(userId)) return true
+  return isProLideresActiveForeignTeamMember(userId)
+}
+
+/**
  * Resolve tenant + papel (dono = líder na consultoria; user_id em leader_tenant_members = equipe ou líder registado).
  *
  * - Memberships ativas têm prioridade sobre `leader_tenants.owner_user_id` (evita membro com tenant pessoal em dev).
