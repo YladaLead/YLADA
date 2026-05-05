@@ -75,6 +75,8 @@ const PUBLIC_LINK_UI: Record<Language, {
   calculatorIntroBadge: string
   calculatorIntroLead: string
   calculatorIntroMicro: string
+  /** Calculadora IMC: linha de resumo antes do resultado (lista peso · altura · idade · sexo). */
+  calculatorImcRecapLead: string
 }> = {
   pt: {
     start: 'Começar',
@@ -128,6 +130,7 @@ const PUBLIC_LINK_UI: Record<Language, {
     calculatorIntroLead:
       'Em poucos passos você recebe um primeiro resultado com base no que informar aqui — rápido, direto e pensado para quem quer um número de partida antes de falar com um profissional. Não substitui avaliação presencial.',
     calculatorIntroMicro: 'Tempo estimado: cerca de 1 minuto · sem cadastro: preencher e ver o resultado.',
+    calculatorImcRecapLead: 'Com os dados que você trouxe:',
   },
   en: {
     start: 'Start',
@@ -181,6 +184,7 @@ const PUBLIC_LINK_UI: Record<Language, {
     calculatorIntroLead:
       'In a few steps you get a first result based on what you enter here — quick, clear, and meant as a starting number before talking to a professional. It does not replace an in-person assessment.',
     calculatorIntroMicro: 'Estimated time: about 1 minute · no sign-up: fill in and see your result.',
+    calculatorImcRecapLead: 'From what you shared:',
   },
   es: {
     start: 'Comenzar',
@@ -234,6 +238,7 @@ const PUBLIC_LINK_UI: Record<Language, {
     calculatorIntroLead:
       'En pocos pasos recibes un primer resultado según lo que indiques aquí: rápido, claro y pensado como punto de partida antes de hablar con un profesional. No sustituye una valoración presencial.',
     calculatorIntroMicro: 'Tiempo estimado: cerca de 1 minuto · sin registro: rellenar y ver el resultado.',
+    calculatorImcRecapLead: 'Con los datos que compartiste:',
   },
 }
 
@@ -2245,7 +2250,328 @@ function evaluateCalculatorFormula(
   }
 }
 
-function getCalculatorResultCopy(title: string, value: number, locale: Language): { insight: string; tip: string } | null {
+/** Contexto opcional vindos dos campos (peso, altura, idade, sexo) para texto da calculadora de IMC. */
+type ImcProfile = {
+  pesoKg?: number
+  alturaCm?: number
+  idade?: number
+  sexoLabel?: string
+  sexoPreferNot?: boolean
+}
+
+function pickCalculatorNumeric(
+  values: Record<string, number | undefined>,
+  aliases: string[],
+): number | undefined {
+  const byLower = new Map<string, string>()
+  for (const k of Object.keys(values)) {
+    byLower.set(k.toLowerCase(), k)
+  }
+  for (const a of aliases) {
+    const real = byLower.get(a.toLowerCase())
+    if (!real) continue
+    const v = values[real]
+    if (v === undefined || v === null) continue
+    const n = Number(v)
+    if (Number.isFinite(n)) return n
+  }
+  return undefined
+}
+
+function findCalculatorField(fields: CalculatorField[], aliases: string[]): CalculatorField | undefined {
+  const set = new Set(aliases.map((a) => a.toLowerCase()))
+  return fields.find((f) => set.has((f.id || '').trim().toLowerCase()))
+}
+
+/** Altura pode vir em cm (170) ou metros (1,70). */
+function normalizeAlturaCm(raw: number): number {
+  if (raw <= 0 || !Number.isFinite(raw)) return raw
+  if (raw < 3) return Math.round(raw * 100)
+  return Math.round(raw)
+}
+
+function extractImcProfile(
+  fields: CalculatorField[],
+  values: Record<string, number | undefined>,
+): ImcProfile {
+  const pesoKg = pickCalculatorNumeric(values, ['peso', 'peso_atual', 'peso_kg', 'weight'])
+  let alturaCm = pickCalculatorNumeric(values, ['altura', 'altura_cm', 'height'])
+  if (alturaCm !== undefined) alturaCm = normalizeAlturaCm(alturaCm)
+  const idade = pickCalculatorNumeric(values, ['idade', 'age'])
+  const sexField = findCalculatorField(fields, ['sexo', 'genero', 'gender'])
+  let sexoLabel: string | undefined
+  let sexoPreferNot = false
+  if (sexField && values[sexField.id] !== undefined && values[sexField.id] !== null) {
+    const rawSex = Number(values[sexField.id])
+    const opt =
+      Array.isArray(sexField.options) ?
+        sexField.options.find((o) => Number(o.value) === rawSex)
+      : undefined
+    const lab = (opt?.label || '').trim()
+    sexoPreferNot =
+      rawSex === 2 ||
+      /pref(er|i)r|n(ã|a)o inform|prefer not|no (quiero|quieres) decir|rather not/i.test(lab)
+    if (lab && !sexoPreferNot) sexoLabel = lab
+  }
+  return { pesoKg, alturaCm, idade, sexoLabel, sexoPreferNot }
+}
+
+function imcOmsBand(imc: number): 'low' | 'normal' | 'over' | 'obese' {
+  if (imc < 18.5) return 'low'
+  if (imc < 25) return 'normal'
+  if (imc < 30) return 'over'
+  return 'obese'
+}
+
+function formatImcValue(imc: number, locale: Language): string {
+  const loc = locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : 'pt-BR'
+  return imc.toLocaleString(loc, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+}
+
+function buildImcRecapLine(profile: ImcProfile, locale: Language): string | null {
+  const loc = locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : 'pt-BR'
+  const parts: string[] = []
+  if (profile.pesoKg !== undefined && Number.isFinite(profile.pesoKg)) {
+    parts.push(`${profile.pesoKg.toLocaleString(loc, { maximumFractionDigits: 1 })} kg`)
+  }
+  if (profile.alturaCm !== undefined && Number.isFinite(profile.alturaCm)) {
+    parts.push(locale === 'en' ? `${profile.alturaCm} cm` : `${profile.alturaCm} cm`)
+  }
+  if (profile.idade !== undefined && Number.isFinite(profile.idade)) {
+    const y = Math.round(profile.idade)
+    parts.push(locale === 'en' ? `${y} years` : locale === 'es' ? `${y} años` : `${y} anos`)
+  }
+  if (profile.sexoLabel && !profile.sexoPreferNot) {
+    parts.push(profile.sexoLabel)
+  } else if (profile.sexoPreferNot) {
+    parts.push(locale === 'en' ? 'sex not specified' : locale === 'es' ? 'sexo no indicado' : 'sexo não informado')
+  }
+  if (parts.length === 0) return null
+  const sep = ' · '
+  return parts.join(sep)
+}
+
+/** Frase curta incorporada nos parágrafos (lista com “e”). */
+function buildImcRecapMidSentence(profile: ImcProfile, locale: Language): string | null {
+  const loc = locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : 'pt-BR'
+  const bits: string[] = []
+  if (profile.pesoKg !== undefined && Number.isFinite(profile.pesoKg)) {
+    bits.push(`${profile.pesoKg.toLocaleString(loc, { maximumFractionDigits: 1 })} kg`)
+  }
+  if (profile.alturaCm !== undefined && Number.isFinite(profile.alturaCm)) {
+    bits.push(`${profile.alturaCm} cm`)
+  }
+  if (profile.idade !== undefined && Number.isFinite(profile.idade)) {
+    const y = Math.round(profile.idade)
+    bits.push(locale === 'en' ? `${y} years old` : locale === 'es' ? `${y} años` : `${y} anos`)
+  }
+  let out: string | null = null
+  if (bits.length === 1) out = bits[0]!
+  else if (bits.length > 1) {
+    const last = bits.pop()!
+    const conj = locale === 'en' ? 'and' : locale === 'es' ? 'y' : 'e'
+    out = bits.length ? `${bits.join(', ')} ${conj} ${last}` : last
+  }
+  let sexFrag = ''
+  if (profile.sexoLabel && !profile.sexoPreferNot) {
+    sexFrag =
+      locale === 'en'
+        ? ` (${profile.sexoLabel})`
+        : locale === 'es'
+          ? ` (${profile.sexoLabel})`
+          : ` (${profile.sexoLabel})`
+  }
+  if (!out && !sexFrag) return null
+  return `${out ?? ''}${sexFrag}` || null
+}
+
+function ageMotivationTail(profile: ImcProfile, locale: Language): string {
+  const idade = profile.idade
+  if (idade === undefined || !Number.isFinite(idade)) return ''
+  const y = Math.round(idade)
+  if (y < 18) {
+    if (locale === 'en')
+      return ' At this stage of life growth and development matters, so a professional can put this number into the full picture.'
+    if (locale === 'es')
+      return ' En esta etapa importa el crecimiento y el desarrollo; un profesional puede encajar mejor este número en el contexto completo.'
+    return ' Nesta fase da vida crescimento e desenvolvimento importam, então um profissional consegue encaixar esse número no quadro inteiro.'
+  }
+  if (y < 40) {
+    if (locale === 'en')
+      return ` At ${y}, small steady changes in routine often show up faster than people expect — worth supporting with guidance.`
+    if (locale === 'es')
+      return ` Con ${y} años, los cambios pequeños y constantes en la rutina suelen notarse antes de lo que parece — merece ir acompañado.`
+    return ` Com ${y} anos, mudanças pequenas e constantes na rotina costumam aparecer antes do que parece — vale sustentar isso com orientação.`
+  }
+  if (y < 60) {
+    if (locale === 'en')
+      return ` Around ${y}, pairing BMI trends with waist, labs (when indicated), and habits usually makes strategy sharper.`
+    if (locale === 'es')
+      return ` Entre los ${y} años, cruzar el IMC con cintura, chequeos cuando toque y hábitos suele hacer la estrategia más clara.`
+    return ` Na faixa dos ${y} anos, cruzar o IMC com cintura, exames quando fizer sentido e hábitos costuma deixar a estratégia bem mais redonda.`
+  }
+  if (locale === 'en')
+    return ` At ${y}+, vitality, mobility, and muscle often deserve the spotlight alongside BMI — conversation with a pro helps balance all three.`
+  if (locale === 'es')
+    return ` A los ${y}+ años vitalidad, movilidad y músculo suelen ganar protagonismo junto al IMC; hablar con un profesional ayuda a balancear todo.`
+  return ` Para ${y}+ anos, vitalidade, mobilidade e músculo costumam dividir protagonismo com o IMC; falar com um profissional ajuda a equilibrar tudo.`
+}
+
+function getImcEngagementHeadline(imc: number, locale: Language, profile: ImcProfile | null): string {
+  const band = imcOmsBand(imc)
+  let core = ''
+  if (locale === 'en') {
+    core =
+      band === 'low'
+        ? 'This BMI lands in the underweight screening band — a clear reason to soften blame and invite nutrition support calmly.'
+        : band === 'normal'
+          ? 'You are in the “normal weight” screening band — a strong base to nurture habits without obsessing over the scale.'
+          : band === 'over'
+            ? 'This BMI lands in the overweight screening band — a practical nudge to care for rhythm, food, and rest with intention.'
+            : 'This BMI lands in the obesity screening band — worth structuring supportive change with steady professional backup.'
+  } else if (locale === 'es') {
+    core =
+      band === 'low'
+        ? 'Este IMC cae en la franja de bajo peso en referencia tipo OMS: buen momento para hablar nutrición con calma y sin culpa.'
+        : band === 'normal'
+          ? 'Tu IMC está en la zona de peso normal en esa referencia: una base muy buena para cuidar hábitos con equilibrio.'
+          : band === 'over'
+            ? 'Este IMC cae en sobrepeso según esa referencia: una señal concreta para ordenar hábitos con intención (no con castigo).'
+            : 'Este IMC cae en obesidad en esa referencia: merece ordenar cambios seguros con acompañamiento profesional estable.'
+  } else {
+    core =
+      band === 'low'
+        ? 'Este IMC cai na faixa de baixo peso na referência usada por muitos profissionais — um bom motivo para falar sobre nutrição com calma, sem culpa.'
+        : band === 'normal'
+          ? 'Seu IMC está na faixa “peso normal” nessa mesma referência — uma base sólida para cuidar de hábitos com equilíbrio.'
+          : band === 'over'
+            ? 'Esse número cai em sobrepeso na referência OMS mais comum — um empurrão objetivo pra cuidar de rotina, alimento e sono com intenção (não com castigo).'
+            : 'Esse IMC entra na faixa de obesidade nessa referência — vale estruturar mudanças com segurança e acompanhamento profissional contínuo.'
+  }
+  return softenTemplateEmDashes(`${core}${profile ? ageMotivationTail(profile, locale) : ''}`)
+}
+
+function getImcCalculatorPersonalCopy(
+  imc: number,
+  locale: Language,
+  profile: ImcProfile | null,
+): { insight: string; tip: string } {
+  const imcFmt = formatImcValue(imc, locale)
+  const band = imcOmsBand(imc)
+
+  const pesoStr =
+    profile?.pesoKg !== undefined && Number.isFinite(profile.pesoKg)
+      ? formatImcValue(profile.pesoKg, locale)
+      : null
+  const altStr =
+    profile?.alturaCm !== undefined && Number.isFinite(profile.alturaCm) ? `${Math.round(profile.alturaCm)}` : null
+  const idade = profile?.idade !== undefined && Number.isFinite(profile.idade) ? Math.round(profile.idade) : undefined
+
+  if (locale === 'en') {
+    let insight = ''
+    const bodyBits: string[] = []
+    if (pesoStr) bodyBits.push(`${pesoStr} kg`)
+    if (altStr) bodyBits.push(`${altStr} cm height`)
+    const bodyList = bodyBits.length ? bodyBits.join(locale === 'en' ? ', ' : ', ') : 'what you typed in'
+
+    insight = `Using ${bodyList}, BMI ${imcFmt} is a quick population screen — not a personal diagnosis — but it already tells you where your self-care roadmap may need attention.`
+
+    if (idade !== undefined) {
+      insight += ` At age ${idade}, daily energy, sleep, and appetite often matter just as much as the scale reading.`
+    }
+    if (profile?.sexoLabel && !profile.sexoPreferNot) {
+      insight += ` The sex marker you shared (${profile.sexoLabel}) does not alter the BMI math, yet helps a clinician read nuance like muscle or life stage when you are ready for that chat.`
+    } else if (profile?.sexoPreferNot) {
+      insight +=
+        ' If you later feel comfortable sharing sex at birth markers with the professional who follows you, it can fine-tune how they contextualize BMI.'
+    }
+
+    let tip =
+      'High-value next step: jot waist circumference this week plus how rested you wake up — bringing those alongside BMI jump-starts an honest plan with whoever guides you.'
+    if (band === 'low') {
+      tip +=
+        ' If meals feel tight or stressful lately, mentioning that upfront helps the conversation stay protective and practical.'
+    } else if (band === 'over' || band === 'obese') {
+      tip +=
+        ' Aim for repeatable routines (movement you enjoy + steady meal rhythm) rather than heroic one-off efforts — pros help make that realistic.'
+    } else {
+      tip += ' Celebrate the stability and keep reinforcing sleep and strength so the needle stays aligned with how you feel.'
+    }
+    return { insight: softenTemplateEmDashes(insight), tip: softenTemplateEmDashes(tip) }
+  }
+
+  if (locale === 'es') {
+    let insight = ''
+    const bodyBits: string[] = []
+    if (pesoStr) bodyBits.push(`${pesoStr} kg`)
+    if (altStr) bodyBits.push(`${altStr} cm de altura`)
+    const introList = bodyBits.length ? bodyBits.join(' y ') : 'lo que indicaste aquí'
+
+    insight = `Con ${introList}, el IMC ${imcFmt} es un cribado rápido poblacional — no tu diagnóstico personal — y ya marca dónde puede merecer la pena afinar el autocuidado.`
+
+    if (idade !== undefined) {
+      insight += ` Con ${idade} años, energía diaria, sueño y apetito suelen importar tanto como el número de la báscula.`
+    }
+    if (profile?.sexoLabel && !profile.sexoPreferNot) {
+      insight += ` La opción (${profile.sexoLabel}) no cambia el cálculo del IMC, pero sí ayuda a interpretar masa magra u hormonas cuando hables con un profesional.`
+    } else if (profile?.sexoPreferNot) {
+      insight +=
+        ' Si más adelante te sientes bien compartiendo el sexo declarado al nacer en consulta, eso sí puede ayudar a contextualizar mejor el resultado.'
+    }
+
+    let tip =
+      'Próximo paso práctico: anota esta semana cintura (alto de ilíacos), horas que duermes bien y cómo llega tu hambre al cabo del día; eso vale oro junto al IMC en la conversación profesional.'
+    if (band === 'low') {
+      tip +=
+        ' Si últimamente cuesta llegar saciado/a o te cuesta tiempo en la cocina, decirlo al inicio mantiene el plan cercano.'
+    } else if (band === 'over' || band === 'obese') {
+      tip +=
+        ' Busca hábitos que puedas repetir (movimiento que guste + horarios más estables) en vez de sólo fuerza de voluntad aislada — un profesional te ayuda anclarlo.'
+    } else {
+      tip += ' Celebra ese equilibrio y refuerza sueño/fuerza para que el resultado refleje también cómo te sientes día a día.'
+    }
+    return { insight: softenTemplateEmDashes(insight), tip: softenTemplateEmDashes(tip) }
+  }
+
+  // pt-BR
+  let insight = ''
+  const bodyBits: string[] = []
+  if (pesoStr) bodyBits.push(`${pesoStr} kg`)
+  if (altStr) bodyBits.push(`${altStr} cm de altura`)
+  const introList = bodyBits.length ? bodyBits.join(' e ') : 'o que você preencheu aqui'
+
+  insight = `Com ${introList}, o IMC ${imcFmt} aparece nitinho no mapa: é triagem em população, não um “laudo” pessoal — mas já sugere onde pode valer lapidar hábitos e rotina sem culpa.`
+
+  if (idade !== undefined) {
+    insight += ` Aos ${idade} anos, energia no dia a dia, sono e apetite costumam pesar tanto quanto o número da balança.`
+  }
+  if (profile?.sexoLabel && !profile.sexoPreferNot) {
+    insight += ` O campo de sexo informado (${profile.sexoLabel}) não muda o cálculo do IMC, só ajuda quem vai te orientar a ler massa magra, hormônio e momento de vida quando você marcar esse papo.`
+  } else if (profile?.sexoPreferNot) {
+    insight +=
+      ' Quando você se sentir confortável pra comentar isso na consulta, o marcador registrado ao nascimento também ajuda a contextualizar esse número — sempre no seu tempo.'
+  }
+
+  let tip =
+    'Um próximo passo que agrega muito valor: esta semana anote circunferência de cintura (logo acima dos ossos do quadril), como tem sido o sono ao acordar e se a fome “oscila”; leve junto na conversa profissional com o seu IMC.'
+  if (band === 'low') {
+    tip +=
+      ' Se comer está difícil ou apertando emocionalmente, mencionar já no começo mantém o plano humano e possível.'
+  } else if (band === 'over' || band === 'obese') {
+    tip +=
+      ' Prefira hábitos que você consiga repetir (movimento que dá prazer + horários de refeição mais estáveis) a depender só de “força de voo” pontual — com orientação vira trajetória.'
+  } else {
+    tip += ' Aproveita essa zona de referência pra reforçar sono e força, assim o resultado continua parecendo com você no espelho e no cotidiano.'
+  }
+  return { insight: softenTemplateEmDashes(insight), tip: softenTemplateEmDashes(tip) }
+}
+
+function getCalculatorResultCopy(
+  title: string,
+  value: number,
+  locale: Language,
+  opts?: { imcProfile?: ImcProfile | null },
+): { insight: string; tip: string } | null {
   const normalized = title.toLowerCase()
 
   if (normalized.includes('prote')) {
@@ -2299,20 +2625,7 @@ function getCalculatorResultCopy(title: string, value: number, locale: Language)
   }
 
   if (normalized.includes('imc')) {
-    return {
-      insight:
-        locale === 'en'
-          ? 'BMI is a screening signal, not a full diagnosis, but it helps show if your strategy needs adjustment.'
-          : locale === 'es'
-            ? 'El IMC es una señal de cribado, no un diagnóstico completo, pero ayuda a indicar si la estrategia necesita ajuste.'
-            : 'IMC é um sinal de triagem, não diagnóstico completo, mas ajuda a mostrar se a estratégia precisa ajuste.',
-      tip:
-        locale === 'en'
-          ? 'Practical tip: combine this with waist measurement and routine habits for a more realistic plan.'
-          : locale === 'es'
-            ? 'Consejo práctico: combina esto con medida de cintura y hábitos para un plan más realista.'
-            : 'Dica prática: combine esse número com medida de cintura e hábitos para um plano mais realista.',
-    }
+    return getImcCalculatorPersonalCopy(value, locale, opts?.imcProfile ?? null)
   }
 
   if (normalized.includes('caloria')) {
@@ -2336,39 +2649,65 @@ function getCalculatorResultCopy(title: string, value: number, locale: Language)
 }
 
 /** Texto expandido “análise completa” só para calculadora de IMC no link público. */
-function getCalculatorImcFullAnalysisParagraphs(imc: number, locale: Language): string[] {
+function getCalculatorImcFullAnalysisParagraphs(
+  imc: number,
+  locale: Language,
+  profile: ImcProfile | null,
+): string[] {
+  const p = profile ?? {}
+  const recap = buildImcRecapMidSentence(p, locale)
+  const imcFmt = formatImcValue(imc, locale)
+  const idHint =
+    p.idade !== undefined && Number.isFinite(p.idade) ? Math.round(p.idade) : undefined
+
   let faixa = ''
   if (locale === 'en') {
     if (imc < 18.5) faixa = 'underweight'
     else if (imc < 25) faixa = 'normal weight'
     else if (imc < 30) faixa = 'overweight'
     else faixa = 'obesity'
-    return [
-      `WHO-style screening puts this BMI in the “${faixa}” range. It is a population-level signal, not a medical label for you personally.`,
-      'Age and sex do not change the BMI math, but they change how a professional reads your context (growth in younger people, muscle mass, menopause, etc.).',
-      'If your goal is change in body composition, combine BMI with waist circumference, strength, sleep, and nutrition patterns — not the number alone.',
-    ]
+    const p1 = recap
+      ? `With ${recap} in view, BMI ${imcFmt} usually maps to the “${faixa}” band in common WHO-style screening. It stays a population signal, not a verdict on you as a person.`
+      : `WHO-style screening usually maps BMI ${imcFmt} to the “${faixa}” band — a population signal, not a verdict on you as a person.`
+    const p2Base =
+      'Clinicians layer age and sex context on top of BMI to understand muscle, puberty, pregnancy history, or menopause — none of that lives inside the BMI formula itself.'
+    const p2 = idHint !== undefined ? `${p2Base} Mentioning you are ${idHint} years old already sharpens that conversation.` : p2Base
+    const p3 =
+      'If your aim is body composition or metabolic health, pair BMI with waist circumference, strength, sleep, and eating rhythm — not the index alone.'
+    return [softenTemplateEmDashes(p1), softenTemplateEmDashes(p2), softenTemplateEmDashes(p3)]
   }
   if (locale === 'es') {
     if (imc < 18.5) faixa = 'bajo peso'
     else if (imc < 25) faixa = 'peso normal'
     else if (imc < 30) faixa = 'sobrepeso'
     else faixa = 'obesidad'
-    return [
-      `Como referencia tipo OMS, este IMC suele clasificarse en la zona de “${faixa}”. Es una señal de cribado, no un diagnóstico personal.`,
-      'La edad y el sexo no cambian el cálculo del IMC, pero sí cómo un profesional interpreta tu contexto (músculo, etapa vital, etc.).',
-      'Si buscas composición corporal, combina el IMC con cintura, fuerza, sueño y hábitos — no solo con el número.',
-    ]
+    const p1 = recap
+      ? `Con ${recap} como contexto, el IMC ${imcFmt} suele ubicarse en la zona de “${faixa}” en referencias tipo OMS. Sigue siendo una señal poblacional, no una sentencia sobre ti.`
+      : `En referencias tipo OMS, el IMC ${imcFmt} suele caer en “${faixa}”. Es una señal poblacional, no una sentencia sobre ti.`
+    const p2Base =
+      'La edad y el sexo (cuando compartes ese dato) ayudan a interpretar músculo, pubertad, embarazos previos o menopausa — y eso no entra en la fórmula del IMC.'
+    const p2 =
+      idHint !== undefined
+        ? `${p2Base} Decir que tienes ${idHint} años ya enriquece esa conversación.`
+        : p2Base
+    const p3 =
+      'Si buscas composición corporal o salud metabólica, cruza el IMC con cintura, fuerza, sueño y ritmo alimentario — no solo con el número.'
+    return [softenTemplateEmDashes(p1), softenTemplateEmDashes(p2), softenTemplateEmDashes(p3)]
   }
   if (imc < 18.5) faixa = 'baixo peso'
   else if (imc < 25) faixa = 'peso normal'
   else if (imc < 30) faixa = 'sobrepeso'
   else faixa = 'obesidade'
-  return [
-    `Como referência amplamente usada (incluindo critérios da OMS), esse IMC costuma cair na faixa de “${faixa}”. É um sinal de triagem em população, não um rótulo clínico só seu.`,
-    'Idade e sexo não entram na fórmula do IMC, mas mudam como um profissional interpreta o seu contexto (massa magra, fase da vida, menopausa, crescimento em adolescentes, etc.).',
-    'Se o objetivo é composição corporal ou saúde metabólica, o ideal é cruzar o IMC com circunferência de cintura, força, sono e padrão alimentar — não olhar só para o número.',
-  ]
+  const p1 = recap
+    ? `Com ${recap} na mesa, o IMC ${imcFmt} costuma cair na faixa de “${faixa}” na referência OMS mais usada. Continua sendo triagem em população, não uma sentença sobre quem você é.`
+    : `Na referência incluindo critérios da OMS, o IMC ${imcFmt} costuma cair em “${faixa}”. É triagem em população, não uma sentença sobre quem você é.`
+  const p2Base =
+    'Trazer idade e o sexo registrado ao nascer (quando você quiser) ajuda a olhar músculo, puberdade, gestações ou menopausa — e isso não entra na fórmula do IMC.'
+  const p2 =
+    idHint !== undefined ? `${p2Base} Só dizer que você tem ${idHint} anos já deixa o papo mais fino.` : p2Base
+  const p3 =
+    'Se o foco é composição corporal ou saúde metabólica, o ideal é cruzar o IMC com circunferência de cintura, força, sono e ritmo alimentar — não ficar só no índice.'
+  return [softenTemplateEmDashes(p1), softenTemplateEmDashes(p2), softenTemplateEmDashes(p3)]
 }
 
 function buildCalculatorWhatsAppPrefill(
@@ -2503,9 +2842,15 @@ function CalculatorBlock({
   })
 
   const resultNum = evaluateCalculatorFormula(formula, fieldsParaCalculadora, values)
-  const resultCopy = getCalculatorResultCopy(title, resultNum, locale)
   const isImcCalculator = title.toLowerCase().includes('imc')
-  const imcFullAnalysis = isImcCalculator ? getCalculatorImcFullAnalysisParagraphs(resultNum, locale) : null
+  const imcProfile = isImcCalculator ? extractImcProfile(fieldsParaCalculadora, values) : null
+  const resultCopy = getCalculatorResultCopy(title, resultNum, locale, { imcProfile })
+  const imcFullAnalysis =
+    isImcCalculator ? getCalculatorImcFullAnalysisParagraphs(resultNum, locale, imcProfile) : null
+  const imcEngagementHeadline = isImcCalculator ? getImcEngagementHeadline(resultNum, locale, imcProfile) : ''
+  const imcRecapLine = isImcCalculator && imcProfile ? buildImcRecapLine(imcProfile, locale) : null
+  const pessoaLabel =
+    locale === 'en' ? 'professional' : locale === 'es' ? 'profesional' : 'profissional'
 
   const beginCalculatorForm = () => {
     if (!calculatorStartSent.current) {
@@ -2658,6 +3003,12 @@ function CalculatorBlock({
             </div>
             <p className="mb-2 text-xs text-gray-500">{title}</p>
             <p className="mb-4 text-sm text-gray-500">{resultIntro}</p>
+            {imcRecapLine ? (
+              <p className="-mt-3 mb-4 text-xs leading-relaxed text-gray-600">
+                <span className="font-semibold text-gray-700">{t.calculatorImcRecapLead}</span>{' '}
+                {imcRecapLine}
+              </p>
+            ) : null}
 
             <div className="relative mb-5 overflow-hidden rounded-2xl border border-sky-100/80 bg-gradient-to-br from-sky-50 to-white shadow-sm">
               <div className="absolute bottom-0 left-0 top-0 w-1.5 rounded-l-2xl bg-gradient-to-b from-sky-400 to-sky-600" />
@@ -2672,6 +3023,11 @@ function CalculatorBlock({
                     </>
                   )}
                 </p>
+                {isImcCalculator && imcEngagementHeadline ? (
+                  <p className="mt-4 border-t border-sky-100/80 pt-4 text-base font-bold leading-snug text-gray-900">
+                    {imcEngagementHeadline}
+                  </p>
+                ) : null}
               </div>
             </div>
 
@@ -2686,13 +3042,29 @@ function CalculatorBlock({
                   <p className="text-sm leading-relaxed text-gray-700">{resultCopy.tip}</p>
                 </div>
                 {showFullAnalysis && imcFullAnalysis ? (
-                  <div className="space-y-3 rounded-xl border border-violet-100 bg-violet-50/60 p-4">
-                    {imcFullAnalysis.map((p, i) => (
-                      <p key={i} className="text-sm leading-relaxed text-gray-700">
-                        {softenTemplateEmDashes(p)}
+                  <>
+                    <div className="space-y-3 rounded-xl border border-violet-100 bg-violet-50/60 p-4">
+                      {imcFullAnalysis.map((pText, i) => (
+                        <p key={i} className="text-sm leading-relaxed text-gray-700">
+                          {softenTemplateEmDashes(pText)}
+                        </p>
+                      ))}
+                    </div>
+                    <div className="p-4 rounded-xl border border-green-100 bg-green-50/80">
+                      <p className="text-sm leading-relaxed text-gray-700">{t.goodNews}</p>
+                    </div>
+                    <div className="p-4 rounded-xl border border-sky-100 bg-sky-50/80">
+                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-sky-600">
+                        {t.moreFactors}
                       </p>
-                    ))}
-                  </div>
+                      <p className="mb-2 text-sm leading-relaxed text-gray-600">
+                        {t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
+                      </p>
+                      <p className="text-sm font-medium leading-relaxed text-gray-700">
+                        {t.talkToPro.replace('{pessoa}', pessoaLabel)}
+                      </p>
+                    </div>
+                  </>
                 ) : null}
               </div>
             ) : null}
@@ -2711,7 +3083,7 @@ function CalculatorBlock({
                 </>
               ) : (
                 <p className="text-center text-sm text-gray-500">
-                  {t.contactNotAvailable.replace('{pessoa}', locale === 'en' ? 'professional' : locale === 'es' ? 'profesional' : 'profissional')}
+                  {t.contactNotAvailable.replace('{pessoa}', pessoaLabel)}
                 </p>
               )}
               <button
