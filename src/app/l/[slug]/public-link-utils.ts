@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase'
 import { isYladaLinkHiddenFromPublicDueToFreemium } from '@/lib/ylada-freemium-public-link'
 import { fetchWhatsappE164ForUserId } from '@/lib/ylada-public-link-whatsapp'
-import { resolveProLideresMemberLinkAttribution } from '@/lib/pro-lideres-member-link-tokens-resolve'
+import { resolveProLideresPublicMemberCtaForLinkId } from '@/lib/ylada-public-link-member-cta'
 
 export type PublicLinkPayload = {
   slug: string
@@ -123,13 +123,13 @@ export async function fetchPublicLinkPayload(
 
   let proLideresAttributionToken: string | null = null
   if (memberSeg) {
-    const row = await resolveProLideresMemberLinkAttribution(supabaseAdmin, link.id as string, memberSeg)
-    if (!row) {
+    const resolved = await resolveProLideresPublicMemberCtaForLinkId(supabaseAdmin, link.id as string, memberSeg)
+    if (!resolved) {
       notFound()
     }
-    proLideresAttributionToken = row.token
+    proLideresAttributionToken = resolved.token
     /** Sempre o número do membro (ou vazio) — nunca manter o WhatsApp do líder quando o link é atribuído a um membro. */
-    ctaWhatsapp = await fetchWhatsappE164ForUserId(supabaseAdmin, row.member_user_id)
+    ctaWhatsapp = resolved.whatsapp
   }
 
   return {

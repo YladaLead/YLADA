@@ -1,10 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 import type { ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
+import { ensureProLideresMemberLinkTokensForMemberOnLinks } from '@/lib/pro-lideres-member-link-tokens-ensure'
 
 /**
- * Para membros no catálogo: troca `/l/{slug}` pelo link pessoal `/l/{slug}/{token|share_path_slug}`
- * quando existe linha em `pro_lideres_member_link_tokens`.
+ * Para membros no catálogo: garante token em `pro_lideres_member_link_tokens` se faltar e troca
+ * `/l/{slug}` pelo link pessoal `/l/{slug}/{token|share_path_slug}`.
  */
 export async function personalizeProLideresCatalogUrlsForMember(
   supabase: SupabaseClient,
@@ -15,6 +16,12 @@ export async function personalizeProLideresCatalogUrlsForMember(
   if (!yladaItems.length) return catalog
 
   const linkIds = [...new Set(yladaItems.map((i) => i.yladaLinkId as string))]
+  await ensureProLideresMemberLinkTokensForMemberOnLinks(supabase, {
+    leaderTenantId: opts.leaderTenantId,
+    memberUserId: opts.memberUserId,
+    yladaLinkIds: linkIds,
+  })
+
   const { data: tokRows } = await supabase
     .from('pro_lideres_member_link_tokens')
     .select('ylada_link_id, token, share_path_slug')

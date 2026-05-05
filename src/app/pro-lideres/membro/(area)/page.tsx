@@ -27,8 +27,12 @@ export default async function ProLideresMembroVisaoPage() {
   let linkRows: Awaited<ReturnType<typeof fetchProLideresCatalogLinkDiagnosticRows>>['rows'] = []
   let truncated = false
   let statsDays = 30
+  /** Evita confundir "sem tráfego" com falha técnica ao ler métricas. */
+  let diagnosticsIssue: 'none' | 'no_admin' | 'fetch_error' = 'none'
 
-  if (admin) {
+  if (!admin) {
+    diagnosticsIssue = 'no_admin'
+  } else {
     try {
       const pack = await fetchProLideresCatalogLinkDiagnosticRows(admin, {
         tenantId: gate.tenant.id,
@@ -41,6 +45,7 @@ export default async function ProLideresMembroVisaoPage() {
       statsDays = pack.days
     } catch (e) {
       console.error('[membro visão geral] diagnóstico links', e)
+      diagnosticsIssue = 'fetch_error'
     }
   }
 
@@ -117,11 +122,23 @@ export default async function ProLideresMembroVisaoPage() {
 
         {activeLinks.length === 0 ? (
           <p className="px-4 py-8 text-center text-sm text-gray-600">
-            Ainda não há atividade registrada neste período. Acesse as ferramentas em{' '}
-            <Link href={proLideresItemHrefWithBase(base, 'catalogo')} className="font-medium text-blue-600">
-              Meus links
-            </Link>{' '}
-            com os links da sua equipe.
+            {diagnosticsIssue === 'no_admin' ? (
+              <>
+                Não foi possível carregar as métricas neste momento (ambiente incompleto). Os contadores voltam quando a
+                configuração do servidor estiver correta — avise o suporte se persistir.
+              </>
+            ) : diagnosticsIssue === 'fetch_error' ? (
+              <>Não foi possível carregar as métricas. Tente atualizar a página em instantes.</>
+            ) : (
+              <>
+                Ainda não há atividade registrada neste período. Acesse as ferramentas em{' '}
+                <Link href={proLideresItemHrefWithBase(base, 'catalogo')} className="font-medium text-blue-600">
+                  Meus links
+                </Link>{' '}
+                e use <strong className="font-semibold text-gray-800">Copiar link</strong> (URLs com o teu código de
+                equipa contam aberturas e WhatsApp na tua área).
+              </>
+            )}
           </p>
         ) : (
           <>

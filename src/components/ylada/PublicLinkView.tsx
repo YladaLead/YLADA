@@ -24,6 +24,10 @@ import {
 import PoweredByYlada from '@/components/ylada/PoweredByYlada'
 import type { Language } from '@/lib/i18n'
 import { createClient } from '@/lib/supabase-client'
+import { parseProLideresMemberPathSegment } from '@/lib/ylada-public-link-path'
+
+const publicLinkShareButtonClassName =
+  'w-full py-3.5 px-4 rounded-xl border-2 border-sky-300 bg-sky-100/80 text-sky-700 font-semibold shadow-sm shadow-sky-300/35 transition-colors hover:bg-sky-100 hover:border-sky-400'
 
 const PUBLIC_LINK_UI: Record<Language, {
   start: string
@@ -648,6 +652,31 @@ export default function PublicLinkView({
     return u || null
   })
   const [plAttributionReady, setPlAttributionReady] = useState(() => Boolean(shareAttributionToken?.trim()))
+  const isProLideresPresetLink =
+    (config.meta as Record<string, unknown> | undefined)?.pro_lideres_preset === true
+  const [memberCtaDigits, setMemberCtaDigits] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!isProLideresPresetLink) return
+    if (typeof window === 'undefined') return
+    const pathSeg = parseProLideresMemberPathSegment(window.location.pathname)
+    const q = new URLSearchParams(window.location.search).get('pl_m')?.trim()
+    const segment = pathSeg || q || ''
+    if (!segment) return
+    let cancelled = false
+    fetch(
+      `/api/ylada/links/public-member-cta?slug=${encodeURIComponent(slug)}&member_segment=${encodeURIComponent(segment)}`
+    )
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { whatsapp?: string | null } | null) => {
+        if (cancelled || !data?.whatsapp?.trim()) return
+        setMemberCtaDigits(data.whatsapp.trim())
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [isProLideresPresetLink, slug])
 
   useEffect(() => {
     const fromUrl = shareAttributionToken?.trim()
@@ -702,7 +731,8 @@ export default function PublicLinkView({
 
   const resultCta = (config.result as Record<string, unknown>)?.cta as Record<string, unknown> | undefined
   const ctaText = (resultCta?.text as string) || (config.ctaText as string) || (config.ctaDefault as string) || t.speakWhatsApp
-  const whatsappUrl = buildWhatsAppUrl(ctaWhatsapp)
+  const effectiveCtaWhatsapp = memberCtaDigits ?? ctaWhatsapp
+  const whatsappUrl = buildWhatsAppUrl(effectiveCtaWhatsapp)
 
   const handleCtaClick = (metricsId?: string, whatsappPrefill?: string) => {
     trackLinkEvent(slug, 'cta_click', metricsId ? { metrics_id: metricsId } : undefined)
@@ -1497,7 +1527,7 @@ function ConfigDrivenLinkView({
                 <button
                   type="button"
                   onClick={handleShareResult}
-                  className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-xl transition-colors"
+                  className={publicLinkShareButtonClassName}
                 >
                   {t.shareResult}
                 </button>
@@ -1610,7 +1640,7 @@ function ConfigDrivenLinkView({
               <button
                 type="button"
                 onClick={handleShareStaticResult}
-                className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-xl transition-colors"
+                className={publicLinkShareButtonClassName}
               >
                 {t.shareResult}
               </button>
@@ -2113,7 +2143,7 @@ function DiagnosticoQuiz({
               <button
                 type="button"
                 onClick={() => void handleShareQuizResult()}
-                className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-xl transition-colors"
+                className={publicLinkShareButtonClassName}
               >
                 {t.shareResult}
               </button>
@@ -2982,7 +3012,7 @@ function CalculatorBlock({
               <button
                 type="button"
                 onClick={handleShareCalculatorResult}
-                className="w-full rounded-xl border border-sky-200 px-4 py-3 font-semibold text-sky-700 transition-colors hover:bg-sky-50"
+                className={publicLinkShareButtonClassName}
               >
                 {t.shareResult}
               </button>
