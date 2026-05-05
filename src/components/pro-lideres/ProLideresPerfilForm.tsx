@@ -170,7 +170,6 @@ export function ProLideresPerfilForm({
         setWhatsapp(wa)
         setWhatsappCountryCode(inferCountryIsoFromLeadingDigits(wa, 'BR'))
         setMemberShareSlug(typeof d.memberShareSlug === 'string' ? d.memberShareSlug.trim() : memberShareSlug.trim())
-        setSavedAt(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }))
         return
       }
 
@@ -254,16 +253,10 @@ export function ProLideresPerfilForm({
       {error && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">{error}</div>
       )}
-      {savedAt && <p className="text-sm font-medium text-green-700">Guardado às {savedAt}.</p>}
-      {isMemberTeamProfile ? (
-        <p className="rounded-lg border border-sky-100 bg-sky-50/90 px-3 py-2.5 text-sm text-gray-800">
-          <span className="font-medium text-sky-900">Editar o teu perfil</span>
-          <span className="mt-1.5 block text-xs text-gray-700">
-            Nome, e-mail, WhatsApp e slug de divulgação podem ser alterados aqui. O nome da operação é definido pelo
-            líder (só leitura).
-          </span>
-        </p>
-      ) : !canEditTenantProfile ? (
+      {savedAt && !isMemberTeamProfile ? (
+        <p className="text-sm font-medium text-green-700">Guardado às {savedAt}.</p>
+      ) : null}
+      {!isMemberTeamProfile && !canEditTenantProfile ? (
         <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700">
           {c.readOnlyMessage}
           <span className="mt-2 block text-xs text-gray-600">
