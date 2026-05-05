@@ -1,18 +1,17 @@
-import fs from 'node:fs/promises'
-import path from 'node:path'
 import { ImageResponse } from 'next/og'
-import {
-  TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
-  TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
-} from '@/lib/estetica-consultoria-form-templates'
 import {
   buildEsteticaResponderShareDescription,
   buildEsteticaResponderShareTitle,
+  publicSiteOriginForEsteticaResponderOg,
   responderOgAccentColor,
   responderOgBandLabel,
   responderOgFormKindLabel,
   resolveEsteticaConsultoriaResponderShareContext,
 } from '@/lib/estetica-consultoria-responder-og'
+
+/** Manter alinhado a `@/lib/estetica-consultoria-form-templates` (evita importar o módulo grande nesta rota). */
+const TEMPLATE_DIAGNOSTICO_CAPILAR_ID = 'diagnostico_capilar_v1' as const
+const TEMPLATE_DIAGNOSTICO_CORPORAL_ID = 'diagnostico_corporal_v1' as const
 
 export const runtime = 'nodejs'
 export const size = { width: 1200, height: 630 }
@@ -23,14 +22,10 @@ const DIAGNOSTICO_POS_PAGAMENTO_FILE: Record<string, string> = {
   [TEMPLATE_DIAGNOSTICO_CORPORAL_ID]: 'marketing/estetica-diagnostico-pre-reuniao-pos-pagamento-corporal.png',
 }
 
-async function pngPublicPathToDataUrl(publicPathNoLeadingSlash: string): Promise<string | null> {
-  try {
-    const full = path.join(process.cwd(), 'public', publicPathNoLeadingSlash)
-    const buf = await fs.readFile(full)
-    return `data:image/png;base64,${buf.toString('base64')}`
-  } catch {
-    return null
-  }
+function absolutePublicAssetUrl(publicPathNoLeadingSlash: string): string {
+  const base = publicSiteOriginForEsteticaResponderOg().replace(/\/$/, '')
+  const rel = publicPathNoLeadingSlash.replace(/^\//, '')
+  return `${base}/${rel}`
 }
 
 export default async function Image({ params }: { params: Promise<{ token: string }> }) {
@@ -44,26 +39,24 @@ export default async function Image({ params }: { params: Promise<{ token: strin
       ? DIAGNOSTICO_POS_PAGAMENTO_FILE[templateKey]
       : null
   if (relFile) {
-    const src = await pngPublicPathToDataUrl(relFile)
-    if (src) {
-      return new ImageResponse(
-        (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: '#f8fafc',
-            }}
-          >
-            <img src={src} width={1200} height={630} alt="" style={{ objectFit: 'cover', width: 1200, height: 630 }} />
-          </div>
-        ),
-        { ...size }
-      )
-    }
+    const imgUrl = absolutePublicAssetUrl(relFile)
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#f8fafc',
+          }}
+        >
+          <img src={imgUrl} width={1200} height={630} alt="" style={{ objectFit: 'cover', width: 1200, height: 630 }} />
+        </div>
+      ),
+      { ...size }
+    )
   }
 
   const headline = buildEsteticaResponderShareTitle(band, templateKey)
