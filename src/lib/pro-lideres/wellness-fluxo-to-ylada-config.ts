@@ -5,6 +5,7 @@
 import type { FluxoCliente } from '@/types/wellness-system'
 import { FLOW_IDS } from '@/config/ylada-flow-catalog'
 import { isHypeCalculadoraPresetFluxoId } from '@/lib/pro-lideres/pro-lideres-hype-calculadora-preset-fluxos'
+import { buildProLideresPresetOgDescription } from '@/lib/pro-lideres/pro-lideres-preset-og-description'
 import { isWellnessCalculadoraBasicaPresetFluxoId } from '@/lib/pro-lideres/pro-lideres-wellness-calculadoras-basicas-preset-fluxos'
 
 const DIAGNOSTICO_TEMPLATE_ID = 'a0000001-0001-4000-8000-000000000001' as const
@@ -184,12 +185,18 @@ export function wellnessFluxoToYladaConfigJson(
     if (d.mensagemPositiva?.trim()) {
       summary_bullets.push(d.mensagemPositiva.trim())
     }
+    const ogDescription = buildProLideresPresetOgDescription({
+      fluxoId: fluxo.id,
+      kind,
+      nome: fluxo.nome,
+    })
     return {
       title: fluxo.nome,
       ctaText: fluxo.cta,
       page: {
         subtitle: pageObjetivo,
         when_to_use: pageObjetivo,
+        og_description: ogDescription,
       },
       meta: {
         architecture: 'PROJECTION_CALCULATOR',
@@ -246,12 +253,19 @@ export function wellnessFluxoToYladaConfigJson(
   const isAguaCalculadoraPreset = fluxo.id === 'agua' || fluxo.id === 'calc-hidratacao'
   const themeParaDiagnostico = isAguaCalculadoraPreset ? 'Hidratação' : fluxo.nome
 
+  const ogDescription = buildProLideresPresetOgDescription({
+    fluxoId: fluxo.id,
+    kind,
+    nome: fluxo.nome,
+  })
+
   return {
     title: fluxo.nome,
     ctaText: fluxo.cta,
     page: {
       subtitle: pageObjetivo,
       when_to_use: pageObjetivo,
+      og_description: ogDescription,
     },
     meta: {
       // Vendas e recrutamento: RISK_DIAGNOSIS + pacotes em ylada_flow_diagnosis_outcomes (tom negócio/convite, não clínico).

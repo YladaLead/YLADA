@@ -56,7 +56,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       : getYladaOgImageUrl(themeRaw || title, segment, baseUrl)
   const ogMime = ogImageMime(ogImageUrl)
   const pageUrl = `${baseUrl}/l/${slug}`
+  const ogFromPage = typeof page.og_description === 'string' ? page.og_description.trim() : ''
   const description =
+    ogFromPage ||
     (page.subtitle as string) ??
     (config.description as string) ??
     'Faça o quiz e descubra seu resultado personalizado.'

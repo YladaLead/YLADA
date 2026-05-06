@@ -9,10 +9,8 @@ import { getProLideresSalesPresetFluxos } from '@/lib/pro-lideres/pro-lideres-sa
 import { getProLideresHypeQuizPresetFluxos } from '@/lib/pro-lideres/pro-lideres-hype-quiz-preset-fluxos'
 import { getProLideresHypeCalculadoraPresetFluxos } from '@/lib/pro-lideres/pro-lideres-hype-calculadora-preset-fluxos'
 import { ensureWellnessNutritionMirrorsAsProLideresLinks } from '@/lib/pro-lideres/wellness-nutrition-mirror-ensure'
-import {
-  getProLideresLegacyAguaPresetFluxo,
-  isWellnessCalculadoraBasicaPresetFluxoId,
-} from '@/lib/pro-lideres/pro-lideres-wellness-calculadoras-basicas-preset-fluxos'
+import { getProLideresLegacyAguaPresetFluxo } from '@/lib/pro-lideres/pro-lideres-wellness-calculadoras-basicas-preset-fluxos'
+import { buildProLideresPresetOgDescription } from '@/lib/pro-lideres/pro-lideres-preset-og-description'
 import type { FluxoCliente } from '@/types/wellness-system'
 
 /** Template biblioteca YLADA: calculadora IMC (peso, altura cm, idade, sexo → IMC). */
@@ -23,6 +21,25 @@ type PresetPack = {
   fluxos: FluxoCliente[]
   segment: string
   category: string
+}
+
+function attachProLideresOgToPresetConfig(
+  config: Record<string, unknown>,
+  fluxo: FluxoCliente,
+  kind: 'sales' | 'recruitment'
+): Record<string, unknown> {
+  const page = ((config.page as Record<string, unknown>) || {}) as Record<string, unknown>
+  return {
+    ...config,
+    page: {
+      ...page,
+      og_description: buildProLideresPresetOgDescription({
+        fluxoId: fluxo.id,
+        kind,
+        nome: fluxo.nome,
+      }),
+    },
+  }
 }
 
 /**
@@ -91,17 +108,29 @@ export async function ensureProLideresPresetYladaLinks(ownerUserId: string): Pro
       const slug = proLideresPresetSlug(ownerUserId, pack.kind, fluxo.id)
       const useRealImcCalculator = fluxo.id === 'calc-imc' && imcCalculatorSchema !== null
       const config_json: Record<string, unknown> = useRealImcCalculator
-        ? {
-            ...imcCalculatorSchema,
-            title: fluxo.nome,
-            meta: {
-              pro_lideres_preset: true,
-              pro_lideres_fluxo_id: fluxo.id,
-              pro_lideres_kind: pack.kind,
-              objective: pack.kind === 'recruitment' ? 'propagar' : 'educar',
-              area_profissional: 'wellness',
-            },
-          }
+        ? (() => {
+            const base = { ...(imcCalculatorSchema as Record<string, unknown>) }
+            const prevMeta =
+              base.meta && typeof base.meta === 'object' && !Array.isArray(base.meta)
+                ? (base.meta as Record<string, unknown>)
+                : {}
+            return attachProLideresOgToPresetConfig(
+              {
+                ...base,
+                title: fluxo.nome,
+                meta: {
+                  ...prevMeta,
+                  pro_lideres_preset: true,
+                  pro_lideres_fluxo_id: fluxo.id,
+                  pro_lideres_kind: pack.kind,
+                  objective: pack.kind === 'recruitment' ? 'propagar' : 'educar',
+                  area_profissional: 'wellness',
+                },
+              },
+              fluxo,
+              pack.kind
+            )
+          })()
         : wellnessFluxoToYladaConfigJson(fluxo, pack.kind)
 
       /** Links já criados: atualiza `config_json` quando o preset canónico muda (vendas selecionados + todo recrutamento). */
@@ -110,10 +139,9 @@ export async function ensureProLideresPresetYladaLinks(ownerUserId: string): Pro
           pack.kind === 'sales' && pack.segment === 'hype' && !useRealImcCalculator
         const refreshSalesPresetConfig =
           pack.kind === 'sales' &&
-          !useRealImcCalculator &&
           (refreshHypePresetConfig ||
-            (pack.segment === 'wellness' &&
-              (isWellnessCalculadoraBasicaPresetFluxoId(fluxo.id) || fluxo.id === 'avaliacao-perfil-metabolico')))
+            pack.segment === 'wellness' ||
+            useRealImcCalculator)
         const refreshRecruitmentPresetConfig = pack.kind === 'recruitment' && !useRealImcCalculator
         if (refreshSalesPresetConfig || refreshRecruitmentPresetConfig) {
           const { error: updateError } = await supabaseAdmin
