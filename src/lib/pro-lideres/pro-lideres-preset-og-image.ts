@@ -1,21 +1,26 @@
 /**
- * Open Graph para presets Pro Líderes (`/l/pl-…`): só assets em `/images/og/ylada/`.
- * Nunca usa pasta `wellness` (evita marca Wellness no WhatsApp).
+ * Open Graph para presets Pro Líderes (`/l/pl-…`).
+ * - Calculadoras espelhadas ao Wellness: mesma URL que `getOGImageUrl` em `/images/og/wellness/`
+ *   (mesmas prévias no WhatsApp que em Meus Links Wellness; vendas e recrutamento usam o mesmo fluxo).
+ * - Resto: assets em `/images/og/ylada/`.
  * Sem mapeamento → logo YLADA (`YLADA_OG_FALLBACK_LOGO_PATH`).
  */
+import { getFullOGImageUrl } from '@/lib/og-image-map'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 
 const YLADA_OG_DIR = '/images/og/ylada'
 
+/** `pro_lideres_fluxo_id` das calculadoras básicas → `template_slug` usado no mapa OG do Wellness. */
+const WELLNESS_MIRROR_CALC_FLUXO_TO_TEMPLATE_SLUG: Record<string, string> = {
+  agua: 'calc-hidratacao',
+  'calc-hidratacao': 'calc-hidratacao',
+  'calc-calorias': 'calc-calorias',
+  'calc-proteina': 'calc-proteina',
+  'calc-imc': 'calc-imc',
+}
+
 /** Nome de ficheiro em `public/images/og/ylada/` (ASCII, ficheiros reais no repo). */
 const PRO_LIDERES_PRESET_OG_FILE: Record<string, string> = {
-  // Calculadoras vendas
-  agua: 'hidratacao.jpg',
-  'calc-hidratacao': 'hidratacao.jpg',
-  'calc-calorias': 'alimentacao.png',
-  'calc-proteina': 'nutri-saude.png',
-  'calc-imc': 'peso-gordura.webp',
-
   // Quizzes vendas Wellness
   'energia-matinal': 'energia.jpg',
   'energia-tarde': 'energia.jpg',
@@ -71,7 +76,12 @@ const PRO_LIDERES_PRESET_OG_FILE: Record<string, string> = {
 
 export function getProLideresPresetOpenGraphImageUrl(fluxoId: string, baseUrl: string): string {
   const base = baseUrl.replace(/\/$/, '')
-  const file = PRO_LIDERES_PRESET_OG_FILE[fluxoId.trim()]
+  const trimmed = fluxoId.trim()
+  const wellnessSlug = WELLNESS_MIRROR_CALC_FLUXO_TO_TEMPLATE_SLUG[trimmed]
+  if (wellnessSlug) {
+    return getFullOGImageUrl(wellnessSlug, base, 'wellness')
+  }
+  const file = PRO_LIDERES_PRESET_OG_FILE[trimmed]
   if (!file) {
     return `${base}${YLADA_OG_FALLBACK_LOGO_PATH}`
   }
