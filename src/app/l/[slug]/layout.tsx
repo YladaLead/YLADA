@@ -59,9 +59,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogFromPage = typeof page.og_description === 'string' ? page.og_description.trim() : ''
   const description =
     ogFromPage ||
-    (page.subtitle as string) ??
-    (config.description as string) ??
-    'Faça o quiz e descubra seu resultado personalizado.'
+    (((page.subtitle as string | undefined) ??
+      (config.description as string | undefined)) ??
+      'Faça o quiz e descubra seu resultado personalizado.')
 
   return {
     title: `${title} | YLADA`,
