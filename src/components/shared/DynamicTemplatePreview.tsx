@@ -11,6 +11,10 @@ import {
 } from '@/lib/diagnosticos-nutri'
 import { diagnosticosCoach, getDiagnostico as getDiagnosticoCoach } from '@/lib/diagnosticos-coach'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import {
+  AVALIACAO_PERFIL_METABOLICO_QUIZ_QUESTIONS_DYNAMIC,
+  isAvaliacaoPerfilMetabolicoWellnessSlug,
+} from '@/lib/wellness/avaliacao-perfil-metabolico-quiz-questions'
 
 interface Template {
   id: string
@@ -1065,6 +1069,19 @@ export default function DynamicTemplatePreview({
         ]
       }
     }
+    if (isAvaliacaoPerfilMetabolicoWellnessSlug(slug)) {
+      return {
+        titulo: 'Avaliação do Perfil Metabólico',
+        descricao: 'Identifique sinais de metabolismo acelerado, equilibrado ou lento',
+        mensagem: '🚀 Uma avaliação personalizada para você.',
+        beneficios: [
+          'Informações personalizadas',
+          'Recomendações específicas',
+          'Estratégias de otimização',
+          'Produtos adequados ao seu perfil',
+        ],
+      }
+    }
     // Fallback padrão
     return {
       titulo: nome,
@@ -1081,10 +1098,22 @@ export default function DynamicTemplatePreview({
 
   // Renderizar QUIZ
   // Verificar se questions é array (formato completo) ou número (formato básico)
-  const questionsArray = Array.isArray(content.questions) 
-    ? content.questions 
-    : (content.items && Array.isArray(content.items) ? content.items : null)
-  
+  const slugNormQuiz = (template.slug || template.id || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+
+  const questionsFromContent = Array.isArray(content.questions)
+    ? content.questions
+    : content.items && Array.isArray(content.items)
+      ? content.items
+      : null
+
+  let questionsArray: unknown[] | null = questionsFromContent
+  if (templateType === 'quiz' && isAvaliacaoPerfilMetabolicoWellnessSlug(slugNormQuiz)) {
+    questionsArray = AVALIACAO_PERFIL_METABOLICO_QUIZ_QUESTIONS_DYNAMIC as unknown[]
+  }
+
   if (templateType === 'quiz' && questionsArray && questionsArray.length > 0) {
     const perguntas = questionsArray
     const totalPerguntas = perguntas.length

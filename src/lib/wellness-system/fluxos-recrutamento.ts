@@ -343,7 +343,7 @@ export const fluxosRecrutamento: FluxoCliente[] = [
       },
       {
         id: 'p5',
-        texto: 'Estaria aberto(a) a conhecer como funciona trabalhar com produtos que você já usa?',
+        texto: 'Topa uma conversa curta no WhatsApp com quem te enviou o link para tirar dúvidas antes de decidir?',
         tipo: 'sim_nao'
       }
     ],
@@ -398,7 +398,7 @@ export const fluxosRecrutamento: FluxoCliente[] = [
       },
       {
         id: 'p5',
-        texto: 'Estaria interessado(a) em um modelo 100% digital?',
+        texto: 'Quer que quem te enviou o link te mostre rotina real (mensagens, follow-up) numa conversa rápida?',
         tipo: 'sim_nao'
       }
     ],
@@ -705,7 +705,7 @@ export const fluxosRecrutamento: FluxoCliente[] = [
       },
       {
         id: 'p2',
-        texto: 'De 0 a 10, quão importante é acelerar seus resultados?',
+        texto: 'De 0 a 10, quão importante é manter consistência nos seus hábitos (sono, alimentação, movimento)?',
         tipo: 'escala',
         escalaMin: 0,
         escalaMax: 10
@@ -717,31 +717,33 @@ export const fluxosRecrutamento: FluxoCliente[] = [
       },
       {
         id: 'p4',
-        texto: 'Estaria interessado(a) em uma forma que acelera resultados e ainda gera renda?',
+        texto: 'Estaria interessado(a) em separar bem conversa de hábitos/produto e conversa de oportunidade de negócio?',
         tipo: 'sim_nao'
       },
       {
         id: 'p5',
-        texto: 'Você busca uma solução prática e rápida?',
+        texto: 'Quer falar com quem te enviou o link para alinhar expectativas (saúde e negócio) com ética?',
         tipo: 'sim_nao'
       }
     ],
     diagnostico: {
       titulo: 'Perfil Emagrecimento Ativo — Potencial de Resultado e Renda',
-      descricao: 'Seu teste mostrou que você tem características muito favoráveis para emagrecer rápido com o modelo que usamos — e isso ainda pode virar uma renda paralela.',
+      descricao:
+        'Seu teste mostrou foco em bem-estar e curiosidade sobre renda. O próximo passo costuma ser alinhar com quem te enviou o link o que é conversa de hábito e o que é oportunidade de negócio — sem misturar promessas.',
       sintomas: [
         'Foco em emagrecimento',
         'Interesse em saúde e bem-estar',
-        'Busca por resultados rápidos',
-        'Abertura para renda paralela'
+        'Busca por consistência nos hábitos',
+        'Abertura para entender modelo de negócio com clareza'
       ],
       beneficios: [
-        'Acelerar resultados no emagrecimento',
-        'Criar renda paralela',
-        'Solução prática e rápida',
-        'Modelo integrado'
+        'Apoio para hábitos com linguagem responsável',
+        'Entender oportunidade de negócio sem confundir com promessa de resultado físico',
+        'Conversa guiada com quem conhece o modelo',
+        'Próximo passo no WhatsApp com contexto'
       ],
-      mensagemPositiva: 'Seu diagnóstico revelou que você tem um dos perfis que mais aceleram resultados com bebidas funcionais — e ainda permite criar renda extra.'
+      mensagemPositiva:
+        'Seu diagnóstico indica perfil em que separar bem “cuidar de si” e “explorar negócio” aumenta confiança — e isso começa numa conversa honesta com quem te convidou.'
     },
     kitRecomendado: 'acelera',
     cta: 'Quero conhecer essa oportunidade',
@@ -776,7 +778,7 @@ export const fluxosRecrutamento: FluxoCliente[] = [
       },
       {
         id: 'p5',
-        texto: 'Você gosta de ajudar pessoas a encontrar soluções?',
+        texto: 'Quer combinar com quem te enviou o link uma conversa para ver processo, treino e follow-up?',
         tipo: 'sim_nao'
       }
     ],
@@ -813,7 +815,7 @@ export const fluxosRecrutamento: FluxoCliente[] = [
       },
       {
         id: 'p2',
-        texto: 'De 0 a 10, quão importante é ter uma renda rápida e acessível agora?',
+        texto: 'De 0 a 10, quão urgente é ter uma nova fonte de renda neste momento?',
         tipo: 'escala',
         escalaMin: 0,
         escalaMax: 10
@@ -830,7 +832,7 @@ export const fluxosRecrutamento: FluxoCliente[] = [
       },
       {
         id: 'p5',
-        texto: 'Você busca uma oportunidade real e acessível para recomeçar?',
+        texto: 'Quer conversar com quem te enviou o link para ver próximos passos com clareza (sem compromisso de entrar)?',
         tipo: 'sim_nao'
       }
     ],
@@ -867,7 +869,7 @@ export const fluxosRecrutamento: FluxoCliente[] = [
       },
       {
         id: 'p2',
-        texto: 'De 0 a 10, quão interessado(a) você está em ganhar enquanto consome?',
+        texto: 'De 0 a 10, quanto valor você dá a receber benefício no que já compra (economia, indicação, programa de cliente)?',
         tipo: 'escala',
         escalaMin: 0,
         escalaMax: 10
@@ -884,7 +886,7 @@ export const fluxosRecrutamento: FluxoCliente[] = [
       },
       {
         id: 'p5',
-        texto: 'Você prefere ganhar apenas compartilhando links, sem vender?',
+        texto: 'Prefere começar compartilhando link e conteúdo, sem montar estoque?',
         tipo: 'sim_nao'
       }
     ],
@@ -939,7 +941,7 @@ export const fluxosRecrutamento: FluxoCliente[] = [
       },
       {
         id: 'p5',
-        texto: 'Você quer começar cedo e construir algo próprio?',
+        texto: 'Quer marcar uma conversa curta com quem te enviou o link para ver o dia a dia real (sem pressão)?',
         tipo: 'sim_nao'
       }
     ],

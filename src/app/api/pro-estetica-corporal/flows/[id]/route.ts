@@ -8,6 +8,7 @@ import {
   PRO_LIDERES_FLOW_LABEL_MAX,
   PRO_LIDERES_FLOW_NOTES_MAX,
 } from '@/lib/pro-lideres-flow-href'
+import { inferProLideresFlowCatalogKindFromHref } from '@/lib/pro-lideres-flow-catalog-kind'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
@@ -82,6 +83,25 @@ export async function PATCH(
   if (Object.keys(patch).length === 0) {
     return NextResponse.json({ error: 'Nada para atualizar' }, { status: 400 })
   }
+
+  const { data: existingRow, error: fetchErr } = await supabaseAdmin
+    .from('leader_tenant_flow_entries')
+    .select('href')
+    .eq('id', id)
+    .eq('leader_tenant_id', ctx.tenant.id)
+    .maybeSingle()
+
+  if (fetchErr) {
+    console.error('[pro-estetica-corporal/flows PATCH] fetch entry', fetchErr)
+    return NextResponse.json({ error: 'Erro ao validar entrada' }, { status: 500 })
+  }
+  if (!existingRow) {
+    return NextResponse.json({ error: 'Entrada não encontrada' }, { status: 404 })
+  }
+
+  const mergedHref =
+    patch.href !== undefined ? String(patch.href) : String((existingRow as { href: string }).href ?? '').trim()
+  patch.catalog_kind = inferProLideresFlowCatalogKindFromHref(mergedHref)
 
   const { data: updated, error } = await supabaseAdmin
     .from('leader_tenant_flow_entries')

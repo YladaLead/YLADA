@@ -9,6 +9,7 @@ import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { perfilMetabolicoDiagnosticos } from '@/lib/diagnostics'
+import { getAvaliacaoPerfilMetabolicoPerguntasTemplate } from '@/lib/wellness/avaliacao-perfil-metabolico-quiz-questions'
 
 interface Pergunta {
   id: number
@@ -32,63 +33,7 @@ export default function AvaliacaoPerfilMetabolico({ config }: TemplateBaseProps)
   const [respostas, setRespostas] = useState<number[]>([])
   const [resultado, setResultado] = useState<Resultado | null>(null)
 
-  const perguntas: Pergunta[] = [
-    {
-      id: 1,
-      pergunta: 'Como você descreveria seu metabolismo?',
-      tipo: 'multipla',
-      opcoes: [
-        'Muito lento, ganho peso facilmente',
-        'Lento, tenho dificuldade para perder peso',
-        'Moderado, equilibrado',
-        'Rápido, queimo calorias facilmente'
-      ]
-    },
-    {
-      id: 2,
-      pergunta: 'Você sente que precisa de ajuda para otimizar seu metabolismo?',
-      tipo: 'multipla',
-      opcoes: [
-        'Sim, preciso muito de orientação profissional',
-        'Sim, seria útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo otimizar sozinho(a)'
-      ]
-    },
-    {
-      id: 3,
-      pergunta: 'Você valoriza ter um plano personalizado baseado no seu perfil metabólico?',
-      tipo: 'multipla',
-      opcoes: [
-        'Muito, é essencial para resultados eficazes',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo prático',
-        'Pouco, prefiro seguir padrões gerais'
-      ]
-    },
-    {
-      id: 4,
-      pergunta: 'Você sente que produtos específicos para seu metabolismo ajudariam seus resultados?',
-      tipo: 'multipla',
-      opcoes: [
-        'Sim, faria toda diferença e aceleraria resultados',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
-      ]
-    },
-    {
-      id: 5,
-      pergunta: 'Você acredita que um acompanhamento especializado pode transformar seu metabolismo?',
-      tipo: 'multipla',
-      opcoes: [
-        'Sim, absolutamente! Estou pronto(a) para mudanças',
-        'Sim, acredito que pode fazer diferença',
-        'Talvez, se for algo estruturado e eficaz',
-        'Não, acho que não é necessário'
-      ]
-    }
-  ]
+  const perguntas: Pergunta[] = getAvaliacaoPerfilMetabolicoPerguntasTemplate()
 
   const pontosPorOpcao = [
     [3, 2, 1, 0], // Pergunta 1: mais lento = mais pontos

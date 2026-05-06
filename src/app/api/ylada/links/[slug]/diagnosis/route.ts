@@ -29,6 +29,9 @@ import { isYladaLinkHiddenFromPublicDueToFreemium } from '@/lib/ylada-freemium-p
 import { recordFreemiumLimitHit } from '@/lib/freemium-behavioral-events'
 import { storeDiagnosisAnswers } from '@/lib/ylada/diagnosis-answers-store'
 import { fetchPackagedDiagnosisOutcome } from '@/lib/ylada/fetch-packaged-diagnosis-outcome'
+import type { DiagnosisDecisionOutput } from '@/lib/ylada/diagnosis-types'
+import { resolveDiagnosisContentContext } from '@/lib/ylada/diagnosis-content-context'
+import { normalizeDiagnosisDecisionForVisitor } from '@/lib/ylada/diagnosis-visitor-copy-normalize'
 
 const ARCHITECTURES: DiagnosisArchitecture[] = [
   'RISK_DIAGNOSIS',
@@ -75,9 +78,11 @@ function hashAnswersForCache(
   themeRaw: string,
   linkTitle: string,
   diagnosisVertical?: string,
+  /** Incluir quando a pontuação RISK depende de flags em `meta` (ex.: `invert_risk_mcq_score`). */
+  scoringSalt?: string,
 ): string {
   const base = hashAnswers(answers)
-  const salt = `${themeRaw.trim()}|${linkTitle.trim()}|${diagnosisVertical ?? ''}`
+  const salt = `${themeRaw.trim()}|${linkTitle.trim()}|${diagnosisVertical ?? ''}|${scoringSalt ?? ''}`
   return createHash('sha256').update(`${base}|${salt}`).digest('hex').slice(0, 32)
 }
 
@@ -130,6 +135,14 @@ function optionIndexToText(idx: unknown, options: string[] | undefined): string 
   return options[i]?.trim() || null
 }
 
+/** Respostas numéricas/texto em calculadoras PROJECTION (q1–q4) não têm options no form. */
+function leadAnswerDisplay(val: unknown): string | null {
+  if (val === undefined || val === null) return null
+  if (typeof val === 'number' && !Number.isNaN(val)) return String(val)
+  const s = String(val).trim()
+  return s.length > 0 ? s : null
+}
+
 const MAX_WHATSAPP_PREFILL_CHARS = 1700
 
 /**
@@ -145,9 +158,9 @@ function buildWhatsAppLeadBulletLines(
     for (let i = 0; i < Math.min(formFields.length, 4); i++) {
       const f = formFields[i]
       const val = visitor_answers[f.id]
-      const text = optionIndexToText(val, f.options)
+      const text = optionIndexToText(val, f.options) ?? leadAnswerDisplay(val)
       if (text) {
-        const label = RESUMO_4D_LABELS[i] ?? `pergunta ${i + 1}`
+        const label = (f.label || '').trim() || RESUMO_4D_LABELS[i] || `pergunta ${i + 1}`
         bullets.push(`• ${label}: ${text}`)
       }
     }
@@ -179,6 +192,32 @@ function appendLeadContextToWhatsAppPrefill(basePrefill: string | undefined, bul
 function clampWhatsAppPrefill(text: string, max: number): string {
   if (text.length <= max) return text
   return `${text.slice(0, max - 1).trimEnd()}…`
+}
+
+/** Calculadora de água: evita próximos passos de refeição (fallback RISK genérico) e “pele” solta na consequência. */
+function applyWaterCalculatorCopyGuards(
+  meta: Record<string, unknown>,
+  d: DiagnosisDecisionOutput
+): DiagnosisDecisionOutput {
+  const fid =
+    typeof meta.pro_lideres_fluxo_id === 'string' ? meta.pro_lideres_fluxo_id.trim() : ''
+  if (fid !== 'agua' && fid !== 'calc-hidratacao') return d
+  const out: DiagnosisDecisionOutput = { ...d }
+  const actions = out.specific_actions
+  const mealish = /\b(refei(ção|cao)|planejar\s+3|café da manhã|almoco|almoço|jantar)\b/i
+  if (Array.isArray(actions) && actions.length > 0 && mealish.test(actions.join(' '))) {
+    out.specific_actions = [
+      'Deixar água ao alcance no horário em que mais costuma esquecer de beber.',
+      'Distribuir líquidos ao longo do dia em vez de compensar só quando a sede apertar.',
+      'Converse com quem te enviou o link para calibrar meta ao seu peso, clima e rotina.',
+    ]
+  }
+  if (typeof out.consequence === 'string') {
+    out.consequence = out.consequence
+      .replace(/puxa foco,\s*pele,\s*digestão/gi, 'puxa foco, digestão')
+      .trim()
+  }
+  return out
 }
 
 function normalizeCompare(text: string): string {
@@ -230,7 +269,7 @@ export async function POST(
 
     const body = await request.json().catch(() => ({}))
     const locale = (body.locale === 'en' || body.locale === 'es') ? body.locale as 'en' | 'es' : null
-    let visitor_answers: Record<string, unknown> = body.visitor_answers && typeof body.visitor_answers === 'object'
+    const visitor_answers: Record<string, unknown> = body.visitor_answers && typeof body.visitor_answers === 'object'
       ? { ...body.visitor_answers }
       : {}
 
@@ -413,10 +452,17 @@ export async function POST(
         ? metaRaw.theme_raw
         : ((metaRaw.theme as Record<string, unknown>)?.raw as string | undefined) ?? ''
     const linkTitleForCache = (config.title as string) || ''
+    const scoringSalt = metaRaw.invert_risk_mcq_score === true ? 'invert_mcq' : ''
 
-    // Cache: v18 — + pacotes PROJECTION diagnóstico capilar biblioteca (mig. 408)
-    const answers_hash = hashAnswersForCache(visitor_answers, themeForCache, linkTitleForCache, diagnosisVertical)
-    const TEMPLATE_VERSION = 18
+    // Cache: v27 — copy calculadora água sem pele/refeição forçada na UI; guards na API
+    const answers_hash = hashAnswersForCache(
+      visitor_answers,
+      themeForCache,
+      linkTitleForCache,
+      diagnosisVertical,
+      scoringSalt
+    )
+    const TEMPLATE_VERSION = 27
     const { data: cached } = await supabaseAdmin
       .from('ylada_diagnosis_cache')
       .select('diagnosis_json')
@@ -498,11 +544,20 @@ export async function POST(
     const objectiveMeta = typeof metaRaw.objective === 'string' ? metaRaw.objective : null
 
     // Bloco 2: normalizar q1,q2... para chaves esperadas pelo motor
+    const invertRiskMcqScore = metaRaw.invert_risk_mcq_score === true
     const normalizedAnswers = normalizeVisitorAnswers(
       visitor_answers,
       architecture as DiagnosisArchitecture,
-      { themeRaw: themeRaw ?? '', formFields }
+      { themeRaw: themeRaw ?? '', formFields, invertRiskMcqScore }
     )
+
+    if (architecture === 'PROJECTION_CALCULATOR') {
+      const du =
+        typeof metaRaw.default_projection_unit === 'string' ? metaRaw.default_projection_unit.trim() : ''
+      if (du && normalizedAnswers.unit === undefined) {
+        normalizedAnswers.unit = du
+      }
+    }
 
     const segment_code = typeof metaRaw.segment_code === 'string' ? metaRaw.segment_code : undefined
     const input: DiagnosisInput = {
@@ -621,6 +676,10 @@ export async function POST(
       fallbackUsed = result.fallbackUsed
       level = result.level
     }
+
+    const contentCtx = resolveDiagnosisContentContext(metaRaw)
+    diagnosis = normalizeDiagnosisDecisionForVisitor(diagnosis as DiagnosisDecisionOutput, contentCtx)
+    diagnosis = applyWaterCalculatorCopyGuards(metaRaw, diagnosis as DiagnosisDecisionOutput)
 
     // Camada 0: disclaimer quando safety_mode (não parecer orientação médica)
     const copyPolicy = metaRaw.copy_policy && typeof metaRaw.copy_policy === 'object' ? metaRaw.copy_policy as { append_disclaimer?: boolean } : undefined

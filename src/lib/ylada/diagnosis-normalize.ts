@@ -102,22 +102,43 @@ function impactFromText(v: unknown): 'baixo' | 'medio' | 'alto' {
   return 'medio'
 }
 
-/** Score genérico: soma das contribuições 0–3 por pergunta (qN ou pN). Faixas: terços do máximo. */
-function calcGenericScoreAndLevel(answers: Record<string, unknown>): { score: number; level: RiskLevel } | null {
+/** Máximo índice de MCQ na pergunta `p{i}` (para pontuação e inversão). */
+function mcqMaxIndexForQuestion(formFields: FormFieldForNormalize[] | undefined, questionNum: number): number {
+  const id = `p${questionNum}`
+  const field = formFields?.find((f) => String(f.id).toLowerCase() === id.toLowerCase())
+  const len = field?.options?.length
+  if (typeof len === 'number' && len >= 2) return len - 1
+  return 3
+}
+
+type CalcGenericScoreOpts = {
+  /** Quizzes espelhados do Wellness: índice alto = “melhor” no template, mas no Pro Líderes queremos maior pontuação = mais abertura/urgência nos outcomes. */
+  invertMcqScore?: boolean
+  formFields?: FormFieldForNormalize[]
+}
+
+/** Score genérico: soma das contribuições por pergunta (qN ou pN). Faixas: terços do máximo possível. */
+function calcGenericScoreAndLevel(
+  answers: Record<string, unknown>,
+  opts?: CalcGenericScoreOpts
+): { score: number; level: RiskLevel } | null {
   const indices = sortedQuizQuestionIndices(answers)
   let sum = 0
+  let maxPossible = 0
   let count = 0
   for (const i of indices) {
     const idx = quizAnswerIndexForRisk(answerAtQuestionIndex(answers, i))
-    if (idx !== null) {
-      sum += idx
-      count++
-    }
+    if (idx === null) continue
+    const maxIdx = mcqMaxIndexForQuestion(opts?.formFields, i)
+    const capped = Math.min(Math.max(0, idx), maxIdx)
+    const contribution = opts?.invertMcqScore ? maxIdx - capped : capped
+    sum += contribution
+    maxPossible += maxIdx
+    count++
   }
   if (count === 0) return null
-  const maxScore = count * 3
-  const third = Math.ceil(maxScore / 3)
-  const twoThirds = Math.ceil((2 * maxScore) / 3)
+  const third = Math.ceil(maxPossible / 3)
+  const twoThirds = Math.ceil((2 * maxPossible) / 3)
   let level: RiskLevel = 'baixo'
   if (sum >= twoThirds) level = 'alto'
   else if (sum >= third) level = 'medio'
@@ -149,7 +170,7 @@ function mapOptionToText(
 export function normalizeVisitorAnswers(
   answers: Record<string, unknown>,
   architecture: DiagnosisArchitecture,
-  options?: { themeRaw?: string; formFields?: FormFieldForNormalize[] }
+  options?: { themeRaw?: string; formFields?: FormFieldForNormalize[]; invertRiskMcqScore?: boolean }
 ): Record<string, unknown> {
   const formFields = options?.formFields
   const q1Raw = answers.q1 ?? answers.Q1 ?? answers.p1 ?? answers.P1
@@ -175,7 +196,10 @@ export function normalizeVisitorAnswers(
 
       // Score genérico para temas não-emagrecimento (intestino, energia, alimentação saudável, etc.)
       if (!isEmagrecimento) {
-        const generic = calcGenericScoreAndLevel(answers)
+        const generic = calcGenericScoreAndLevel(answers, {
+          invertMcqScore: options?.invertRiskMcqScore === true,
+          formFields,
+        })
         if (generic) {
           out.generic_score = generic.score
           out.generic_level = generic.level

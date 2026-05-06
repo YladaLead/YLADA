@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { perfilMetabolicoDiagnosticos } from '@/lib/diagnostics'
+import { getAvaliacaoPerfilMetabolicoPerguntasTemplate } from '@/lib/wellness/avaliacao-perfil-metabolico-quiz-questions'
 
 interface QuizPerfilMetabolicoPreviewProps {
   etapa: number
@@ -22,63 +23,13 @@ export default function QuizPerfilMetabolicoPreview({ etapa, onEtapaChange }: Qu
 
   const labels = ['Início', '1', '2', '3', '4', '5', 'Resultados']
 
-  const perguntas = [
-    {
-      numero: 1,
-      texto: 'Como você descreveria seu metabolismo?',
-      cor: 'blue',
-      opcoes: [
-        'Muito lento, ganho peso facilmente',
-        'Lento, tenho dificuldade para perder peso',
-        'Moderado, equilibrado',
-        'Rápido, queimo calorias facilmente'
-      ]
-    },
-    {
-      numero: 2,
-      texto: 'Você sente que precisa de ajuda para otimizar seu metabolismo?',
-      cor: 'indigo',
-      opcoes: [
-        'Sim, preciso muito de orientação profissional',
-        'Sim, seria útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo otimizar sozinho(a)'
-      ]
-    },
-    {
-      numero: 3,
-      texto: 'Você valoriza ter um plano personalizado baseado no seu perfil metabólico?',
-      cor: 'blue',
-      opcoes: [
-        'Muito, é essencial para resultados eficazes',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo prático',
-        'Pouco, prefiro seguir padrões gerais'
-      ]
-    },
-    {
-      numero: 4,
-      texto: 'Você sente que produtos específicos para seu metabolismo ajudariam seus resultados?',
-      cor: 'indigo',
-      opcoes: [
-        'Sim, faria toda diferença e aceleraria resultados',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
-      ]
-    },
-    {
-      numero: 5,
-      texto: 'Você acredita que um acompanhamento especializado pode transformar seu metabolismo?',
-      cor: 'blue',
-      opcoes: [
-        'Sim, absolutamente! Estou pronto(a) para mudanças',
-        'Sim, acredito que pode fazer diferença',
-        'Talvez, se for algo estruturado e eficaz',
-        'Não, acho que não é necessário'
-      ]
-    }
-  ]
+  const cores: Array<'blue' | 'indigo'> = ['blue', 'indigo', 'blue', 'indigo', 'blue']
+  const perguntas = getAvaliacaoPerfilMetabolicoPerguntasTemplate().map((p, i) => ({
+    numero: p.id,
+    texto: p.pergunta,
+    cor: cores[i] ?? 'blue',
+    opcoes: p.opcoes,
+  }))
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">

@@ -6,6 +6,13 @@ import {
 } from '@/lib/pro-lideres/wellness-fluxo-to-ylada-config'
 import { getProLideresRecruitmentPresetFluxos } from '@/lib/pro-lideres/pro-lideres-recruitment-preset-fluxos'
 import { getProLideresSalesPresetFluxos } from '@/lib/pro-lideres/pro-lideres-sales-preset-fluxos'
+import { getProLideresHypeQuizPresetFluxos } from '@/lib/pro-lideres/pro-lideres-hype-quiz-preset-fluxos'
+import { getProLideresHypeCalculadoraPresetFluxos } from '@/lib/pro-lideres/pro-lideres-hype-calculadora-preset-fluxos'
+import { ensureWellnessNutritionMirrorsAsProLideresLinks } from '@/lib/pro-lideres/wellness-nutrition-mirror-ensure'
+import {
+  getProLideresLegacyAguaPresetFluxo,
+  isWellnessCalculadoraBasicaPresetFluxoId,
+} from '@/lib/pro-lideres/pro-lideres-wellness-calculadoras-basicas-preset-fluxos'
 import type { FluxoCliente } from '@/types/wellness-system'
 
 /** Template biblioteca YLADA: calculadora IMC (peso, altura cm, idade, sexo → IMC). */
@@ -35,13 +42,19 @@ export async function ensureProLideresPresetYladaLinks(ownerUserId: string): Pro
       category: 'vendas',
     },
     {
+      kind: 'sales',
+      fluxos: [...getProLideresHypeQuizPresetFluxos(), ...getProLideresHypeCalculadoraPresetFluxos()],
+      segment: 'hype',
+      /** Coluna `category` como vendas: HYPE fica no funil Vendas no catálogo Pro Líderes. */
+      category: 'vendas',
+    },
+    {
       kind: 'recruitment',
       fluxos: getProLideresRecruitmentPresetFluxos(),
       segment: 'recrutamento',
       category: 'recrutamento',
     },
   ]
-  if (!packs.some((p) => p.fluxos.length > 0)) return
 
   const { data: imcTemplateRow } = await supabaseAdmin
     .from('ylada_link_templates')
@@ -76,8 +89,6 @@ export async function ensureProLideresPresetYladaLinks(ownerUserId: string): Pro
   for (const pack of packs) {
     for (const fluxo of pack.fluxos) {
       const slug = proLideresPresetSlug(ownerUserId, pack.kind, fluxo.id)
-      if (existingSlugs.has(slug)) continue
-
       const useRealImcCalculator = fluxo.id === 'calc-imc' && imcCalculatorSchema !== null
       const config_json: Record<string, unknown> = useRealImcCalculator
         ? {
@@ -92,6 +103,35 @@ export async function ensureProLideresPresetYladaLinks(ownerUserId: string): Pro
             },
           }
         : wellnessFluxoToYladaConfigJson(fluxo, pack.kind)
+
+      /** Links já criados: atualiza `config_json` quando o preset canónico muda (vendas selecionados + todo recrutamento). */
+      if (existingSlugs.has(slug)) {
+        const refreshHypePresetConfig =
+          pack.kind === 'sales' && pack.segment === 'hype' && !useRealImcCalculator
+        const refreshSalesPresetConfig =
+          pack.kind === 'sales' &&
+          !useRealImcCalculator &&
+          (refreshHypePresetConfig ||
+            (pack.segment === 'wellness' &&
+              (isWellnessCalculadoraBasicaPresetFluxoId(fluxo.id) || fluxo.id === 'avaliacao-perfil-metabolico')))
+        const refreshRecruitmentPresetConfig = pack.kind === 'recruitment' && !useRealImcCalculator
+        if (refreshSalesPresetConfig || refreshRecruitmentPresetConfig) {
+          const { error: updateError } = await supabaseAdmin
+            .from('ylada_links')
+            .update({
+              config_json,
+              title: fluxo.nome,
+              segment: pack.segment,
+              category: pack.category,
+            })
+            .eq('user_id', ownerUserId)
+            .eq('slug', slug)
+          if (updateError) {
+            console.warn('[ensureProLideresPresetYladaLinks] update preset', slug, updateError.message)
+          }
+        }
+        continue
+      }
 
       const { error: insertError } = await supabaseAdmin.from('ylada_links').insert({
         user_id: ownerUserId,
@@ -111,4 +151,26 @@ export async function ensureProLideresPresetYladaLinks(ownerUserId: string): Pro
       existingSlugs.add(slug)
     }
   }
+
+  /** Preset canónico é `calc-hidratacao`; quem ainda tem `…-v-agua` criado antes recebe o mesmo JSON novo. */
+  const legacyAguaSlug = proLideresPresetSlug(ownerUserId, 'sales', 'agua')
+  if (existingSlugs.has(legacyAguaSlug)) {
+    const aguaFluxo = getProLideresLegacyAguaPresetFluxo()
+    const legacyConfig = wellnessFluxoToYladaConfigJson(aguaFluxo, 'sales')
+    const { error: legacyUp } = await supabaseAdmin
+      .from('ylada_links')
+      .update({
+        config_json: legacyConfig,
+        title: aguaFluxo.nome,
+        segment: 'wellness',
+        category: 'vendas',
+      })
+      .eq('user_id', ownerUserId)
+      .eq('slug', legacyAguaSlug)
+    if (legacyUp) {
+      console.warn('[ensureProLideresPresetYladaLinks] update legacy agua', legacyAguaSlug, legacyUp.message)
+    }
+  }
+
+  await ensureWellnessNutritionMirrorsAsProLideresLinks(ownerUserId, existingSlugs)
 }

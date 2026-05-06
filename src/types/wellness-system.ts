@@ -529,7 +529,29 @@ export type TipoKit = string
 export type PerguntaFluxoCliente =
   | { id: string; texto: string; tipo: 'sim_nao' }
   | { id: string; texto: string; tipo: 'escala'; escalaMin: number; escalaMax: number }
-  | { id: string; texto: string; tipo: 'multipla_escolha'; opcoes: string[] }
+  | { id: string; texto: string; tipo: 'multipla_escolha'; opcoes: string[]; opcional?: boolean }
+  /** Texto livre curto (links públicos Pro Líderes / YLADA: um passo por pergunta). */
+  | {
+      id: string
+      texto: string
+      tipo: 'texto'
+      placeholder?: string
+      maxLength?: number
+      /** ≥2 vira textarea no link público. */
+      linhas?: number
+      opcional?: boolean
+    }
+  /** Número digitável (peso, altura, idade, etc.) nos mesmos fluxos. */
+  | {
+      id: string
+      texto: string
+      tipo: 'numero'
+      placeholder?: string
+      min?: number
+      max?: number
+      step?: number
+      opcional?: boolean
+    }
 
 export interface FluxoCliente {
   id: string

@@ -11,6 +11,7 @@ import { fluxosRecrutamento } from '@/lib/wellness-system/fluxos-recrutamento'
 import { fluxosClientes } from '@/lib/wellness-system/fluxos-clientes'
 import { FluxoCliente } from '@/types/wellness-system'
 import { getAppUrl, buildWellnessToolUrl } from '@/lib/url-utils'
+import { WELLNESS_HYPE_MEUS_LINKS } from '@/lib/wellness/wellness-hype-meus-links'
 import dynamic from 'next/dynamic'
 import QRCode from '@/components/QRCode'
 import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
@@ -373,71 +374,14 @@ function LinksUnificadosPageContent() {
     )
   })
 
-  // Templates Hype Drink (6 templates específicos) - URLs com slug do usuário
+  // Templates Hype Drink — catálogo central em `@/lib/wellness/wellness-hype-meus-links`
   const templatesHype = useMemo(() => {
     if (!profile?.userSlug) return []
-    
-    const templates = [
-      {
-        id: 'hype-energia-foco',
-        nome: 'Quiz: Energia & Foco',
-        slug: 'energia-foco',
-        type: 'quiz',
-        categoria: 'HYPE',
-        description: 'Descubra como melhorar sua energia e foco ao longo do dia',
-        icon: '⚡'
-      },
-      {
-        id: 'hype-pre-treino',
-        nome: 'Quiz: Pré-Treino Ideal',
-        slug: 'pre-treino',
-        type: 'quiz',
-        categoria: 'HYPE',
-        description: 'Identifique o pré-treino ideal para você',
-        icon: '🏋️'
-      },
-      {
-        id: 'hype-rotina-produtiva',
-        nome: 'Quiz: Rotina Produtiva',
-        slug: 'rotina-produtiva',
-        type: 'quiz',
-        categoria: 'HYPE',
-        description: 'Descubra como melhorar sua produtividade e constância',
-        icon: '📈'
-      },
-      {
-        id: 'hype-constancia',
-        nome: 'Quiz: Constância & Rotina',
-        slug: 'constancia',
-        type: 'quiz',
-        categoria: 'HYPE',
-        description: 'Identifique como manter uma rotina saudável todos os dias',
-        icon: '🎯'
-      },
-      {
-        id: 'hype-consumo-cafeina',
-        nome: 'Calculadora: Consumo de Cafeína',
-        slug: 'consumo-cafeina',
-        type: 'calculadora',
-        categoria: 'HYPE',
-        description: 'Calcule seu consumo de cafeína e identifique alternativas',
-        icon: '☕'
-      },
-      {
-        id: 'hype-custo-energia',
-        nome: 'Calculadora: Custo da Falta de Energia',
-        slug: 'custo-energia',
-        type: 'calculadora',
-        categoria: 'HYPE',
-        description: 'Calcule o impacto da falta de energia na sua produtividade',
-        icon: '💰'
-      }
-    ]
-    
-    // Gerar links com slug do usuário (mesmo padrão dos outros fluxos)
-    return templates.map(t => ({
+
+    return WELLNESS_HYPE_MEUS_LINKS.map((t) => ({
       ...t,
-      link: buildWellnessToolUrl(profile.userSlug, t.slug)
+      categoria: 'HYPE',
+      link: buildWellnessToolUrl(profile.userSlug, t.slug),
     }))
   }, [profile?.userSlug, baseUrl])
 

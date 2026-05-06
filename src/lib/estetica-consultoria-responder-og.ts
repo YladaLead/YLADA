@@ -19,6 +19,9 @@ export const ESTETICA_DIAGNOSTICO_PRE_REUNIAO_POS_PAGAMENTO_CAPILAR_OG_PATH =
 export const ESTETICA_DIAGNOSTICO_PRE_REUNIAO_POS_PAGAMENTO_CORPORAL_OG_PATH =
   '/marketing/estetica-diagnostico-pre-reuniao-pos-pagamento-corporal.png' as const
 
+/** Legado: PNG estático para pré-diagnóstico / fallback de compartilhamento. */
+export const ESTETICA_CONSULTORIA_RESPONDER_OG_PATH = '/marketing/estetica-consultoria-responder-og.png'
+
 export function esteticaDiagnosticoPosPagamentoOgPath(
   templateKey: string | null | undefined
 ): string | null {
@@ -31,8 +34,27 @@ export function esteticaDiagnosticoPosPagamentoOgPath(
   return null
 }
 
-/** Legado: PNG estático (não usado na meta quando existe `opengraph-image.tsx` na rota). */
-export const ESTETICA_CONSULTORIA_RESPONDER_OG_PATH = '/marketing/estetica-consultoria-responder-og.png'
+/** Cartão estático para pré-diagnóstico / pré-avaliação (evita depender só de `opengraph-image.tsx` dinâmico). */
+export function esteticaResponderStaticFallbackOgPath(): string {
+  return ESTETICA_CONSULTORIA_RESPONDER_OG_PATH
+}
+
+/**
+ * Imagem absoluta (path em site) para OG/Twitter conforme o material.
+ * Pré-* usam PNG estático; diagnóstico completo usa arte dedicada.
+ */
+export function esteticaResponderShareOgImagePath(templateKey: string | null | undefined): string | null {
+  const pos = esteticaDiagnosticoPosPagamentoOgPath(templateKey)
+  if (pos) return pos
+  if (
+    templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID ||
+    templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID ||
+    templateKey === TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID
+  ) {
+    return esteticaResponderStaticFallbackOgPath()
+  }
+  return null
+}
 
 export function publicSiteOriginForEsteticaResponderOg(): string {
   const u =
@@ -233,8 +255,8 @@ export function buildEsteticaConsultoriaResponderShareMetadata(
   const base = publicSiteOriginForEsteticaResponderOg()
   const title = buildEsteticaResponderShareTitle(band, templateKey)
   const description = buildEsteticaResponderShareDescription(band, templateKey)
-  const diagOgPath = esteticaDiagnosticoPosPagamentoOgPath(templateKey)
-  const diagOgAbs = diagOgPath ? new URL(diagOgPath, `${base}/`).toString() : null
+  const shareOgPath = esteticaResponderShareOgImagePath(templateKey)
+  const shareOgAbs = shareOgPath ? new URL(shareOgPath, `${base}/`).toString() : null
 
   return {
     metadataBase: new URL(base),
@@ -245,9 +267,9 @@ export function buildEsteticaConsultoriaResponderShareMetadata(
       description,
       locale: 'pt_BR',
       type: 'website',
-      ...(diagOgAbs
+      ...(shareOgAbs
         ? {
-            images: [{ url: diagOgAbs, width: 1200, height: 630, alt: title }],
+            images: [{ url: shareOgAbs, width: 1200, height: 630, alt: title }],
           }
         : {}),
     },
@@ -255,7 +277,7 @@ export function buildEsteticaConsultoriaResponderShareMetadata(
       card: 'summary_large_image',
       title,
       description,
-      ...(diagOgAbs ? { images: [diagOgAbs] } : {}),
+      ...(shareOgAbs ? { images: [shareOgAbs] } : {}),
     },
   }
 }

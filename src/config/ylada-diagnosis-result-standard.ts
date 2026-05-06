@@ -90,3 +90,18 @@ export const YLADA_DIAGNOSIS_PACK_CHECKLIST: readonly string[] = [
   'O convite direciona a falar com quem enviou (Pro Líderes) ou profissional (estética).',
   'CTA e whatsapp_prefill não contradizem o tema do quiz (sono ≠ refeição).',
 ]
+
+/**
+ * Links de **saúde e bem-estar** (conscientização): o objetivo é a pessoa **reconhecer o padrão**,
+ * **sentir que melhorar é possível** e **querer dar o próximo passo** (conversa com quem enviou o link),
+ * sem tom de aula longa nem promessa de cura/ganho.
+ *
+ * Use com `content_json` em `ylada_flow_diagnosis_outcomes` (ex.: fluxos energia/cansaço do catálogo).
+ */
+export const YLADA_DIAGNOSIS_WELLNESS_CONSCIENTIZATION_CHECKLIST: readonly string[] = [
+  'Primeiro impacto: validação + curiosidade (“você já percebeu…”) — não culpa nem rótulo patológico.',
+  'Tensão (`main_blocker`, `causa_provavel`, `preocupacoes`): linguagem de corpo e rotina, sem diagnóstico médico nem garantia de resultado.',
+  'Possibilidade (`growth_potential`, `dica_rapida`, `specific_actions`): micro-passos factíveis + convite à conversa; “melhorar” > “revolucionar”.',
+  '`whatsapp_prefill` menciona explicitamente **querer melhorar** e pede **primeiro passo simples** alinhado ao tema do quiz.',
+  'Evitar duplicar a mesma ideia em `preocupacoes` e `consequence` quando possível — cada bloco avança um degrau na reflexão.',
+]

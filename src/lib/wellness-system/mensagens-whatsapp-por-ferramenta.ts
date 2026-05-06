@@ -109,6 +109,10 @@ export const mensagensWhatsAppPorFerramenta: Record<string, MensagemWhatsApp> = 
     mensagem: 'Olá! Acabei de descobrir meu perfil metabólico e queria saber mais sobre como otimizar meu metabolismo.',
     botaoTexto: 'Saiba Mais sobre Metabolismo'
   },
+  'avaliacao-perfil-metabolico': {
+    mensagem: 'Olá! Acabei de fazer a avaliação do perfil metabólico e queria saber mais sobre como otimizar meu metabolismo.',
+    botaoTexto: 'Saiba Mais sobre Metabolismo'
+  },
   
   // ============================================
   // DIAGNÓSTICOS

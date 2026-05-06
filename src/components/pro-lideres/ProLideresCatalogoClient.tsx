@@ -68,7 +68,7 @@ function CatalogRowCard({
   teamVisibilityBusy,
   onTeamVisibilityChange,
   rowHighlight,
-  showScriptsLink = true,
+  showScriptsLink = false,
   showOriginKindChips = true,
 }: {
   item: ProLideresCatalogItem
@@ -109,9 +109,20 @@ function CatalogRowCard({
                     Biblioteca
                   </span>
                 ) : item.source === 'custom' ? (
-                  <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-900 ring-1 ring-amber-100">
-                    Extra
-                  </span>
+                  <>
+                    <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-900 ring-1 ring-amber-100">
+                      Extra
+                    </span>
+                    {item.customCatalogKind === 'ylada_diagnosis' ? (
+                      <span className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-900 ring-1 ring-indigo-100">
+                        Diagnóstico 3 níveis
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
+                        Link / atalho
+                      </span>
+                    )}
+                  </>
                 ) : (
                   <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-800 ring-1 ring-slate-200">
                     Criado por você
@@ -161,7 +172,7 @@ function CatalogRowCard({
           href={item.publicUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-[44px] items-center rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+          className="inline-flex min-h-[44px] items-center rounded-lg border border-sky-200/90 bg-sky-50/90 px-3 text-xs font-semibold text-sky-900 shadow-sm ring-1 ring-sky-100/80 transition hover:bg-sky-100/90"
         >
           Preview
         </a>
@@ -171,7 +182,7 @@ function CatalogRowCard({
             const ok = await copyText(item.publicUrl)
             if (ok) onCopied('link')
           }}
-          className="inline-flex min-h-[44px] items-center rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+          className="inline-flex min-h-[44px] items-center rounded-lg border border-violet-200/90 bg-violet-50/90 px-3 text-xs font-semibold text-violet-900 shadow-sm ring-1 ring-violet-100/80 transition hover:bg-violet-100/90"
         >
           {copied === 'link' ? '✓ Link' : 'Copiar link'}
         </button>
@@ -181,7 +192,7 @@ function CatalogRowCard({
             const ok = await copyQrImage(item.publicUrl)
             if (ok) onCopied('qr')
           }}
-          className="inline-flex min-h-[44px] items-center rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+          className="inline-flex min-h-[44px] items-center rounded-lg border border-teal-200/90 bg-teal-50/90 px-3 text-xs font-semibold text-teal-900 shadow-sm ring-1 ring-teal-100/80 transition hover:bg-teal-100/90"
         >
           {copied === 'qr' ? '✓ QR' : 'Copiar QR'}
         </button>
@@ -265,6 +276,8 @@ export function ProLideresCatalogoClient({
   salesTabLabel = 'Vendas',
   catalogTitle = 'Meus links',
   catalogIntro,
+  /** Atalho preto "Scripts" nos cards (editor de link). Por defeito desligado. */
+  showScriptsLink = false,
 }: {
   /** Base da API de fluxos (ex.: `/api/pro-estetica-corporal`). */
   flowsApiBase?: string
@@ -276,6 +289,7 @@ export function ProLideresCatalogoClient({
   catalogTitle?: string
   /** Parágrafo introdutório abaixo do título. */
   catalogIntro?: string
+  showScriptsLink?: boolean
 } = {}) {
   const { isLeaderWorkspace, verticalCode, painelBasePath } = useProLideresPainel()
   const painelHomeHref = painelHomeHrefProp ?? painelBasePath
@@ -353,7 +367,8 @@ export function ProLideresCatalogoClient({
       const name = item.label.toLowerCase()
       const desc = (item.description ?? '').toLowerCase()
       const when = (item.whenToUse ?? '').toLowerCase()
-      return name.includes(q) || desc.includes(q) || when.includes(q)
+      const meta = (item.metaLine ?? '').toLowerCase()
+      return name.includes(q) || desc.includes(q) || when.includes(q) || meta.includes(q)
     })
   }, [catalog, tab, section, search, isLeaderWorkspace])
 
@@ -583,7 +598,7 @@ export function ProLideresCatalogoClient({
               showTeamVisibilityControls={isLeaderWorkspace}
               teamVisibilityBusy={teamVisibilityBusyId === item.id}
               onTeamVisibilityChange={(i, vis) => void setItemTeamVisible(i, vis)}
-              showScriptsLink={isLeaderWorkspace}
+              showScriptsLink={showScriptsLink}
               showOriginKindChips={isLeaderWorkspace}
               rowHighlight={Boolean(highlightYladaLinkId && item.yladaLinkId === highlightYladaLinkId)}
             />

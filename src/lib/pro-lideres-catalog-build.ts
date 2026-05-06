@@ -1,6 +1,10 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { ensureProLideresPresetYladaLinks } from '@/lib/pro-lideres/ensure-pro-lideres-preset-links'
 import { isProLideresPresetLink } from '@/lib/pro-lideres/wellness-fluxo-to-ylada-config'
+import {
+  type ProLideresFlowCatalogKind,
+  inferProLideresFlowCatalogKindFromHref,
+} from '@/lib/pro-lideres-flow-catalog-kind'
 
 /** Tipos em ylada_link_templates que entram no catálogo (ferramentas com resultado / diagnóstico). */
 const YLADA_CATALOG_TEMPLATE_TYPES = new Set(['calculator', 'diagnostico', 'quiz', 'triagem'])
@@ -43,6 +47,8 @@ export type ProLideresCatalogItem = {
   badge: 'most_used' | 'most_shared' | null
   /** Só em entradas `custom` (BD): notas do líder (edição no painel). */
   customFlowNotes?: string
+  /** Só `source === 'custom'`: atalho vs diagnóstico YLADA (3 níveis). */
+  customCatalogKind?: ProLideresFlowCatalogKind
 }
 
 type EventRow = { link_id: string; event_type: string; cnt: number | string }
@@ -102,6 +108,12 @@ function inferYladaCatalogCategory(
 ): ProLideresCatalogCategory {
   const title = (row.title ?? '').trim() || (row.slug ?? '').trim() || ''
   const slug = (row.slug ?? '').trim() || ''
+  const seg = (row.segment ?? '').toLowerCase()
+  const cat = (row.category ?? '').toLowerCase()
+  /** HYPE Drink: sempre no funil de vendas no painel Pro Líderes. */
+  if (seg === 'hype' || cat === 'hype') {
+    return 'sales'
+  }
 
   if (title && isHomGravadaOrVideoPresentation(title, slug, config)) {
     return 'sales'
@@ -164,6 +176,7 @@ function segmentCodeToLabel(code: string | null | undefined): string | null {
     energia: 'Energia',
     inchaço: 'Inchaço',
     inchaco: 'Inchaço',
+    hype: 'HYPE Drink',
   }
   return map[c] ?? c.charAt(0).toUpperCase() + c.slice(1)
 }
@@ -480,16 +493,25 @@ export async function buildProLideresCatalog(
     const href = r.href.trim()
     const k = inferCustomKind(href)
     const label = r.label.trim()
+    const catalogKind = inferProLideresFlowCatalogKindFromHref(r.href)
     const catalogCategory: ProLideresCatalogCategory =
       r.category === 'recruitment' ? 'recruitment' : 'sales'
     const rawNotes = typeof r.notes === 'string' ? r.notes.trim() : ''
     const visibleToTeam = r.visible_to_team !== false
+    const diagnosisMeta = 'Diagnóstico YLADA · 3 níveis (leve / moderado / urgente)'
     const metaLine =
-      k === 'calculator'
-        ? `Ferramenta · ~1 min`
-        : rawNotes
-          ? `${rawNotes.slice(0, 40)}${rawNotes.length > 40 ? '…' : ''}`
-          : `${label.slice(0, 24)}${label.length > 24 ? '…' : ''} · extra`
+      catalogKind === 'ylada_diagnosis'
+        ? diagnosisMeta
+        : k === 'calculator'
+          ? `Ferramenta · ~1 min`
+          : rawNotes
+            ? `${rawNotes.slice(0, 40)}${rawNotes.length > 40 ? '…' : ''}`
+            : `${label.slice(0, 24)}${label.length > 24 ? '…' : ''} · extra`
+
+    const whenToUse =
+      catalogKind === 'ylada_diagnosis'
+        ? `Resultado em três faixas (leve, moderado, urgente), gerido pela YLADA. ${rawNotes ? rawNotes : customFallbackWhen}`
+        : rawNotes || customFallbackWhen
 
     out.push({
       id: r.id,
@@ -504,8 +526,9 @@ export async function buildProLideresCatalog(
       stats: { views: 0, conversions: 0, shares: 0 },
       description: null,
       metaLine,
-      whenToUse: rawNotes || customFallbackWhen,
+      whenToUse,
       customFlowNotes: rawNotes,
+      customCatalogKind: catalogKind,
       segmentLabel: null,
       themeLabel: null,
       situationBucket: 'all',

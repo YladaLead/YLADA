@@ -28,8 +28,13 @@ export default function FluxoDiagnostico({
   const [mostrarResultado, setMostrarResultado] = useState(false)
   const [diagnosticoId, setDiagnosticoId] = useState<string | null>(null)
   const [respostaSelecionada, setRespostaSelecionada] = useState<string | number | null>(null)
+  const [entradaAberta, setEntradaAberta] = useState('')
 
   const pergunta = fluxo.perguntas[perguntaAtual]
+
+  useEffect(() => {
+    setEntradaAberta('')
+  }, [perguntaAtual])
   const todasRespondidas = perguntaAtual === fluxo.perguntas.length - 1 && respostas[pergunta.id] !== undefined
 
   const handleResposta = (valor: string | number) => {
@@ -53,6 +58,33 @@ export default function FluxoDiagnostico({
   const handleVoltar = () => {
     if (perguntaAtual > 0) {
       setPerguntaAtual(perguntaAtual - 1)
+    }
+  }
+
+  function confirmarEntradaAberta() {
+    if (pergunta.tipo !== 'texto' && pergunta.tipo !== 'numero') return
+    const raw = entradaAberta.trim()
+    if (pergunta.tipo === 'numero') {
+      if (raw === '' && pergunta.opcional) {
+        handleResposta('')
+        return
+      }
+      if (raw === '') return
+      const n = parseFloat(raw.replace(',', '.'))
+      if (!Number.isFinite(n)) return
+      if (typeof pergunta.min === 'number' && n < pergunta.min) return
+      if (typeof pergunta.max === 'number' && n > pergunta.max) return
+      handleResposta(n)
+      return
+    }
+    if (pergunta.tipo === 'texto') {
+      if (raw === '' && pergunta.opcional) {
+        handleResposta('')
+        return
+      }
+      if (raw === '') return
+      if (pergunta.maxLength && raw.length > pergunta.maxLength) return
+      handleResposta(raw)
     }
   }
 
@@ -378,6 +410,60 @@ export default function FluxoDiagnostico({
                   {opcao}
                 </button>
               ))}
+            </div>
+          )}
+
+          {pergunta.tipo === 'numero' && (
+            <div className="space-y-4">
+              <input
+                type="number"
+                inputMode="decimal"
+                min={pergunta.min}
+                max={pergunta.max}
+                step={pergunta.step ?? 'any'}
+                value={entradaAberta}
+                onChange={(e) => setEntradaAberta(e.target.value)}
+                placeholder={pergunta.placeholder || 'Digite um número'}
+                className="w-full p-4 rounded-lg border-2 border-gray-200 text-lg focus:border-green-500 focus:ring-2 focus:ring-green-200"
+              />
+              <button
+                type="button"
+                onClick={confirmarEntradaAberta}
+                className="w-full p-4 rounded-lg font-medium bg-green-600 text-white hover:bg-green-700 transition-colors"
+              >
+                Continuar
+              </button>
+            </div>
+          )}
+
+          {pergunta.tipo === 'texto' && (
+            <div className="space-y-4">
+              {pergunta.linhas && pergunta.linhas >= 2 ? (
+                <textarea
+                  rows={pergunta.linhas}
+                  maxLength={pergunta.maxLength}
+                  value={entradaAberta}
+                  onChange={(e) => setEntradaAberta(e.target.value)}
+                  placeholder={pergunta.placeholder || 'Escreva aqui'}
+                  className="w-full p-4 rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 min-h-[120px]"
+                />
+              ) : (
+                <input
+                  type="text"
+                  maxLength={pergunta.maxLength}
+                  value={entradaAberta}
+                  onChange={(e) => setEntradaAberta(e.target.value)}
+                  placeholder={pergunta.placeholder || 'Escreva aqui'}
+                  className="w-full p-4 rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+                />
+              )}
+              <button
+                type="button"
+                onClick={confirmarEntradaAberta}
+                className="w-full p-4 rounded-lg font-medium bg-green-600 text-white hover:bg-green-700 transition-colors"
+              >
+                Continuar
+              </button>
             </div>
           )}
         </div>

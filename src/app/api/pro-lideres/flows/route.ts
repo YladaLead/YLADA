@@ -12,6 +12,7 @@ import {
   PRO_LIDERES_FLOW_LABEL_MAX,
   PRO_LIDERES_FLOW_NOTES_MAX,
 } from '@/lib/pro-lideres-flow-href'
+import { inferProLideresFlowCatalogKindFromHref } from '@/lib/pro-lideres-flow-catalog-kind'
 
 export type { ProLideresCatalogItem }
 
@@ -141,6 +142,7 @@ export async function POST(request: NextRequest) {
 
   const label = String(body.label ?? '').trim().slice(0, PRO_LIDERES_FLOW_LABEL_MAX)
   const href = String(body.href ?? '').trim().slice(0, PRO_LIDERES_FLOW_HREF_MAX)
+  const catalog_kind = inferProLideresFlowCatalogKindFromHref(href)
   if (!label) {
     return NextResponse.json({ error: 'label é obrigatório' }, { status: 400 })
   }
@@ -160,6 +162,7 @@ export async function POST(request: NextRequest) {
       href,
       sort_order,
       notes,
+      catalog_kind,
     })
     .select()
     .single()

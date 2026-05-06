@@ -558,7 +558,14 @@ function isIncompleteFragment(text: string): boolean {
   return /\b(pode|poderia|resultar|será|deve|ter|dar|ficar|estar)\s*$/i.test(t)
 }
 
-function toShortProfileName(text: string): string {
+function isWaterIntakeCalculatorContext(meta: Record<string, unknown>, displayTitle: string): boolean {
+  const fid = typeof meta.pro_lideres_fluxo_id === 'string' ? meta.pro_lideres_fluxo_id.trim() : ''
+  if (fid === 'agua' || fid === 'calc-hidratacao') return true
+  const t = `${displayTitle}`.toLowerCase()
+  return /calculadora.*\b(água|agua)\b/.test(t) || /calculadora.*hidrat/.test(t)
+}
+
+function toShortProfileName(text: string, options?: { waterIntakeTool?: boolean }): string {
   const trimmed = (text || '').trim()
   if (!trimmed) return ''
   const firstSentence = trimmed.split(/[.!?]/)[0]?.trim() || trimmed
@@ -575,6 +582,7 @@ function toShortProfileName(text: string): string {
     return 'Rotina de cuidados inconsistente'
   }
   if (
+    !options?.waterIntakeTool &&
     /hidratacao|hidratação|sol|protecao|proteção|pele/i.test(base) &&
     !/unha|unhas|manicure|esmalte/i.test(base)
   ) {
@@ -604,17 +612,25 @@ function toShortProfileName(text: string): string {
 function themeHintImpliesSkin(themeHint: string): boolean {
   const t = themeHint.toLowerCase()
   if (/unha|unhas|manicure|esmalte/.test(t)) return false
-  return /pele|skincare|dermat|manchas|celulite|flacidez|idrata|sol|prote[cç][aã]o|est[eé]tica facial/.test(t)
+  if (/\bcalculadora\b.*\b(água|agua|hidrat)/i.test(themeHint)) return false
+  return /\bpele\b|skincare|dermat|manchas|celulite|flacidez|est[eé]tica\s+facial|cuidados?\s+com\s+a\s+pele|protetor\s+solar|prote[cç][aã]o\s+(solar|da\s+pele)/.test(
+    t
+  )
 }
 
 function themeHintImpliesNails(themeHint: string): boolean {
   return /unha|unhas|manicure|esmalte/.test(themeHint.toLowerCase())
 }
 
-function toImpactDiagnosisText(text: string, themeHint = ''): string {
+function toImpactDiagnosisText(
+  text: string,
+  themeHint = '',
+  options?: { waterIntakeTool?: boolean }
+): string {
   const trimmed = (text || '').trim()
   if (!trimmed) return trimmed
-  const skinRewriteOk = themeHintImpliesSkin(themeHint) && !themeHintImpliesNails(themeHint)
+  const skinRewriteOk =
+    !options?.waterIntakeTool && themeHintImpliesSkin(themeHint) && !themeHintImpliesNails(themeHint)
   if (
     skinRewriteOk &&
     /rotina de cuidados|hidratacao|hidratação|sol|protecao|proteção/i.test(trimmed) &&
@@ -1368,7 +1384,8 @@ function ConfigDrivenLinkView({
           ? fallbackProfileFromInsight
           : contextTitle || 'Padrão de atenção identificado'
       const themeHintForUi = `${themeFromMeta || ''} ${pageTitleRaw} ${displayTitle || ''}`
-      let profileName = toShortProfileName(chosenProfileBase)
+      const waterIntakeTool = isWaterIntakeCalculatorContext(meta, displayTitle)
+      let profileName = toShortProfileName(chosenProfileBase, { waterIntakeTool })
       if (isIncompleteFragment(profileName) && contextTitle.trim().length >= 6) {
         profileName = contextTitle
       }
@@ -1380,7 +1397,7 @@ function ConfigDrivenLinkView({
       const diagnosisCardText = shouldUseSummaryInDiagnosisCard
         ? compactSummary
         : mainBlockerText
-      const impactDiagnosisText = toImpactDiagnosisText(diagnosisCardText, themeHintForUi)
+      const impactDiagnosisText = toImpactDiagnosisText(diagnosisCardText, themeHintForUi, { waterIntakeTool })
       const primaryInsightText = buildPrimaryInsight(diagnosis, diagnosisCardText)
       const showDetailedCause = !!diagnosis.causa_provavel && !isVerySimilarText(diagnosis.causa_provavel, primaryInsightText)
 
@@ -1466,7 +1483,8 @@ function ConfigDrivenLinkView({
 
             <div className="mb-5 p-4 rounded-xl border border-gray-100 bg-gray-50/70">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
-                {commercePublicCopy ? t.whatItMeans : locale === 'en' ? 'Main point' : locale === 'es' ? 'Punto principal' : 'Ponto principal'}
+                {/* Varejo (matriz joias/perfumaria/…): rótulo leve em `getMatrixCommercePublicLinkCopy` (ex.: “O que isso mostra”). Bem-estar / Pro Líderes: “Consequência”. */}
+                {commercePublicCopy ? t.whatItMeans : t.consequence}
               </p>
               <p className="text-sm text-gray-700 leading-relaxed">
                 {primaryInsightTextForUi}
@@ -1518,14 +1536,18 @@ function ConfigDrivenLinkView({
                   </div>
                 )}
 
-                <div className="mb-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
-                    {isPerfumery ? t.benefit : t.consequence}
-                  </p>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {softenTemplateEmDashes(diagnosis.consequence ?? '')}
-                  </p>
-                </div>
+                {diagnosis.consequence?.trim() &&
+                !commerceNarrative &&
+                !isVerySimilarText(diagnosis.consequence, primaryInsightText) ? (
+                  <div className="mb-4">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
+                      {isPerfumery ? t.benefit : t.consequence}
+                    </p>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {softenTemplateEmDashes(diagnosis.consequence)}
+                    </p>
+                  </div>
+                ) : null}
 
                 <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
                   <p className="text-gray-700 text-sm leading-relaxed">

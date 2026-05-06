@@ -4,6 +4,7 @@
  * 20 fluxos completos para vendas de bebidas funcionais
  */
 
+import { getAvaliacaoPerfilMetabolicoPerguntasTemplate } from '@/lib/wellness/avaliacao-perfil-metabolico-quiz-questions'
 import { FluxoCliente, TipoKit } from '@/types/wellness-system'
 
 export const fluxosClientes: FluxoCliente[] = [
@@ -421,6 +422,30 @@ export const fluxosClientes: FluxoCliente[] = [
     kitRecomendado: 'acelera',
     cta: 'Falar agora com o Especialista',
     tags: ['metabolismo', 'inchaço', 'retenção', 'leveza']
+  },
+  {
+    id: 'avaliacao-perfil-metabolico',
+    nome: 'Avaliação do Perfil Metabólico',
+    objetivo:
+      'Mesmas perguntas do quiz de Perfil Metabólico no Wellness (`metabolic-profile-assessment` / `avaliacao-perfil-metabolico-quiz-questions`) — para continuar no WhatsApp com quem enviou o link.',
+    perguntas: getAvaliacaoPerfilMetabolicoPerguntasTemplate().map((q) => ({
+      id: `p${q.id}`,
+      texto: q.pergunta,
+      tipo: 'multipla_escolha' as const,
+      opcoes: [...q.opcoes],
+    })),
+    diagnostico: {
+      titulo: 'Perfil metabólico (visão geral)',
+      descricao:
+        'Questionário alinhado ao Wellness; o próximo passo é alinhar expectativas e opções com quem compartilhou o link.',
+      sintomas: ['Como você percebe seu metabolismo', 'Abertura a plano e acompanhamento'],
+      beneficios: ['Mesmas opções de resposta que no app Wellness', 'Continuidade da conversa no WhatsApp'],
+      mensagemPositiva:
+        'Pequenos ajustes com orientação costumam destravar o que o questionário mostrou como prioridade.',
+    },
+    kitRecomendado: 'acelera',
+    cta: 'Falar agora com o Especialista',
+    tags: ['metabolismo', 'perfil-metabolico', 'quiz', 'wellness'],
   },
   {
     id: 'barriga-pesada',

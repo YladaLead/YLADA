@@ -1,6 +1,7 @@
 import type { FluxoCliente } from '@/types/wellness-system'
 import { getFluxoRecrutamentoById } from '@/lib/wellness-system/fluxos-recrutamento'
 import { proLideresRecruitmentQuizFluxos } from '@/lib/pro-lideres/pro-lideres-recruitment-quiz-fluxos'
+import { PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS } from '@/lib/pro-lideres/pro-lideres-recruitment-unified-perguntas'
 
 /**
  * Presets de Recrutamento Pro Líderes:
@@ -32,6 +33,8 @@ function upgradeFluxoForNoel(fluxo: FluxoCliente): FluxoCliente {
 
   return {
     ...fluxo,
+    /** Mesmo questionário que o quiz Ganhos no Wellness — comparação de diagnóstico por `flow_id` só. */
+    perguntas: PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS,
     objetivo: objetivosNoel,
     diagnostico: {
       ...fluxo.diagnostico,
