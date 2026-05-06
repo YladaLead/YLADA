@@ -1,4 +1,8 @@
-import { getYladaOgImagePath } from '@/lib/ylada-og-tema-imagem'
+import {
+  getYladaOgImagePath,
+  temaTextSuggestsCapilarOg,
+  temaTextSuggestsCorporalBodyOg,
+} from '@/lib/ylada-og-tema-imagem'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 
 const OG_BASE = '/images/og/ylada'
@@ -46,17 +50,52 @@ export function buildProEsteticaLinkOgDescription(input: {
   return `Responda em poucos minutos e veja um primeiro recorte sobre «${short}» — corpo, hábitos e próximo passo com calma.`
 }
 
-/** Quando o mapa genérico cai em pele ou logo, força arte alinhada à linha Pro Estética. */
+/** Quando o mapa genérico cai em pele, unhas, logo ou arte facial, força imagem alinhada à vertical Pro Estética. */
 export function getProEsteticaPublicOpenGraphImagePath(
   vertical: ProEsteticaDiagnosisVertical,
   tema: string,
   segment: string | null | undefined
 ): string {
   const p = getYladaOgImagePath(tema, segment)
-  if (p === ESTETICA_SEGMENT_FALLBACK_PATH || p === YLADA_OG_FALLBACK_LOGO_PATH) {
-    return vertical === 'capilar' ? `${OG_BASE}/estetica-cabelos.png` : `${OG_BASE}/estetica-corporal.jpg`
+  if (vertical === 'capilar') {
+    if (
+      p === ESTETICA_SEGMENT_FALLBACK_PATH ||
+      p === YLADA_OG_FALLBACK_LOGO_PATH ||
+      /\/estetica-pele|\/estetica-unhas|\/estetica-rejuvenescimento/.test(p)
+    ) {
+      return `${OG_BASE}/estetica-cabelos.png`
+    }
+  } else {
+    if (
+      p === ESTETICA_SEGMENT_FALLBACK_PATH ||
+      p === YLADA_OG_FALLBACK_LOGO_PATH ||
+      /\/estetica-pele|\/estetica-unhas/.test(p)
+    ) {
+      return `${OG_BASE}/estetica-corporal.jpg`
+    }
   }
   return p
+}
+
+/**
+ * Descrição OG quando não há `page.og_description` (ex. links antigos fora do backfill SQL).
+ * Só para segmento estética; evita o genérico «Faça o quiz…» em títulos capilar/corporal claros.
+ */
+export function buildEsteticaAestheticsOgDescriptionFallback(
+  title: string,
+  themeRaw?: string | null
+): string | null {
+  const blob = `${(title || '').trim()} ${(themeRaw || '').trim()}`.trim()
+  if (!blob) return null
+  if (temaTextSuggestsCapilarOg(blob)) {
+    const short = title.length > 78 ? `${title.slice(0, 75)}…` : title.trim()
+    return `Queda, couro ou rotina atrapalhando? Responda em poucos minutos e veja um primeiro recorte sobre «${short}» — foco fios e couro cabeludo, sem misturar com cuidados de pele do rosto.`
+  }
+  if (temaTextSuggestsCorporalBodyOg(blob)) {
+    const short = title.length > 78 ? `${title.slice(0, 75)}…` : title.trim()
+    return `Corpo e hábitos: responda em poucos minutos e receba um primeiro encaixe sobre «${short}» — sem promessa vazia, alinhado ao que você sente no dia a dia.`
+  }
+  return null
 }
 
 export function getProEsteticaPublicOpenGraphImageUrl(

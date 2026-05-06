@@ -86,6 +86,11 @@ const TEMA_TO_IMAGE: Record<string, string> = {
   cuidado_unhas: 'estetica-unhas.jpg',
   alongamento_unhas: 'estetica-unhas.jpg',
   cabelos: 'estetica-cabelos.png',
+  cabelo: 'estetica-cabelos.png',
+  queda: 'estetica-cabelos.png',
+  fio: 'estetica-cabelos.png',
+  fios: 'estetica-cabelos.png',
+  capilar: 'estetica-cabelos.png',
   cuidado_cabelos: 'estetica-cabelos.png',
   gordura_localizada: 'estetica-corporal-celulite.png',
   celulite: 'estetica-corporal-celulite.png',
@@ -193,6 +198,40 @@ function normalizeSegment(segment: string | null | undefined): YladaOgSegment {
   return map[s] ?? 'ylada'
 }
 
+/**
+ * Título ou `theme_raw` sugere foco capilar (evita OG de pele só pelo segmento aesthetics).
+ * Exportado para copy de WhatsApp e `/l/[slug]`.
+ */
+export function temaTextSuggestsCapilarOg(tema: string | null | undefined): boolean {
+  if (!tema || typeof tema !== 'string') return false
+  const s = tema
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+  if (
+    /\b(cabelo|cabelos|queda de cabelo|queda capilar|fios?\b|capilar|cronograma|oleosidade|tricologia|tricolog|cachos?\b|progressiva|alisamento|tintura|descolor|escova\b|corte de cabelo|couro cabeludo|antiqueda)\b/i.test(
+      s
+    )
+  ) {
+    return true
+  }
+  if (/\bqueda\b/i.test(s) && /\b(cabelo|cabelos|fio|fios|capilar|cronograma|couro)\b/i.test(s)) return true
+  return false
+}
+
+/** Corpo / contorno — só quando não é claramente capilar. */
+export function temaTextSuggestsCorporalBodyOg(tema: string | null | undefined): boolean {
+  if (!tema || typeof tema !== 'string') return false
+  if (temaTextSuggestsCapilarOg(tema)) return false
+  const s = tema
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+  return /\b(celulite|flacidez|gordura localizada|contorno corporal|corporal\b|drenagem|estrias?\b|barriga|gluteo|reten(cao)?|inchaco|lipedema|pos[- ]?operatorio|massagem modeladora)\b/i.test(
+    s
+  )
+}
+
 /** Normaliza tema para chave do mapeamento (lowercase, sem acentos, underscores). */
 function normalizeTema(tema: string | null | undefined): string {
   if (!tema || typeof tema !== 'string') return ''
@@ -212,10 +251,46 @@ function extractTemaKeywords(tema: string): string[] {
   const keywords: string[] = [n]
   // Palavras comuns que podem ser o tema principal
   const common = [
-    'emagrecimento', 'intestino', 'energia', 'pele', 'perfume', 'treino', 'ansiedade', 'metabolismo',
-    'alimentacao', 'hidratacao', 'sono', 'estresse', 'detox', 'performance', 'perfil_olfativo', 'familia_olfativa',
-    'sorriso', 'unhas', 'cabelos', 'celulite', 'flacidez', 'manchas', 'clareamento', 'halitose', 'implantes',
-    'ortodontia', 'sensibilidade', 'depressao', 'relacionamentos', 'autoconhecimento', 'proposito', 'saude', 'diabetes', 'pressao'
+    'emagrecimento',
+    'intestino',
+    'energia',
+    // Capilar antes de «pele»: títulos com «cabelo» singular não pegavam «cabelos» e caíam em pele genérica.
+    'cabelo',
+    'cabelos',
+    'queda',
+    'fios',
+    'capilar',
+    'cronograma',
+    'pele',
+    'perfume',
+    'treino',
+    'ansiedade',
+    'metabolismo',
+    'alimentacao',
+    'hidratacao',
+    'sono',
+    'estresse',
+    'detox',
+    'performance',
+    'perfil_olfativo',
+    'familia_olfativa',
+    'sorriso',
+    'unhas',
+    'celulite',
+    'flacidez',
+    'manchas',
+    'clareamento',
+    'halitose',
+    'implantes',
+    'ortodontia',
+    'sensibilidade',
+    'depressao',
+    'relacionamentos',
+    'autoconhecimento',
+    'proposito',
+    'saude',
+    'diabetes',
+    'pressao',
   ]
   for (const c of common) {
     if (n.includes(c)) keywords.push(c)
@@ -240,6 +315,15 @@ export function getYladaOgImagePath(
   segment: string | null | undefined
 ): string {
   const seg = normalizeSegment(segment)
+  const blob = typeof tema === 'string' ? tema : ''
+  if (seg === 'estetica' && blob) {
+    if (temaTextSuggestsCapilarOg(blob)) {
+      return ogPathFromFilename('estetica-cabelos.png')
+    }
+    if (temaTextSuggestsCorporalBodyOg(blob)) {
+      return ogPathFromFilename('estetica-corporal.jpg')
+    }
+  }
 
   if (tema) {
     const normalized = normalizeTema(tema)

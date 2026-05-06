@@ -6,7 +6,10 @@ import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 import { getProLideresPresetOpenGraphImageUrl } from '@/lib/pro-lideres/pro-lideres-preset-og-image'
-import { getProEsteticaPublicOpenGraphImageUrl } from '@/lib/pro-estetica/pro-estetica-public-link-og'
+import {
+  buildEsteticaAestheticsOgDescriptionFallback,
+  getProEsteticaPublicOpenGraphImageUrl,
+} from '@/lib/pro-estetica/pro-estetica-public-link-og'
 import { getYladaOgImageUrl } from '@/lib/ylada-og-tema-imagem'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://ylada.app'
@@ -56,6 +59,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     typeof meta.diagnosis_vertical === 'string' ? meta.diagnosis_vertical.trim().toLowerCase() : ''
   const proEsteticaVertical =
     diagnosisVerticalRaw === 'capilar' || diagnosisVerticalRaw === 'corporal' ? diagnosisVerticalRaw : null
+  const segmentLower = (segment || '').toLowerCase().trim()
+  const isAestheticsSegment = segmentLower === 'estetica' || segmentLower === 'aesthetics'
 
   const ogImageUrl =
     isProLideresPreset && proLideresFluxoId
@@ -66,8 +71,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogMime = ogImageMime(ogImageUrl)
   const pageUrl = `${baseUrl}/l/${slug}`
   const ogFromPage = typeof page.og_description === 'string' ? page.og_description.trim() : ''
+  const esteticaOgFallback =
+    isAestheticsSegment && !ogFromPage
+      ? buildEsteticaAestheticsOgDescriptionFallback(title, themeRaw || null)
+      : null
   const description =
     ogFromPage ||
+    esteticaOgFallback ||
     (((page.subtitle as string | undefined) ??
       (config.description as string | undefined)) ??
       'Faça o quiz e descubra seu resultado personalizado.')
