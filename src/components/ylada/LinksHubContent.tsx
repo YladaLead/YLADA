@@ -16,7 +16,7 @@ const TITLE_TAB_BIBLIOTECA_PRO =
   'Vitrine de modelos: você escolhe um e gera um link novo. Só aparece em “Seus links” depois de criado.'
 /** Tooltip (desktop): separador Seus links no hub Pro Estética (PT-BR). */
 const TITLE_TAB_MEUS_LINKS_PRO =
-  'Lista dos links já na sua conta (Biblioteca, Noel, etc.) — URL, QR e análise: aberturas, respostas, WhatsApp.'
+  'Links já na conta — Preview, Copiar link e Copiar QR (como no Pro Líderes), mais URL, métricas e WhatsApp.'
 
 interface LinksHubContentProps {
   areaCodigo: OnboardingAreaCodigo | string
@@ -148,9 +148,10 @@ function LinksHubContentInner({
                 <span className="font-medium">link novo</span> (ex.: “Usar esse”).
               </p>
               <p className="mt-1 border-t border-slate-200/80 pt-1.5">
-                <span className="font-semibold text-slate-900">Seus links</span> — os links que{' '}
-                <span className="font-medium">já estão na sua conta</span> (Biblioteca, Noel ou outro), com URL, QR e{' '}
-                <span className="font-medium">análise</span> (aberturas, respostas, WhatsApp).
+                <span className="font-semibold text-slate-900">Seus links</span> — os que{' '}
+                <span className="font-medium">já estão na conta</span> (Biblioteca, Noel, etc.), com{' '}
+                <span className="font-medium">Preview, Copiar link e Copiar QR</span> no mesmo padrão do Pro Líderes,
+                mais métricas (aberturas, respostas, WhatsApp).
               </p>
             </div>
           ) : null}
@@ -160,7 +161,7 @@ function LinksHubContentInner({
           <BibliotecaPageContent
             areaCodigo={areaCodigo as OnboardingAreaCodigo}
             areaLabel={areaLabel}
-            embedded
+            embedded={true}
             esteticaCorporalScope={bibliotecaEsteticaCorporalScope}
             esteticaCapilarScope={bibliotecaEsteticaCapilarScope}
           />
@@ -169,7 +170,7 @@ function LinksHubContentInner({
           <LinksPageContent
             areaCodigo={areaCodigo as OnboardingAreaCodigo}
             areaLabel={areaLabel}
-            embedded
+            embedded={true}
             proEsteticaCorporalEmbedded={proEsteticaProBiblioteca}
           />
         )}

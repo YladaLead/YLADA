@@ -812,14 +812,14 @@ function BibliotecaCard({
                 </div>
                 {copyOkFlash ? (
                   <p className="text-center text-xs font-medium text-emerald-700 sm:text-right">
-                    Link copiado. Você pode colar onde quiser; o QR está abaixo ou em “Seus links”.
+                    Link copiado. Você pode colar onde quiser; o QR está abaixo ou em “Seus links” (Copiar QR).
                   </p>
                 ) : null}
                 {postCopyQrUrl ? (
                   <div className="w-full rounded-xl border border-indigo-100 bg-indigo-50/40 p-3 text-left shadow-sm">
                     <p className="text-xs font-semibold text-gray-900">QR deste link</p>
                     <p className="mt-0.5 text-[11px] text-gray-600 leading-snug">
-                      Copie a imagem do QR ou o link — o mesmo que você encontra em “Seus links” → QR Code.
+                      Copie a imagem do QR ou o link — o mesmo fluxo de “Seus links” (Preview, Copiar link, Copiar QR).
                     </p>
                     <div className="mt-2">
                       <DiagnosticoLinkQrPanel url={postCopyQrUrl} />
@@ -1069,11 +1069,17 @@ function BibliotecaPageContentInner({
   const pathname = usePathname()
   const linhaBibliotecaQueryRaw = rawEsteticaBibliotecaLinhaFromSearchParams(searchParams)
 
+  const pathnameIsProEsteticaBibliotecaHub =
+    typeof pathname === 'string' &&
+    (pathname.startsWith('/pro-estetica-corporal/painel/biblioteca-links') ||
+      pathname.startsWith('/pro-estetica-capilar/painel/biblioteca-links'))
+
   /**
-   * Biblioteca corporal/capilar só existe embutida no painel Pro — não depender do `pathname`
-   * (evita cair na matriz `/pt/estetica/links` quando o prefixo da rota difere).
+   * Cartões do painel Pro (Ver preview, Criar e copiar link, Usar esse): `embedded` + capilar/corporal.
+   * Fallback por URL: se `embedded` falhar por algum motivo, ainda reconhecemos o hub canónico
+   * `/pro-estetica-*/painel/biblioteca-links` (corporal e capilar usam o mesmo layout).
    */
-  const stayInProEsteticaHub = embedded && proEsteticaNarrow
+  const stayInProEsteticaHub = proEsteticaNarrow && (Boolean(embedded) || pathnameIsProEsteticaBibliotecaHub)
 
   const navigateAfterLinkCreated = useCallback(
     (
