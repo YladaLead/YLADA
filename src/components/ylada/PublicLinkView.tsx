@@ -27,11 +27,15 @@ import { createClient } from '@/lib/supabase-client'
 import { parseProLideresMemberPathSegment } from '@/lib/ylada-public-link-path'
 
 const publicLinkShareButtonClassName =
-  'w-full py-3.5 px-4 rounded-xl border-2 border-sky-300 bg-sky-100/80 text-sky-700 font-semibold shadow-sm shadow-sky-300/35 transition-colors hover:bg-sky-100 hover:border-sky-400'
+  'w-full rounded-xl border-2 border-sky-400 bg-sky-100 px-4 py-4 text-sm font-semibold leading-snug text-sky-900 shadow-md shadow-sky-400/30 transition-colors hover:border-sky-500 hover:bg-sky-200/70'
 
-/** Botão “Ver / ocultar análise completa”: destaque em verde para chamar mais atenção que o secundário azul. */
-const publicLinkFullAnalysisToggleClassName =
-  'w-full rounded-xl border-2 border-emerald-500 bg-emerald-50 px-4 py-3.5 font-semibold text-emerald-900 shadow-md shadow-emerald-200/45 transition-colors hover:bg-emerald-100 hover:border-emerald-600'
+/** CTA principal WhatsApp: único bloco de alta ênfase na coluna de ações. */
+const publicLinkPrimaryWhatsAppClassName =
+  'w-full rounded-xl bg-sky-600 px-4 py-5 text-base font-bold text-white shadow-xl shadow-sky-600/40 ring-2 ring-sky-400/25 transition-colors hover:bg-sky-700 hover:ring-sky-400/35'
+
+/** “Ver / ocultar análise completa”: verde claro, compacto, abaixo do WhatsApp na hierarquia visual. */
+const publicLinkFullAnalysisToggleCompactClassName =
+  'mx-auto mb-4 block w-max max-w-full rounded-lg border border-emerald-200/90 bg-emerald-50/90 px-3.5 py-2 text-sm font-medium text-emerald-900 shadow-sm shadow-emerald-900/5 transition-colors hover:border-emerald-300 hover:bg-emerald-100/90'
 
 const PUBLIC_LINK_UI: Record<Language, {
   start: string
@@ -834,7 +838,20 @@ export default function PublicLinkView({
 }
 
 // --- Config-driven (flow_id) form + result (Etapa 8) ---
-type FormField = { id: string; label: string; type?: string; options?: string[] }
+type FormField = {
+  id: string
+  label: string
+  type?: string
+  options?: string[]
+  placeholder?: string
+  min?: number
+  max?: number
+  step?: number
+  rows?: number
+  maxLength?: number
+  /** false = pergunta opcional (ex.: clima) */
+  obrigatoria?: boolean
+}
 type ResultConfig = {
   headline?: string
   description?: string
@@ -913,11 +930,12 @@ function ConfigDrivenLinkView({
     if (tipo === 'number') {
       return { ...f, options: undefined }
     }
+    if (tipo === 'text' || tipo === 'textarea') {
+      return { ...f, options: undefined }
+    }
     const noOptions = !f.options || f.options.length === 0
     const isQuestionLike =
       !f.type ||
-      tipo === 'text' ||
-      tipo === 'textarea' ||
       tipo === 'select' ||
       tipo === 'single' ||
       tipo === 'radio' ||
@@ -932,9 +950,13 @@ function ConfigDrivenLinkView({
     return f
   })
 
+  /** Pro Líderes: um passo por campo (múltipla escolha + texto + número na mesma ordem). */
+  const orderedWizardMode = isProLideresPreset && fieldsValidados.length > 0
+
   /** Perguntas que de fato aparecem no modo quiz (com opções) — deve bater com o texto da intro */
-  const visibleQuizQuestionCount =
-    fieldsValidados.filter((f) => Array.isArray(f.options) && f.options.length > 0).length || fieldsValidados.length
+  const visibleQuizQuestionCount = orderedWizardMode
+    ? fieldsValidados.length
+    : fieldsValidados.filter((f) => Array.isArray(f.options) && f.options.length > 0).length || fieldsValidados.length
 
   const pageTitleRaw = (page.title as string) ?? (config.title as string) ?? 'Link'
   const pageTitle = patientFacingTitleFromStoredPageTitle(pageTitleRaw)
@@ -1001,7 +1023,8 @@ function ConfigDrivenLinkView({
     // VALIDAÇÃO: Verificar se todas as perguntas obrigatórias foram respondidas
     // IMPORTANTE: No modo quiz, validar APENAS os campos que estão sendo exibidos (quizFields)
     // Não validar campos que não estão visíveis na tela
-    const camposParaValidar = isQuizMode ? quizFields : fieldsValidados
+    const stepFieldsForSubmit = orderedWizardMode ? fieldsValidados : isQuizMode ? quizFields : fieldsValidados
+    const camposParaValidar = stepFieldsForSubmit
     const camposObrigatorios = camposParaValidar.filter((f) => f.id && (!f.hasOwnProperty('obrigatoria') || f.obrigatoria !== false))
     const camposNaoRespondidos = camposObrigatorios.filter((f) => {
       const valor = values[f.id]
@@ -1053,11 +1076,14 @@ function ConfigDrivenLinkView({
         const url = `/api/ylada/links/${encodeURIComponent(slug)}/diagnosis`
         // IMPORTANTE: Enviar apenas os valores dos campos que foram exibidos no quiz
         // No modo quiz, enviar apenas os valores de quizFields
-        const answersToSend = isQuizMode 
-          ? Object.fromEntries(
-              quizFields.map(f => [f.id, values[f.id]]).filter(([, v]) => v !== undefined && v !== null)
-            )
-          : values
+        const answersToSend =
+          orderedWizardMode || isQuizMode
+            ? Object.fromEntries(
+                stepFieldsForSubmit
+                  .map((f) => [f.id, values[f.id]] as const)
+                  .filter(([, v]) => v !== undefined && v !== null)
+              )
+            : values
         const body = {
           visitor_answers: answersToSend,
           ...(locale !== 'pt' && { locale }),
@@ -1447,6 +1473,21 @@ function ConfigDrivenLinkView({
               </p>
             </div>
 
+            <button
+              type="button"
+              onClick={() => {
+                setShowFullAnalysis((prev) => {
+                  if (!prev) {
+                    trackLinkEvent(slug, 'full_analysis_expand', { metrics_id: metricsId })
+                  }
+                  return !prev
+                })
+              }}
+              className={publicLinkFullAnalysisToggleCompactClassName}
+            >
+              {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
+            </button>
+
             {showFullAnalysis && (
               <>
                 {diagnosis.frase_identificacao && (
@@ -1557,7 +1598,7 @@ function ConfigDrivenLinkView({
                         (locale === 'en' ? 'Hi, I did the assessment and would like to talk about the result.' : locale === 'es' ? 'Hola, hice la evaluación y me gustaría hablar sobre el resultado.' : 'Oi, fiz a análise e gostaria de conversar sobre o resultado.')
                     )
                   }
-                  className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
+                  className={publicLinkPrimaryWhatsAppClassName}
                 >
                   {isProLideresRecruitmentLink
                     ? (diagnosis.cta_text?.trim() || t.recruitmentPrimaryCta)
@@ -1569,20 +1610,6 @@ function ConfigDrivenLinkView({
                   className={publicLinkShareButtonClassName}
                 >
                   {t.shareResult}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowFullAnalysis((prev) => {
-                      if (!prev) {
-                        trackLinkEvent(slug, 'full_analysis_expand', { metrics_id: metricsId })
-                      }
-                      return !prev
-                    })
-                  }}
-                  className={publicLinkFullAnalysisToggleClassName}
-                >
-                  {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
                 </button>
               </div>
             ) : (
@@ -1672,7 +1699,7 @@ function ConfigDrivenLinkView({
               <button
                 type="button"
                 onClick={() => onCtaClick()}
-                className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
+                className={publicLinkPrimaryWhatsAppClassName}
               >
                 {isProLideresRecruitmentLink ? t.recruitmentPrimaryCta : t.talkNow}
               </button>
@@ -1713,30 +1740,52 @@ function ConfigDrivenLinkView({
   const quizFields = hasQuizFields ? fieldsValidados.filter((f) => Array.isArray(f.options) && f.options.length > 0) : []
   const textFields = hasQuizFields ? fieldsValidados.filter((f) => !Array.isArray(f.options) || f.options.length === 0) : fieldsValidados
   const isQuizMode = quizFields.length > 0
-  const currentField = isQuizMode ? quizFields[formStep] : null
-  const isLastQuizStep = isQuizMode && formStep >= quizFields.length - 1
-  // Verificar se todas as perguntas foram respondidas
-  // IMPORTANTE: Aceitar qualquer valor não-undefined/non-null, incluindo "0"
-  const allQuizAnswered = isQuizMode && quizFields.every((f) => {
-    const valor = values[f.id]
-    const temValor = valor !== undefined && valor !== null && String(valor).trim() !== ''
-    if (!temValor) {
-      console.log('[PublicLinkView] Pergunta não respondida:', f.id, f.label, 'valor:', valor)
+
+  const stepFields = orderedWizardMode ? fieldsValidados : quizFields
+  const useStepWizardUi = orderedWizardMode || isQuizMode
+  const currentField = useStepWizardUi ? stepFields[formStep] ?? null : null
+  const stepCount = stepFields.length
+  const isLastQuizStep = useStepWizardUi && stepCount > 0 && formStep >= stepCount - 1
+
+  const fieldHasOptions = (f: FormField) => Array.isArray(f.options) && f.options.length > 0
+
+  const currentInputValid = (f: FormField) => {
+    if (f.obrigatoria === false && (values[f.id] === undefined || String(values[f.id] ?? '').trim() === '')) {
+      return true
     }
-    return temValor
-  })
-  
-  // Debug: logar estado de todas as perguntas
-  if (isQuizMode && isLastQuizStep) {
+    const raw = String(values[f.id] ?? '').trim()
+    if ((f.type || '').toLowerCase() === 'number') {
+      if (raw === '') return false
+      const n = parseFloat(raw.replace(',', '.'))
+      if (!Number.isFinite(n)) return false
+      if (typeof f.min === 'number' && n < f.min) return false
+      if (typeof f.max === 'number' && n > f.max) return false
+      return true
+    }
+    return raw.length > 0
+  }
+
+  const allQuizAnswered =
+    useStepWizardUi &&
+    stepFields.every((f) => {
+      if (fieldHasOptions(f)) {
+        if (f.obrigatoria === false) return true
+        const valor = values[f.id]
+        return valor !== undefined && valor !== null && String(valor).trim() !== ''
+      }
+      return currentInputValid(f)
+    })
+
+  if (useStepWizardUi && isLastQuizStep) {
     console.log('[PublicLinkView] Estado das perguntas:', {
       allQuizAnswered,
-      totalPerguntas: quizFields.length,
-      perguntas: quizFields.map(f => ({ 
-        id: f.id, 
-        label: f.label, 
-        valor: values[f.id], 
-        temValor: values[f.id] !== undefined && values[f.id] !== null && String(values[f.id]).trim() !== ''
-      }))
+      totalPerguntas: stepCount,
+      perguntas: stepFields.map((f) => ({
+        id: f.id,
+        label: f.label,
+        valor: values[f.id],
+        temValor: values[f.id] !== undefined && values[f.id] !== null && String(values[f.id]).trim() !== '',
+      })),
     })
   }
 
@@ -1750,7 +1799,23 @@ function ConfigDrivenLinkView({
     setTimeout(() => setFormStep((s) => s + 1), 150)
   }
 
-  if (isQuizMode && currentField) {
+  const advanceFromOpenInput = () => {
+    if (!currentField) return
+    if (!currentInputValid(currentField)) {
+      setError(
+        locale === 'en'
+          ? 'Please fill in this field correctly before continuing.'
+          : locale === 'es'
+            ? 'Completa este campo correctamente antes de continuar.'
+            : 'Preencha este campo corretamente antes de continuar.'
+      )
+      return
+    }
+    setError(null)
+    setFormStep((s) => Math.min(s + 1, Math.max(0, stepCount - 1)))
+  }
+
+  if (useStepWizardUi && currentField) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100/80 p-6 sm:p-8 animate-in fade-in duration-300">
@@ -1768,47 +1833,94 @@ function ConfigDrivenLinkView({
                   </button>
                 ) : null}
               </div>
-              <span className="flex-1 text-center">{t.questionOf} {formStep + 1} {locale === 'en' ? 'of' : 'de'} {quizFields.length}</span>
+              <span className="flex-1 text-center">
+                {t.questionOf} {formStep + 1} {locale === 'en' ? 'of' : 'de'} {stepCount}
+              </span>
               <div className="w-14" />
             </div>
             <div className="h-1.5 bg-sky-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-sky-500 rounded-full transition-all duration-300"
-                style={{ width: `${((formStep + 1) / quizFields.length) * 100}%` }}
+                style={{ width: `${((formStep + 1) / stepCount) * 100}%` }}
               />
             </div>
           </div>
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6 leading-snug">
             {currentField.label}
           </h2>
-          <div className="space-y-3">
-            {currentField.options?.map((opt, i) => {
-              const isSelected = (values[currentField.id] ?? '') === String(i)
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => handleOptionSelect(currentField.id, String(i))}
-                  className={`w-full text-left py-4 px-4 rounded-xl border-2 transition-all duration-200 ${
-                    isSelected
-                      ? 'border-sky-500 bg-sky-50 text-sky-900'
-                      : 'border-gray-100 hover:border-sky-200 hover:bg-gray-50/80 text-gray-700'
-                  }`}
-                >
-                  <span className="flex items-center gap-3">
-                    <span
-                      className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center text-xs font-medium ${
-                        isSelected ? 'border-sky-500 bg-sky-500 text-white' : 'border-gray-300'
-                      }`}
-                    >
-                      {isSelected ? '✓' : String.fromCharCode(65 + i)}
+          {fieldHasOptions(currentField) ? (
+            <div className="space-y-3">
+              {currentField.options!.map((opt, i) => {
+                const isSelected = (values[currentField.id] ?? '') === String(i)
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => handleOptionSelect(currentField.id, String(i))}
+                    className={`w-full text-left py-4 px-4 rounded-xl border-2 transition-all duration-200 ${
+                      isSelected
+                        ? 'border-sky-500 bg-sky-50 text-sky-900'
+                        : 'border-gray-100 hover:border-sky-200 hover:bg-gray-50/80 text-gray-700'
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      <span
+                        className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center text-xs font-medium ${
+                          isSelected ? 'border-sky-500 bg-sky-500 text-white' : 'border-gray-300'
+                        }`}
+                      >
+                        {isSelected ? '✓' : String.fromCharCode(65 + i)}
+                      </span>
+                      {opt}
                     </span>
-                    {opt}
-                  </span>
+                  </button>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {(currentField.type || '').toLowerCase() === 'textarea' ? (
+                <textarea
+                  rows={currentField.rows ?? 4}
+                  maxLength={currentField.maxLength}
+                  value={values[currentField.id] ?? ''}
+                  onChange={(e) => setValues((prev) => ({ ...prev, [currentField.id]: e.target.value }))}
+                  placeholder={currentField.placeholder || currentField.label}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                />
+              ) : (currentField.type || '').toLowerCase() === 'number' ? (
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min={currentField.min}
+                  max={currentField.max}
+                  step={currentField.step ?? 'any'}
+                  value={values[currentField.id] ?? ''}
+                  onChange={(e) => setValues((prev) => ({ ...prev, [currentField.id]: e.target.value }))}
+                  placeholder={currentField.placeholder || (locale === 'en' ? 'e.g. 70' : locale === 'es' ? 'ej. 70' : 'Ex: 70')}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 text-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                />
+              ) : (
+                <input
+                  type="text"
+                  maxLength={currentField.maxLength}
+                  value={values[currentField.id] ?? ''}
+                  onChange={(e) => setValues((prev) => ({ ...prev, [currentField.id]: e.target.value }))}
+                  placeholder={currentField.placeholder || currentField.label}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                />
+              )}
+              {!isLastQuizStep && (
+                <button
+                  type="button"
+                  onClick={advanceFromOpenInput}
+                  className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-colors"
+                >
+                  {locale === 'en' ? 'Next →' : locale === 'es' ? 'Siguiente →' : 'Próxima →'}
                 </button>
-              )
-            })}
-          </div>
+              )}
+            </div>
+          )}
           {isLastQuizStep && (
             <div className="mt-8">
               <button
@@ -1816,27 +1928,28 @@ function ConfigDrivenLinkView({
                 disabled={loading || !allQuizAnswered}
                 onClick={(e) => {
                   try {
-                    console.log('🔵 [PublicLinkView] BOTÃO CLICADO!', { 
-                      loading, 
-                      allQuizAnswered, 
+                    console.log('🔵 [PublicLinkView] BOTÃO CLICADO!', {
+                      loading,
+                      allQuizAnswered,
                       disabled: loading || !allQuizAnswered,
                       values,
-                      quizFieldsCount: quizFields.length,
-                      quizFields: quizFields.map(f => ({ id: f.id, label: f.label, valor: values[f.id] }))
+                      stepFieldsCount: stepCount,
+                      stepFields: stepFields.map((f) => ({ id: f.id, label: f.label, valor: values[f.id] })),
                     })
                     
                     e.preventDefault()
                     e.stopPropagation()
                     
                     if (!allQuizAnswered) {
-                      console.warn('⚠️ [PublicLinkView] Bloqueado: nem todas as perguntas foram respondidas', { 
-                        allQuizAnswered, 
-                        quizFields: quizFields.map(f => ({ 
-                          id: f.id, 
-                          label: f.label, 
-                          valor: values[f.id], 
-                          temValor: values[f.id] !== undefined && values[f.id] !== null && String(values[f.id]).trim() !== ''
-                        }))
+                      console.warn('⚠️ [PublicLinkView] Bloqueado: nem todas as perguntas foram respondidas', {
+                        allQuizAnswered,
+                        stepFields: stepFields.map((f) => ({
+                          id: f.id,
+                          label: f.label,
+                          valor: values[f.id],
+                          temValor:
+                            values[f.id] !== undefined && values[f.id] !== null && String(values[f.id]).trim() !== '',
+                        })),
                       })
                       setError('Por favor, responda todas as perguntas antes de ver o resultado.')
                       return
@@ -2157,6 +2270,10 @@ function DiagnosticoQuiz({
             </p>
           </div>
 
+          <button type="button" onClick={toggleFullAnalysis} className={publicLinkFullAnalysisToggleCompactClassName}>
+            {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
+          </button>
+
           {showFullAnalysis && (
             <>
               <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
@@ -2175,11 +2292,7 @@ function DiagnosticoQuiz({
           {whatsappUrl ? (
             <div className="space-y-3">
               <p className="text-center text-sm text-gray-600">{t.quizResultHelperLine}</p>
-              <button
-                type="button"
-                onClick={() => onCtaClick()}
-                className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
-              >
+              <button type="button" onClick={() => onCtaClick()} className={publicLinkPrimaryWhatsAppClassName}>
                 {isProLideresRecruitmentQuiz ? t.recruitmentPrimaryCta : ctaText}
               </button>
               <button
@@ -2189,25 +2302,9 @@ function DiagnosticoQuiz({
               >
                 {t.shareResult}
               </button>
-              <button
-                type="button"
-                onClick={toggleFullAnalysis}
-                className={publicLinkFullAnalysisToggleClassName}
-              >
-                {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
-              </button>
             </div>
           ) : (
-            <div className="space-y-3">
-              <span className="text-gray-500 text-sm block">{t.contactNotAvailable.replace('{pessoa}', pessoaLabel)}</span>
-              <button
-                type="button"
-                onClick={toggleFullAnalysis}
-                className={publicLinkFullAnalysisToggleClassName}
-              >
-                {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
-              </button>
-            </div>
+            <span className="text-gray-500 text-sm block">{t.contactNotAvailable.replace('{pessoa}', pessoaLabel)}</span>
           )}
 
           <div className="mt-5 pt-4 border-t border-gray-100">
@@ -3090,6 +3187,20 @@ function CalculatorBlock({
                   </p>
                   <p className="text-sm leading-relaxed text-gray-700">{resultCopy.tip}</p>
                 </div>
+                {imcFullAnalysis ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowFullAnalysis((prev) => {
+                        if (!prev) trackLinkEvent(slug, 'full_analysis_expand')
+                        return !prev
+                      })
+                    }}
+                    className={publicLinkFullAnalysisToggleCompactClassName}
+                  >
+                    {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
+                  </button>
+                ) : null}
                 {showFullAnalysis && imcFullAnalysis ? (
                   <div className="space-y-3 rounded-xl border border-violet-100 bg-violet-50/60 p-4">
                     {imcFullAnalysis.map((pText, i) => (
@@ -3111,7 +3222,7 @@ function CalculatorBlock({
                   <button
                     type="button"
                     onClick={() => onCtaClick(undefined, whatsappPrefillResult)}
-                    className="w-full rounded-xl bg-sky-600 px-4 py-4 font-semibold text-white shadow-lg shadow-sky-500/25 transition-colors hover:bg-sky-700"
+                    className={publicLinkPrimaryWhatsAppClassName}
                   >
                     {ctaLabel}
                   </button>
@@ -3128,20 +3239,6 @@ function CalculatorBlock({
               >
                 {t.shareResult}
               </button>
-              {imcFullAnalysis ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowFullAnalysis((prev) => {
-                      if (!prev) trackLinkEvent(slug, 'full_analysis_expand')
-                      return !prev
-                    })
-                  }}
-                  className={publicLinkFullAnalysisToggleClassName}
-                >
-                  {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
-                </button>
-              ) : null}
             </div>
 
             <div className="mt-5 border-t border-gray-100 pt-4">
