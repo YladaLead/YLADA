@@ -9,11 +9,52 @@ import Link from 'next/link'
  */
 export function PricingSectionLanding({
   checkoutBasePath = '/pt/precos',
+  /** Wellness: só plano mensal no checkout (oculta coluna anual). */
+  hideAnnualPlan = false,
 }: {
   checkoutBasePath?: string
+  hideAnnualPlan?: boolean
 }) {
   const hrefMonthly = checkoutBasePath === '/pt/precos' ? '/pt/precos' : `${checkoutBasePath}?plan=monthly`
   const hrefAnnual = checkoutBasePath === '/pt/precos' ? '/pt/precos' : `${checkoutBasePath}?plan=annual`
+
+  if (hideAnnualPlan) {
+    return (
+      <section className="py-12 sm:py-16">
+        <p className="text-center text-gray-600 mb-2">Acesso completo à plataforma.</p>
+        <p className="text-center text-gray-600 mb-4">Crie quantos diagnósticos quiser.</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Comece a usar o YLADA</h2>
+        <div className="max-w-md mx-auto">
+          <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 sm:p-8 flex flex-col">
+            <h3 className="text-xl font-bold text-gray-900 mb-1">Plano mensal</h3>
+            <p className="text-sm text-gray-600 mb-4">Assinatura Wellness com renovação mensal.</p>
+            <ul className="space-y-2 mb-6 flex-1">
+              {[
+                'Acesso completo ao Wellness System',
+                'Criação de avaliações e diagnósticos',
+                'Scripts e ferramentas de captação',
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2 text-gray-700 text-sm">
+                  <span className="text-green-600">✔</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href={hrefMonthly}
+              className="block w-full text-center py-3.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors"
+            >
+              Começar agora
+            </Link>
+            <p className="text-center text-xs text-gray-500 mt-4">
+              O plano anual não está disponível para novas assinaturas no momento.
+            </p>
+          </div>
+        </div>
+        <p className="text-center text-gray-500 text-sm mt-6">Após o pagamento você já pode acessar a plataforma.</p>
+      </section>
+    )
+  }
 
   return (
     <section className="py-12 sm:py-16">

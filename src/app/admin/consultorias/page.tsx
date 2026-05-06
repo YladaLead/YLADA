@@ -29,7 +29,7 @@ export default function AdminConsultoriasHubPage() {
             <AreaPrincipalCard
               href="/admin/consultorias/terapia-capilar"
               icon="✨"
-              title="Terapia capilar"
+              title="Estética capilar"
               border="border-violet-200"
               hover="hover:border-violet-400 hover:bg-violet-50/50"
             />

@@ -214,10 +214,10 @@ export function getDicaNoelBiblioteca(
     return 'Noel: em estética corporal, fluxos de contorno, retenção, celulite e “expectativa de sessões” costumam abrir conversa com intenção real — use também os quizzes de ordem de protocolo e agenda.'
   }
   if (segmentCode === 'aesthetics' && esteticaLinha === 'capilar') {
-    return 'Noel: em terapia capilar, queda, couro cabeludo e hidratação geram resposta rápida; envie o link com uma pergunta curta no WhatsApp ou no story.'
+    return 'Noel: em estética capilar, queda, couro cabeludo e hidratação geram resposta rápida; envie o link com uma pergunta curta no WhatsApp ou no story.'
   }
   if (segmentCode === 'aesthetics' && esteticaLinha === 'todos') {
-    return 'Noel: use o filtro Linha (terapia capilar ou estética corporal) para achar o modelo certo. A sugestão do dia acima já traz um ângulo pronto para postar ou mandar no direct.'
+    return 'Noel: use o filtro Linha (estética capilar ou estética corporal) para achar o modelo certo. A sugestão do dia acima já traz um ângulo pronto para postar ou mandar no direct.'
   }
   const dicas: Partial<Record<BibliotecaSegmentCode, string>> = {
     nutrition: 'Comece pelo diagnóstico de Metabolismo ou Emagrecimento. São os que mais geram conversas com clientes.',
@@ -608,7 +608,7 @@ const IDEIAS_RAPIDAS_ESTETICA: Record<string, IdeiaRapidaNoel[]> = {
   ],
   capilar: [
     {
-      texto: 'Noel: em terapia capilar, quem responde um quiz curto já chega no salão com contexto — ótimo para qualificar antes da cadeira.',
+      texto: 'Noel: em estética capilar, quem responde um quiz curto já chega no salão com contexto — ótimo para qualificar antes da cadeira.',
       tema: 'cabelo',
       titulo_sugerido: 'Seu cabelo está recebendo os cuidados certos?',
     },

@@ -11,14 +11,14 @@ export default function AdminConsultoriasTerapiaCapilarPage() {
           <header className="space-y-2">
             <LinkConsultoriasHub />
             <p className="text-sm font-medium text-indigo-700">YLADA · Admin</p>
-            <h1 className="text-2xl font-bold text-gray-900">Terapia capilar</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Estética capilar</h1>
             <p className="text-sm text-gray-600 max-w-2xl">
               Fichas em pipeline (pré vs diagnóstico). Abaixo, a consultoria completa com materiais e respostas.
             </p>
           </header>
 
           <aside className="rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm text-amber-950 space-y-1 max-w-3xl">
-            <p className="font-semibold text-gray-900">Painel Terapia capilar — demo (se aplicaste o SQL no Supabase)</p>
+            <p className="font-semibold text-gray-900">Painel Pro Estética capilar — demo (se aplicaste o SQL no Supabase)</p>
             <p>
               <strong>E-mail:</strong>{' '}
               <code className="text-xs bg-white/80 px-1 rounded border border-amber-100">demo@proesteticacapilar.com</code>{' '}
@@ -43,7 +43,7 @@ export default function AdminConsultoriasTerapiaCapilarPage() {
                 <span className="text-2xl" aria-hidden>
                   🔗
                 </span>
-                <h2 className="mt-2 text-lg font-semibold text-gray-900">Onboarding — Terapia capilar</h2>
+                <h2 className="mt-2 text-lg font-semibold text-gray-900">Onboarding — Pro Estética capilar</h2>
                 <p className="mt-1 text-sm text-gray-600">
                   Gerar link de micro-diagnóstico inicial (consultoria / implantação) para o produto vertical capilar.
                 </p>
@@ -57,9 +57,9 @@ export default function AdminConsultoriasTerapiaCapilarPage() {
                 <span className="text-2xl" aria-hidden>
                   ✨
                 </span>
-                <h2 className="mt-2 text-lg font-semibold text-gray-900">Consultoria e diagnóstico — Terapia capilar</h2>
+                <h2 className="mt-2 text-lg font-semibold text-gray-900">Consultoria e diagnóstico — Pro Estética capilar</h2>
                 <p className="mt-1 text-sm text-gray-600">
-                  Clientes, terapia capilar, materiais e respostas (inclui registos “ambos” com corporal, se existirem).
+                  Clientes, estética capilar, materiais e respostas (inclui registos “ambos” com corporal, se existirem).
                 </p>
               </Link>
             </li>
@@ -71,7 +71,7 @@ export default function AdminConsultoriasTerapiaCapilarPage() {
                 <span className="text-2xl" aria-hidden>
                   🔐
                 </span>
-                <h2 className="mt-2 text-lg font-semibold text-gray-900">Cadastro manual — Pro Terapia capilar</h2>
+                <h2 className="mt-2 text-lg font-semibold text-gray-900">Cadastro manual — Pro Estética capilar</h2>
                 <p className="mt-1 text-sm text-gray-600">
                   Na ficha (consultoria), usa o atalho com dados pré-preenchidos; no formulário, segmento{' '}
                   <code className="text-xs">estetica-capilar</code>.

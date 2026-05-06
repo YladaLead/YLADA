@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { createCheckout } from '@/lib/payment-gateway'
+import { createCheckout, WELLNESS_ANNUAL_CHECKOUT_DISABLED_MESSAGE } from '@/lib/payment-gateway'
 import { detectCountryCode } from '@/lib/payment-helpers'
 
 /**
@@ -43,6 +43,10 @@ export async function POST(
         { error: 'Tipo de plano inválido. Use "monthly" ou "annual"' },
         { status: 400 }
       )
+    }
+
+    if (area === 'wellness' && planType === 'annual') {
+      return NextResponse.json({ error: WELLNESS_ANNUAL_CHECKOUT_DISABLED_MESSAGE }, { status: 400 })
     }
 
     // Validar productType apenas para área Nutri

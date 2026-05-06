@@ -172,21 +172,21 @@ export const NOEL_SCRIPTS: Record<string, Script> = {
     mensagens: [
       'Perfeito, acho que você já entendeu bem.',
       'O que importa agora é escolher o plano que fica melhor para o seu momento.',
-      'Quer que eu te envie o link do plano anual ou do mensal?',
+      'Quer que eu te envie o link do plano mensal?',
     ],
   },
   'fechamento-final': {
     nome: 'Fechamento Final',
     contexto: 'Enviar link de compra (quando usuário não especificou qual plano)',
     mensagens: [
-      'Prontinho! Você pode escolher entre o plano anual (/pt/wellness/checkout?plan=annual) ou mensal (/pt/wellness/checkout?plan=monthly). Qualquer coisa que precisar, estou aqui contigo 😊',
+      'Prontinho! As novas assinaturas do Wellness são só no plano mensal (/pt/wellness/checkout?plan=monthly). Qualquer coisa que precisar, estou aqui contigo 😊',
     ],
   },
   'fechamento-anual': {
-    nome: 'Fechamento - Plano Anual',
-    contexto: 'Enviar link do plano anual',
+    nome: 'Fechamento - Plano Anual (indisponível)',
+    contexto: 'Usuário pediu anual — redirecionar para mensal',
     mensagens: [
-      'Ótima escolha! O plano anual é R$ 59,90 por mês e te dá acesso total ao Wellness System. Com scripts personalizados baseados nos seus projetos, IA integrada que vai conhecer você, e um plano completo para construir sua carreira no marketing com renda extra. Clique aqui para o [plano anual](/pt/wellness/checkout?plan=annual)',
+      'Hoje não estamos vendendo o plano anual para novas assinaturas — só o mensal, com o mesmo acesso total ao Wellness System. Clique aqui para o [plano mensal](/pt/wellness/checkout?plan=monthly)',
     ],
   },
   'fechamento-mensal': {
@@ -230,20 +230,18 @@ export const NOEL_CTAS = {
     'Quer que eu calcule qual plano fica melhor para o seu momento?',
   ],
   decisao: [
-    'Quer que eu te envie o link do plano mensal ou do anual?',
+    'Quer que eu te envie o link do plano mensal?',
     'Posso te ajudar a decidir agora.',
     'Quer ativar seu acesso e começar hoje mesmo?',
     'O próximo passo é escolher o plano — quer que eu abra aqui para você?',
   ],
   links: [
-    'Aqui está o link do plano anual: /pt/wellness/checkout?plan=annual',
     'Aqui está o link do plano mensal: /pt/wellness/checkout?plan=monthly',
-    'Quer o link do plano anual? É só acessar: /pt/wellness/checkout?plan=annual',
     'Quer o link do plano mensal? É só acessar: /pt/wellness/checkout?plan=monthly',
   ],
   whatsapp: [
     'Te envio o link agora?',
-    'Quer começar pelo anual ou pelo mensal?',
+    'Quer começar pelo plano mensal?',
     'Posso te mostrar o primeiro passo rapidinho.',
     'Quer que eu deixe tudo pronto para você acessar?',
   ],

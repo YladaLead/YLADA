@@ -6,7 +6,7 @@ export default function ProEsteticaCapilarContaOutraEdicaoPage() {
       <h1 className="text-2xl font-bold text-gray-900">Esta conta está noutra edição YLADA Pro</h1>
       <p className="text-gray-700">
         Este e-mail já está ligado a outro espaço YLADA Pro. Usa um <strong>e-mail dedicado</strong> para{' '}
-        <strong>Terapia capilar</strong> ou
+        <strong>Estética capilar</strong> ou
         fala connosco para reorganizar o acesso.
       </p>
       <div className="flex flex-col gap-3 sm:flex-row">

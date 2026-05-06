@@ -7,7 +7,7 @@ export default function ProEsteticaCapilarBibliotecaLinksPage() {
     <div className="space-y-3">
       <LinksHubContent
         areaCodigo="estetica"
-        areaLabel="Terapia capilar"
+        areaLabel="Estética capilar"
         noAreaShell
         bibliotecaEsteticaCapilarScope
       />

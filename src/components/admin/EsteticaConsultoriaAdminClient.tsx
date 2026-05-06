@@ -1709,13 +1709,13 @@ export default function EsteticaConsultoriaAdminClient() {
           Painel Pro Estética — credenciais demo e nota para clientes reais (referência)
         </summary>
         <p className="text-xs text-amber-950/90 max-w-3xl leading-relaxed pt-2">
-          <strong>Clientes reais:</strong> cada clínica usa o <strong>próprio e-mail dedicado</strong> (um para Terapia
+          <strong>Clientes reais:</strong> cada clínica usa o <strong>próprio e-mail dedicado</strong> (um para Estética
           capilar, outro para Estética corporal, se forem produtos separados) e a <strong>senha que definirem</strong> no
           primeiro acesso ou em «Recuperar senha». Não existe senha fixa na aplicação para contratos pagos.
         </p>
         <div className="grid gap-3 sm:grid-cols-2 text-xs text-amber-950/95">
           <div className="rounded-lg border border-amber-100 bg-white/80 p-3 space-y-1">
-            <p className="font-semibold text-gray-900">Terapia capilar — conta demo (opcional)</p>
+            <p className="font-semibold text-gray-900">Pro Estética capilar — conta demo (opcional)</p>
             <p>
               <strong>E-mail:</strong> <code className="text-[11px] bg-amber-100/80 px-1 rounded">demo@proesteticacapilar.com</code>
             </p>
@@ -1763,7 +1763,7 @@ export default function EsteticaConsultoriaAdminClient() {
             {(
               [
                 { key: 'corporal' as const, label: 'Pré — estética corporal', pack: openPreLinks?.corporal },
-                { key: 'capilar' as const, label: 'Pré — terapia capilar', pack: openPreLinks?.capilar },
+                { key: 'capilar' as const, label: 'Pré — estética capilar', pack: openPreLinks?.capilar },
               ] as const
             ).map(({ key, label, pack }) => (
               <div
@@ -1825,7 +1825,7 @@ export default function EsteticaConsultoriaAdminClient() {
                 },
                 {
                   key: 'diag_cap' as const,
-                  label: 'Diagnóstico completo — terapia capilar',
+                  label: 'Diagnóstico completo — estética capilar',
                   pack: openPreLinks?.diagnostico_capilar,
                 },
               ] as const
@@ -2146,7 +2146,7 @@ export default function EsteticaConsultoriaAdminClient() {
             )}
             {(clientForm.segment === 'capilar' || clientForm.segment === 'ambos') && (
               <div className="sm:col-span-2 lg:col-span-3 rounded-lg border border-violet-200 bg-violet-50/80 p-3 text-sm text-violet-950">
-                <p className="font-medium text-gray-900">Conta no painel Pro Terapia capilar</p>
+                <p className="font-medium text-gray-900">Conta no painel Pro Estética capilar</p>
                 <p className="mt-1 text-xs text-gray-700">
                   Mesmo fluxo: cadastro manual com dados desta ficha; depois cole o tenant ID aqui se for o painel
                   capilar.
@@ -2163,7 +2163,7 @@ export default function EsteticaConsultoriaAdminClient() {
                   }).toString()}`}
                   className="mt-2 inline-flex font-semibold text-violet-900 underline hover:text-violet-950"
                 >
-                  Abrir cadastro manual — Pro Terapia capilar →
+                  Abrir cadastro manual — Pro Estética capilar →
                 </Link>
               </div>
             )}
@@ -2774,7 +2774,7 @@ export default function EsteticaConsultoriaAdminClient() {
               <div className="border-t border-sky-200/80 pt-4 space-y-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <h3 className="text-sm font-semibold text-sky-950">
-                  Diagnóstico completo — terapia capilar (YLADA fixo)
+                  Diagnóstico completo — estética capilar (YLADA fixo)
                 </h3>
                 <button
                   type="button"

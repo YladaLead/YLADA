@@ -11,6 +11,6 @@ export function manualLeaderEntrarPathForVerticalCode(segmentCode: string): stri
 export function manualLeaderHandoutTitleForVerticalCode(segmentCode: string): string {
   const s = segmentCode.trim().toLowerCase()
   if (s === 'estetica-corporal') return 'Pro Estética corporal'
-  if (s === 'estetica-capilar') return 'Pro Terapia capilar'
+  if (s === 'estetica-capilar') return 'Pro Estética capilar'
   return 'Pro Líderes'
 }

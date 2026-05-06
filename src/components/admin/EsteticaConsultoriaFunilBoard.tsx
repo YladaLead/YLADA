@@ -340,7 +340,7 @@ export default function EsteticaConsultoriaFunilBoard() {
       case 'lider':
         return 'Onboarding Pro Líderes (links) + fichas estética com tenant; colunas com nomes para este fluxo'
       case 'capilar':
-        return 'Terapia capilar (+ segmento «ambos»)'
+        return 'Estética capilar (+ segmento «ambos»)'
       default:
         return 'Estética corporal (+ segmento «ambos»)'
     }
@@ -390,7 +390,7 @@ export default function EsteticaConsultoriaFunilBoard() {
           [
             { key: 'todos' as const, label: 'Todos juntos' },
             { key: 'corporal' as const, label: 'Estética corporal' },
-            { key: 'capilar' as const, label: 'Terapia capilar' },
+            { key: 'capilar' as const, label: 'Estética capilar' },
             { key: 'lider' as const, label: 'Pro líder' },
           ] as const
         ).map(({ key, label }) => (

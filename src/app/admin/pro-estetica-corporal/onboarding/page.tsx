@@ -102,7 +102,7 @@ function AdminProEsteticaCorporalOnboardingContent() {
               href="/admin/pro-estetica-capilar/onboarding"
               className="font-semibold text-blue-600 underline hover:text-blue-800"
             >
-              Onboarding Terapia capilar
+              Onboarding Pro Estética capilar
             </Link>
             {' · '}
             <Link href="/pro-estetica-corporal/entrar" className="font-semibold text-blue-600 underline hover:text-blue-800">

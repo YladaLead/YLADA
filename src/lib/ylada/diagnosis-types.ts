@@ -5,7 +5,7 @@
 
 export type LinkObjective = 'captar' | 'educar' | 'reter' | 'propagar' | 'indicar'
 
-/** Vertical de entrega do diagnóstico (Pro Terapia Capilar, Pro Estética Corporal, Pro Líderes). */
+/** Vertical de entrega do diagnóstico (Pro Estética capilar, Pro Estética corporal, Pro Líderes). */
 export type DiagnosisVertical = 'capilar' | 'corporal' | 'pro_lideres'
 
 export type AreaProfissional = 'saude' | 'profissional_liberal' | 'vendas' | 'wellness' | 'geral'

@@ -515,7 +515,11 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
 
         <DiagnosticoExemploSection
           area={area === 'nutra' ? 'nutra' : componentArea}
-          ctaHref={`${checkoutBase}?plan=annual`}
+          ctaHref={
+            checkoutBase === '/pt/wellness/checkout'
+              ? `${checkoutBase}?plan=monthly`
+              : `${checkoutBase}?plan=annual`
+          }
           fluxoVideoUrl={area === 'psicanalise' ? landingPageVideos.yladaDemonstracaoFluxoPsicanalise : undefined}
         />
 
@@ -578,7 +582,10 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
         <section className="py-12 sm:py-16 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto">
-              <PricingSectionLanding checkoutBasePath={checkoutBase} />
+              <PricingSectionLanding
+                checkoutBasePath={checkoutBase}
+                hideAnnualPlan={checkoutBase === '/pt/wellness/checkout'}
+              />
             </div>
           </div>
         </section>
@@ -597,7 +604,11 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
                 {locale === 'es' && 'Crea tu primer diagnóstico en minutos.'}
               </p>
               <Link
-                href={`${checkoutBase}?plan=annual`}
+                href={
+                  checkoutBase === '/pt/wellness/checkout'
+                    ? `${checkoutBase}?plan=monthly`
+                    : `${checkoutBase}?plan=annual`
+                }
                 className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-white text-blue-600 font-semibold text-lg hover:bg-blue-50 transition-colors shadow-lg"
               >
                 {locale === 'pt' && 'Começar agora'}

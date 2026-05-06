@@ -11,6 +11,10 @@ import { getStripeInstance, getStripePriceId } from './stripe-helpers'
 import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from './resend'
 import Stripe from 'stripe'
 
+/** Quando o checkout anual do Wellness está desativado (API + UI alinhadas). */
+export const WELLNESS_ANNUAL_CHECKOUT_DISABLED_MESSAGE =
+  'No momento o Wellness está disponível apenas no plano mensal. Use o plano mensal para continuar.'
+
 export interface CheckoutRequest {
   area: 'wellness' | 'nutri' | 'coach' | 'nutra'
   planType: 'monthly' | 'annual'
@@ -466,6 +470,10 @@ export async function createCheckout(
   request: CheckoutRequest,
   httpRequest?: Request
 ): Promise<CheckoutResponse> {
+  if (request.area === 'wellness' && request.planType === 'annual') {
+    throw new Error(WELLNESS_ANNUAL_CHECKOUT_DISABLED_MESSAGE)
+  }
+
   // Detectar país se não fornecido
   let countryCode = request.countryCode
   if (!countryCode && httpRequest) {

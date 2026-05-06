@@ -3,7 +3,7 @@ import Link from 'next/link'
 export default function ProEsteticaCapilarAguardandoPage() {
   return (
     <div className="mx-auto max-w-md space-y-6 text-center">
-      <h1 className="text-2xl font-bold text-gray-900">Acesso — Terapia capilar</h1>
+      <h1 className="text-2xl font-bold text-gray-900">Acesso — Estética capilar</h1>
       <p className="text-base text-gray-600">
         Sua conta ainda não tem este espaço ativo. Confirme o convite ou entre com outra conta já associada a esta edição.
       </p>

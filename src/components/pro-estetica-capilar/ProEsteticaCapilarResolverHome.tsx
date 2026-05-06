@@ -18,7 +18,7 @@ export default function ProEsteticaCapilarResolverHome() {
         <h1 className="text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">O que você quer resolver hoje?</h1>
         <p className="text-sm leading-relaxed text-gray-600 sm:text-base">
           Escolha o foco que mais pesa agora — abrimos o Noel já no tema e você pode ir a links, mensagens e retorno quando
-          quiser aprofundar no dia a dia da terapia capilar.
+          quiser aprofundar no dia a dia da estética capilar.
         </p>
       </header>
 
@@ -104,7 +104,7 @@ export default function ProEsteticaCapilarResolverHome() {
       <footer className="rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-600">
         <p>
           <strong className="text-gray-900">Noel</strong> e <strong className="text-gray-900">Links</strong> trabalham
-          juntos: comece por um foco e aprofunde quando fizer sentido no seu fluxo de terapia capilar.
+          juntos: comece por um foco e aprofunde quando fizer sentido no seu fluxo de estética capilar.
         </p>
       </footer>
     </div>

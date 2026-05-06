@@ -116,11 +116,9 @@ export const SUPPORT_CONTACTS = {
   whatsappNumber: '+55 19 99604-9800',
 }
 
-// Links de checkout do Wellness System
+// Links de checkout do Wellness System (apenas plano mensal ativo para novas assinaturas)
 export const WELLNESS_CHECKOUT_LINKS = {
-  annual: '/pt/wellness/checkout?plan=annual',
   monthly: '/pt/wellness/checkout?plan=monthly',
-  // URLs completas para uso em mensagens (com domínio quando necessário)
-  annualFull: (baseUrl?: string) => baseUrl ? `${baseUrl}/pt/wellness/checkout?plan=annual` : '/pt/wellness/checkout?plan=annual',
-  monthlyFull: (baseUrl?: string) => baseUrl ? `${baseUrl}/pt/wellness/checkout?plan=monthly` : '/pt/wellness/checkout?plan=monthly',
+  monthlyFull: (baseUrl?: string) =>
+    baseUrl ? `${baseUrl}/pt/wellness/checkout?plan=monthly` : '/pt/wellness/checkout?plan=monthly',
 }

@@ -41,21 +41,19 @@ function renderMessageWithLinks(content: string) {
   
   // Detectar placeholders do NOEL (___CHECKOUT_LINK_0__)
   processedText = processedText.replace(/___CHECKOUT_LINK_(\d+)___/g, (match, index) => {
-    // Se for índice 0, assumir plano anual; índice 1, mensal
-    const isAnnual = parseInt(index) === 0
-    const text = isAnnual ? 'Plano Anual' : 'Plano Mensal'
-    const url = isAnnual ? '/pt/wellness/checkout?plan=annual' : '/pt/wellness/checkout?plan=monthly'
+    const text = 'Plano mensal'
+    const url = '/pt/wellness/checkout?plan=monthly'
     const placeholder = `__CHECKOUT_LINK_${checkoutLinks.length}__`
     checkoutLinks.push({ text, url })
     return placeholder
   })
   
   // Detectar URLs diretas de checkout
-  processedText = processedText.replace(/\/pt\/wellness\/checkout\?plan=(annual|monthly)/g, (match, plan) => {
-    const isAnnual = plan === 'annual'
-    const text = isAnnual ? 'Plano Anual' : 'Plano Mensal'
+  processedText = processedText.replace(/\/pt\/wellness\/checkout\?plan=(annual|monthly)/g, () => {
+    const text = 'Plano mensal'
+    const url = '/pt/wellness/checkout?plan=monthly'
     const placeholder = `__CHECKOUT_LINK_${checkoutLinks.length}__`
-    checkoutLinks.push({ text, url: match })
+    checkoutLinks.push({ text, url })
     return placeholder
   })
 

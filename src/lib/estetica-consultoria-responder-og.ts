@@ -9,7 +9,7 @@ import {
 } from '@/lib/estetica-consultoria-form-templates'
 
 /**
- * Arte do diagnóstico pré-reunião (após pagamento) — terapia capilar.
+ * Arte do diagnóstico pré-reunião (após pagamento) — estética capilar.
  * Não confundir com cartões de pré-diagnóstico / pré-avaliação.
  */
 export const ESTETICA_DIAGNOSTICO_PRE_REUNIAO_POS_PAGAMENTO_CAPILAR_OG_PATH =
@@ -94,11 +94,11 @@ export function templateKeyToResponderOgBand(templateKey: string | null | undefi
 export function responderOgBandLabel(band: EsteticaResponderOgBand): string {
   switch (band) {
     case 'capilar':
-      return 'Terapia capilar'
+      return 'Estética capilar'
     case 'corporal':
       return 'Estética corporal'
     case 'ambos':
-      return 'Terapia capilar e estética corporal'
+      return 'Estética capilar e estética corporal'
     default:
       return 'Consultoria estética'
   }
@@ -130,21 +130,21 @@ export function buildEsteticaResponderShareTitle(
 ): string {
   const area =
     band === 'capilar' || templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID
-      ? 'terapia capilar'
+      ? 'estética capilar'
       : band === 'corporal' || templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID
         ? 'estética corporal'
         : band === 'ambos'
-          ? 'terapia capilar e estética corporal'
+          ? 'estética capilar e estética corporal'
           : null
 
   if (templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID) {
-    return 'Diagnóstico terapia capilar'
+    return 'Diagnóstico estética capilar'
   }
   if (templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID) {
     return 'Diagnóstico estética corporal'
   }
   if (templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID) {
-    return 'YLADA — Pré-diagnóstico (terapia capilar)'
+    return 'YLADA — Pré-diagnóstico (estética capilar)'
   }
   if (templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID) {
     return 'YLADA — Pré-diagnóstico (estética corporal)'

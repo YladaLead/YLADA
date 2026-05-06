@@ -87,7 +87,7 @@ function AdminProEsteticaCapilarOnboardingContent() {
     <main className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="mx-auto max-w-6xl space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Admin — Onboarding Terapia capilar</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Admin — Onboarding Pro Estética capilar</h1>
           <p className="text-sm text-gray-600">
             Gere um link para a dona fazer o <strong className="font-semibold text-gray-800">micro-diagnóstico inicial</strong>{' '}
             (entrada para o mentor Noel, não só cadastro). As respostas aplicam-se ao ambiente quando ela entrar no painel
@@ -99,7 +99,7 @@ function AdminProEsteticaCapilarOnboardingContent() {
             </Link>
             {' · '}
             <Link href="/pro-estetica-capilar/entrar" className="font-semibold text-blue-600 underline hover:text-blue-800">
-              Entrar — Terapia capilar
+              Entrar — Estética capilar
             </Link>
           </p>
         </div>

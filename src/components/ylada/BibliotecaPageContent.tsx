@@ -1544,10 +1544,10 @@ function BibliotecaPageContentInner({
             {isEsteticaLinksBiblioteca ? (
               <p className="text-xs text-sky-800/85 mb-1">
                 {terapiaLinhaAtual === 'capilar'
-                  ? 'Noel nesta linha (terapia capilar): a ideia do dia conversa com os modelos capilares da lista.'
+                  ? 'Noel nesta linha (estética capilar): a ideia do dia conversa com os modelos capilares da lista.'
                   : terapiaLinhaAtual === 'corporal'
                     ? 'Noel nesta linha (estética corporal): a ideia do dia conversa com contorno, retenção e protocolo.'
-                    : 'Noel mostra uma ideia por dia; use o filtro Linha para priorizar terapia capilar ou estética corporal na lista.'}
+                    : 'Noel mostra uma ideia por dia; use o filtro Linha para priorizar estética capilar ou estética corporal na lista.'}
               </p>
             ) : null}
             <p className="text-sm text-gray-700 line-clamp-2 sm:line-clamp-2">{ideiaDoDia.texto}</p>
@@ -1723,13 +1723,13 @@ function BibliotecaPageContentInner({
             <div
               className="flex flex-wrap items-center gap-2 pt-1"
               role="group"
-              aria-label="Filtro da biblioteca: terapia capilar ou estética corporal"
+              aria-label="Filtro da biblioteca: estética capilar ou estética corporal"
             >
               <span className="text-xs font-medium text-gray-600 shrink-0">Linha</span>
               {(
                 [
                   { value: 'todos' as const, label: 'Tudo' },
-                  { value: 'capilar' as const, label: 'Terapia capilar' },
+                  { value: 'capilar' as const, label: 'Estética capilar' },
                   { value: 'corporal' as const, label: 'Estética corporal' },
                 ] as const
               ).map(({ value, label }) => (
@@ -1835,13 +1835,13 @@ function BibliotecaPageContentInner({
               <div
                 className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t border-gray-100 pt-2"
                 role="group"
-                aria-label="Filtro da biblioteca: terapia capilar ou estética corporal"
+                aria-label="Filtro da biblioteca: estética capilar ou estética corporal"
               >
                 <span className="text-xs font-medium text-gray-600">Linha</span>
                 {(
                   [
                     { value: 'todos' as const, label: 'Tudo' },
-                    { value: 'capilar' as const, label: 'Terapia capilar' },
+                    { value: 'capilar' as const, label: 'Estética capilar' },
                     { value: 'corporal' as const, label: 'Estética corporal' },
                   ] as const
                 ).map(({ value, label }) => (
@@ -1895,7 +1895,7 @@ function BibliotecaPageContentInner({
                 </h2>
                 {isEsteticaLinksBiblioteca ? (
                   <p className="text-xs text-gray-600 mb-2 sm:mb-3">
-                    Noel monta estes três com base na linha ativa (terapia capilar, estética corporal ou mistura em “Tudo”).
+                    Noel monta estes três com base na linha ativa (estética capilar, estética corporal ou mistura em “Tudo”).
                   </p>
                 ) : null}
                 <div className={`grid sm:grid-cols-3 ${embedded ? 'gap-3' : 'gap-4'}`}>

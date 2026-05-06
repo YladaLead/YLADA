@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { createCheckout } from '@/lib/payment-gateway'
+import { createCheckout, WELLNESS_ANNUAL_CHECKOUT_DISABLED_MESSAGE } from '@/lib/payment-gateway'
 import { detectCountryCode } from '@/lib/payment-helpers'
 import { supabaseAdmin } from '@/lib/supabase'
 
@@ -25,6 +25,10 @@ export async function POST(request: NextRequest) {
         { error: 'Tipo de plano inválido. Use "monthly" ou "annual"' },
         { status: 400 }
       )
+    }
+
+    if (planType === 'annual') {
+      return NextResponse.json({ error: WELLNESS_ANNUAL_CHECKOUT_DISABLED_MESSAGE }, { status: 400 })
     }
 
     // NOVO: Aceitar checkout sem autenticação (apenas e-mail)

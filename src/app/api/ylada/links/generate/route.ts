@@ -30,6 +30,7 @@ import {
   projectionQuestionsOverrideAllowed,
 } from '@/lib/ylada/projection-form-fields'
 import type { DiagnosisVertical } from '@/lib/ylada/diagnosis-types'
+import { applyProEsteticaPublicLinkOgMetadata } from '@/lib/pro-estetica/pro-estetica-public-link-og'
 
 function parseDiagnosisVerticalFromBody(body: Record<string, unknown>): DiagnosisVertical | undefined {
   const v = typeof body.diagnosis_vertical === 'string' ? body.diagnosis_vertical.trim().toLowerCase() : ''
@@ -232,6 +233,12 @@ export async function POST(request: NextRequest) {
 
     let templateId = templateIdLegacy
     let configJson: Record<string, unknown>
+    /** Linha Pro Estética (capilar/corporal): copy e OG em `/l/[slug]`. */
+    let bibliotecaItemForOg: {
+      description?: string | null
+      dor_principal?: string | null
+      objetivo_principal?: string | null
+    } | null = null
 
     // Bloco 3 e 4: calculadora ou diagnostico da biblioteca — usa template direto (schema completo)
     if (bibliotecaTemplateId) {
@@ -257,6 +264,20 @@ export async function POST(request: NextRequest) {
       const schema = (bibliotecaTemplate.schema_json as Record<string, unknown>) || {}
       const title = titleOverride ?? (schema.title as string) ?? bibliotecaTemplate.name
       templateId = bibliotecaTemplate.id
+      const { data: bibliotecaItem } = await supabaseAdmin
+        .from('ylada_biblioteca_itens')
+        .select('meta, description, dor_principal, objetivo_principal')
+        .eq('template_id', bibliotecaTemplateId)
+        .eq('active', true)
+        .limit(1)
+        .maybeSingle()
+      if (bibliotecaItem) {
+        bibliotecaItemForOg = {
+          description: bibliotecaItem.description as string | null | undefined,
+          dor_principal: bibliotecaItem.dor_principal as string | null | undefined,
+          objetivo_principal: bibliotecaItem.objetivo_principal as string | null | undefined,
+        }
+      }
       // schema depois de title/ctaText faria o título do cartão (override) perder para schema.title
       configJson = {
         ...schema,
@@ -274,13 +295,6 @@ export async function POST(request: NextRequest) {
           }))
           // Buscar meta do item da biblioteca (architecture, segment_code para PERFUME_PROFILE)
           let itemMeta: Record<string, unknown> = {}
-          const { data: bibliotecaItem } = await supabaseAdmin
-            .from('ylada_biblioteca_itens')
-            .select('meta')
-            .eq('template_id', bibliotecaTemplateId)
-            .eq('active', true)
-            .limit(1)
-            .maybeSingle()
           if (bibliotecaItem?.meta && typeof bibliotecaItem.meta === 'object') {
             itemMeta = bibliotecaItem.meta as Record<string, unknown>
           }
@@ -520,6 +534,19 @@ export async function POST(request: NextRequest) {
         title: titleOverride ?? schema.title ?? template.name,
         ctaText: ctaWhatsapp ?? schema.ctaDefault ?? 'Falar no WhatsApp',
       }
+    }
+
+    if (
+      configJson &&
+      (diagnosisVertical === 'capilar' || diagnosisVertical === 'corporal')
+    ) {
+      applyProEsteticaPublicLinkOgMetadata(configJson, {
+        vertical: diagnosisVertical,
+        linkTitle: String((configJson.title as string) || ''),
+        bibliotecaDescription: bibliotecaItemForOg?.description ?? null,
+        dorPrincipal: bibliotecaItemForOg?.dor_principal ?? null,
+        objetivoPrincipal: bibliotecaItemForOg?.objetivo_principal ?? null,
+      })
     }
 
     // Freemium: usuário Free só pode ter 1 link ativo

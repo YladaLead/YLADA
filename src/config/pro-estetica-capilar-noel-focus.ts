@@ -19,7 +19,7 @@ export const PRO_ESTETICA_CAPILAR_NOEL_FOCUS_MESSAGES: Record<ProEsteticaCapilar
   responder:
     'No WhatsApp, quando a cliente pergunta preço ou some, quero respostas curtas e naturais no meu tom, para o nicho capilar.',
   reativar:
-    'Tenho clientes que sumiram ou não voltaram. Quero mensagens para reativar sem ser insistente, no contexto de terapia capilar.',
+    'Tenho clientes que sumiram ou não voltaram. Quero mensagens para reativar sem ser insistente, no contexto de estética capilar.',
   destravar:
     'Me ajude a responder quem pediu preço e parou de responder — mensagens curtas no meu tom, para tratamento capilar.',
   ret_faltou:

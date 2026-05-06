@@ -59,9 +59,9 @@ const ESTETICA_SUGGESTIONS = [
   { label: 'Atrair mais clientes', prompt: 'Como atrair mais clientes para meus serviços de estética?' },
   { label: 'Melhorar minhas conversas', prompt: 'Como melhorar minhas conversas depois que a cliente responde?' },
   {
-    label: 'Terapia capilar e estética corporal',
+    label: 'Estética capilar e estética corporal',
     prompt:
-      'Sou da estética e atendo terapia capilar e estética corporal: como o Noel sugere eu separar o discurso (stories, bio e WhatsApp) sem misturar os dois nichos na mesma mensagem?',
+      'Sou da estética e atendo estética capilar e estética corporal: como o Noel sugere eu separar o discurso (stories, bio e WhatsApp) sem misturar os dois nichos na mesma mensagem?',
   },
 ]
 

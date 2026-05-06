@@ -9,8 +9,8 @@ import { useAuth } from '@/contexts/AuthContext'
 export default function WellnessCheckoutPage() {
   const router = useRouter()
   const { user, userProfile, loading: authLoading } = useAuth()
-  const [planType, setPlanType] = useState<'monthly' | 'annual'>('annual')
-  const [planLocked, setPlanLocked] = useState(false)
+  const planType = 'monthly' as const
+  const [showAnnualSunsetNotice, setShowAnnualSunsetNotice] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [canceled, setCanceled] = useState(false)
@@ -93,31 +93,29 @@ export default function WellnessCheckoutPage() {
   // Mostrar mensagem ex-trial quando veio de renovar OU email fez trial
   const showExTrialMessage = fromRenovar || hadTrialEmail
 
-  // Detectar parâmetros da URL usando window.location (mais confiável)
+  // Detectar parâmetros da URL (plan=annual mostra aviso e remove o query inválido)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      const plan = params.get('plan')
-      const canceledParam = params.get('canceled')
-      const from = params.get('from')
-      
-      if (plan === 'annual') {
-        setPlanType('annual')
-        setPlanLocked(true)
-      } else if (plan === 'monthly') {
-        setPlanType('monthly')
-        setPlanLocked(true)
-      }
-      
-      if (canceledParam === 'true') {
-        setCanceled(true)
-      }
-      
-      if (from === 'renovar') {
-        setFromRenovar(true)
-      }
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const plan = params.get('plan')
+    const canceledParam = params.get('canceled')
+    const from = params.get('from')
+
+    if (plan === 'annual') {
+      setShowAnnualSunsetNotice(true)
+      params.delete('plan')
+      const qs = params.toString()
+      router.replace(`/pt/wellness/checkout${qs ? `?${qs}` : ''}`)
     }
-  }, [])
+
+    if (canceledParam === 'true') {
+      setCanceled(true)
+    }
+
+    if (from === 'renovar') {
+      setFromRenovar(true)
+    }
+  }, [router])
 
   const handleCheckout = async () => {
     console.log('🔘 ========================================')
@@ -174,8 +172,7 @@ export default function WellnessCheckoutPage() {
           language: 'pt',
           email: userEmail,
           countryCode: userProfile?.countryCode || 'BR', // Evita bloqueio quando geo retorna US (VPN/proxy)
-          // Anual: Preapproval no MP (renovação a cada 12 meses). Mensal sem auto: Preference (PIX/boleto/cartão).
-          paymentMethod: planType === 'annual' ? 'auto' : undefined,
+          paymentMethod: undefined,
         }),
       })
 
@@ -235,24 +232,10 @@ export default function WellnessCheckoutPage() {
   }
 
   const planDetails = {
-    monthly: {
-      price: 100.00,
-      priceFormatted: 'R$ 100,00',
-      period: 'mês',
-      description: 'Plano Mensal',
-    },
-    annual: {
-      price: 720.00, // Valor total (12× de R$ 60)
-      priceFormatted: 'R$ 720,00',
-      period: 'ano',
-      description: 'Plano Anual',
-      monthlyEquivalent: 60.00, // 12× de R$ 60
-      totalParcelado: 720.00,
-      savings: 480.00, // (100.00 * 12) - 720.00
-    },
+    priceFormatted: 'R$ 100,00',
+    period: 'mês',
+    description: 'Plano mensal',
   }
-
-  const currentPlan = planDetails[planType]
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -281,6 +264,14 @@ export default function WellnessCheckoutPage() {
             <div className="mb-6 bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
               <p className="text-sm">
                 Pagamento cancelado. Você pode tentar novamente quando quiser.
+              </p>
+            </div>
+          )}
+
+          {showAnnualSunsetNotice && (
+            <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-900 px-4 py-3 rounded-lg">
+              <p className="text-sm">
+                O plano anual do Wellness não está mais disponível para novas assinaturas. Por enquanto você pode assinar apenas o <strong>plano mensal</strong> abaixo.
               </p>
             </div>
           )}
@@ -319,103 +310,22 @@ export default function WellnessCheckoutPage() {
             </div>
           )}
 
-          {/* Seleção de Plano - Anual primeiro (recomendado e selecionado por padrão) */}
           <div className="mb-8">
-            {planLocked ? (
-              <div className="max-w-xl mx-auto">
-                <div className="p-6 rounded-lg border-2 border-green-500 bg-green-50 shadow-md relative">
-                  {planType === 'annual' && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      RECOMENDADO
-                    </div>
-                  )}
-                  <div className="text-center">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {planType === 'annual' ? 'Anual' : 'Mensal'}
-                    </h3>
-                    {planType === 'annual' ? (
-                      <>
-                        <div className="text-3xl font-bold text-green-600 mb-1">R$ 60</div>
-                        <div className="text-sm text-gray-600">/mês</div>
-                        <div className="text-xs text-gray-500 mt-2">Total: R$ 720/ano (12× de R$ 60)</div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="text-3xl font-bold text-green-600 mb-1">R$ 100,00</div>
-                        <div className="text-sm text-gray-600">/mês</div>
-                      </>
-                    )}
-                  </div>
+            <div className="max-w-xl mx-auto">
+              <div className="p-6 rounded-lg border-2 border-green-500 bg-green-50 shadow-md relative">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  PLANO DISPONÍVEL
                 </div>
-                <div className="text-center mt-3">
-                  <button
-                    type="button"
-                    onClick={() => setPlanLocked(false)}
-                    className="text-sm text-green-700 hover:text-green-800 underline font-medium"
-                  >
-                    Quero escolher outro plano
-                  </button>
+                <div className="text-center pt-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{planDetails.description}</h3>
+                  <div className="text-3xl font-bold text-green-600 mb-1">{planDetails.priceFormatted}</div>
+                  <div className="text-sm text-gray-600">/{planDetails.period}</div>
+                  <p className="text-xs text-gray-600 mt-3">
+                    Acesso completo ao Wellness System com renovação mensal.
+                  </p>
                 </div>
               </div>
-            ) : (
-              <div className="grid sm:grid-cols-2 gap-4">
-                {/* Plano Anual - Primeiro e selecionado por padrão */}
-                <button
-                  onClick={() => setPlanType('annual')}
-                  className={`p-6 rounded-lg border-2 transition-all relative ${
-                    planType === 'annual'
-                      ? 'border-green-500 bg-green-50 shadow-md'
-                      : 'border-gray-200 bg-white hover:border-green-300 hover:bg-green-50/30'
-                  }`}
-                >
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    RECOMENDADO
-                  </div>
-                  {planType === 'annual' && (
-                    <div className="absolute -top-3 right-4 bg-green-700 text-white text-xs font-bold px-2 py-1 rounded">
-                      SELECIONADO
-                    </div>
-                  )}
-                  <div className="text-center">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      Anual
-                    </h3>
-                    <div className="text-3xl font-bold text-green-600 mb-1">
-                      R$ 60
-                    </div>
-                    <div className="text-sm text-gray-600">/mês</div>
-                    <div className="text-xs text-gray-500 mt-2">
-                      Total: R$ 720/ano (12× de R$ 60)
-                    </div>
-                  </div>
-                </button>
-
-                {/* Plano Mensal */}
-                <button
-                  onClick={() => setPlanType('monthly')}
-                  className={`p-6 rounded-lg border-2 transition-all relative ${
-                    planType === 'monthly'
-                      ? 'border-green-500 bg-green-50 shadow-md'
-                      : 'border-gray-200 bg-white hover:border-green-300 hover:bg-green-50/30'
-                  }`}
-                >
-                  <div className="text-center">
-                    {planType === 'monthly' && (
-                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                        SELECIONADO
-                      </div>
-                    )}
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      Mensal
-                    </h3>
-                    <div className="text-3xl font-bold text-green-600 mb-1">
-                      R$ 100,00
-                    </div>
-                    <div className="text-sm text-gray-600">/mês</div>
-                  </div>
-                </button>
-              </div>
-            )}
+            </div>
           </div>
 
 
@@ -450,27 +360,6 @@ export default function WellnessCheckoutPage() {
                   : 'Seu e-mail será usado para criar sua conta automaticamente após o pagamento.'}
             </p>
           </div>
-
-          {/* Aviso sobre Parcelamento (Plano Anual) */}
-          {planType === 'annual' && (
-            <div className="mb-6 bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3 flex-1">
-                  <h3 className="text-sm font-semibold text-blue-900 mb-1">
-                    💳 Parcelamento Disponível
-                  </h3>
-                  <p className="text-sm text-blue-800">
-                    Após preencher os dados do seu cartão na próxima página, você poderá escolher <strong>12× de R$ 60</strong>. O parcelamento aparecerá automaticamente após inserir o número do cartão.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Botão de Checkout */}
           <button

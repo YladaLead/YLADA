@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 import { getProLideresPresetOpenGraphImageUrl } from '@/lib/pro-lideres/pro-lideres-preset-og-image'
+import { getProEsteticaPublicOpenGraphImageUrl } from '@/lib/pro-estetica/pro-estetica-public-link-og'
 import { getYladaOgImageUrl } from '@/lib/ylada-og-tema-imagem'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://ylada.app'
@@ -51,11 +52,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const proLideresFluxoId =
     typeof meta.pro_lideres_fluxo_id === 'string' ? meta.pro_lideres_fluxo_id.trim() : ''
   const isProLideresPreset = meta.pro_lideres_preset === true
+  const diagnosisVerticalRaw =
+    typeof meta.diagnosis_vertical === 'string' ? meta.diagnosis_vertical.trim().toLowerCase() : ''
+  const proEsteticaVertical =
+    diagnosisVerticalRaw === 'capilar' || diagnosisVerticalRaw === 'corporal' ? diagnosisVerticalRaw : null
 
   const ogImageUrl =
     isProLideresPreset && proLideresFluxoId
       ? getProLideresPresetOpenGraphImageUrl(proLideresFluxoId, baseUrl)
-      : getYladaOgImageUrl(themeRaw || title, segment, baseUrl)
+      : proEsteticaVertical
+        ? getProEsteticaPublicOpenGraphImageUrl(proEsteticaVertical, themeRaw || title, segment, baseUrl)
+        : getYladaOgImageUrl(themeRaw || title, segment, baseUrl)
   const ogMime = ogImageMime(ogImageUrl)
   const pageUrl = `${baseUrl}/l/${slug}`
   const ogFromPage = typeof page.og_description === 'string' ? page.og_description.trim() : ''

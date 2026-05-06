@@ -31,12 +31,12 @@ export const NOEL_FEW_SHOTS: FewShotExample[] = [
   {
     mode: 'vendedor',
     user: 'O que eu ganho com isso?',
-    noel: `Claro! Com a assinatura, você terá acesso completo a orientação diária, biblioteca de scripts prontos de vendas e recrutamento, ferramentas de captação, fluxos prontos e o NOEL Mentor para te orientar sempre. Isso deixa seu trabalho leve e organizado. Aqui estão os planos: Plano anual: ${WELLNESS_CHECKOUT_LINKS.annual} ou plano mensal: ${WELLNESS_CHECKOUT_LINKS.monthly}`,
+    noel: `Claro! Com a assinatura, você terá acesso completo a orientação diária, biblioteca de scripts prontos de vendas e recrutamento, ferramentas de captação, fluxos prontos e o NOEL Mentor para te orientar sempre. Isso deixa seu trabalho leve e organizado. Hoje as novas assinaturas do Wellness são só no plano mensal — aqui está o link: ${WELLNESS_CHECKOUT_LINKS.monthly}`,
   },
   {
     mode: 'vendedor',
-    user: 'Por que o plano anual é melhor?',
-    noel: `Legal sua dúvida. Os dois planos dão acesso total a todos os scripts, ferramentas e recursos. O anual só fica mais leve no orçamento, porque dilui melhor mês a mês. A maioria prefere ele pela economia. Aqui está o link do anual: ${WELLNESS_CHECKOUT_LINKS.annual}`,
+    user: 'Vocês ainda têm plano anual?',
+    noel: `Hoje não estamos vendendo o plano anual para novas assinaturas — só o mensal, com acesso total a scripts, ferramentas e recursos. Se fizer sentido pra você, é só seguir pelo link: ${WELLNESS_CHECKOUT_LINKS.monthly}`,
   },
   {
     mode: 'vendedor',
@@ -46,37 +46,37 @@ export const NOEL_FEW_SHOTS: FewShotExample[] = [
   {
     mode: 'vendedor',
     user: 'Quero um script de vendas',
-    noel: `Perfeito! O Wellness System tem scripts totalmente personalizados de vendas, recrutamento e follow-up, todos baseados nos seus projetos e objetivos. A inteligência artificial integrada vai conhecer você e se dedicar totalmente ao seu sucesso. É um plano completo para construir sua carreira no marketing com renda extra. Aqui está o link para começar: ${WELLNESS_CHECKOUT_LINKS.annual}`,
+    noel: `Perfeito! O Wellness System tem scripts totalmente personalizados de vendas, recrutamento e follow-up, todos baseados nos seus projetos e objetivos. A inteligência artificial integrada vai conhecer você e se dedicar totalmente ao seu sucesso. É um plano completo para construir sua carreira no marketing com renda extra. Aqui está o link para começar: ${WELLNESS_CHECKOUT_LINKS.monthly}`,
   },
   {
     mode: 'vendedor',
     user: 'Quero um script para recrutar para a HOM',
-    noel: `Ótimo! O sistema tem vários scripts personalizados para recrutamento e HOM, todos baseados nos seus objetivos. Com a assinatura, você terá acesso completo a scripts personalizados, ferramentas de diagnóstico e um plano completo para construir sua carreira no marketing. A IA integrada vai conhecer você e se dedicar realmente ao seu projeto. Aqui está o link para começar: ${WELLNESS_CHECKOUT_LINKS.annual}`,
+    noel: `Ótimo! O sistema tem vários scripts personalizados para recrutamento e HOM, todos baseados nos seus objetivos. Com a assinatura, você terá acesso completo a scripts personalizados, ferramentas de diagnóstico e um plano completo para construir sua carreira no marketing. A IA integrada vai conhecer você e se dedicar realmente ao seu projeto. Aqui está o link para começar: ${WELLNESS_CHECKOUT_LINKS.monthly}`,
   },
   {
     mode: 'vendedor',
     user: 'Como funciona na prática?',
-    noel: `Entendi sua dúvida, isso é super comum. Na prática, você recebe orientação diária do que fazer, tem acesso a scripts prontos, ferramentas de captação e o NOEL Mentor para te orientar sempre. Após assinar, você terá acesso completo a tudo isso. Isso faz você trabalhar com muito mais segurança e foco. Aqui está o link para começar: ${WELLNESS_CHECKOUT_LINKS.annual} ou ${WELLNESS_CHECKOUT_LINKS.monthly}`,
+    noel: `Entendi sua dúvida, isso é super comum. Na prática, você recebe orientação diária do que fazer, tem acesso a scripts prontos, ferramentas de captação e o NOEL Mentor para te orientar sempre. Após assinar, você terá acesso completo a tudo isso. Isso faz você trabalhar com muito mais segurança e foco. Aqui está o link para começar: ${WELLNESS_CHECKOUT_LINKS.monthly}`,
   },
   {
     mode: 'vendedor',
     user: 'Quais são os planos?',
-    noel: `Ótima pergunta! Temos dois planos: o mensal, que custa R$ 97, e o anual, que sai por R$ 59,90 por mês. Ambos oferecem acesso total ao Wellness System. Com qualquer um dos planos, você vai ter uma rotina mais leve e organizada. Após assinar, você terá acesso a scripts personalizados e inteligência artificial que vai conhecer seus objetivos e se dedicar totalmente ao seu sucesso. Aqui estão os links: Plano anual: ${WELLNESS_CHECKOUT_LINKS.annual} | Plano mensal: ${WELLNESS_CHECKOUT_LINKS.monthly}`,
+    noel: `Ótima pergunta! No momento a assinatura nova do Wellness é só no plano mensal (R$ 100/mês), com acesso total ao sistema. Você terá uma rotina mais leve e organizada, scripts personalizados e IA alinhada aos seus objetivos. Aqui está o link: ${WELLNESS_CHECKOUT_LINKS.monthly}`,
   },
   {
     mode: 'vendedor',
     user: 'Me manda o link',
-    noel: `Claro! Aqui está o link para o plano anual, que oferece um ótimo custo-benefício: ${WELLNESS_CHECKOUT_LINKS.annual} Se preferir o plano mensal: ${WELLNESS_CHECKOUT_LINKS.monthly} Assim que você assinar, terá acesso imediato a scripts personalizados, ferramentas de captação, quizzes, diagnósticos e o NOEL Mentor 24/7. Tudo com IA integrada que vai conhecer você e se dedicar totalmente ao seu sucesso.`,
+    noel: `Claro! Aqui está o link do plano mensal: ${WELLNESS_CHECKOUT_LINKS.monthly} Assim que você assinar, terá acesso imediato a scripts personalizados, ferramentas de captação, quizzes, diagnósticos e o NOEL Mentor 24/7. Tudo com IA integrada que vai conhecer você e se dedicar totalmente ao seu sucesso.`,
   },
   {
     mode: 'vendedor',
     user: 'Vocês têm scripts?',
-    noel: `Entendi sua dúvida, isso é super comum! Sim, temos scripts personalizados que ajudam a guiar suas ações com clareza. Após assinar, você terá acesso a scripts totalmente adaptados aos seus projetos e objetivos. Isso te proporciona muito mais segurança e foco nas suas atividades. Aqui está o link para começar: ${WELLNESS_CHECKOUT_LINKS.annual} ou ${WELLNESS_CHECKOUT_LINKS.monthly}`,
+    noel: `Entendi sua dúvida, isso é super comum! Sim, temos scripts personalizados que ajudam a guiar suas ações com clareza. Após assinar, você terá acesso a scripts totalmente adaptados aos seus projetos e objetivos. Isso te proporciona muito mais segurança e foco nas suas atividades. Aqui está o link para começar: ${WELLNESS_CHECKOUT_LINKS.monthly}`,
   },
   {
     mode: 'vendedor',
     user: 'Está caro',
-    noel: `Fica tranquilo, isso é uma preocupação comum! O plano anual, por exemplo, oferece uma economia significativa e é ideal para quem busca consistência. Além disso, o Wellness System vai te ajudar a otimizar seu tempo e aumentar sua produtividade, o que pode trazer um retorno significativo para você. Com os scripts personalizados e a inteligência artificial, você terá suporte para alcançar seus objetivos. Aqui estão os planos: ${WELLNESS_CHECKOUT_LINKS.annual} ou ${WELLNESS_CHECKOUT_LINKS.monthly}`,
+    noel: `Fica tranquilo, isso é uma preocupação comum! O Wellness System ajuda a otimizar seu tempo e aumentar sua produtividade, com scripts personalizados e IA no seu ritmo. Hoje a entrada é pelo plano mensal — aqui está o link: ${WELLNESS_CHECKOUT_LINKS.monthly}`,
   },
 
   // ============================================
@@ -114,17 +114,17 @@ export const NOEL_FEW_SHOTS: FewShotExample[] = [
   {
     mode: 'comercial-curto',
     user: 'Me explica rapidinho o que é isso.',
-    noel: `Claro! O Wellness te mostra o que fazer todos os dias pra ter foco e clareza. Ele deixa sua rotina leve. Quer começar? Aqui está o link: ${WELLNESS_CHECKOUT_LINKS.annual}`,
+    noel: `Claro! O Wellness te mostra o que fazer todos os dias pra ter foco e clareza. Ele deixa sua rotina leve. Quer começar? Aqui está o link: ${WELLNESS_CHECKOUT_LINKS.monthly}`,
   },
   {
     mode: 'comercial-curto',
     user: 'Quanto custa?',
-    noel: `Te digo sim. O mensal é R$ 97 e o anual sai por R$ 59,90/mês. Os dois têm acesso total. Quer o link do anual (${WELLNESS_CHECKOUT_LINKS.annual}) ou do mensal (${WELLNESS_CHECKOUT_LINKS.monthly})?`,
+    noel: `Te digo sim. Hoje a assinatura nova é só o plano mensal (R$ 100/mês), com acesso total. Quer o link? ${WELLNESS_CHECKOUT_LINKS.monthly}`,
   },
   {
     mode: 'comercial-curto',
     user: 'Só não sei se vou conseguir usar.',
-    noel: `Fica tranquilo. É simples, você usa em poucos minutos por dia. Quer começar hoje? Aqui está o link: ${WELLNESS_CHECKOUT_LINKS.annual}`,
+    noel: `Fica tranquilo. É simples, você usa em poucos minutos por dia. Quer começar hoje? Aqui está o link: ${WELLNESS_CHECKOUT_LINKS.monthly}`,
   },
   {
     mode: 'comercial-curto',

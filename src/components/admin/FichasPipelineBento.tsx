@@ -160,7 +160,7 @@ export function FichasPipelineBento({ linha }: { linha: FichasPipelineLinha }) {
     void load()
   }, [load])
 
-  const labelLinha = linha === 'capilar' ? 'terapia capilar' : 'estética corporal'
+  const labelLinha = linha === 'capilar' ? 'estética capilar' : 'estética corporal'
 
   return (
     <div className="space-y-4">

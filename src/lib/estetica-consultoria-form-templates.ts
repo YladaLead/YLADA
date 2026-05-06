@@ -14,7 +14,7 @@ export const TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_TITLE = 'Pré-diagnóstico — Es
 
 export const TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID = 'pre_diagnostico_corporal_v1' as const
 
-export const TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE = 'Pré-diagnóstico — Terapia capilar (YLADA)'
+export const TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE = 'Pré-diagnóstico — Estética capilar (YLADA)'
 
 export const TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID = 'pre_diagnostico_capilar_v1' as const
 

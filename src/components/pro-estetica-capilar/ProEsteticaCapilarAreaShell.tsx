@@ -100,7 +100,7 @@ export default function ProEsteticaCapilarAreaShell({
                   priority
                 />
                 <div className="flex min-w-0 flex-col leading-tight sm:flex-row sm:items-baseline sm:gap-2">
-                  <span className="truncate text-sm font-medium text-gray-500">Terapia capilar</span>
+                  <span className="truncate text-sm font-medium text-gray-500">Estética capilar</span>
                   <span
                     className={`truncate text-xs font-semibold ${
                       isLeaderWorkspace ? 'text-blue-800' : 'text-emerald-700'

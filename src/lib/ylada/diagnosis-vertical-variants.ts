@@ -1,5 +1,5 @@
 /**
- * Copy de diagnóstico por vertical de entrega (Pro Terapia Capilar, Pro Estética Corporal, Pro Líderes).
+ * Copy de diagnóstico por vertical de entrega (Pro Estética capilar, Pro Estética corporal, Pro Líderes).
  * Filosofia do arco narrativo: `@/config/ylada-diagnosis-result-standard`
  * Usado pelo motor quando `meta.diagnosis_vertical` está definido no link.
  */

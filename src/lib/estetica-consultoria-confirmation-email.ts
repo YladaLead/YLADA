@@ -24,7 +24,7 @@ export async function sendEsteticaDiagnosticoConfirmEmail(params: {
     return { ok: false, error: 'Envio de e-mail não configurado (RESEND_API_KEY).' }
   }
   const area = params.formArea ?? 'corporal'
-  const areaLabel = area === 'capilar' ? 'terapia capilar' : 'estética corporal'
+  const areaLabel = area === 'capilar' ? 'estética capilar' : 'estética corporal'
   const url = `${buildEsteticaConsultoriaResponderUrl(params.origin, params.shareToken)}?confirm=${encodeURIComponent(params.confirmToken)}`
   const subject = 'Confirme para abrir o diagnóstico — YLADA'
   const html = `

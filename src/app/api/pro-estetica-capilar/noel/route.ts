@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
   const ctx = await resolveEsteticaCapilarTenantContext(supabaseAdmin, user)
   if (!ctx) {
-    return NextResponse.json({ error: 'Sem acesso ao espaço Terapia capilar.' }, { status: 403 })
+    return NextResponse.json({ error: 'Sem acesso ao espaço Pro Estética capilar.' }, { status: 403 })
   }
 
   let body: {
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
   const replyLanguage = locale === 'en' ? 'English' : 'Português (Brasil)'
 
   const t = ctx.tenant
-  const operationLabel = t.display_name?.trim() || t.team_name?.trim() || t.slug || 'Terapia capilar'
+  const operationLabel = t.display_name?.trim() || t.team_name?.trim() || t.slug || 'Pro Estética capilar'
   const verticalCode = (t.vertical_code ?? PRO_ESTETICA_CAPILAR_VERTICAL_CODE).trim() || PRO_ESTETICA_CAPILAR_VERTICAL_CODE
 
   const messageToneId: EsteticaMessageToneId = isEsteticaMessageToneId(t.message_tone)

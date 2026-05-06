@@ -454,7 +454,8 @@ export async function POST(
     const linkTitleForCache = (config.title as string) || ''
     const scoringSalt = metaRaw.invert_risk_mcq_score === true ? 'invert_mcq' : ''
 
-    // Cache: v27 — copy calculadora água sem pele/refeição forçada na UI; guards na API
+    // Cache: v27 — restante do produto (ex. Nutri, presets gerais).
+    // v28 — só `diagnosis_vertical` capilar|corporal: backfill meta + OG; invalidação focada (mig. 424).
     const answers_hash = hashAnswersForCache(
       visitor_answers,
       themeForCache,
@@ -462,7 +463,8 @@ export async function POST(
       diagnosisVertical,
       scoringSalt
     )
-    const TEMPLATE_VERSION = 27
+    const TEMPLATE_VERSION =
+      diagnosisVertical === 'capilar' || diagnosisVertical === 'corporal' ? 28 : 27
     const { data: cached } = await supabaseAdmin
       .from('ylada_diagnosis_cache')
       .select('diagnosis_json')

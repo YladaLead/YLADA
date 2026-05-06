@@ -161,7 +161,7 @@ function AdminDashboardContent() {
     {
       id: 'consultorias-hub',
       title: 'Consultorias',
-      description: 'Pró Líderes, estética corporal e terapia capilar',
+      description: 'Pró Líderes, estética corporal e estética capilar',
       icon: '📋',
       link: '/admin/consultorias',
       color: 'bg-indigo-700',
@@ -519,7 +519,7 @@ function AdminDashboardContent() {
           <h2 className="text-lg font-semibold text-gray-900 mb-0.5">Operação — consultorias e contas</h2>
           <p className="text-sm text-gray-500 mb-3 max-w-2xl">
             <strong className="font-medium text-gray-700">Consultorias</strong>: Pró Líderes, estética corporal e
-            terapia capilar. <strong className="font-medium text-gray-700">Usuários</strong>: contas gerais.
+            estética capilar. <strong className="font-medium text-gray-700">Usuários</strong>: contas gerais.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 max-w-3xl gap-3">
             {acoesOperacaoFoco.map((a) => (

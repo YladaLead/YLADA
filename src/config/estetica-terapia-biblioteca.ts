@@ -1,5 +1,5 @@
 /**
- * Biblioteca Estética (/pt/estetica/links): filtro **Terapia capilar** | **Estética corporal** | Todos (nomenclatura BR).
+ * Biblioteca Estética (/pt/estetica/links): filtro **Estética capilar** | **Estética corporal** | Todos (nomenclatura BR).
  * URL: `?linha=terapia-capilar` ou `?linha=estetica-corporal`. Aceita ainda `capilar`, `corporal` e o legado `?terapia=`.
  */
 

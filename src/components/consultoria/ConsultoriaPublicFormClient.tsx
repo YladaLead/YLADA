@@ -222,7 +222,7 @@ function WhatsappDdiLocalRow({
   const help =
     variant === 'pro_lideres'
       ? 'Escolha o país (DDI) à esquerda e digite só o número com DDD à direita — não repita o código do país no número.'
-      : 'Para pré-diagnóstico e diagnóstico, estética corporal ou terapia capilar. País (DDI) e número com DDD na mesma linha — não repita o código do país no número.'
+      : 'Para pré-diagnóstico e diagnóstico, estética corporal ou estética capilar. País (DDI) e número com DDD na mesma linha — não repita o código do país no número.'
 
   return (
     <div className="block text-sm">

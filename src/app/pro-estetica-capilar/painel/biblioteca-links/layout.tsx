@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
 export const metadata: Metadata = {
-  title: 'Links | Terapia capilar',
+  title: 'Links | Estética capilar',
   description:
     'Biblioteca de modelos capilares e gestão dos seus links públicos YLADA neste painel.',
 }
