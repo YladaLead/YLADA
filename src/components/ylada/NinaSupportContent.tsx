@@ -224,6 +224,8 @@ export default function NinaSupportContent(props: NinaSupportContentProps) {
         onWhatsAppClick={openSupportWhatsApp}
         chipsDisabled={loading || whatsappLoading}
         whatsappLoading={whatsappLoading}
+        supportPhoneHref={supportUi === 'wellness' ? 'tel:+5519996049800' : undefined}
+        supportPhoneLabel={supportUi === 'wellness' ? '(19) 99604-9800' : undefined}
       />
 
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden flex flex-col min-h-[420px] max-h-[min(70vh,640px)] sm:max-h-[min(72vh,680px)]">

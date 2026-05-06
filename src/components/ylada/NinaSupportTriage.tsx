@@ -8,6 +8,9 @@ export interface NinaSupportTriageProps {
   onWhatsAppClick?: () => void | Promise<void>
   chipsDisabled?: boolean
   whatsappLoading?: boolean
+  /** Ex.: Wellness — mesmo contato por voz */
+  supportPhoneHref?: string
+  supportPhoneLabel?: string
 }
 
 export default function NinaSupportTriage({
@@ -16,6 +19,8 @@ export default function NinaSupportTriage({
   onWhatsAppClick,
   chipsDisabled = false,
   whatsappLoading = false,
+  supportPhoneHref,
+  supportPhoneLabel,
 }: NinaSupportTriageProps) {
   const topicChips = chips.filter((c) => c.action !== 'whatsapp')
   const whatsappChip = chips.find((c) => c.action === 'whatsapp')
@@ -77,6 +82,14 @@ export default function NinaSupportTriage({
           <p className="mt-1.5 text-center text-[11px] text-gray-500">
             A equipe é avisada automaticamente. Você será redirecionado para o WhatsApp.
           </p>
+          {supportPhoneHref && supportPhoneLabel ? (
+            <p className="mt-1.5 text-center text-[11px] text-gray-600">
+              Qualquer dúvida, pode ligar:{' '}
+              <a href={supportPhoneHref} className="font-semibold text-emerald-900 underline hover:text-emerald-950">
+                {supportPhoneLabel}
+              </a>
+            </p>
+          ) : null}
         </div>
       ) : null}
     </section>

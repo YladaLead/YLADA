@@ -10,6 +10,8 @@ import type {
   ProLideresCatalogOrigin,
 } from '@/lib/pro-lideres-catalog-build'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
+import { copyTextToClipboard } from '@/lib/clipboard'
+import { copyYladaLinkQrAsPng } from '@/lib/ylada-link-share-actions'
 
 type CatalogPayload = {
   catalog?: ProLideresCatalogItem[]
@@ -18,45 +20,6 @@ type CatalogPayload = {
 
 type TabKey = ProLideresCatalogCategory
 type SectionKey = ProLideresCatalogOrigin
-
-async function copyText(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text)
-    return true
-  } catch {
-    return false
-  }
-}
-
-async function copyQrImage(url: string): Promise<boolean> {
-  try {
-    const QRCodeLib = (await import('qrcode')).default
-    const dataUrl = await QRCodeLib.toDataURL(url, {
-      width: 280,
-      margin: 2,
-      color: { dark: '#2563eb', light: '#ffffff' },
-    })
-    const res = await fetch(dataUrl)
-    const blob = await res.blob()
-    if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-      return true
-    }
-  } catch {
-    /* continua */
-  }
-  try {
-    const QRCodeLib = (await import('qrcode')).default
-    const dataUrl = await QRCodeLib.toDataURL(url, { width: 280, margin: 2 })
-    const a = document.createElement('a')
-    a.href = dataUrl
-    a.download = 'ylada-qr.png'
-    a.click()
-    return true
-  } catch {
-    return false
-  }
-}
 
 function CatalogRowCard({
   item,
@@ -179,7 +142,7 @@ function CatalogRowCard({
         <button
           type="button"
           onClick={async () => {
-            const ok = await copyText(item.publicUrl)
+            const ok = await copyTextToClipboard(item.publicUrl)
             if (ok) onCopied('link')
           }}
           className="inline-flex min-h-[44px] items-center rounded-lg border border-violet-200/90 bg-violet-50/90 px-3 text-xs font-semibold text-violet-900 shadow-sm ring-1 ring-violet-100/80 transition hover:bg-violet-100/90"
@@ -189,7 +152,7 @@ function CatalogRowCard({
         <button
           type="button"
           onClick={async () => {
-            const ok = await copyQrImage(item.publicUrl)
+            const ok = await copyYladaLinkQrAsPng(item.publicUrl)
             if (ok) onCopied('qr')
           }}
           className="inline-flex min-h-[44px] items-center rounded-lg border border-teal-200/90 bg-teal-50/90 px-3 text-xs font-semibold text-teal-900 shadow-sm ring-1 ring-teal-100/80 transition hover:bg-teal-100/90"

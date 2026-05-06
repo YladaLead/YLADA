@@ -443,7 +443,10 @@ export default function WellnessChatWidget({ chatbotId, defaultOpen = false }: W
               </button>
             </div>
             <p className="text-xs text-gray-500 text-center">
-              Ou entre em contato: <a href="https://wa.me/5519996049800" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 hover:underline font-medium">WhatsApp</a>
+              Ou entre em contato:{' '}
+              <a href="https://wa.me/5519996049800" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 hover:underline font-medium">WhatsApp</a>
+              {' · '}
+              <a href="tel:+5519996049800" className="text-green-600 hover:text-green-700 hover:underline font-medium">(19) 99604-9800</a>
             </p>
           </div>
         </div>

@@ -9,6 +9,7 @@ import { getFlowById } from '@/config/ylada-flow-catalog'
 import { getTemasForProfession, getTemaLabel, TEMA_OUTRO_VALUE, TEMA_ICONS } from '@/config/ylada-temas'
 import { getFerramentasForTema, type FerramentaConcreta } from '@/config/ylada-temas-ferramentas'
 import { copyTextToClipboard } from '@/lib/clipboard'
+import { copyYladaLinkQrAsPng } from '@/lib/ylada-link-share-actions'
 import { DiagnosticoLinkQrPanel } from '@/components/shared/DiagnosticoLinkQrPanel'
 import { ActiveLinksProModal } from '@/components/ylada/ActiveLinksProModal'
 import LinksHubContent from '@/components/ylada/LinksHubContent'
@@ -218,8 +219,8 @@ function LinksPageContent({
   const [comoFuncionaAberto, setComoFuncionaAberto] = useState(!embedded)
   /** Modal: limite de diagnósticos ativos (Free) ao tentar criar outro link. */
   const [activeLinksModalMessage, setActiveLinksModalMessage] = useState<string | null>(null)
-  /** Qual link acabou de ser copiado (feedback por linha). */
-  const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null)
+  /** Feedback por linha (Preview / Copiar link / Copiar QR — alinhado ao catálogo Pro Líderes). */
+  const [rowCopyFeedback, setRowCopyFeedback] = useState<{ id: string; mode: 'link' | 'qr' } | null>(null)
   /** Hub com abas: filtrar a lista «Os teus links» por texto. */
   const [meusLinksBusca, setMeusLinksBusca] = useState('')
   /** null = ainda carregando assinatura; false = gratuito; true = Pro (ou equivalente). */
@@ -413,10 +414,12 @@ function LinksPageContent({
     const label = title ? `"${title}"` : ''
     if (ok) {
       if (linkId) {
-        setCopiedLinkId(linkId)
-        setTimeout(() => setCopiedLinkId(null), 2000)
+        setRowCopyFeedback({ id: linkId, mode: 'link' })
+        setTimeout(() => {
+          setRowCopyFeedback((cur) => (cur?.id === linkId && cur.mode === 'link' ? null : cur))
+        }, 2000)
       }
-      setMessage({ type: 'success', text: label ? `URL de ${label} copiada!` : 'URL copiada!' })
+      setMessage({ type: 'success', text: label ? `Link de ${label} copiado!` : 'Link copiado!' })
     } else {
       setMessage({
         type: 'error',
@@ -860,7 +863,7 @@ function LinksPageContent({
                     }}
                     className="rounded-lg border border-green-600 bg-white px-4 py-2 text-sm font-medium text-green-800 hover:bg-green-50 transition-colors"
                   >
-                    Copiar URL
+                    Copiar link
                   </button>
                 </div>
               </>
@@ -875,7 +878,8 @@ function LinksPageContent({
           >
             <h2 className={`font-semibold text-gray-900 ${embedded ? 'text-sm mb-0.5' : 'text-base mb-1'}`}>Seus links</h2>
             <p className={`text-gray-500 ${embedded ? 'text-[11px] leading-snug mb-2.5' : 'text-xs mb-3'}`}>
-              Cada &quot;Copiar URL&quot; copia <strong>só aquele</strong> link. No celular, se não colar, copie o endereço cinza abaixo.
+              <strong>Copiar link</strong> copia só aquele endereço. <strong>Copiar QR</strong> guarda uma imagem na área de transferência (WhatsApp, Stories).
+              Se não colar no celular, copie o endereço cinza abaixo ou use <strong>Mais</strong> → Ver QR na tela.
             </p>
             {embedded ? (
               <div className="mb-3">
@@ -1004,26 +1008,58 @@ function LinksPageContent({
                           </div>
                         </details>
                       </div>
-                      <div className="flex flex-wrap items-center gap-1.5 shrink-0 w-full sm:w-auto sm:max-w-[min(100%,20rem)] sm:justify-end">
+                      <div className="flex flex-wrap items-center gap-2 shrink-0 w-full sm:w-auto sm:max-w-none sm:justify-end">
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex min-h-[44px] items-center rounded-lg border border-sky-200/90 bg-sky-50/90 px-3 text-xs font-semibold text-sky-900 shadow-sm ring-1 ring-sky-100/80 transition hover:bg-sky-100/90"
+                        >
+                          Preview
+                        </a>
                         <button
                           type="button"
                           onClick={() => void copyUrl(link.url, link.title || link.slug, link.id)}
-                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-white bg-slate-800 hover:bg-slate-900"
+                          className="inline-flex min-h-[44px] items-center rounded-lg border border-violet-200/90 bg-violet-50/90 px-3 text-xs font-semibold text-violet-900 shadow-sm ring-1 ring-violet-100/80 transition hover:bg-violet-100/90"
                         >
-                          {copiedLinkId === link.id ? '✓ Copiado' : 'Copiar URL'}
+                          {rowCopyFeedback?.id === link.id && rowCopyFeedback.mode === 'link' ? '✓ Link' : 'Copiar link'}
                         </button>
                         <button
                           type="button"
-                          onClick={() => setLinkQrModal(link)}
-                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200"
+                          onClick={async () => {
+                            const ok = await copyYladaLinkQrAsPng(link.url)
+                            if (ok) {
+                              setRowCopyFeedback({ id: link.id, mode: 'qr' })
+                              setTimeout(() => {
+                                setRowCopyFeedback((cur) => (cur?.id === link.id && cur.mode === 'qr' ? null : cur))
+                              }, 2000)
+                              setMessage({
+                                type: 'success',
+                                text: 'QR copiado (imagem). Cola no WhatsApp, Instagram ou Stories.',
+                              })
+                            } else {
+                              setMessage({
+                                type: 'error',
+                                text: 'Não foi possível copiar o QR neste browser. Abre Mais → Ver QR na tela ou tenta noutro dispositivo.',
+                              })
+                            }
+                          }}
+                          className="inline-flex min-h-[44px] items-center rounded-lg border border-teal-200/90 bg-teal-50/90 px-3 text-xs font-semibold text-teal-900 shadow-sm ring-1 ring-teal-100/80 transition hover:bg-teal-100/90"
                         >
-                          QR Code
+                          {rowCopyFeedback?.id === link.id && rowCopyFeedback.mode === 'qr' ? '✓ QR' : 'Copiar QR'}
                         </button>
                         <details className="relative group/actions">
-                          <summary className="cursor-pointer rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 list-none text-center [&::-webkit-details-marker]:hidden whitespace-nowrap">
+                          <summary className="cursor-pointer rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 list-none text-center [&::-webkit-details-marker]:hidden whitespace-nowrap min-h-[44px] inline-flex items-center">
                             Mais
                           </summary>
                           <div className="mt-2 flex flex-col gap-1 rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
+                            <button
+                              type="button"
+                              onClick={() => setLinkQrModal(link)}
+                              className="rounded px-2 py-2 text-xs font-medium text-indigo-700 hover:bg-indigo-50 text-left w-full"
+                            >
+                              Ver QR na tela
+                            </button>
                             <Link
                               href={`${prefix}/links/editar/${link.id}`}
                               {...(proBibliotecaLinksBase

@@ -387,6 +387,15 @@ export default function WellnessCheckoutPage() {
             <p className="text-xs text-gray-500 mt-2">
               Ao continuar, você será redirecionado para a página de pagamento segura
             </p>
+            <p className="text-xs text-gray-600 mt-4">
+              Qualquer dúvida, pode chamar o suporte:{' '}
+              <a
+                href="tel:+5519996049800"
+                className="text-green-700 font-semibold hover:text-green-800 underline"
+              >
+                (19) 99604-9800
+              </a>
+            </p>
           </div>
         </div>
       </main>
