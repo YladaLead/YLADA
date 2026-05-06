@@ -1075,9 +1075,9 @@ function BibliotecaPageContentInner({
       pathname.startsWith('/pro-estetica-capilar/painel/biblioteca-links'))
 
   /**
-   * Cartões do painel Pro (Ver preview, Criar e copiar link, Usar esse): `embedded` + capilar/corporal.
-   * Fallback por URL: se `embedded` falhar por algum motivo, ainda reconhecemos o hub canónico
-   * `/pro-estetica-*/painel/biblioteca-links` (corporal e capilar usam o mesmo layout).
+   * Cartões do painel Pro (Ver preview, Criar e copiar link, Usar esse): embedded + capilar ou corporal.
+   * Fallback por URL: se embedded falhar, ainda reconhecemos as rotas
+   * /pro-estetica-corporal/painel/biblioteca-links e /pro-estetica-capilar/painel/biblioteca-links.
    */
   const stayInProEsteticaHub = proEsteticaNarrow && (Boolean(embedded) || pathnameIsProEsteticaBibliotecaHub)
 
