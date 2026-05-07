@@ -6,6 +6,10 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { isYladaLinkHiddenFromPublicDueToFreemium } from '@/lib/ylada-freemium-public-link'
 import { fetchWhatsappE164ForUserId } from '@/lib/ylada-public-link-whatsapp'
 import { resolveProLideresPublicMemberCtaForLinkId } from '@/lib/ylada-public-link-member-cta'
+import {
+  resolvePublicLinkConfigJson,
+  rewriteProLideresVendasCalculadoraPresetToLibraryTemplate,
+} from '@/lib/ylada-canonical-flow-config'
 
 export type PublicLinkPayload = {
   slug: string
@@ -74,7 +78,8 @@ export async function fetchPublicLinkPayload(
 
   const memberSeg = options?.memberShareSegment?.trim()
 
-  const config = (link.config_json as Record<string, unknown>) ?? {}
+  const configRaw = (link.config_json as Record<string, unknown>) ?? {}
+  let config = await resolvePublicLinkConfigJson(supabaseAdmin, configRaw)
   const meta = config.meta as Record<string, unknown> | undefined
   /**
    * Links criados pelo Noel / generate (Etapa 6) trazem `meta.flow_id` + `meta.architecture`.
@@ -115,6 +120,14 @@ export async function fetchPublicLinkPayload(
   } else if (!isFlowLike) {
     notFound()
   }
+
+  const vendasCalcRewrite = await rewriteProLideresVendasCalculadoraPresetToLibraryTemplate(
+    supabaseAdmin,
+    config,
+    type
+  )
+  config = vendasCalcRewrite.config
+  type = vendasCalcRewrite.type
 
   let ctaWhatsapp = link.cta_whatsapp ?? null
   if (!ctaWhatsapp && link.user_id) {

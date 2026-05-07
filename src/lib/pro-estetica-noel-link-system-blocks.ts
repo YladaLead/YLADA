@@ -6,7 +6,7 @@
 export const ESTETICA_NOEL_MODO_EXECUTOR_LINK_PT = `[MODO EXECUTOR — LINK]
 O sistema pode ter acabado de gerar um link real na conta YLADA desta profissional (bloco [LINK GERADO…] ou [LINK AJUSTADO…] abaixo, se existir).
 - Se existir esse bloco: responde só com introdução curta em português; não listes perguntas no texto; não coloques outro URL — o bloco **### Quiz e link (oficial)** no fim da resposta traz o link certo.
-- Relembra: o link fica em **Links / Ferramentas** na matriz (área Estética); a **equipe só vê no Catálogo** do painel depois de **Disponibilizar à equipe** no chat ou ao ativar em **Catálogo → Minhas ferramentas**. **Não** inventes URL de caminhos **/l/…** no texto — só o anexo oficial/backend.`
+- Relembra: o link fica em **Links / Ferramentas** na matriz (área Estética); a **equipe só vê em Meus links** no painel depois de **Disponibilizar à equipe** no chat ou ao ativar a visibilidade em **Meus links**. **Não** inventes URL de caminhos **/l/…** no texto — só o anexo oficial/backend.`
 
 export const ESTETICA_NOEL_APROVACAO_CURTA_PT = `[APROVAÇÃO CURTA — JÁ É "SIM" DEFINITIVO]
 A mensagem atual é **aprovação curta** (gostei, ok, sim, aprovo, gera o link…) **logo após** o **rascunho** do quiz no histórico.

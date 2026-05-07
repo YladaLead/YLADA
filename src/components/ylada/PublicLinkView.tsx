@@ -25,6 +25,8 @@ import PoweredByYlada from '@/components/ylada/PoweredByYlada'
 import type { Language } from '@/lib/i18n'
 import { createClient } from '@/lib/supabase-client'
 import { parseProLideresMemberPathSegment } from '@/lib/ylada-public-link-path'
+import { dedupeQuizExpandedBody, splitQuizDescriptionForPublicResult } from '@/lib/split-quiz-result-description'
+import { shouldAdvanceConfigDrivenStepToResult } from '@/lib/ylada/public-link-quiz-flow'
 
 const publicLinkShareButtonClassName =
   'w-full rounded-xl border-2 border-sky-400 bg-sky-100 px-4 py-4 text-sm font-semibold leading-snug text-sky-900 shadow-md shadow-sky-400/30 transition-colors hover:border-sky-500 hover:bg-sky-200/70'
@@ -138,8 +140,8 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentBadge: 'Avaliação de perfil',
     recruitmentIntroTitle: 'Algumas perguntas rápidas',
     recruitmentIntroSubtitle:
-      'Vamos alinhar seu perfil e seu interesse em conversar sobre oportunidade de negócio, sem compromisso.',
-    recruitmentIntroMicro: 'Tempo estimado: 2 a 3 minutos',
+      'Algumas perguntas rápidas para entender seu perfil neste tema. Se fizer sentido para você, o próximo passo é uma conversa leve com quem te enviou o link — sem pressa e sem compromisso.',
+    recruitmentIntroMicro: 'Sem cadastro — tempo estimado: 2 a 3 minutos.',
     recruitmentBoxTitle: 'Próximo passo',
     recruitmentBoxDisclaimer:
       'Este resumo reflete suas respostas. Para o modelo de negócio, próximos passos e dúvidas sobre a oportunidade com a equipe, converse com quem te enviou este link.',
@@ -148,16 +150,16 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentTalkNow: '💬 Falar no WhatsApp',
     recruitmentPrimaryCta: 'Quero conhecer novas oportunidades',
     recruitmentYourResult: 'Seu resultado',
-    quizIntroBadge: 'Análise guiada',
+    quizIntroBadge: 'Antes de começar',
     quizIntroLead:
-      'Em poucos cliques você vê um primeiro recorte sobre o que o seu corpo e a sua rotina pedem neste tema: o que pesa no dia a dia e por onde costuma fazer sentido começar. Rápido, direto e pensado para quem quer se entender melhor.',
-    quizIntroMicro: 'Tempo estimado: cerca de 1 a 2 minutos',
+      'Em cerca de dois minutos você vê um resultado inicial com base no que informar aqui.',
+    quizIntroMicro: 'Sem cadastro — só preencher e ver o resultado.',
     quizResultHelperLine:
       'Cada corpo responde de um jeito. Este resumo ajuda a abrir a conversa com um profissional.',
     calculatorIntroBadge: 'Antes de começar',
     calculatorIntroLead:
-      'Em poucos passos você recebe um primeiro resultado com base no que informar aqui — rápido, direto e pensado para quem quer um número de partida antes de falar com um profissional. Não substitui avaliação presencial.',
-    calculatorIntroMicro: 'Tempo estimado: cerca de 1 minuto · sem cadastro: preencher e ver o resultado.',
+      'Descubra em cerca de dois minutos um número de partida com base no que você informar aqui.',
+    calculatorIntroMicro: 'Sem cadastro — só preencher e ver o resultado.',
     calculatorImcRecapLead: 'Com os dados que você trouxe:',
     calculatorImcCtaLead:
       'Seu resultado pede um próximo passo humano, não mais conta na cabeça. Chama no WhatsApp quem te enviou o link pra receber orientação inicial e ver onde ajustar antes que o cansaço vire rotina.',
@@ -202,8 +204,8 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentBadge: 'Profile assessment',
     recruitmentIntroTitle: 'A few quick questions',
     recruitmentIntroSubtitle:
-      "We'll align your profile and interest in discussing a business opportunity — no commitment.",
-    recruitmentIntroMicro: 'Estimated time: 2–3 minutes',
+      'A few quick questions to understand your profile on this topic. If it resonates, the next step is an easy chat with whoever sent you this — no pressure, no commitment.',
+    recruitmentIntroMicro: 'No sign-up — about 2–3 minutes.',
     recruitmentBoxTitle: 'Next step',
     recruitmentBoxDisclaimer:
       'This summary reflects your answers. For the business model, next steps and questions about the opportunity with the team, talk to whoever sent you this link.',
@@ -211,16 +213,16 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentTalkNow: '💬 Continue on WhatsApp',
     recruitmentPrimaryCta: 'I want to learn about the opportunity',
     recruitmentYourResult: 'Your result',
-    quizIntroBadge: 'Guided check-in',
+    quizIntroBadge: 'Before you start',
     quizIntroLead:
-      'In just a few taps, get a first read on what your body and routine are asking for here: what shows up in daily life and where it usually makes sense to start. Quick, clear, and built for anyone curious to understand themselves better.',
-    quizIntroMicro: 'Estimated time: about 1 to 2 minutes',
+      'In about two minutes, get a clear initial result from what you enter here.',
+    quizIntroMicro: 'No sign-up — fill in and see your result.',
     quizResultHelperLine:
       'Every body responds differently. This summary helps you start the conversation with a professional.',
     calculatorIntroBadge: 'Before you start',
     calculatorIntroLead:
-      'In a few steps you get a first result based on what you enter here — quick, clear, and meant as a starting number before talking to a professional. It does not replace an in-person assessment.',
-    calculatorIntroMicro: 'Estimated time: about 1 minute · no sign-up: fill in and see your result.',
+      'In about two minutes, get a clear starting number from what you enter here.',
+    calculatorIntroMicro: 'No sign-up — fill in and see your result.',
     calculatorImcRecapLead: 'From what you shared:',
     calculatorImcCtaLead:
       'Your result asks for a human next step, not more math in your head. Message whoever sent you this link on WhatsApp for initial guidance and a clearer place to adjust before low energy becomes your default.',
@@ -265,8 +267,8 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentBadge: 'Evaluación de perfil',
     recruitmentIntroTitle: 'Algunas preguntas rápidas',
     recruitmentIntroSubtitle:
-      'Alineamos tu perfil y tu interés en conversar sobre oportunidad de negocio — sin compromiso.',
-    recruitmentIntroMicro: 'Tiempo estimado: 2 a 3 minutos',
+      'Algunas preguntas rápidas para entender tu perfil en este tema. Si encaja contigo, el siguiente paso es una charla tranquila con quien te envió el enlace — sin prisas ni compromiso.',
+    recruitmentIntroMicro: 'Sin registro — unos 2 a 3 minutos.',
     recruitmentBoxTitle: 'Próximo paso',
     recruitmentBoxDisclaimer:
       'Este resumen refleja tus respuestas. Para el modelo de negocio, próximos pasos y dudas sobre la oportunidad con el equipo, habla con quien te envió este enlace.',
@@ -274,16 +276,16 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentTalkNow: '💬 Hablar por WhatsApp',
     recruitmentPrimaryCta: 'Quiero conocer la oportunidad',
     recruitmentYourResult: 'Tu resultado',
-    quizIntroBadge: 'Análisis guiado',
+    quizIntroBadge: 'Antes de empezar',
     quizIntroLead:
-      'En pocos toques ves un primer recorte de lo que tu cuerpo y tu rutina piden en este tema: qué pesa en el día a día y por dónde suele tener sentido empezar. Rápido, directo y pensado para quien quiere entenderse mejor.',
-    quizIntroMicro: 'Tiempo estimado: unos 1 a 2 minutos',
+      'En unos dos minutos obtienes un resultado inicial claro con lo que indiques aquí.',
+    quizIntroMicro: 'Sin registro — rellena y ve el resultado.',
     quizResultHelperLine:
       'Cada cuerpo responde distinto. Este resumen ayuda a abrir la conversación con un profesional.',
     calculatorIntroBadge: 'Antes de empezar',
     calculatorIntroLead:
-      'En pocos pasos recibes un primer resultado según lo que indiques aquí: rápido, claro y pensado como punto de partida antes de hablar con un profesional. No sustituye una valoración presencial.',
-    calculatorIntroMicro: 'Tiempo estimado: cerca de 1 minuto · sin registro: rellenar y ver el resultado.',
+      'En unos dos minutos obtienes un número de partida claro con lo que indiques aquí.',
+    calculatorIntroMicro: 'Sin registro — rellena y ve el resultado.',
     calculatorImcRecapLead: 'Con los datos que compartiste:',
     calculatorImcCtaLead:
       'Tu resultado pide un siguiente paso humano, no más números en la cabeza. Escríbele por WhatsApp a quien te envió el enlace para una orientación inicial y ver dónde ajustar antes de que el cansancio se vuelva rutina.',
@@ -505,6 +507,17 @@ function isVerySimilarText(a?: string, b?: string): boolean {
   const overlap = yWords.filter((w) => xSet.has(w)).length
   const ratio = overlap / Math.max(xWords.length, yWords.length)
   return ratio >= 0.8
+}
+
+/** Primeira dobra: cartões com frases diferentes mas o mesmo recorte de “se nada mudar / piora”. */
+function isSameWorseningWithoutChangeNarrative(a: string, b: string): boolean {
+  const x = normalizeForCompare(a)
+  const y = normalizeForCompare(b)
+  if (x.length < 28 || y.length < 28) return false
+  const mentionsChange = (s: string) =>
+    /nada mudar|sem ajuste|sem mudan|se nada|padr[aã]o atual|continuar igual|tende a/.test(s)
+  const mentionsWorse = (s: string) => /piora|piorar|manter ou pior/.test(s)
+  return mentionsChange(x) && mentionsChange(y) && mentionsWorse(x) && mentionsWorse(y)
 }
 
 function buildPrimaryInsight(diagnosis: DiagnosisResultState, diagnosisCardText: string): string {
@@ -809,6 +822,7 @@ export default function PublicLinkView({
     if (hasStaticResults(config)) {
       return (
         <DiagnosticoQuiz
+          key={slug}
           slug={slug}
           config={config}
           ctaText={ctaText}
@@ -822,6 +836,7 @@ export default function PublicLinkView({
     const normalizedConfig = normalizeBibliotecaConfig(config, locale)
     return (
       <ConfigDrivenLinkView
+        key={slug}
         slug={slug}
         config={normalizedConfig}
         ctaText={ctaText}
@@ -835,6 +850,7 @@ export default function PublicLinkView({
   if (type === 'calculator') {
     return (
       <CalculatorBlock
+        key={slug}
         slug={slug}
         config={config}
         ctaText={ctaText}
@@ -981,9 +997,11 @@ function ConfigDrivenLinkView({
   const subtitle = isProLideresPreset ? sanitizeProLideresVisitorSubtitle(subtitleRaw) : subtitleRaw
 
   const [values, setValues] = useState<Record<string, string>>({})
-  const [step, setStep] = useState<'intro' | 'form' | 'result' | 'limit_reached' | 'access_paused'>(() =>
-    isProLideresPreset ? 'form' : 'intro'
-  )
+  const [step, setStep] = useState<'intro' | 'form' | 'result' | 'limit_reached' | 'access_paused'>(() => {
+    if (!isProLideresPreset) return 'intro'
+    // Pro Líderes (vendas e recrutamento): mesma primeira tela — card curto + "Começar"; copy difere por funil.
+    return 'intro'
+  })
   const [formStep, setFormStep] = useState(0)
   const [diagnosis, setDiagnosis] = useState<DiagnosisResultState | null>(null)
   const [metricsId, setMetricsId] = useState<string | null>(null)
@@ -1006,28 +1024,12 @@ function ConfigDrivenLinkView({
     }
   }, [step, diagnosis, metricsId, slug])
 
-  // Garantir que quando diagnosis e metricsId estiverem prontos, o step seja 'result'
+  // Garantir que quando diagnosis e metricsId estiverem prontos, o step seja 'result'.
+  // Padrão centralizado: nunca saltar a intro por estado residual — ver `public-link-quiz-flow.ts` + regra do projeto.
   useEffect(() => {
-    if (diagnosis && metricsId) {
-      console.log('✅ [PublicLinkView] useEffect: Diagnosis e metricsId prontos', {
-        step,
-        hasDiagnosis: !!diagnosis,
-        hasMetricsId: !!metricsId,
-        loading
-      })
-      if (step !== 'result') {
-        console.log('✅ [PublicLinkView] useEffect: Mudando step de', step, 'para result')
-        setStep('result')
-      }
-    } else {
-      console.log('⏳ [PublicLinkView] useEffect: Aguardando diagnosis/metricsId', {
-        step,
-        hasDiagnosis: !!diagnosis,
-        hasMetricsId: !!metricsId,
-        loading
-      })
-    }
-  }, [diagnosis, metricsId, step, loading])
+    if (!shouldAdvanceConfigDrivenStepToResult(step, !!diagnosis, !!metricsId)) return
+    setStep('result')
+  }, [diagnosis, metricsId, step])
 
   const useDiagnosisApi =
     typeof archForDiagnosisApi === 'string' &&
@@ -1210,11 +1212,17 @@ function ConfigDrivenLinkView({
   })
   const introForDisplay = isProLideresRecruitmentLink
     ? {
-        title: t.recruitmentIntroTitle,
+        title: displayTitle,
         subtitle: t.recruitmentIntroSubtitle,
         micro: t.recruitmentIntroMicro,
       }
-    : introContent
+    : isProLideresPreset
+      ? {
+          title: displayTitle,
+          subtitle: t.quizIntroLead,
+          micro: t.quizIntroMicro,
+        }
+      : introContent
 
   if (step === 'access_paused') {
     return <FreemiumExtraLinkBlockedScreen locale={locale} pageTitle={displayTitle} />
@@ -1337,7 +1345,11 @@ function ConfigDrivenLinkView({
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-sky-100/50 border border-sky-100/60 p-6 sm:p-8">
           <div className="mb-4">
             <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
-              {isProLideresRecruitmentLink ? t.recruitmentBadge : t.personalizedDiagnosis}
+              {isProLideresRecruitmentLink
+                ? t.recruitmentBadge
+                : isProLideresPreset
+                  ? t.quizIntroBadge
+                  : t.personalizedDiagnosis}
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 leading-tight">{introForDisplay.title}</h1>
@@ -1350,7 +1362,13 @@ function ConfigDrivenLinkView({
           </p>
           <button
             type="button"
-            onClick={() => setStep('form')}
+            onClick={() => {
+              setDiagnosis(null)
+              setMetricsId(null)
+              setError(null)
+              setFormStep(0)
+              setStep('form')
+            }}
             className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors hover:shadow-sky-500/30"
           >
             {t.start}
@@ -1399,7 +1417,6 @@ function ConfigDrivenLinkView({
         : mainBlockerText
       const impactDiagnosisText = toImpactDiagnosisText(diagnosisCardText, themeHintForUi, { waterIntakeTool })
       const primaryInsightText = buildPrimaryInsight(diagnosis, diagnosisCardText)
-      const showDetailedCause = !!diagnosis.causa_provavel && !isVerySimilarText(diagnosis.causa_provavel, primaryInsightText)
 
       const commerceQuizLabels =
         commercePublicCopy && isQuizMode && quizFields.length > 0
@@ -1418,6 +1435,25 @@ function ConfigDrivenLinkView({
       const primaryInsightTextForUi = softenTemplateEmDashes(
         String(commerceNarrative?.supportingLine ?? primaryInsightText).trim()
       )
+
+      const firstFoldInsightRedundant =
+        !primaryInsightTextForUi ||
+        isVerySimilarText(impactDiagnosisTextForUi, primaryInsightTextForUi) ||
+        isSameWorseningWithoutChangeNarrative(impactDiagnosisTextForUi, primaryInsightTextForUi)
+      const showDetailedCause =
+        !!diagnosis.causa_provavel?.trim() &&
+        !isVerySimilarText(diagnosis.causa_provavel, primaryInsightText) &&
+        !isVerySimilarText(diagnosis.causa_provavel, primaryInsightTextForUi) &&
+        !isVerySimilarText(diagnosis.causa_provavel, impactDiagnosisTextForUi) &&
+        !isSameWorseningWithoutChangeNarrative(diagnosis.causa_provavel, impactDiagnosisTextForUi)
+      const showPreocupacoesExpanded =
+        !!diagnosis.preocupacoes?.trim() &&
+        !isVerySimilarText(diagnosis.preocupacoes, impactDiagnosisTextForUi) &&
+        !isSameWorseningWithoutChangeNarrative(diagnosis.preocupacoes, impactDiagnosisTextForUi) &&
+        (firstFoldInsightRedundant ||
+          (!isVerySimilarText(diagnosis.preocupacoes, primaryInsightTextForUi) &&
+            !isSameWorseningWithoutChangeNarrative(diagnosis.preocupacoes, primaryInsightTextForUi))) &&
+        !(showDetailedCause && isVerySimilarText(diagnosis.preocupacoes, diagnosis.causa_provavel || ''))
 
       const handleShareResult = async () => {
         trackLinkEvent(slug, 'share_click', { metrics_id: metricsId })
@@ -1481,15 +1517,17 @@ function ConfigDrivenLinkView({
               </div>
             </div>
 
-            <div className="mb-5 p-4 rounded-xl border border-gray-100 bg-gray-50/70">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
-                {/* Varejo (matriz joias/perfumaria/…): rótulo leve em `getMatrixCommercePublicLinkCopy` (ex.: “O que isso mostra”). Bem-estar / Pro Líderes: “Consequência”. */}
-                {commercePublicCopy ? t.whatItMeans : t.consequence}
-              </p>
-              <p className="text-sm text-gray-700 leading-relaxed">
-                {primaryInsightTextForUi}
-              </p>
-            </div>
+            {!firstFoldInsightRedundant ? (
+              <div className="mb-5 p-4 rounded-xl border border-gray-100 bg-gray-50/70">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                  {/* Varejo (matriz joias/perfumaria/…): rótulo leve em `getMatrixCommercePublicLinkCopy` (ex.: “O que isso mostra”). Bem-estar / Pro Líderes: “Consequência”. */}
+                  {commercePublicCopy ? t.whatItMeans : t.consequence}
+                </p>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {primaryInsightTextForUi}
+                </p>
+              </div>
+            ) : null}
 
             <button
               type="button"
@@ -1525,7 +1563,7 @@ function ConfigDrivenLinkView({
                   </div>
                 )}
 
-                {diagnosis.preocupacoes && (
+                {showPreocupacoesExpanded ? (
                   <div className="mb-4">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
                       {t.concerns}
@@ -1534,11 +1572,13 @@ function ConfigDrivenLinkView({
                       {diagnosis.preocupacoes}
                     </p>
                   </div>
-                )}
+                ) : null}
 
                 {diagnosis.consequence?.trim() &&
                 !commerceNarrative &&
-                !isVerySimilarText(diagnosis.consequence, primaryInsightText) ? (
+                !isVerySimilarText(diagnosis.consequence, primaryInsightText) &&
+                !isVerySimilarText(diagnosis.consequence, primaryInsightTextForUi) &&
+                !isVerySimilarText(diagnosis.consequence, impactDiagnosisTextForUi) ? (
                   <div className="mb-4">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
                       {isPerfumery ? t.benefit : t.consequence}
@@ -1592,15 +1632,10 @@ function ConfigDrivenLinkView({
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
                     {isProLideresRecruitmentLink ? t.recruitmentBoxTitle : t.moreFactors}
                   </p>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-2">
+                  <p className="text-gray-600 text-sm leading-relaxed">
                     {isProLideresRecruitmentLink
                       ? t.recruitmentBoxDisclaimer
                       : t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
-                  </p>
-                  <p className="text-gray-700 text-sm font-medium">
-                    {isProLideresRecruitmentLink
-                      ? t.recruitmentBoxHint
-                      : t.talkToPro.replace('{pessoa}', pessoaLabel)}
                   </p>
                 </div>
               </>
@@ -1609,7 +1644,11 @@ function ConfigDrivenLinkView({
             {whatsappUrl ? (
               <div className="space-y-3">
                 <p className="text-center text-sm text-gray-600">
-                  {isProLideresRecruitmentLink ? t.recruitmentBoxHint : t.quizResultHelperLine}
+                  {isProLideresRecruitmentLink
+                    ? t.recruitmentBoxHint
+                    : showFullAnalysis
+                      ? t.calculatorCtaLead
+                      : t.quizResultHelperLine}
                 </p>
                 <button
                   type="button"
@@ -1703,21 +1742,17 @@ function ConfigDrivenLinkView({
             <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
               {isProLideresRecruitmentLink ? t.recruitmentBoxTitle : t.moreFactors}
             </p>
-            <p className="text-gray-600 text-sm leading-relaxed mb-2">
+            <p className="text-gray-600 text-sm leading-relaxed">
               {isProLideresRecruitmentLink
                 ? t.recruitmentBoxDisclaimer
                 : t.resultDisclaimer.replace('{pessoa}', pessoaLabelStatic)}
             </p>
-            {isProLideresRecruitmentLink ? (
-              <p className="text-gray-700 text-sm font-medium">{t.recruitmentBoxHint}</p>
-            ) : (
-              <p className="text-gray-700 text-sm font-medium">
-                {t.talkToPro.replace('{pessoa}', pessoaLabelStatic)}
-              </p>
-            )}
           </div>
           {whatsappUrl ? (
             <div className="space-y-3">
+              <p className="text-center text-sm text-gray-600">
+                {isProLideresRecruitmentLink ? t.recruitmentBoxHint : t.quizResultHelperLine}
+              </p>
               <button
                 type="button"
                 onClick={() => onCtaClick()}
@@ -2215,6 +2250,19 @@ function DiagnosticoQuiz({
       : resultDescription
   )
 
+  const {
+    consequence: quizConsequenceCard,
+    insight: quizInsightCard,
+    tip: quizTipCard,
+    expandedTail: quizExpandedTailRaw,
+  } = splitQuizDescriptionForPublicResult(displayQuizResultDescription)
+  const quizExpandedBody = dedupeQuizExpandedBody(quizExpandedTailRaw, [
+    displayQuizResultHeadline,
+    quizConsequenceCard ?? '',
+    quizInsightCard,
+    quizTipCard,
+  ])
+
   if (step === 'intro') {
     const introTitle = (cfg.introTitle as string)?.trim() || quizTitle
     const introSubtitle = (cfg.introSubtitle as string)?.trim() || t.quizIntroLead
@@ -2283,37 +2331,85 @@ function DiagnosticoQuiz({
             </div>
           </div>
 
-          <div className="mb-5 p-4 rounded-xl border border-gray-100 bg-gray-50/70">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">{t.whatItMeans}</p>
-            <p
-              className={`text-sm text-gray-700 leading-relaxed ${showFullAnalysis ? '' : 'line-clamp-5'}`}
-            >
-              {displayQuizResultDescription}
-            </p>
-          </div>
-
-          <button type="button" onClick={toggleFullAnalysis} className={publicLinkFullAnalysisToggleCompactClassName}>
-            {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
-          </button>
-
-          {showFullAnalysis && (
-            <>
-              <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
-                <p className="text-gray-700 text-sm leading-relaxed">{t.goodNews}</p>
-              </div>
-              <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">{t.moreFactors}</p>
-                <p className="text-gray-600 text-sm leading-relaxed mb-2">
-                  {t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
+          <>
+            {quizConsequenceCard ? (
+              <div className="mb-4 rounded-xl border border-slate-100 bg-slate-50/90 p-4">
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
+                  {t.consequence}
                 </p>
-                <p className="text-gray-700 text-sm font-medium">{t.talkToPro.replace('{pessoa}', pessoaLabel)}</p>
+                <p className="text-sm leading-relaxed text-gray-800">{quizConsequenceCard}</p>
               </div>
-            </>
-          )}
+            ) : null}
+            {(quizInsightCard || quizTipCard) && (
+              <div className="mb-5 space-y-3">
+                {quizInsightCard ? (
+                  <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+                      {t.probableCause}
+                    </p>
+                    <p
+                      className={`text-sm leading-relaxed text-gray-700 ${
+                        !showFullAnalysis && quizTipCard ? 'line-clamp-4' : !showFullAnalysis ? 'line-clamp-5' : ''
+                      }`}
+                    >
+                      {quizInsightCard}
+                    </p>
+                  </div>
+                ) : null}
+                {quizTipCard ? (
+                  <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4">
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
+                      {t.calculatorPrecautionLabel}
+                    </p>
+                    <p
+                      className={`text-sm leading-relaxed text-gray-700 ${
+                        !showFullAnalysis ? 'line-clamp-4' : ''
+                      }`}
+                    >
+                      {quizTipCard}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            )}
+            <button type="button" onClick={toggleFullAnalysis} className={publicLinkFullAnalysisToggleCompactClassName}>
+              {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
+            </button>
+            {showFullAnalysis && (
+              <>
+                {quizExpandedBody ? (
+                  <div className="mb-4 space-y-2 rounded-xl border border-violet-100 bg-violet-50/60 p-4">
+                    <p className="text-sm leading-relaxed text-gray-800 whitespace-pre-line">{quizExpandedBody}</p>
+                  </div>
+                ) : null}
+                <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
+                  <p className="text-gray-700 text-sm leading-relaxed">{t.goodNews}</p>
+                </div>
+                <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
+                    {isProLideresRecruitmentQuiz ? t.recruitmentBoxTitle : t.moreFactors}
+                  </p>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {isProLideresRecruitmentQuiz
+                      ? t.recruitmentBoxDisclaimer
+                      : t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
+                  </p>
+                </div>
+              </>
+            )}
+          </>
 
           {whatsappUrl ? (
             <div className="space-y-3">
-              <p className="text-center text-sm text-gray-600">{t.quizResultHelperLine}</p>
+              <p className="text-center text-sm text-gray-600">
+                {isProLideresRecruitmentQuiz
+                  ? showFullAnalysis
+                    ? t.recruitmentBoxHint
+                    : t.quizResultHelperLine
+                  : showFullAnalysis
+                    ? t.calculatorCtaLead
+                    : t.quizResultHelperLine}
+              </p>
               <button type="button" onClick={() => onCtaClick()} className={publicLinkPrimaryWhatsAppClassName}>
                 {isProLideresRecruitmentQuiz ? t.recruitmentPrimaryCta : ctaText}
               </button>
@@ -2333,7 +2429,13 @@ function DiagnosticoQuiz({
             <PoweredByYlada variant="compact" />
           </div>
           <DiagnosisDisclaimer
-            variant={commerceUi ? 'commerce' : 'informative'}
+            variant={
+              isProLideresRecruitmentQuiz
+                ? 'recrutamento_pro_lideres'
+                : commerceUi
+                  ? 'commerce'
+                  : 'informative'
+            }
             locale={locale}
             className="mt-4"
           />
@@ -2728,13 +2830,35 @@ function getImcCalculatorPersonalCopy(
   return { insight: softenTemplateEmDashes(insightPt), tip: softenTemplateEmDashes(tipPt) }
 }
 
+type PublicCalculatorResultCopy = { insight: string; tip: string; expanded?: string[] }
+
+function getCalculatorExpandedRoutineContext(locale: Language): string[] {
+  if (locale === 'en') {
+    return [
+      'This number is a snapshot: training load, heat, sleep and digestion shift what you need day to day.',
+      'Use it as a conversation starter with whoever sent you the link so it fits your real routine without extremes.',
+    ]
+  }
+  if (locale === 'es') {
+    return [
+      'Ese número es una foto: entreno calor sueño y digestión cambian lo que necesitas cada día.',
+      'Úsalo para conversar con quien te envió el enlace y encajarlo en tu rutina real sin extremos.',
+    ]
+  }
+  return [
+    'Esse número é um retrato: treino, calor, sono e digestão mudam o que você precisa a cada dia.',
+    'Use como ponto de partida pra conversar com quem te enviou o link e encaixar na rotina real, sem extremos.',
+  ]
+}
+
 function getCalculatorResultCopy(
   title: string,
   value: number,
   locale: Language,
   opts?: { imcProfile?: ImcProfile | null },
-): { insight: string; tip: string } | null {
+): PublicCalculatorResultCopy | null {
   const normalized = title.toLowerCase()
+  const routineExpanded = getCalculatorExpandedRoutineContext(locale)
 
   if (normalized.includes('prote')) {
     if (value < 90) {
@@ -2751,6 +2875,7 @@ function getCalculatorResultCopy(
             : locale === 'es'
               ? 'Precaución: reparte en tres o cuatro tomas y comenta riñón o digestión pesada antes de subir fuerte de golpe.'
               : 'Precaução: espalha em três ou quatro refeições em vez de um jantar gigante, e comenta rim ou digestão pesada antes de subir muito do nada.',
+        expanded: routineExpanded,
       }
     }
     return {
@@ -2766,6 +2891,7 @@ function getCalculatorResultCopy(
           : locale === 'es'
             ? 'Deja un ancla proteica fácil para tu peor horario, yogur huevo lata de pescado, para que no cargue solo la fuerza de voluntad.'
             : 'Deixa uma âncora proteica fácil pro teu pior horário, iogurte, ovo, lata de peixe, pra vontade não carregar tudo sozinha.',
+      expanded: routineExpanded,
     }
   }
 
@@ -2783,11 +2909,16 @@ function getCalculatorResultCopy(
           : locale === 'es'
             ? 'Precaución: reparte vasos en el día, empieza con uno al levantar y comenta diuréticos o corazón antes de beber litros de golpe.'
             : 'Precaução: espalha copos no dia, começa com um ao levantar, e comenta diurético ou coração antes de tomar litros de uma vez.',
+      expanded: routineExpanded,
     }
   }
 
   if (normalized.includes('imc')) {
-    return getImcCalculatorPersonalCopy(value, locale, opts?.imcProfile ?? null)
+    const base = getImcCalculatorPersonalCopy(value, locale, opts?.imcProfile ?? null)
+    return {
+      ...base,
+      expanded: getCalculatorImcFullAnalysisParagraphs(value, locale, opts?.imcProfile ?? null),
+    }
   }
 
   if (normalized.includes('caloria')) {
@@ -2804,6 +2935,7 @@ function getCalculatorResultCopy(
           : locale === 'es'
             ? 'Precaución mueve ese número cada una o dos semanas mirando sueño antojos y respuesta real al entrenamiento no sólo báscula de un día.'
             : 'Precaução: mexe nesse número a cada uma ou duas semanas olhando sono vontade de doce e treino, nunca só estalo da balança de um dia.',
+      expanded: routineExpanded,
     }
   }
 
@@ -3009,8 +3141,21 @@ function CalculatorBlock({
         : ctaText
   const imcProfile = isImcCalculator ? extractImcProfile(fieldsParaCalculadora, values) : null
   const resultCopy = getCalculatorResultCopy(title, resultNum, locale, { imcProfile })
-  const imcFullAnalysis =
-    isImcCalculator ? getCalculatorImcFullAnalysisParagraphs(resultNum, locale, imcProfile) : null
+  const calculatorExpandedSource = resultCopy?.expanded?.length ? resultCopy.expanded : null
+  const calculatorExpandedJoined = calculatorExpandedSource?.length
+    ? calculatorExpandedSource.join('\n\n').trim()
+    : ''
+  const calculatorExpandedVioletBody =
+    resultCopy && calculatorExpandedJoined
+      ? (() => {
+          const deduped = dedupeQuizExpandedBody(calculatorExpandedJoined, [
+            resultCopy.insight,
+            resultCopy.tip,
+          ]).trim()
+          return deduped || calculatorExpandedJoined
+        })()
+      : ''
+  const calculatorHasExpandableAnalysis = Boolean(calculatorExpandedSource && calculatorExpandedSource.length > 0)
   const imcEngagementHeadline = isImcCalculator ? getImcEngagementHeadline(resultNum, locale, imcProfile) : ''
   const imcRecapLine = isImcCalculator && imcProfile ? buildImcRecapLine(imcProfile, locale) : null
   const pessoaLabel =
@@ -3209,7 +3354,7 @@ function CalculatorBlock({
                   </p>
                   <p className="text-sm leading-relaxed text-gray-700">{resultCopy.tip}</p>
                 </div>
-                {imcFullAnalysis ? (
+                {calculatorHasExpandableAnalysis ? (
                   <button
                     type="button"
                     onClick={() => {
@@ -3223,14 +3368,29 @@ function CalculatorBlock({
                     {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
                   </button>
                 ) : null}
-                {showFullAnalysis && imcFullAnalysis ? (
+                {showFullAnalysis && calculatorExpandedVioletBody ? (
                   <div className="space-y-3 rounded-xl border border-violet-100 bg-violet-50/60 p-4">
-                    {imcFullAnalysis.map((pText, i) => (
+                    {calculatorExpandedVioletBody.split(/\n\s*\n/).map((pText, i) => (
                       <p key={i} className="text-sm leading-relaxed text-gray-700">
-                        {softenTemplateEmDashes(pText)}
+                        {softenTemplateEmDashes(pText.trim())}
                       </p>
                     ))}
                   </div>
+                ) : null}
+                {showFullAnalysis && resultCopy ? (
+                  <>
+                    <div className="p-4 rounded-xl bg-green-50/80 border border-green-100">
+                      <p className="text-gray-700 text-sm leading-relaxed">{t.goodNews}</p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-sky-50/80 border border-sky-100">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
+                        {t.moreFactors}
+                      </p>
+                      <p className="text-gray-600 text-sm leading-relaxed">
+                        {t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
+                      </p>
+                    </div>
+                  </>
                 ) : null}
               </div>
             ) : null}
@@ -3238,8 +3398,16 @@ function CalculatorBlock({
             <div className="space-y-3">
               {whatsappUrl ? (
                 <>
-                  <p className="text-center text-sm font-medium leading-relaxed text-gray-800">
-                    {isImcCalculator ? t.calculatorImcCtaLead : t.calculatorCtaLead}
+                  <p className="text-center text-sm text-gray-600">
+                    {resultCopy
+                      ? showFullAnalysis
+                        ? isImcCalculator
+                          ? t.calculatorImcCtaLead
+                          : t.calculatorCtaLead
+                        : t.quizResultHelperLine
+                      : isImcCalculator
+                        ? t.calculatorImcCtaLead
+                        : t.calculatorCtaLead}
                   </p>
                   <button
                     type="button"

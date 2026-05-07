@@ -1310,7 +1310,7 @@ export default function NoelChat({
                           ) : null}
                           {proLideresPayload && proLideresLeaderLibraryFlow && lid && alreadyInLibrary ? (
                             <Link
-                              href={`${proLideresPainelCatalogHref}?highlightYladaLink=${lid}&section=mine`}
+                              href={`${proLideresPainelCatalogHref}?highlightYladaLink=${lid}`}
                               className="inline-flex min-h-[40px] items-center gap-2 rounded-lg border border-indigo-300 bg-white px-3 py-2 text-sm font-semibold text-indigo-800 hover:bg-indigo-50 touch-manipulation"
                             >
                               Abrir o meu catálogo
@@ -1336,10 +1336,10 @@ export default function NoelChat({
                           )}
                           {proLideresPayload && ctxForMessage?.link_id ? (
                             <Link
-                              href={`${proLideresPainelCatalogHref}?highlightYladaLink=${ctxForMessage.link_id}&section=mine`}
+                              href={`${proLideresPainelCatalogHref}?highlightYladaLink=${ctxForMessage.link_id}`}
                               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-50 text-violet-900 text-sm font-medium border border-violet-200 hover:bg-violet-100 transition-colors touch-manipulation"
                             >
-                              Catálogo (Minhas ferramentas)
+                              Abrir Meus links
                             </Link>
                           ) : null}
                           {showDisponibilizarCatalog ? (
@@ -1449,8 +1449,8 @@ export default function NoelChat({
                 Publicar na tua biblioteca
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                Escolhe o separador do catálogo onde esta ferramenta deve aparecer em{' '}
-                <strong>Minhas ferramentas</strong> (podes mudar depois no catálogo).
+                Escolhe se entra em <strong>Vendas</strong> ou <strong>Recrutamento</strong> em Meus links (podes mudar
+                depois no mesmo sítio).
               </p>
               {linkMetaError ? (
                 <p className="mt-2 text-sm text-red-600" role="alert">
@@ -1515,15 +1515,15 @@ export default function NoelChat({
                     se esta versão já serve, ou <strong>Pedir ajuste ao Noel</strong> para continuar no chat.
                   </li>
                   <li>
-                    A equipe <strong>só vê no Catálogo</strong> depois de <strong>Disponibilizar à equipe</strong> (botão
-                    na mensagem do quiz ou abaixo) ou ao ativar a visibilidade em{' '}
+                    A equipe <strong>só vê em Meus links</strong> depois de <strong>Disponibilizar à equipe</strong>{' '}
+                    (botão na mensagem do quiz ou abaixo) ou ao ativar a visibilidade em{' '}
                     <Link
                       href={proLideresPainelCatalogHref}
                       className="font-semibold text-emerald-950 underline decoration-emerald-600/60 hover:no-underline"
                     >
-                      Catálogo de ferramentas
+                      Meus links
                     </Link>{' '}
-                    → <strong>Minhas ferramentas</strong>.
+                    no painel.
                   </li>
                 </ul>
               </div>
@@ -1544,8 +1544,8 @@ export default function NoelChat({
                   {shareCatalogBusy ? 'Disponibilizando…' : 'Disponibilizar à equipe (catálogo)'}
                 </button>
                 <p className="text-xs text-slate-600 max-w-xl">
-                  Passa a aparecer para cada pessoa em <strong>Catálogo → Minhas ferramentas</strong> no painel da
-                  equipa. O número de WhatsApp no resultado do fluxo é o que estiver definido na <strong>matriz YLADA</strong>{' '}
+                  Passa a aparecer para cada pessoa em <strong>Meus links</strong> no painel da equipa. O número de
+                  WhatsApp no resultado do fluxo é o que estiver definido na <strong>matriz YLADA</strong>{' '}
                   (editar o link); cada membro trabalha a partir da <strong>sua sessão</strong> no painel.
                 </p>
               </div>
@@ -1555,7 +1555,7 @@ export default function NoelChat({
                 Esta ferramenta já está <strong>disponível para a equipe</strong> no catálogo. Você pode ajustar a
                 visibilidade em{' '}
                 <Link href={proLideresPainelCatalogHref} className="font-semibold underline hover:no-underline">
-                  Catálogo → Minhas ferramentas
+                  Meus links
                 </Link>
                 .
               </p>

@@ -4,11 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 
 import { PRO_LIDERES_VERTICAL_BRAND_LABEL } from '@/config/pro-lideres-vertical'
-import type {
-  ProLideresCatalogCategory,
-  ProLideresCatalogItem,
-  ProLideresCatalogOrigin,
-} from '@/lib/pro-lideres-catalog-build'
+import type { ProLideresCatalogCategory, ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
 import { copyTextToClipboard } from '@/lib/clipboard'
 import { copyYladaLinkQrAsPng } from '@/lib/ylada-link-share-actions'
@@ -19,7 +15,6 @@ type CatalogPayload = {
 }
 
 type TabKey = ProLideresCatalogCategory
-type SectionKey = ProLideresCatalogOrigin
 
 function CatalogRowCard({
   item,
@@ -190,8 +185,7 @@ function CatalogRowCard({
         <div className="mt-3 border-t border-slate-100 pt-3">
           <p className="text-xs font-semibold text-slate-800">Equipe no painel</p>
           <p className="mt-0.5 text-[11px] leading-snug text-slate-600">
-            Defina se esta ferramenta aparece na biblioteca dos membros (biblioteca YLADA ou o que criaste em Meus
-            links).
+            Defina se esta ferramenta aparece em Meus links no painel de cada membro da equipe.
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {item.visibleToTeam ? (
@@ -262,13 +256,12 @@ export function ProLideresCatalogoClient({
   const [error, setError] = useState<string | null>(null)
   const [copyState, setCopyState] = useState<Record<string, 'link' | 'qr'>>({})
   const [tab, setTab] = useState<TabKey>('sales')
-  const [section, setSection] = useState<SectionKey>('library')
   const [search, setSearch] = useState('')
   const [teamVisibilityBusyId, setTeamVisibilityBusyId] = useState<string | null>(null)
   const [highlightYladaLinkId, setHighlightYladaLinkId] = useState<string | null>(null)
 
   const defaultIntroLeader =
-    'Aqui você separa a biblioteca que a YLADA já deixa pronta dos links que você mesmo criar. Depois é só escolher entre ferramentas de vendas ou de recrutamento.'
+    'Aqui aparecem juntas as ferramentas sugeridas pela YLADA e as que você criar em Meus links. Escolha vendas ou recrutamento e use os botões em cada card para mostrar ou ocultar da equipe.'
   const defaultIntroTeam =
     'Aqui aparecem as ferramentas disponíveis para a equipe neste espaço. Escolha o funil (vendas ou recrutamento), use o fluxo e copie o seu link para divulgar.'
 
@@ -309,7 +302,6 @@ export function ProLideresCatalogoClient({
     const match = catalog.find((i) => i.yladaLinkId === highlightYladaLinkId)
     if (match) {
       setTab(match.catalogCategory)
-      if (isLeaderWorkspace) setSection(match.origin)
     }
     const tid = window.setTimeout(() => {
       document.getElementById(`pro-lideres-catalog-yd-${highlightYladaLinkId}`)?.scrollIntoView({
@@ -318,13 +310,11 @@ export function ProLideresCatalogoClient({
       })
     }, 200)
     return () => window.clearTimeout(tid)
-  }, [highlightYladaLinkId, loading, catalog, isLeaderWorkspace])
+  }, [highlightYladaLinkId, loading, catalog])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
-    const teamCatalogOnlyReleased = !isLeaderWorkspace
     return catalog.filter((item) => {
-      if (!teamCatalogOnlyReleased && item.origin !== section) return false
       if (item.catalogCategory !== tab) return false
       if (!q) return true
       const name = item.label.toLowerCase()
@@ -333,7 +323,7 @@ export function ProLideresCatalogoClient({
       const meta = (item.metaLine ?? '').toLowerCase()
       return name.includes(q) || desc.includes(q) || when.includes(q) || meta.includes(q)
     })
-  }, [catalog, tab, section, search, isLeaderWorkspace])
+  }, [catalog, tab, search])
 
   async function removeCustom(id: string) {
     if (!confirm('Remover esta entrada extra do catálogo?')) return
@@ -421,39 +411,6 @@ export function ProLideresCatalogoClient({
 
       <div className="rounded-2xl border-2 border-slate-200 bg-gradient-to-b from-slate-50/90 to-white p-5 shadow-md ring-1 ring-slate-900/5">
         <div className="flex flex-col gap-5">
-          {isLeaderWorkspace ? (
-            <div className="rounded-xl border border-violet-200/80 bg-violet-50/60 p-4 shadow-sm">
-              <p className="text-sm font-semibold text-slate-900">Origem</p>
-              <p className="mt-0.5 text-xs text-slate-600">Biblioteca pronta ou o que você criou em Meus links</p>
-              <div className="mt-3 flex max-w-xl rounded-xl bg-slate-300/35 p-1.5 shadow-inner">
-                <button
-                  type="button"
-                  onClick={() => setSection('library')}
-                  title="Ferramentas da biblioteca base Pro Líderes"
-                  className={`min-h-[46px] flex-1 rounded-lg px-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
-                    section === 'library'
-                      ? 'bg-white text-violet-900 shadow-md ring-2 ring-violet-400/70'
-                      : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
-                  }`}
-                >
-                  Biblioteca
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSection('mine')}
-                  title="Links criados em Meus links e extras do painel"
-                  className={`min-h-[46px] flex-1 rounded-lg px-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 ${
-                    section === 'mine'
-                      ? 'bg-white text-slate-900 shadow-md ring-2 ring-slate-400/80'
-                      : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
-                  }`}
-                >
-                  Minhas ferramentas
-                </button>
-              </div>
-            </div>
-          ) : null}
-
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-4">
             <div className="min-w-0 flex-1 space-y-2 rounded-xl border border-sky-200/80 bg-sky-50/50 p-4 shadow-sm">
               <p className="text-sm font-semibold text-slate-900">Vendas ou recrutamento</p>
@@ -535,10 +492,10 @@ export function ProLideresCatalogoClient({
               ? search.trim()
                 ? hideRecruitmentTab
                   ? 'Nenhum resultado — tente outro nome.'
-                  : 'Nenhum resultado — tente outro nome ou troque os filtros (Vendas / Recrutamento ou Biblioteca / Minhas ferramentas).'
+                  : 'Nenhum resultado — tente outro nome ou troque entre Vendas e Recrutamento.'
                 : hideRecruitmentTab
-                  ? 'Tente outra origem (Biblioteca / Minhas) ou crie ferramentas em Meus links.'
-                  : 'Troque Biblioteca / Minhas ferramentas ou Vendas / Recrutamento, ou crie algo novo em Meus links.'
+                  ? 'Crie ferramentas em Meus links ou ajuste a busca.'
+                  : 'Troque entre Vendas e Recrutamento, ou crie algo novo em Meus links.'
               : search.trim()
                 ? hideRecruitmentTab
                   ? 'Nenhum resultado — tente outro nome.'

@@ -43,7 +43,7 @@ type HistoryTurn = { role?: string; content?: string }
 const MODO_EXECUTOR_LINK_PT = `[MODO EXECUTOR — LINK]
 O sistema pode ter acabado de gerar um link real na conta YLADA deste líder (bloco [LINK GERADO…] ou [LINK AJUSTADO…] abaixo, se existir).
 - Se existir esse bloco: responde só com introdução curta em português; não listes perguntas no texto; não coloques outro URL — o bloco **### Quiz e link (oficial)** no fim da resposta traz o link certo.
-- Relembra: o link fica em **Links / Ferramentas** na matriz; a **equipe só vê no Catálogo** depois de **Disponibilizar à equipe** no chat ou ativar em **Catálogo → Minhas ferramentas**. **Não** inventes URL de caminhos **/l/…** no texto — só o anexo oficial/backend.`
+- Relembra: o link fica em **Links / Ferramentas** na matriz; a **equipe só vê em Meus links** no painel depois de **Disponibilizar à equipe** no chat ou ao ativar a visibilidade em **Meus links**. **Não** inventes URL de caminhos **/l/…** no texto — só o anexo oficial/backend.`
 
 const APROVACAO_CURTA_SEM_SEGUNDA_CONFIRMACAO_PT = `[APROVAÇÃO CURTA — JÁ É "SIM" DEFINITIVO]
 A mensagem atual do líder é **aprovação curta** (gostei, ok, sim, aprovo, gera o link…) **logo após** o **rascunho** do quiz no histórico.
