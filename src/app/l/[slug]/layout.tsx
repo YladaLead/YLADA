@@ -4,13 +4,10 @@
  */
 import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
-import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
-import { getProLideresPresetOpenGraphImageUrl } from '@/lib/pro-lideres/pro-lideres-preset-og-image'
 import {
-  buildEsteticaAestheticsOgDescriptionFallback,
-  getProEsteticaPublicOpenGraphImageUrl,
-} from '@/lib/pro-estetica/pro-estetica-public-link-og'
-import { getYladaOgImageUrl } from '@/lib/ylada-og-tema-imagem'
+  YLADA_OG_UNIFIED_SHARE_CARD_PATH,
+} from '@/lib/ylada-og-fallback-logo'
+import { buildEsteticaAestheticsOgDescriptionFallback } from '@/lib/pro-estetica/pro-estetica-public-link-og'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://ylada.app'
 
@@ -34,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { data: link, error } = await supabaseAdmin
     .from('ylada_links')
-    .select('title, config_json, segment')
+    .select('title, config_json, segment, template_id')
     .eq('slug', slug)
     .eq('status', 'active')
     .maybeSingle()
@@ -52,22 +49,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const themeRaw =
     (meta.theme_raw as string) ?? (meta.theme as string) ?? (meta.theme_display as string) ?? ''
   const segment = (meta.segment_code as string) ?? (link.segment as string) ?? null
-  const proLideresFluxoId =
-    typeof meta.pro_lideres_fluxo_id === 'string' ? meta.pro_lideres_fluxo_id.trim() : ''
-  const isProLideresPreset = meta.pro_lideres_preset === true
-  const diagnosisVerticalRaw =
-    typeof meta.diagnosis_vertical === 'string' ? meta.diagnosis_vertical.trim().toLowerCase() : ''
-  const proEsteticaVertical =
-    diagnosisVerticalRaw === 'capilar' || diagnosisVerticalRaw === 'corporal' ? diagnosisVerticalRaw : null
   const segmentLower = (segment || '').toLowerCase().trim()
   const isAestheticsSegment = segmentLower === 'estetica' || segmentLower === 'aesthetics'
 
-  const ogImageUrl =
-    isProLideresPreset && proLideresFluxoId
-      ? getProLideresPresetOpenGraphImageUrl(proLideresFluxoId, baseUrl)
-      : proEsteticaVertical
-        ? getProEsteticaPublicOpenGraphImageUrl(proEsteticaVertical, themeRaw || title, segment, baseUrl)
-        : getYladaOgImageUrl(themeRaw || title, segment, baseUrl)
+  /** Prévia social unificada (card azul + logo) até haver artes por fluxo vertical. */
+  const ogImageUrl = `${baseUrl.replace(/\/$/, '')}${YLADA_OG_UNIFIED_SHARE_CARD_PATH}`
   const ogMime = ogImageMime(ogImageUrl)
   const pageUrl = `${baseUrl}/l/${slug}`
   const ogFromPage = typeof page.og_description === 'string' ? page.og_description.trim() : ''
@@ -116,7 +102,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 function defaultMetadata(title: string, base: string): Metadata {
-  const defaultImage = `${base.replace(/\/$/, '')}${YLADA_OG_FALLBACK_LOGO_PATH}`
+  const defaultImage = `${base.replace(/\/$/, '')}${YLADA_OG_UNIFIED_SHARE_CARD_PATH}`
   return {
     title: `${title} | YLADA`,
     description: 'Link inteligente com quiz personalizado.',

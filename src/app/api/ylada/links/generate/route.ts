@@ -38,6 +38,12 @@ function parseDiagnosisVerticalFromBody(body: Record<string, unknown>): Diagnosi
   return undefined
 }
 
+/** Fallback quando o cliente não manda `diagnosis_vertical` (ex. Coach `/pt/estetica/links`): usa `ylada_biblioteca_itens.meta`. */
+function parseDiagnosisVerticalFromBibliotecaItemMeta(meta: unknown): DiagnosisVertical | undefined {
+  if (!meta || typeof meta !== 'object') return undefined
+  return parseDiagnosisVerticalFromBody({ diagnosis_vertical: (meta as Record<string, unknown>).diagnosis_vertical })
+}
+
 function normalizeOptionText(value: string): string {
   return value
     .normalize('NFD')
@@ -143,7 +149,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
-    const diagnosisVertical = parseDiagnosisVerticalFromBody(body)
+    /** Pode ser enriquecido após carregar `ylada_biblioteca_itens` (paridade Coach × Pro Estética corporal/capilar). */
+    let diagnosisVertical = parseDiagnosisVerticalFromBody(body)
     const flowId = typeof body.flow_id === 'string' ? body.flow_id.trim() : ''
     const interpretacao = body.interpretacao && typeof body.interpretacao === 'object' ? body.interpretacao as Record<string, unknown> : null
     /** Perguntas customizadas do interpret unificado; se ausente, usa question_labels do catálogo. */
@@ -276,6 +283,10 @@ export async function POST(request: NextRequest) {
           description: bibliotecaItem.description as string | null | undefined,
           dor_principal: bibliotecaItem.dor_principal as string | null | undefined,
           objetivo_principal: bibliotecaItem.objetivo_principal as string | null | undefined,
+        }
+        if (!diagnosisVertical) {
+          const fromItem = parseDiagnosisVerticalFromBibliotecaItemMeta(bibliotecaItem.meta)
+          if (fromItem) diagnosisVertical = fromItem
         }
       }
       // schema depois de title/ctaText faria o título do cartão (override) perder para schema.title

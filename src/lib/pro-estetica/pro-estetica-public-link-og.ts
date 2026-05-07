@@ -1,14 +1,25 @@
 import {
+  PRO_ESTETICA_CAPILAR_OG_IMAGE_BANK,
+  PRO_ESTETICA_CORPORAL_OG_IMAGE_BANK,
+  type ProEsteticaOgImageBankEntry,
+  YLADA_LINK_OG_IMAGE_DIR,
+} from '@/config/ylada-link-og-image-bank'
+import {
   getYladaOgImagePath,
+  normalizeYladaOgThemeKey,
   temaTextSuggestsCapilarOg,
   temaTextSuggestsCorporalBodyOg,
 } from '@/lib/ylada-og-tema-imagem'
-import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
+import { YLADA_OG_FALLBACK_LOGO_PATH, YLADA_OG_UNIFIED_SHARE_CARD_PATH } from '@/lib/ylada-og-fallback-logo'
 
-const OG_BASE = '/images/og/ylada'
-const ESTETICA_SEGMENT_FALLBACK_PATH = `${OG_BASE}/estetica-pele.png`
+const YLADA_OG_BASE = YLADA_LINK_OG_IMAGE_DIR
+const ESTETICA_SEGMENT_FALLBACK_PATH = `${YLADA_OG_BASE}/estetica-pele.png`
 
 export type ProEsteticaDiagnosisVertical = 'capilar' | 'corporal'
+
+function proEsteticaOgPath(bank: ProEsteticaOgImageBankEntry, filename: string): string {
+  return `${bank.imageDir}/${filename}`
+}
 
 /**
  * Texto curto para WhatsApp / Open Graph (prioridade sobre `page.subtitle` em `/l/[slug]`).
@@ -54,8 +65,20 @@ export function buildProEsteticaLinkOgDescription(input: {
 export function getProEsteticaPublicOpenGraphImagePath(
   vertical: ProEsteticaDiagnosisVertical,
   tema: string,
-  segment: string | null | undefined
+  segment: string | null | undefined,
+  templateId?: string | null
 ): string {
+  const bank = vertical === 'capilar' ? PRO_ESTETICA_CAPILAR_OG_IMAGE_BANK : PRO_ESTETICA_CORPORAL_OG_IMAGE_BANK
+  const partnerOgFallback = YLADA_OG_UNIFIED_SHARE_CARD_PATH
+  const tid = typeof templateId === 'string' ? templateId.trim() : ''
+  if (tid && bank.byTemplateId[tid]) {
+    return proEsteticaOgPath(bank, bank.byTemplateId[tid])
+  }
+  const themeKey = normalizeYladaOgThemeKey(tema)
+  if (themeKey && bank.byNormalizedTheme[themeKey]) {
+    return proEsteticaOgPath(bank, bank.byNormalizedTheme[themeKey])
+  }
+
   const p = getYladaOgImagePath(tema, segment)
   if (vertical === 'capilar') {
     if (
@@ -63,7 +86,7 @@ export function getProEsteticaPublicOpenGraphImagePath(
       p === YLADA_OG_FALLBACK_LOGO_PATH ||
       /\/estetica-pele|\/estetica-unhas|\/estetica-rejuvenescimento/.test(p)
     ) {
-      return `${OG_BASE}/estetica-cabelos.png`
+      return partnerOgFallback
     }
   } else {
     if (
@@ -71,10 +94,18 @@ export function getProEsteticaPublicOpenGraphImagePath(
       p === YLADA_OG_FALLBACK_LOGO_PATH ||
       /\/estetica-pele|\/estetica-unhas/.test(p)
     ) {
-      return `${OG_BASE}/estetica-corporal.jpg`
+      return partnerOgFallback
     }
   }
-  return p
+
+  if (p === YLADA_OG_FALLBACK_LOGO_PATH) {
+    return partnerOgFallback
+  }
+  if (p.startsWith(`${YLADA_OG_BASE}/`)) {
+    const basename = p.slice(YLADA_OG_BASE.length + 1)
+    return proEsteticaOgPath(bank, basename)
+  }
+  return partnerOgFallback
 }
 
 /**
@@ -102,9 +133,10 @@ export function getProEsteticaPublicOpenGraphImageUrl(
   vertical: ProEsteticaDiagnosisVertical,
   tema: string,
   segment: string | null | undefined,
-  baseUrl: string
+  baseUrl: string,
+  templateId?: string | null
 ): string {
-  const path = getProEsteticaPublicOpenGraphImagePath(vertical, tema, segment)
+  const path = getProEsteticaPublicOpenGraphImagePath(vertical, tema, segment, templateId)
   return `${baseUrl.replace(/\/$/, '')}${path}`
 }
 

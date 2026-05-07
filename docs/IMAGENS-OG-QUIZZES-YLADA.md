@@ -8,7 +8,7 @@ Links de quizzes compartilhados via WhatsApp (`/l/[slug]`) exibem uma **imagem d
 
 1. **Rota**: `/l/[slug]` (ex: `https://ylada.app/l/abc123`)
 2. **Metadata**: O layout `src/app/l/[slug]/layout.tsx` gera `og:image` dinamicamente
-3. **Mapeamento**: `src/lib/ylada-og-tema-imagem.ts` mapeia tema + segmento → imagem
+3. **Mapeamento**: `src/lib/ylada-og-tema-imagem.ts` mapeia tema + segmento → imagem; **Pró Líderes e Pro Estética** usam pastas dedicadas e `src/config/ylada-link-og-image-bank.ts` (ver **`docs/GUIA-BANCO-IMAGENS-OG-LINKS.md`**).
 4. **Fontes de tema**: `config_json.meta.theme_raw`, `meta.theme`, ou título do link
 5. **Fontes de segmento**: `config_json.meta.segment_code` ou `ylada_links.segment`
 

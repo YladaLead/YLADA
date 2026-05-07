@@ -1,5 +1,15 @@
 'use client'
 
+/**
+ * Hub «Biblioteca + Meus links» — **mesma estrutura** em:
+ * - Coach Estética: `src/app/pt/estetica/links/page.tsx` → `<LinksHubContent areaCodigo="estetica" />` (vitrine completa).
+ * - Pro Estética corporal: `.../pro-estetica-corporal/painel/biblioteca-links` com `bibliotecaEsteticaCorporalScope`.
+ * - Pro Estética capilar: `.../pro-estetica-capilar/painel/biblioteca-links` com `bibliotecaEsteticaCapilarScope`.
+ *
+ * Nota: `/pt/estetica/biblioteca` é **só** a vitrine (`BibliotecaPageContent`), sem aba «Meus links».
+ * Passos seguintes de paridade (API Noel, presets, copy): ver comentários em LinksPageContent e rotas API pro-estetica-corporal/flows (e capilar).
+ */
+
 import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import YladaAreaShell from './YladaAreaShell'

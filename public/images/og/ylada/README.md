@@ -9,6 +9,9 @@ Ex: Calculadora de IMC → `peso-gordura.jpg`, independente da área.
 
 Mapeamento tema → arquivo em `src/lib/ylada-og-tema-imagem.ts`.
 
+**Guia do banco por produto:** `docs/GUIA-BANCO-IMAGENS-OG-LINKS.md`.  
+**OG por linha:** Pró Líderes → `public/images/og/pro-lideres/`; Pro Estética capilar/corporal → pastas homónimas em `public/images/og/`.
+
 ## Placeholders
 
 Arquivos copiados de `default.jpg` — substitua pelas imagens finais (1200×630 px).

@@ -128,7 +128,11 @@ interface LinksPageContentProps {
   areaLabel?: string
   /** Quando true, não renderiza YladaAreaShell (para uso em Links hub com abas). */
   embedded?: boolean
-  /** Hub Pro Estética (corporal ou capilar): filtra presets Pro Líderes, estado vazio Noel+biblioteca e omite criador da matriz. */
+  /**
+   * Hub Pro Estética (**corporal e capilar**): filtra presets Pro Líderes, ajusta estado vazio e URLs de retorno
+   * para o painel certo (`pathname` distingue `/pro-estetica-corporal` vs `/pro-estetica-capilar`).
+   * Nome histórico `Corporal` — aplica-se aos dois quando `LinksHubContent` está em modo Pro biblioteca.
+   */
   proEsteticaCorporalEmbedded?: boolean
 }
 

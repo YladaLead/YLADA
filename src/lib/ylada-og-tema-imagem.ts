@@ -233,7 +233,7 @@ export function temaTextSuggestsCorporalBodyOg(tema: string | null | undefined):
 }
 
 /** Normaliza tema para chave do mapeamento (lowercase, sem acentos, underscores). */
-function normalizeTema(tema: string | null | undefined): string {
+export function normalizeYladaOgThemeKey(tema: string | null | undefined): string {
   if (!tema || typeof tema !== 'string') return ''
   return tema
     .toLowerCase()
@@ -242,6 +242,10 @@ function normalizeTema(tema: string | null | undefined): string {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, '_')
     .replace(/-/g, '_')
+}
+
+function normalizeTema(tema: string | null | undefined): string {
+  return normalizeYladaOgThemeKey(tema)
 }
 
 /** Extrai palavras-chave do tema para busca (ex: "Emagrecimento com saúde" → emagrecimento). */

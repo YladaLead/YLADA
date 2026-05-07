@@ -105,6 +105,20 @@ const PUBLIC_LINK_UI: Record<Language, {
   calculatorPrecautionLabel: string
   /** Calculadoras genéricas: linha antes do WhatsApp quando não é IMC. */
   calculatorCtaLead: string
+  /** Calorias / proteína / hidratação: 1.º cartão (evita “causa provável” de diagnóstico). */
+  calculatorMetabolicReadingLabel: string
+  /** “Análise completa” expandida: substitui `goodNews` (tom de quiz) nestas calculadoras. */
+  calculatorExpandedMetabolicEncouragement: string
+  /** Cartão azul expandido: cabeçalho (tom estética / macro, não “vários fatores”). */
+  calculatorMetabolicProNextStepHeadline: string
+  /** Cartão azul expandido: corpo mais curto que `resultDisclaimer`. */
+  calculatorMetabolicResultDisclaimer: string
+  /** Com análise expandida: linha antes do WhatsApp sem repetir o cartão azul. */
+  calculatorMetabolicCtaLeadAfterExpand: string
+  /** Pro Estética (meta.diagnosis_vertical capilar|corporal): cartão verde na análise expandida (sem tom “bloqueio”). */
+  esteticaExpandedEncouragement: string
+  /** Cartão azul (quiz / API): corpo específico; evita “esse número” fora de calculadora. */
+  esteticaVerticalResultDisclaimer: string
 }> = {
   pt: {
     start: 'Começar',
@@ -169,6 +183,18 @@ const PUBLIC_LINK_UI: Record<Language, {
     calculatorPrecautionLabel: 'Precaução que ajuda',
     calculatorCtaLead:
       'Esse número é só o começo da história. Chamar no WhatsApp quem te enviou o link costuma ser o jeito mais rápido de encaixar isso na sua rotina real.',
+    calculatorMetabolicReadingLabel: 'Leitura prática',
+    calculatorExpandedMetabolicEncouragement:
+      'Esse valor é um ponto de partida: saúde, treino e restrições mudam o que faz sentido no dia a dia. Vale alinhar com um profissional antes de mudar dieta forte por conta própria.',
+    calculatorMetabolicProNextStepHeadline: 'Próximo passo com orientação profissional',
+    calculatorMetabolicResultDisclaimer:
+      'Esse número é uma estimativa de partida. Um {pessoa} pode encaixar isso nos seus objetivos, na rotina e em eventuais restrições com mais segurança.',
+    calculatorMetabolicCtaLeadAfterExpand:
+      'Quando fizer sentido dar o próximo passo, use o botão abaixo para falar com quem te enviou o link.',
+    esteticaExpandedEncouragement:
+      'Esse panorama é um ponto de partida: rotina, tempo e tipo de cuidado mudam o que faz sentido. Vale alinhar com quem te enviou o link antes de mudar tudo de uma vez por conta própria.',
+    esteticaVerticalResultDisclaimer:
+      'Esse resultado é um primeiro panorama. Um {pessoa} pode encaixar isso nos seus objetivos, na rotina e em eventuais restrições com mais segurança.',
   },
   en: {
     start: 'Start',
@@ -232,6 +258,18 @@ const PUBLIC_LINK_UI: Record<Language, {
     calculatorPrecautionLabel: 'A practical safeguard',
     calculatorCtaLead:
       'That number is only the opening line. Messaging whoever sent you this link on WhatsApp is usually the fastest way to fit it into your real routine.',
+    calculatorMetabolicReadingLabel: 'Practical read',
+    calculatorExpandedMetabolicEncouragement:
+      'This value is a starting point: health, training, and restrictions change what makes sense day to day. Check with a professional before making big diet changes on your own.',
+    calculatorMetabolicProNextStepHeadline: 'Next step with professional guidance',
+    calculatorMetabolicResultDisclaimer:
+      'This number is a starting estimate. A {pessoa} can help align it with your goals, routine, and any restrictions more safely.',
+    calculatorMetabolicCtaLeadAfterExpand:
+      'When you are ready for the next step, use the button below to reach whoever sent you this link.',
+    esteticaExpandedEncouragement:
+      'This snapshot is a starting point: routine, timing, and the kind of care you need change what fits. Check with whoever sent you this link before changing everything on your own.',
+    esteticaVerticalResultDisclaimer:
+      'This outcome is an initial snapshot. A {pessoa} can help align it with your goals, routine, and any restrictions more safely.',
   },
   es: {
     start: 'Comenzar',
@@ -295,7 +333,24 @@ const PUBLIC_LINK_UI: Record<Language, {
     calculatorPrecautionLabel: 'Precaución útil',
     calculatorCtaLead:
       'Ese número es solo el arranque. Escribir por WhatsApp a quien te envió el enlace suele ser la forma más rápida de encajarlo en tu rutina real.',
+    calculatorMetabolicReadingLabel: 'Lectura práctica',
+    calculatorExpandedMetabolicEncouragement:
+      'Ese valor es un punto de partida: salud, entreno y restricciones cambian lo que encaja cada día. Conviene alinearlo con un profesional antes de cambiar la dieta fuerte por tu cuenta.',
+    calculatorMetabolicProNextStepHeadline: 'Próximo paso con orientación profesional',
+    calculatorMetabolicResultDisclaimer:
+      'Ese número es una estimación de partida. Un {pessoa} puede encajarlo con tus objetivos, tu rutina y posibles restricciones con más seguridad.',
+    calculatorMetabolicCtaLeadAfterExpand:
+      'Cuando quieras dar el siguiente paso, usa el botón de abajo para hablar con quien te envió el enlace.',
+    esteticaExpandedEncouragement:
+      'Ese panorama es un punto de partida: rutina, tiempo y tipo de cuidado cambian lo que encaja. Conviene alinearlo con quien te envió el enlace antes de cambiarlo todo por tu cuenta.',
+    esteticaVerticalResultDisclaimer:
+      'Este resultado es un primer panorama. Un {pessoa} puede encajarlo con tus objetivos, tu rutina y posibles restricciones con más seguridad.',
   },
+}
+/** `meta.diagnosis_vertical` capilar | corporal (Pro Estética): copy amigável alinhada a Líderes, sem tom de quiz genérico. */
+function isProEsteticaPublicLinkVertical(meta: Record<string, unknown>): boolean {
+  const v = typeof meta.diagnosis_vertical === 'string' ? meta.diagnosis_vertical.trim().toLowerCase() : ''
+  return v === 'corporal' || v === 'capilar'
 }
 /** Exibe textos de template sem travessão longa ou "--" (leitura mais limpa em mobile). */
 function softenTemplateEmDashes(text: string): string {
@@ -947,6 +1002,7 @@ function ConfigDrivenLinkView({
   const t = commercePublicCopy ? { ...PUBLIC_LINK_UI[locale], ...commercePublicCopy } : PUBLIC_LINK_UI[locale]
   const isProLideresPreset = meta.pro_lideres_preset === true
   const isProLideresRecruitmentLink = isProLideresPreset && meta.pro_lideres_kind === 'recruitment'
+  const isProEsteticaVerticalLink = isProEsteticaPublicLinkVertical(meta)
   const fieldsRaw = (formConfig.fields as FormField[]) || []
   const submitLabel = (formConfig.submit_label as string) || t.seeResult
   /** Calculadora de projeção: nunca injetar opções Sim/Não — sempre entrada numérica (corrige links antigos mal gerados). */
@@ -1520,8 +1576,8 @@ function ConfigDrivenLinkView({
             {!firstFoldInsightRedundant ? (
               <div className="mb-5 p-4 rounded-xl border border-gray-100 bg-gray-50/70">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
-                  {/* Varejo (matriz joias/perfumaria/…): rótulo leve em `getMatrixCommercePublicLinkCopy` (ex.: “O que isso mostra”). Bem-estar / Pro Líderes: “Consequência”. */}
-                  {commercePublicCopy ? t.whatItMeans : t.consequence}
+                  {/* Varejo: `whatItMeans`. Pro Estética vertical: “Leitura prática”. Demais: “Consequência”. */}
+                  {commercePublicCopy ? t.whatItMeans : isProEsteticaVerticalLink ? t.calculatorMetabolicReadingLabel : t.consequence}
                 </p>
                 <p className="text-sm text-gray-700 leading-relaxed">
                   {primaryInsightTextForUi}
@@ -1555,7 +1611,7 @@ function ConfigDrivenLinkView({
                 {showDetailedCause && diagnosis.causa_provavel && !commerceNarrative && (
                   <div className="mb-4">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
-                      {isPerfumery ? t.whatItMeans : t.probableCause}
+                      {isPerfumery ? t.whatItMeans : isProEsteticaVerticalLink ? t.calculatorMetabolicReadingLabel : t.probableCause}
                     </p>
                     <p className="text-gray-600 text-sm leading-relaxed">
                       {diagnosis.causa_provavel}
@@ -1591,7 +1647,7 @@ function ConfigDrivenLinkView({
 
                 <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
                   <p className="text-gray-700 text-sm leading-relaxed">
-                    {t.goodNews}
+                    {isProEsteticaVerticalLink ? t.esteticaExpandedEncouragement : t.goodNews}
                   </p>
                 </div>
 
@@ -1630,12 +1686,18 @@ function ConfigDrivenLinkView({
 
                 <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-                    {isProLideresRecruitmentLink ? t.recruitmentBoxTitle : t.moreFactors}
+                    {isProLideresRecruitmentLink
+                      ? t.recruitmentBoxTitle
+                      : isProEsteticaVerticalLink
+                        ? t.calculatorMetabolicProNextStepHeadline
+                        : t.moreFactors}
                   </p>
                   <p className="text-gray-600 text-sm leading-relaxed">
                     {isProLideresRecruitmentLink
                       ? t.recruitmentBoxDisclaimer
-                      : t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
+                      : isProEsteticaVerticalLink
+                        ? t.esteticaVerticalResultDisclaimer.replace('{pessoa}', pessoaLabel)
+                        : t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
                   </p>
                 </div>
               </>
@@ -1647,7 +1709,9 @@ function ConfigDrivenLinkView({
                   {isProLideresRecruitmentLink
                     ? t.recruitmentBoxHint
                     : showFullAnalysis
-                      ? t.calculatorCtaLead
+                      ? isProEsteticaVerticalLink
+                        ? t.calculatorMetabolicCtaLeadAfterExpand
+                        : t.calculatorCtaLead
                       : t.quizResultHelperLine}
                 </p>
                 <button
@@ -1740,12 +1804,18 @@ function ConfigDrivenLinkView({
           </div>
           <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-              {isProLideresRecruitmentLink ? t.recruitmentBoxTitle : t.moreFactors}
+              {isProLideresRecruitmentLink
+                ? t.recruitmentBoxTitle
+                : isProEsteticaVerticalLink
+                  ? t.calculatorMetabolicProNextStepHeadline
+                  : t.moreFactors}
             </p>
             <p className="text-gray-600 text-sm leading-relaxed">
               {isProLideresRecruitmentLink
                 ? t.recruitmentBoxDisclaimer
-                : t.resultDisclaimer.replace('{pessoa}', pessoaLabelStatic)}
+                : isProEsteticaVerticalLink
+                  ? t.esteticaVerticalResultDisclaimer.replace('{pessoa}', pessoaLabelStatic)
+                  : t.resultDisclaimer.replace('{pessoa}', pessoaLabelStatic)}
             </p>
           </div>
           {whatsappUrl ? (
@@ -2144,6 +2214,7 @@ function DiagnosticoQuiz({
   const cfgMeta = (config as { meta?: Record<string, unknown> }).meta ?? {}
   const isProLideresRecruitmentQuiz =
     cfgMeta.pro_lideres_preset === true && cfgMeta.pro_lideres_kind === 'recruitment'
+  const isProEsteticaVerticalQuiz = isProEsteticaPublicLinkVertical(cfgMeta)
   const cfg = config as DiagnosticoConfig
   const questions = Array.isArray(cfg.questions) ? cfg.questions : []
   const results = Array.isArray(cfg.results) ? cfg.results : []
@@ -2345,7 +2416,7 @@ function DiagnosticoQuiz({
                 {quizInsightCard ? (
                   <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
                     <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                      {t.probableCause}
+                      {isProEsteticaVerticalQuiz ? t.calculatorMetabolicReadingLabel : t.probableCause}
                     </p>
                     <p
                       className={`text-sm leading-relaxed text-gray-700 ${
@@ -2383,16 +2454,24 @@ function DiagnosticoQuiz({
                   </div>
                 ) : null}
                 <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
-                  <p className="text-gray-700 text-sm leading-relaxed">{t.goodNews}</p>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    {isProEsteticaVerticalQuiz ? t.esteticaExpandedEncouragement : t.goodNews}
+                  </p>
                 </div>
                 <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-                    {isProLideresRecruitmentQuiz ? t.recruitmentBoxTitle : t.moreFactors}
+                    {isProLideresRecruitmentQuiz
+                      ? t.recruitmentBoxTitle
+                      : isProEsteticaVerticalQuiz
+                        ? t.calculatorMetabolicProNextStepHeadline
+                        : t.moreFactors}
                   </p>
                   <p className="text-gray-600 text-sm leading-relaxed">
                     {isProLideresRecruitmentQuiz
                       ? t.recruitmentBoxDisclaimer
-                      : t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
+                      : isProEsteticaVerticalQuiz
+                        ? t.esteticaVerticalResultDisclaimer.replace('{pessoa}', pessoaLabel)
+                        : t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
                   </p>
                 </div>
               </>
@@ -2407,7 +2486,9 @@ function DiagnosticoQuiz({
                     ? t.recruitmentBoxHint
                     : t.quizResultHelperLine
                   : showFullAnalysis
-                    ? t.calculatorCtaLead
+                    ? isProEsteticaVerticalQuiz
+                      ? t.calculatorMetabolicCtaLeadAfterExpand
+                      : t.calculatorCtaLead
                     : t.quizResultHelperLine}
               </p>
               <button type="button" onClick={() => onCtaClick()} className={publicLinkPrimaryWhatsAppClassName}>
@@ -2851,6 +2932,45 @@ function getCalculatorExpandedRoutineContext(locale: Language): string[] {
   ]
 }
 
+/** Calorias, proteína, hidratação: rótulos e “boa notícia” expandida alinhados a macro, não a quiz de bloqueio. */
+function isMetabolicMacroCalculatorTitle(title: string): boolean {
+  const n = title.toLowerCase()
+  return (
+    n.includes('prote') ||
+    n.includes('água') ||
+    n.includes('agua') ||
+    n.includes('hidrata') ||
+    n.includes('caloria') ||
+    n.includes('caloría') ||
+    n.includes('calorie')
+  )
+}
+
+function isCalorieCalculatorTitle(title: string): boolean {
+  const n = title.toLowerCase()
+  return n.includes('caloria') || n.includes('caloría') || n.includes('calorie') || n.includes('calorías')
+}
+
+/** Calorias: sem “com base no que você informou” nem nome de fórmula na dobra (template legado continua oculto). */
+function resolvePublicCalculatorResultIntro(title: string, locale: Language, resultIntroFromCfg: string): string {
+  const defaultIntro =
+    locale === 'en'
+      ? 'Based on what you provided:'
+      : locale === 'es'
+        ? 'Según lo que proporcionaste:'
+        : 'Com base no que você informou:'
+  if (!isCalorieCalculatorTitle(title)) {
+    return resultIntroFromCfg.trim() || defaultIntro
+  }
+  const raw = resultIntroFromCfg.trim()
+  const legacy =
+    !raw ||
+    /com base no que você informou|fórmula mifflin|mifflin-st jeor|mifflin|según lo que proporcionaste|based on what you provided/i.test(
+      raw,
+    )
+  return legacy ? '' : raw
+}
+
 function getCalculatorResultCopy(
   title: string,
   value: number,
@@ -2925,16 +3045,16 @@ function getCalculatorResultCopy(
     return {
       insight:
         locale === 'en'
-          ? 'Very high averages stack weight fast, razor-thin totals spark rebounds and sluggish days, the middle corridor is usually where people stay consistent longest.'
+          ? 'If daily calories land well above what your body uses, weight tends to creep up faster. If they sit too low, hunger, tiredness, or stop-start patterns often show up. A middle range is usually the easiest to keep for several weeks.'
           : locale === 'es'
-              ? 'Promedios muy altos acumulan kilos rápido. Totales demasiado bajos disparan arrebatos de hambre y días lánguidos. Lo equilibrado suele aguantar semanas enteras.'
-            : 'Número muito alto acumula peso rápido demais; número raspado demais vira estouro de fome e dia arrastando. O meio costuma ser onde dá para ficar semanas seguidas.',
+            ? 'Si las calorías del día quedan muy por encima de lo que el cuerpo gasta, el peso suele subir más rápido. Si quedan muy por debajo, suelen aparecer más hambre, cansancio o altibajos. Un término medio suele ser el más sostenible durante semanas.'
+            : 'Se as calorias do dia ficam bem acima do que o corpo gasta, o peso tende a subir mais rápido. Se ficam bem abaixo, é comum sentir mais fome, cansaço ou aquela sensação de não aguentar a restrição. Um valor no meio costuma ser o mais viável de manter por semanas.',
       tip:
         locale === 'en'
-          ? 'Precaution: adjust every week or two using sleep quality, cravings, and training response, never the scale spike alone.'
+          ? 'Precaution: revisit this number every week or two using sleep, sweet cravings, and how training felt—not just one weigh-in.'
           : locale === 'es'
-            ? 'Precaución mueve ese número cada una o dos semanas mirando sueño antojos y respuesta real al entrenamiento no sólo báscula de un día.'
-            : 'Precaução: mexe nesse número a cada uma ou duas semanas olhando sono vontade de doce e treino, nunca só estalo da balança de um dia.',
+            ? 'Precaución: revisa ese número cada una o dos semanas mirando sueño, antojos dulces y cómo te fue el entreno; no solo el peso de un solo día.'
+            : 'Precaução: revise esse número a cada uma ou duas semanas olhando sono, vontade de doce e como foi o treino — não só o peso de um único dia.',
       expanded: routineExpanded,
     }
   }
@@ -3083,7 +3203,8 @@ function CalculatorBlock({
   const resultLabel = (cfg.resultLabel as string) || (locale === 'en' ? 'Result:' : locale === 'es' ? 'Resultado:' : 'Resultado:')
   const resultPrefix = (cfg.resultPrefix as string) ?? ''
   const resultSuffix = (cfg.resultSuffix as string) ?? ''
-  const resultIntro = (cfg.resultIntro as string) || (locale === 'en' ? 'Based on what you provided:' : locale === 'es' ? 'Según lo que proporcionaste:' : 'Com base no que você informou:')
+  const resultIntroCfg = typeof cfg.resultIntro === 'string' ? cfg.resultIntro : ''
+  const resultIntro = resolvePublicCalculatorResultIntro(title, locale, resultIntroCfg)
   const extraCfg = config as Record<string, unknown>
   const introTitleFromCfg =
     typeof extraCfg.introTitle === 'string' && extraCfg.introTitle.trim() ? extraCfg.introTitle.trim() : ''
@@ -3129,6 +3250,7 @@ function CalculatorBlock({
 
   const resultNum = evaluateCalculatorFormula(formula, fieldsParaCalculadora, values)
   const isImcCalculator = title.toLowerCase().includes('imc')
+  const metabolicMacroCalculator = isMetabolicMacroCalculatorTitle(title)
   const ctaLabel =
     isImcCalculator && String(whatsappUrl || '').trim()
       ? t.calculatorImcPrimaryCta
@@ -3311,7 +3433,9 @@ function CalculatorBlock({
               </span>
             </div>
             <p className="mb-2 text-xs text-gray-500">{title}</p>
-            <p className="mb-4 text-sm text-gray-500">{resultIntro}</p>
+            {resultIntro.trim() ? (
+              <p className="mb-4 text-sm text-gray-500">{resultIntro}</p>
+            ) : null}
             {imcRecapLine ? (
               <p className="-mt-3 mb-4 text-xs leading-relaxed text-gray-600">
                 <span className="font-semibold text-gray-700">{t.calculatorImcRecapLead}</span>{' '}
@@ -3344,7 +3468,11 @@ function CalculatorBlock({
               <div className="mb-5 space-y-3">
                 <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
                   <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                    {isImcCalculator ? t.calculatorImcImpactLabel : t.probableCause}
+                    {isImcCalculator
+                      ? t.calculatorImcImpactLabel
+                      : metabolicMacroCalculator
+                        ? t.calculatorMetabolicReadingLabel
+                        : t.probableCause}
                   </p>
                   <p className="text-sm leading-relaxed text-gray-700">{resultCopy.insight}</p>
                 </div>
@@ -3380,14 +3508,19 @@ function CalculatorBlock({
                 {showFullAnalysis && resultCopy ? (
                   <>
                     <div className="p-4 rounded-xl bg-green-50/80 border border-green-100">
-                      <p className="text-gray-700 text-sm leading-relaxed">{t.goodNews}</p>
+                      <p className="text-gray-700 text-sm leading-relaxed">
+                        {metabolicMacroCalculator ? t.calculatorExpandedMetabolicEncouragement : t.goodNews}
+                      </p>
                     </div>
                     <div className="p-4 rounded-xl bg-sky-50/80 border border-sky-100">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-                        {t.moreFactors}
+                        {metabolicMacroCalculator ? t.calculatorMetabolicProNextStepHeadline : t.moreFactors}
                       </p>
                       <p className="text-gray-600 text-sm leading-relaxed">
-                        {t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
+                        {(metabolicMacroCalculator ? t.calculatorMetabolicResultDisclaimer : t.resultDisclaimer).replace(
+                          '{pessoa}',
+                          pessoaLabel,
+                        )}
                       </p>
                     </div>
                   </>
@@ -3403,7 +3536,9 @@ function CalculatorBlock({
                       ? showFullAnalysis
                         ? isImcCalculator
                           ? t.calculatorImcCtaLead
-                          : t.calculatorCtaLead
+                          : metabolicMacroCalculator
+                            ? t.calculatorMetabolicCtaLeadAfterExpand
+                            : t.calculatorCtaLead
                         : t.quizResultHelperLine
                       : isImcCalculator
                         ? t.calculatorImcCtaLead
