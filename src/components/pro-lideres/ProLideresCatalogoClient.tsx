@@ -260,13 +260,6 @@ export function ProLideresCatalogoClient({
   const [teamVisibilityBusyId, setTeamVisibilityBusyId] = useState<string | null>(null)
   const [highlightYladaLinkId, setHighlightYladaLinkId] = useState<string | null>(null)
 
-  const defaultIntroLeader =
-    'Aqui aparecem juntas as ferramentas sugeridas pela YLADA e as que você criar em Meus links. Escolha vendas ou recrutamento e use os botões em cada card para mostrar ou ocultar da equipe.'
-  const defaultIntroTeam =
-    'Aqui aparecem as ferramentas disponíveis para a equipe neste espaço. Escolha o funil (vendas ou recrutamento), use o fluxo e copie o seu link para divulgar.'
-
-  const introText = catalogIntro ?? (isLeaderWorkspace ? defaultIntroLeader : defaultIntroTeam)
-
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -402,10 +395,11 @@ export function ProLideresCatalogoClient({
       data-pro-lideres-brand={brandDisplay}
     >
       {isLeaderWorkspace ? (
-        <header className="space-y-2">
-          <p className="text-sm font-semibold text-blue-700">Conteúdo</p>
+        <header>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{catalogTitle}</h1>
-          <p className="max-w-2xl text-base leading-relaxed text-slate-700">{introText}</p>
+          {catalogIntro ? (
+            <p className="mt-2 max-w-2xl text-base leading-relaxed text-slate-700">{catalogIntro}</p>
+          ) : null}
         </header>
       ) : null}
 
