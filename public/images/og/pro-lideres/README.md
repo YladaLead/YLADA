@@ -3,7 +3,9 @@
 **Todas** as prévias Open Graph dos links **preset** Pro Líderes vêm desta pasta:  
 `/images/og/pro-lideres/{stem}.jpg` (stem = `pro_lideres_fluxo_id` normalizado; exceção `agua` → `calc-hidratacao.jpg`).
 
-- **`og-placeholder-ylada.jpg`** — placebo quando não há `fluxo_id`; cópia do cartão logo YLADA.
+- **`og-default-saude.jpg`** — OG genérica **vendas / saúde** (sem `pro_lideres_fluxo_id` ou `kind` ≠ recruitment).
+- **`og-default-recrutamento.jpg`** — OG genérica **recrutamento** (`meta.pro_lideres_kind === 'recruitment'` e sem fluxo).
+- **`og-placeholder-ylada.jpg`** — legado / seed a partir do logo (opcional).
 - **Por fluxo:** substitui só o ficheiro do fluxo (mantém o **mesmo nome** `{stem}.jpg`) ou usa `PRO_LIDERES_OG_IMAGE_FILENAME_OVERRIDE_BY_FLUXO_ID` para outro nome/extensão.
 
 Regenerar placebos a partir do logo (`public/images/og/ylada/logo_ylada_azul_horizontal.png`):

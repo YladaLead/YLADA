@@ -56,6 +56,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const segment = (meta.segment_code as string) ?? (link.segment as string) ?? null
   const proLideresFluxoId =
     typeof meta.pro_lideres_fluxo_id === 'string' ? meta.pro_lideres_fluxo_id.trim() : ''
+  const proLideresKindRaw =
+    typeof meta.pro_lideres_kind === 'string' ? meta.pro_lideres_kind.trim().toLowerCase() : ''
+  const proLideresKind = proLideresKindRaw === 'recruitment' || proLideresKindRaw === 'sales' ? proLideresKindRaw : null
   const isProLideresPreset = meta.pro_lideres_preset === true
   const diagnosisVerticalRaw =
     typeof meta.diagnosis_vertical === 'string' ? meta.diagnosis_vertical.trim().toLowerCase() : ''
@@ -66,8 +69,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const isAestheticsSegment = segmentLower === 'estetica' || segmentLower === 'aesthetics'
 
   const ogImageUrl =
-    isProLideresPreset && proLideresFluxoId
-      ? getProLideresPresetOpenGraphImageUrl(proLideresFluxoId, baseUrl)
+    isProLideresPreset
+      ? getProLideresPresetOpenGraphImageUrl(proLideresFluxoId, baseUrl, proLideresKind)
       : proEsteticaVertical
         ? getProEsteticaPublicOpenGraphImageUrl(
             proEsteticaVertical,
