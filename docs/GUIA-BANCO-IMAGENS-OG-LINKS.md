@@ -4,7 +4,7 @@
 
 | Produto | Pasta em `public/` | Uso atual |
 |--------|-------------------|-----------|
-| Pró Líderes (presets) | `images/og/pro-lideres/` | `{stem}.jpg` por fluxo; sem fluxo → `og-default-saude.jpg` ou `og-default-recrutamento.jpg` (`pro_lideres_kind`). |
+| Pró Líderes (presets) | `images/og/pro-lideres/` | `{stem}.jpg` por fluxo; sem fluxo → defaults (`src/lib/pro-lideres/pro-lideres-og-default-assets.ts`); fontes `_sources/` + `npm run og:build-pro-lideres-defaults`. |
 | Pro Estética capilar / corporal | `images/og/pro-estetica-capilar/`, `…-corporal/` | `byTemplateId` / `byNormalizedTheme` e basename espelhado de `ylada`; **fallback** = mesmo cartão YLADA. |
 | Outros segmentos YLADA | `images/og/ylada/` | Mapa tema em `ylada-og-tema-imagem.ts`. |
 
@@ -18,7 +18,7 @@ Cartão unificado (parceiros / marca): `YLADA_OG_UNIFIED_SHARE_CARD_PATH` em `sr
 
 ## Pró Líderes — placebo
 
-O script `scripts/seed-pro-lideres-og-placeholders.mjs` gera JPEG a partir do logo: `og-default-saude.jpg`, `og-default-recrutamento.jpg`, `og-placeholder-ylada.jpg` e cada `{stem}.jpg` conhecido (ver script). Substitui as duas **default** por artes distintas (saúde vs recrutamento).
+O script `scripts/seed-pro-lideres-og-placeholders.mjs` gera placebos a partir do logo (`og-placeholder-ylada.jpg` + `{stem}.jpg`). As OG genéricas saúde/recrutamento vêm de `scripts/build-pro-lideres-og-defaults.mjs` (`npm run og:build-pro-lideres-defaults`) usando PNG em `pro-lideres/_sources/`.
 
 ## Pro Estética
 

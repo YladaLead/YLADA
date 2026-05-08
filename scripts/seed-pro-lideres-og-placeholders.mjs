@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Placebo Pro Líderes OG: gera `og-placeholder-ylada.jpg`, `og-default-saude.jpg`, `og-default-recrutamento.jpg`
- * e cada `{stem}.jpg` a partir do logo YLADA
+ * Placebo Pro Líderes OG: gera `og-placeholder-ylada.jpg` e cada `{stem}.jpg` a partir do logo YLADA.
+ * Defaults saúde/recrutamento: `npm run og:build-pro-lideres-defaults` (artes em `_sources/`).
  * em `public/images/og/pro-lideres/` (alinhado a `proLideresOgImageRelativeFile` no código).
  *
  * Uso:
@@ -17,8 +17,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const dir = join(__dirname, '../public/images/og/pro-lideres')
 const sourceLogo = join(__dirname, '../public/images/og/ylada/logo_ylada_azul_horizontal.png')
 const placeholderName = 'og-placeholder-ylada.jpg'
-const defaultSaude = 'og-default-saude.jpg'
-const defaultRecrutamento = 'og-default-recrutamento.jpg'
 
 const force = process.argv.includes('--force')
 
@@ -108,8 +106,6 @@ async function writeJpegIfNeeded(dest) {
 
 let n = 0
 if (await writeJpegIfNeeded(join(dir, placeholderName))) n++
-if (await writeJpegIfNeeded(join(dir, defaultSaude))) n++
-if (await writeJpegIfNeeded(join(dir, defaultRecrutamento))) n++
 
 for (const id of FLUXO_IDS) {
   const s = OVERRIDE[id] ?? stem(id)

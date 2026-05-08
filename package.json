@@ -34,7 +34,8 @@
     "agente:interno": "npx tsx scripts/agents/ylada-interno.ts",
     "og:pexels": "tsx scripts/fetch-og-ylada-pexels.ts",
     "og:logo-default": "tsx scripts/og-ylada-composite-logo.ts",
-    "og:compress-pro-lideres": "tsx scripts/compress-pro-lideres-og.ts"
+    "og:compress-pro-lideres": "tsx scripts/compress-pro-lideres-og.ts",
+    "og:build-pro-lideres-defaults": "node scripts/build-pro-lideres-og-defaults.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

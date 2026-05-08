@@ -3,8 +3,7 @@
 **Todas** as prévias Open Graph dos links **preset** Pro Líderes vêm desta pasta:  
 `/images/og/pro-lideres/{stem}.jpg` (stem = `pro_lideres_fluxo_id` normalizado; exceção `agua` → `calc-hidratacao.jpg`).
 
-- **`og-default-saude.jpg`** — OG genérica **vendas / saúde** (sem `pro_lideres_fluxo_id` ou `kind` ≠ recruitment).
-- **`og-default-recrutamento.jpg`** — OG genérica **recrutamento** (`meta.pro_lideres_kind === 'recruitment'` e sem fluxo).
+- **`og-default-saude.jpg`** / **`og-default-recrutamento.jpg`** — OG genéricas (sem `pro_lideres_fluxo_id`). Nomes e regra `sales` vs `recruitment`: `src/lib/pro-lideres/pro-lideres-og-default-assets.ts`. Regenerar a partir de `_sources/*.source.png`: `npm run og:build-pro-lideres-defaults`.
 - **`og-placeholder-ylada.jpg`** — legado / seed a partir do logo (opcional).
 - **Por fluxo:** substitui só o ficheiro do fluxo (mantém o **mesmo nome** `{stem}.jpg`) ou usa `PRO_LIDERES_OG_IMAGE_FILENAME_OVERRIDE_BY_FLUXO_ID` para outro nome/extensão.
 

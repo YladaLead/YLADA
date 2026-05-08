@@ -2,8 +2,7 @@
  * Banco de imagens Open Graph para links `/l/[slug]`.
  *
  * Pastas por produto (ficheiros em `public/images/og/…`):
- * - Pró Líderes: `PRO_LIDERES_OG_IMAGE_DIR` — `{stem}.jpg` por `pro_lideres_fluxo_id`.
- *   Sem `pro_lideres_fluxo_id`: `PRO_LIDERES_OG_DEFAULT_SAUDE_FILE` (vendas/saúde) ou `PRO_LIDERES_OG_DEFAULT_RECRUTAMENTO_FILE` (recrutamento), conforme `meta.pro_lideres_kind`.
+ * - Pró Líderes: `PRO_LIDERES_OG_IMAGE_DIR` — `{stem}.jpg` por `pro_lideres_fluxo_id`; defaults genéricos: ver `src/lib/pro-lideres/pro-lideres-og-default-assets.ts`.
  * - Pro Estética corporal / capilar: `imageDir` + mapas explícitos; fallback genérico = cartão OG YLADA (`YLADA_OG_UNIFIED_SHARE_CARD_PATH`).
  *
  * Guia: `docs/GUIA-BANCO-IMAGENS-OG-LINKS.md`.
@@ -19,19 +18,6 @@ export const PRO_LIDERES_OG_IMAGE_DIR = '/images/og/pro-lideres'
 
 /** Legado / seed: cartão logo até trocares (não usado no `og:image` quando há defaults por linha). */
 export const PRO_LIDERES_OG_PLACEHOLDER_LOGO_FILE = 'og-placeholder-ylada.jpg'
-
-/** OG genérica vendas/saúde (bem-estar, hábito, corpo) — substituir pela arte final em `public/…`. */
-export const PRO_LIDERES_OG_DEFAULT_SAUDE_FILE = 'og-default-saude.jpg'
-
-/** OG genérica recrutamento (oportunidade, conversa) — substituir pela arte final. */
-export const PRO_LIDERES_OG_DEFAULT_RECRUTAMENTO_FILE = 'og-default-recrutamento.jpg'
-
-/** `pro_lideres_kind` em `config_json.meta`: `sales` → saúde; `recruitment` → recrutamento; resto → saúde. */
-export function proLideresOgDefaultFileForKind(kind: string | null | undefined): string {
-  const k = (kind ?? '').trim().toLowerCase()
-  if (k === 'recruitment') return PRO_LIDERES_OG_DEFAULT_RECRUTAMENTO_FILE
-  return PRO_LIDERES_OG_DEFAULT_SAUDE_FILE
-}
 
 /**
  * Stem ASCII do `pro_lideres_fluxo_id` para nome de ficheiro (`{stem}.jpg` por defeito).
