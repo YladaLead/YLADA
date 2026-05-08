@@ -1,0 +1,12 @@
+# Pré-visualizações Meta/WhatsApp e motores de busca: permitir rastreio público (links /l/, imagens OG, etc.)
+User-agent: *
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Facebot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /

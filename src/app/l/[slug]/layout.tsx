@@ -12,6 +12,7 @@ import {
 } from '@/lib/pro-estetica/pro-estetica-public-link-og'
 import { getProLideresPresetOpenGraphImageUrl } from '@/lib/pro-lideres/pro-lideres-preset-og-image'
 import { getYladaOgImageUrl } from '@/lib/ylada-og-tema-imagem'
+import { normalizeYladaPublicLinkPathSegment } from '@/lib/ylada-public-link-path-normalize'
 
 function ogImageMime(url: string): 'image/jpeg' | 'image/png' | 'image/webp' {
   if (url.includes('.png')) return 'image/png'
@@ -23,7 +24,8 @@ type Props = { params: Promise<{ slug: string }>; children: React.ReactNode }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const baseUrl = await resolveYladaOgBaseUrlForMetadata()
-  const { slug } = await params
+  const { slug: slugRaw } = await params
+  const slug = slugRaw ? normalizeYladaPublicLinkPathSegment(slugRaw) : ''
   if (!slug) {
     return defaultMetadata('Link YLADA', baseUrl)
   }

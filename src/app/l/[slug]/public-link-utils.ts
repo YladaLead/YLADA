@@ -10,6 +10,7 @@ import {
   resolvePublicLinkConfigJson,
   rewriteProLideresVendasCalculadoraPresetToLibraryTemplate,
 } from '@/lib/ylada-canonical-flow-config'
+import { normalizeYladaPublicLinkPathSegment } from '@/lib/ylada-public-link-path-normalize'
 
 export type PublicLinkPayload = {
   slug: string
@@ -37,6 +38,10 @@ export async function fetchPublicLinkPayload(
   slug: string,
   options?: PublicLinkFetchOptions
 ): Promise<PublicLinkPayload> {
+  const slugNorm = normalizeYladaPublicLinkPathSegment(slug)
+  const memberSegRaw = options?.memberShareSegment?.trim()
+  const memberSegNorm = memberSegRaw ? normalizeYladaPublicLinkPathSegment(memberSegRaw) : ''
+
   if (!supabaseAdmin) {
     console.error('[public-link] Supabase admin não disponível')
     notFound()
@@ -45,7 +50,7 @@ export async function fetchPublicLinkPayload(
   const { data: link, error } = await supabaseAdmin
     .from('ylada_links')
     .select('id, slug, title, config_json, cta_whatsapp, status, template_id, user_id')
-    .eq('slug', slug)
+    .eq('slug', slugNorm)
     .eq('status', 'active')
     .maybeSingle()
 
@@ -76,7 +81,7 @@ export async function fetchPublicLinkPayload(
     }
   }
 
-  const memberSeg = options?.memberShareSegment?.trim()
+  const memberSeg = memberSegNorm
 
   const configRaw = (link.config_json as Record<string, unknown>) ?? {}
   let config = await resolvePublicLinkConfigJson(supabaseAdmin, configRaw)
