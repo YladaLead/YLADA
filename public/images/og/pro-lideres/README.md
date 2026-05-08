@@ -25,6 +25,12 @@ Se o Automator (ou outra ferramenta) gravar **PNG** na pasta, gera os **JPG** qu
 npm run og:sync-pro-lideres-png-to-jpg
 ```
 
+Validar dimensões (1200×630) e tamanhos em KB:
+
+```bash
+npm run og:verify-pro-lideres-og
+```
+
 ### Comprimir PNG legadas de uma vez (1200×630)
 
 ```bash

@@ -36,7 +36,8 @@
     "og:logo-default": "tsx scripts/og-ylada-composite-logo.ts",
     "og:compress-pro-lideres": "tsx scripts/compress-pro-lideres-og.ts",
     "og:build-pro-lideres-defaults": "node scripts/build-pro-lideres-og-defaults.mjs",
-    "og:sync-pro-lideres-png-to-jpg": "node scripts/sync-pro-lideres-og-png-to-jpg.mjs"
+    "og:sync-pro-lideres-png-to-jpg": "node scripts/sync-pro-lideres-og-png-to-jpg.mjs",
+    "og:verify-pro-lideres-og": "node scripts/verify-pro-lideres-og-jpg.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
