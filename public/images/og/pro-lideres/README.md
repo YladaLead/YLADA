@@ -19,6 +19,12 @@ node scripts/seed-pro-lideres-og-placeholders.mjs
 
 Sobrescrever todos os JPG placebos (ex.: logo atualizado): `node scripts/seed-pro-lideres-og-placeholders.mjs --force`
 
+Se o Automator (ou outra ferramenta) gravar **PNG** na pasta, gera os **JPG** que o site usa no `og:image`:
+
+```bash
+npm run og:sync-pro-lideres-png-to-jpg
+```
+
 ### Comprimir PNG legadas de uma vez (1200×630)
 
 ```bash
