@@ -1,6 +1,6 @@
 /**
  * Open Graph para presets Pro Líderes (`/l/…`).
- * Todas as prévias vêm de `public/images/og/pro-lideres/` — um ficheiro por fluxo (`{stem}.png`).
+ * Todas as prévias vêm de `public/images/og/pro-lideres/` — um ficheiro por fluxo (`{stem}.jpg`).
  * Placebo inicial: cópia do cartão logo YLADA (gerar com `node scripts/seed-pro-lideres-og-placeholders.mjs`).
  */
 import {

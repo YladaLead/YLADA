@@ -1,20 +1,21 @@
 #!/usr/bin/env node
 /**
- * Placebo Pro Líderes OG: copia o cartão logo YLADA para `og-placeholder-ylada.png` e para `{stem}.png`
+ * Placebo Pro Líderes OG: gera `og-placeholder-ylada.jpg` e `{stem}.jpg` a partir do logo YLADA
  * em `public/images/og/pro-lideres/` (alinhado a `proLideresOgImageRelativeFile` no código).
  *
  * Uso:
  *   node scripts/seed-pro-lideres-og-placeholders.mjs
- *   node scripts/seed-pro-lideres-og-placeholders.mjs --force   # sobrescreve PNGs existentes (cuidado: apaga artes já colocadas)
+ *   node scripts/seed-pro-lideres-og-placeholders.mjs --force   # sobrescreve JPGs existentes (cuidado: apaga artes já colocadas)
  */
-import { copyFileSync, existsSync, mkdirSync } from 'node:fs'
+import { existsSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import sharp from 'sharp'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const dir = join(__dirname, '../public/images/og/pro-lideres')
 const sourceLogo = join(__dirname, '../public/images/og/ylada/logo_ylada_azul_horizontal.png')
-const placeholderName = 'og-placeholder-ylada.png'
+const placeholderName = 'og-placeholder-ylada.jpg'
 
 const force = process.argv.includes('--force')
 
@@ -92,23 +93,25 @@ if (!existsSync(sourceLogo)) {
 
 if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
 
-function writeIfNeeded(dest) {
-  if (force || !existsSync(dest)) {
-    copyFileSync(sourceLogo, dest)
-    return true
-  }
-  return false
+async function writeJpegIfNeeded(dest) {
+  if (!force && existsSync(dest)) return false
+  await sharp(sourceLogo)
+    .rotate()
+    .resize(1200, 630, { fit: 'cover', position: 'attention' })
+    .jpeg({ quality: 82, mozjpeg: true })
+    .toFile(dest)
+  return true
 }
 
 let n = 0
-if (writeIfNeeded(join(dir, placeholderName))) n++
+if (await writeJpegIfNeeded(join(dir, placeholderName))) n++
 
 for (const id of FLUXO_IDS) {
   const s = OVERRIDE[id] ?? stem(id)
-  const dest = join(dir, `${s}.png`)
-  if (writeIfNeeded(dest)) n++
+  const dest = join(dir, `${s}.jpg`)
+  if (await writeJpegIfNeeded(dest)) n++
 }
 
 console.log(
-  `pro-lideres OG: ${n} PNG placebo(s) ${force ? '(force overwrite) ' : ''}from logo. Dir: ${dir}`
+  `pro-lideres OG: ${n} JPG placebo(s) ${force ? '(force overwrite) ' : ''}from logo. Dir: ${dir}`
 )

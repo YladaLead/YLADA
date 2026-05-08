@@ -2,7 +2,7 @@
  * Banco de imagens Open Graph para links `/l/[slug]`.
  *
  * Pastas por produto (ficheiros em `public/images/og/…`):
- * - Pró Líderes: `PRO_LIDERES_OG_IMAGE_DIR` — `{stem}.png` por `pro_lideres_fluxo_id` (placebo = cartão logo YLADA até trocares). Sem fluxo: `PRO_LIDERES_OG_PLACEHOLDER_LOGO_FILE`.
+ * - Pró Líderes: `PRO_LIDERES_OG_IMAGE_DIR` — `{stem}.jpg` por `pro_lideres_fluxo_id` (placebo = cartão logo YLADA até trocares). Sem fluxo: `PRO_LIDERES_OG_PLACEHOLDER_LOGO_FILE`.
  * - Pro Estética corporal / capilar: `imageDir` + mapas explícitos; fallback genérico = cartão OG YLADA (`YLADA_OG_UNIFIED_SHARE_CARD_PATH`).
  *
  * Guia: `docs/GUIA-BANCO-IMAGENS-OG-LINKS.md`.
@@ -17,10 +17,10 @@ export type YladaLinkOgProductLine = 'pro_lideres' | 'pro_estetica_corporal' | '
 export const PRO_LIDERES_OG_IMAGE_DIR = '/images/og/pro-lideres'
 
 /** Placebo genérico (cópia do cartão logo YLADA) quando não há `pro_lideres_fluxo_id`. */
-export const PRO_LIDERES_OG_PLACEHOLDER_LOGO_FILE = 'og-placeholder-ylada.png'
+export const PRO_LIDERES_OG_PLACEHOLDER_LOGO_FILE = 'og-placeholder-ylada.jpg'
 
 /**
- * Stem ASCII do `pro_lideres_fluxo_id` para nome de ficheiro (`{stem}.png` por defeito).
+ * Stem ASCII do `pro_lideres_fluxo_id` para nome de ficheiro (`{stem}.jpg` por defeito).
  * Ex.: `retencao-inchaço` → `retencao-inchaco`.
  */
 export function proLideresOgImageStemFromFluxoId(fluxoId: string): string {
@@ -41,7 +41,7 @@ export const PRO_LIDERES_OG_IMAGE_STEM_OVERRIDE_BY_FLUXO_ID: Record<string, stri
   agua: 'calc-hidratacao',
 }
 
-/** Ficheiro completo (com extensão) por fluxo — prevalece sobre `{stem}.png`. */
+/** Ficheiro completo (com extensão) por fluxo — prevalece sobre `{stem}.jpg`. */
 export const PRO_LIDERES_OG_IMAGE_FILENAME_OVERRIDE_BY_FLUXO_ID: Record<string, string> = {}
 
 export function proLideresOgImageRelativeFile(fluxoId: string): string {
@@ -49,7 +49,7 @@ export function proLideresOgImageRelativeFile(fluxoId: string): string {
   const byFull = PRO_LIDERES_OG_IMAGE_FILENAME_OVERRIDE_BY_FLUXO_ID[trimmed]
   if (byFull) return byFull
   const stem = PRO_LIDERES_OG_IMAGE_STEM_OVERRIDE_BY_FLUXO_ID[trimmed] ?? proLideresOgImageStemFromFluxoId(trimmed)
-  return `${stem}.png`
+  return `${stem}.jpg`
 }
 
 export type ProEsteticaOgImageBankEntry = {
