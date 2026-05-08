@@ -62,7 +62,7 @@ export function getProLideresHypeCalculadoraPresetFluxos(): FluxoCliente[] {
       id: 'custo-energia',
       nome: 'Calculadora: Custo da Falta de Energia',
       objetivo:
-        'Mesmos dados da calculadora de custo de energia no Wellness (horas trabalhadas, improdutivas, tipo de trabalho, valor da hora opcional).',
+        'Percentual do dia em baixa energia e, se a pessoa informar, custo em R$; tipo de trabalho só orienta a leitura (hábitos antes de produto).',
       perguntas: [
         {
           id: 'p1',
@@ -75,7 +75,8 @@ export function getProLideresHypeCalculadoraPresetFluxos(): FluxoCliente[] {
         },
         {
           id: 'p2',
-          texto: 'Quantas horas você fica improdutivo por cansaço?',
+          texto:
+            'Horas em que você rende menos por cansaço (média por dia: travar na tela, reler sem avançar, precisar de mais cafeína…)',
           tipo: 'numero',
           placeholder: 'Ex: 2',
           min: 0,
@@ -84,7 +85,7 @@ export function getProLideresHypeCalculadoraPresetFluxos(): FluxoCliente[] {
         },
         {
           id: 'p3',
-          texto: 'Tipo de trabalho',
+          texto: 'Tipo de trabalho (para dicas de rotina na leitura)',
           tipo: 'multipla_escolha',
           opcoes: ['Mental/Intelectual', 'Físico', 'Misto'],
         },
@@ -102,10 +103,10 @@ export function getProLideresHypeCalculadoraPresetFluxos(): FluxoCliente[] {
       diagnostico: {
         titulo: 'Energia e produtividade no dia',
         descricao:
-          'Horas úteis vs improdutivas e tipo de esforço ajudam a falar de onde a fadiga “custa” — bom gancho com quem compartilhou o link.',
-        sintomas: ['Trechos improdutivos por cansaço', 'Tipo de demanda mental ou física'],
-        beneficios: ['Visão simples do gargalo', 'Próximo passo no WhatsApp'],
-        mensagemPositiva: 'Pequenos ajustes de rotina e suporte certo costumam recuperar fôlego rápido.',
+          'Percentual de tempo improdutivo por cansaço (e R$/dia se informar valor da hora) + leitura por tipo de trabalho; rotina antes de produto.',
+        sintomas: ['Baixa energia no expediente', 'Trechos em que o ritmo cai'],
+        beneficios: ['Número claro (%)', 'Estimativa opcional em reais', 'Próximo passo no WhatsApp com contexto'],
+        mensagemPositiva: 'Pequenos ajustes de rotina costumam devolver foco antes de qualquer “atalho”.',
       },
       kitRecomendado: 'energia',
       cta: 'Quero falar no WhatsApp',

@@ -751,7 +751,7 @@ export const fluxosRecrutamento: FluxoCliente[] = [
   },
   {
     id: 'boas-venda-comercial',
-    nome: 'Boas de Venda / Comercial / Comunicativas',
+    nome: 'Bom de venda, comercial e comunicativo',
     objetivo: 'Conectar com pessoas que sabem vender, gostam de falar com pessoas, têm habilidade comercial ou facilidade em indicar coisas.',
     perguntas: [
       {

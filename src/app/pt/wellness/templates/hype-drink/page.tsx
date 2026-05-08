@@ -67,7 +67,8 @@ export default function HypeDrinkTemplatesPage() {
     {
       id: 'custo-energia',
       name: 'Calculadora: Custo da Falta de Energia',
-      description: 'Calcule o impacto da falta de energia na sua produtividade',
+      description:
+        'Percentual do dia em baixa energia e, se quiser, estimativa em R$; dicas de rotina antes de produto.',
       icon: Calculator,
       type: 'calculadora',
       link: '/pt/wellness/templates/hype-drink/custo-energia',

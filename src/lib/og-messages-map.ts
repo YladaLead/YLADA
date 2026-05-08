@@ -278,16 +278,19 @@ export const OG_MESSAGES_MAP: Record<string, { title: string; description: strin
     description: 'Descubra em 1 minuto se seu consumo de cafeína está causando ansiedade, insônia ou dependência - e encontre alternativas melhores'
   },
   'custo-energia': {
-    title: '💰 Quanto a Falta de Energia Está Custando?',
-    description: 'Descubra em 1 minuto quanto dinheiro você está perdendo por falta de energia e produtividade - e como recuperar isso'
+    title: 'Quanto do seu dia some em baixa energia?',
+    description:
+      'Veja o percentual do expediente em ritmo reduzido por cansaço e, se quiser, uma estimativa em reais com sua hora de trabalho — com dicas de rotina antes de produto.',
   },
   'calc-custo-energia': {
-    title: '💰 Quanto a Falta de Energia Está Custando?',
-    description: 'Descubra em 1 minuto quanto dinheiro você está perdendo por falta de energia e produtividade - e como recuperar isso'
+    title: 'Quanto do seu dia some em baixa energia?',
+    description:
+      'Veja o percentual do expediente em ritmo reduzido por cansaço e, se quiser, uma estimativa em reais com sua hora de trabalho — com dicas de rotina antes de produto.',
   },
   'calculadora-custo-energia': {
-    title: '💰 Quanto a Falta de Energia Está Custando?',
-    description: 'Descubra em 1 minuto quanto dinheiro você está perdendo por falta de energia e produtividade - e como recuperar isso'
+    title: 'Quanto do seu dia some em baixa energia?',
+    description:
+      'Veja o percentual do expediente em ritmo reduzido por cansaço e, se quiser, uma estimativa em reais com sua hora de trabalho — com dicas de rotina antes de produto.',
   },
 }
 

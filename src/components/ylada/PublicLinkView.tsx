@@ -154,7 +154,7 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentBadge: 'Avaliação de perfil',
     recruitmentIntroTitle: 'Algumas perguntas rápidas',
     recruitmentIntroSubtitle:
-      'Algumas perguntas rápidas para entender seu perfil neste tema. Se fizer sentido para você, o próximo passo é uma conversa leve com quem te enviou o link — sem pressa e sem compromisso.',
+      'Em poucos minutos você vê um primeiro panorama do seu perfil. Se fizer sentido, o próximo passo é uma conversa leve com quem te enviou o link — sem pressa e sem compromisso.',
     recruitmentIntroMicro: 'Sem cadastro — tempo estimado: 2 a 3 minutos.',
     recruitmentBoxTitle: 'Próximo passo',
     recruitmentBoxDisclaimer:
@@ -230,7 +230,7 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentBadge: 'Profile assessment',
     recruitmentIntroTitle: 'A few quick questions',
     recruitmentIntroSubtitle:
-      'A few quick questions to understand your profile on this topic. If it resonates, the next step is an easy chat with whoever sent you this — no pressure, no commitment.',
+      'In a few minutes you’ll get a first snapshot of your profile. If it resonates, the next step is an easy chat with whoever sent you this — no pressure, no commitment.',
     recruitmentIntroMicro: 'No sign-up — about 2–3 minutes.',
     recruitmentBoxTitle: 'Next step',
     recruitmentBoxDisclaimer:
@@ -305,7 +305,7 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentBadge: 'Evaluación de perfil',
     recruitmentIntroTitle: 'Algunas preguntas rápidas',
     recruitmentIntroSubtitle:
-      'Algunas preguntas rápidas para entender tu perfil en este tema. Si encaja contigo, el siguiente paso es una charla tranquila con quien te envió el enlace — sin prisas ni compromiso.',
+      'En pocos minutos ves un primer panorama de tu perfil. Si encaja contigo, el siguiente paso es una charla tranquila con quien te envió el enlace — sin prisas ni compromiso.',
     recruitmentIntroMicro: 'Sin registro — unos 2 a 3 minutos.',
     recruitmentBoxTitle: 'Próximo paso',
     recruitmentBoxDisclaimer:

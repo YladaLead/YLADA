@@ -122,10 +122,20 @@ function hypeCalculadoraProjectionFields(
       ]
     case 'custo-energia':
       return [
-        { id: 'q1', label: 'Horas improdutivas por cansaço (por dia)', type: 'number', obrigatoria: true },
-        { id: 'q2', label: 'Meta de horas improdutivas (por dia)', type: 'number', obrigatoria: true },
-        { id: 'q3', label: 'Prazo para melhorar (dias)', type: 'number', obrigatoria: true },
-        { id: 'q4', label: 'Consistência esperada (1 a 10)', type: 'number', obrigatoria: true },
+        {
+          id: 'q1',
+          label: 'Hoje: horas em que o cansaço reduz seu rendimento (por dia)',
+          type: 'number',
+          obrigatoria: true,
+        },
+        {
+          id: 'q2',
+          label: 'Meta: reduzir esse tempo improdutivo para quantas horas por dia?',
+          type: 'number',
+          obrigatoria: true,
+        },
+        { id: 'q3', label: 'Em quantos dias você quer testar essa melhora?', type: 'number', obrigatoria: true },
+        { id: 'q4', label: 'Quão confiante você está de manter o plano (1 a 10)', type: 'number', obrigatoria: true },
       ]
     default:
       return []

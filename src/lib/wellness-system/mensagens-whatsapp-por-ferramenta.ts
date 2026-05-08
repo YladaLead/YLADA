@@ -460,16 +460,19 @@ export const mensagensWhatsAppPorFerramenta: Record<string, MensagemWhatsApp> = 
   },
   
   'custo-energia': {
-    mensagem: 'Olá! Descubra quanto a falta de energia está custando para sua produtividade e aprenda como recuperar essas horas e aumentar sua performance.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem:
+      'Olá! Quero ver quanto do meu dia some em baixa energia e, se fizer sentido, uma estimativa em reais — e alinhar hábitos (e se couber, Hype Drink) com quem me enviou o link.',
+    botaoTexto: 'Quero falar sobre energia e rotina',
   },
   'calc-custo-energia': {
-    mensagem: 'Olá! Descubra quanto a falta de energia está custando para sua produtividade e aprenda como recuperar essas horas e aumentar sua performance.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem:
+      'Olá! Quero ver quanto do meu dia some em baixa energia e, se fizer sentido, uma estimativa em reais — e alinhar hábitos (e se couber, Hype Drink) com quem me enviou o link.',
+    botaoTexto: 'Quero falar sobre energia e rotina',
   },
   'calculadora-custo-energia': {
-    mensagem: 'Olá! Descubra quanto a falta de energia está custando para sua produtividade e aprenda como recuperar essas horas e aumentar sua performance.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem:
+      'Olá! Quero ver quanto do meu dia some em baixa energia e, se fizer sentido, uma estimativa em reais — e alinhar hábitos (e se couber, Hype Drink) com quem me enviou o link.',
+    botaoTexto: 'Quero falar sobre energia e rotina',
   },
   
   // ============================================

@@ -16,6 +16,8 @@ export interface DiagnosticoCompleto {
   suplementacao?: string // Opcional para área Nutri (será definido pela nutricionista)
   alimentacao?: string // Opcional para área Nutri (será definido pela nutricionista)
   proximoPasso?: string // Seção 7 opcional - gatilho emocional + CTA indireto
+  /** Hábitos/rotina antes de produto (ex.: calculadora custo de energia HYPE). */
+  rotinaPrimeiro?: string
 }
 
 export interface ResultadoPossivel {

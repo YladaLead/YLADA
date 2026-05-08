@@ -57,7 +57,8 @@ export const WELLNESS_HYPE_MEUS_LINKS: WellnessHypeMeusLinkItem[] = [
     nome: 'Calculadora: Custo da Falta de Energia',
     slug: 'custo-energia',
     type: 'calculadora',
-    description: 'Calcule o impacto da falta de energia na sua produtividade',
+    description:
+      'Percentual do dia em baixa energia e, se quiser, estimativa em R$; dicas de rotina antes de falar de produto.',
     icon: '💰',
   },
 ]
