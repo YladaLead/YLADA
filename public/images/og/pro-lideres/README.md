@@ -7,6 +7,10 @@
 - **`og-placeholder-ylada.jpg`** — legado / seed a partir do logo (opcional).
 - **Por fluxo:** substitui só o ficheiro do fluxo (mantém o **mesmo nome** `{stem}.jpg`) ou usa `PRO_LIDERES_OG_IMAGE_FILENAME_OVERRIDE_BY_FLUXO_ID` para outro nome/extensão.
 
+### Tamanho dos JPEG (WhatsApp / Meta)
+
+O crawler aceita ficheiros pequenos, mas **abaixo de ~30–50 KB** para 1200×630 costuma significar compressão demasiada: a prévia abre, porém fica **pixelada** ou “lavada”. Alvo prático: **~80–250 KB** por imagem (qualidade ~85–92 no export). Os fluxos comprimidos no PC a 2–10 KB convém **regenerar** a partir dos PNG/JPG originais com qualidade mais alta.
+
 Regenerar placebos a partir do logo (`public/images/og/ylada/logo_ylada_azul_horizontal.png`):
 
 ```bash

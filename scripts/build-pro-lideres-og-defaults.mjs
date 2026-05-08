@@ -32,7 +32,7 @@ async function main() {
     .rotate()
     .resize(W, H, { fit: 'cover', position: 'attention' })
     .modulate({ saturation: 0.36, brightness: 1.09 })
-    .jpeg({ quality: 90, mozjpeg: true })
+    .jpeg({ quality: 92, mozjpeg: true, chromaSubsampling: '4:4:4' })
     .toFile(join(outDir, 'og-default-recrutamento.jpg'))
 
   // Saúde: realça canal verde e saturação para leitura “mais verde / fresca” em OG pequena
@@ -45,7 +45,7 @@ async function main() {
       [0.03, 0.06, 0.94],
     ])
     .modulate({ saturation: 1.2, brightness: 1.03 })
-    .jpeg({ quality: 90, mozjpeg: true })
+    .jpeg({ quality: 92, mozjpeg: true, chromaSubsampling: '4:4:4' })
     .toFile(join(outDir, 'og-default-saude.jpg'))
 
   console.log('OK: og-default-recrutamento.jpg + og-default-saude.jpg →', outDir)

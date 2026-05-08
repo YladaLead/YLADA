@@ -99,7 +99,7 @@ async function writeJpegIfNeeded(dest) {
   await sharp(sourceLogo)
     .rotate()
     .resize(1200, 630, { fit: 'cover', position: 'attention' })
-    .jpeg({ quality: 82, mozjpeg: true })
+    .jpeg({ quality: 88, mozjpeg: true, chromaSubsampling: '4:4:4' })
     .toFile(dest)
   return true
 }
