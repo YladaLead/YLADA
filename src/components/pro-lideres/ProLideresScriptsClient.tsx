@@ -22,6 +22,7 @@ import {
   type ScriptLibraryFilters,
 } from '@/lib/pro-lideres-script-section-meta'
 import type { ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
+import { resolveAbsoluteProLideresCatalogPublicUrl } from '@/lib/pro-lideres-catalog-public-url'
 import type { ProLideresScriptSectionWithEntries } from '@/types/leader-tenant'
 
 type ScriptsPayload = {
@@ -639,7 +640,8 @@ function LinkedCatalogStrip({
   teamExperience: boolean
 }) {
   const [copied, setCopied] = useState(false)
-  const url = (item.publicUrl || item.href || '').trim()
+  const rawUrl = (item.publicUrl || item.href || '').trim()
+  const url = resolveAbsoluteProLideresCatalogPublicUrl(rawUrl)
 
   async function copyUrl() {
     if (!url) return

@@ -7,6 +7,7 @@ import { PRO_LIDERES_VERTICAL_BRAND_LABEL } from '@/config/pro-lideres-vertical'
 import type { ProLideresCatalogCategory, ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
 import { copyTextToClipboard } from '@/lib/clipboard'
+import { resolveAbsoluteProLideresCatalogPublicUrl } from '@/lib/pro-lideres-catalog-public-url'
 import { copyYladaLinkQrAsPng } from '@/lib/ylada-link-share-actions'
 
 type CatalogPayload = {
@@ -46,6 +47,7 @@ function CatalogRowCard({
 }) {
   const [whenOpen, setWhenOpen] = useState(false)
   const scriptsHref = item.yladaLinkId ? `/pt/links/editar/${item.yladaLinkId}` : '/pt/links'
+  const shareUrl = resolveAbsoluteProLideresCatalogPublicUrl(item.publicUrl)
 
   const cardId = item.yladaLinkId ? `pro-lideres-catalog-yd-${item.yladaLinkId}` : undefined
 
@@ -115,7 +117,7 @@ function CatalogRowCard({
 
         <div className="flex shrink-0 flex-col items-stretch gap-2 sm:flex-row sm:items-center lg:flex-col">
           <a
-            href={item.publicUrl}
+            href={shareUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex min-h-[44px] min-w-[140px] items-center justify-center rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
@@ -127,7 +129,7 @@ function CatalogRowCard({
 
       <div className="mt-4 flex flex-wrap gap-2 border-t border-gray-100 pt-3">
         <a
-          href={item.publicUrl}
+          href={shareUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex min-h-[44px] items-center rounded-lg border border-sky-200/90 bg-sky-50/90 px-3 text-xs font-semibold text-sky-900 shadow-sm ring-1 ring-sky-100/80 transition hover:bg-sky-100/90"
@@ -137,7 +139,7 @@ function CatalogRowCard({
         <button
           type="button"
           onClick={async () => {
-            const ok = await copyTextToClipboard(item.publicUrl)
+            const ok = await copyTextToClipboard(shareUrl)
             if (ok) onCopied('link')
           }}
           className="inline-flex min-h-[44px] items-center rounded-lg border border-violet-200/90 bg-violet-50/90 px-3 text-xs font-semibold text-violet-900 shadow-sm ring-1 ring-violet-100/80 transition hover:bg-violet-100/90"
@@ -147,7 +149,7 @@ function CatalogRowCard({
         <button
           type="button"
           onClick={async () => {
-            const ok = await copyYladaLinkQrAsPng(item.publicUrl)
+            const ok = await copyYladaLinkQrAsPng(shareUrl)
             if (ok) onCopied('qr')
           }}
           className="inline-flex min-h-[44px] items-center rounded-lg border border-teal-200/90 bg-teal-50/90 px-3 text-xs font-semibold text-teal-900 shadow-sm ring-1 ring-teal-100/80 transition hover:bg-teal-100/90"
@@ -177,8 +179,8 @@ function CatalogRowCard({
         )}
       </div>
 
-      <p className="mt-2 truncate font-mono text-[10px] text-gray-400" title={item.publicUrl}>
-        {item.publicUrl}
+      <p className="mt-2 truncate font-mono text-[10px] text-gray-400" title={shareUrl}>
+        {shareUrl}
       </p>
 
       {showTeamVisibilityControls ? (

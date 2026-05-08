@@ -17,9 +17,15 @@ import { inferProLideresFlowCatalogKindFromHref } from '@/lib/pro-lideres-flow-c
 export type { ProLideresCatalogItem }
 
 function requestBaseUrl(request: NextRequest): string {
-  const host = request.headers.get('host') || ''
-  const protocol = request.headers.get('x-forwarded-proto') || 'http'
-  return host ? `${protocol}://${host}` : ''
+  const host = request.headers.get('host')?.trim() || ''
+  const protoRaw = (request.headers.get('x-forwarded-proto') || '').split(',')[0].trim() || 'https'
+  const protocol = protoRaw === 'http' || protoRaw === 'https' ? protoRaw : 'https'
+  if (host) return `${protocol}://${host}`
+  const env = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, '')
+  if (env) return env
+  const vercel = process.env.VERCEL_URL?.trim().replace(/^https?:\/\//, '')
+  if (vercel) return `https://${vercel}`
+  return ''
 }
 
 /**
