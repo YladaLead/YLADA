@@ -1,4 +1,38 @@
 import type { NextRequest } from 'next/server'
+import { headers } from 'next/headers'
+
+/**
+ * Base URL absoluta para `og:image` / `og:url` em `generateMetadata` (sem `NextRequest`).
+ * Prioriza o **host do pedido** (`www.ylada.com`, preview Vercel, etc.) para o WhatsApp não pedir
+ * imagens noutro domínio definido só em `NEXT_PUBLIC_APP_URL`.
+ */
+export async function resolveYladaOgBaseUrlForMetadata(): Promise<string> {
+  const fromEnv =
+    process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, '') ||
+    process.env.NEXT_PUBLIC_APP_URL_PRODUCTION?.trim().replace(/\/$/, '') ||
+    ''
+
+  try {
+    const h = await headers()
+    const xfHost = h.get('x-forwarded-host')?.split(',')[0]?.trim()
+    const host = (xfHost || h.get('host') || '').trim()
+    if (host) {
+      const proto = h.get('x-forwarded-proto')?.split(',')[0]?.trim() || 'https'
+      return `${proto}://${host}`.replace(/\/$/, '')
+    }
+  } catch {
+    /* headers() indisponível em alguns contextos */
+  }
+
+  const vercel = process.env.VERCEL_URL?.trim()
+  if (vercel) {
+    const hostOnly = vercel.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    return `https://${hostOnly}`
+  }
+
+  if (fromEnv) return fromEnv
+  return 'https://ylada.app'
+}
 
 /**
  * Base URL pública para links `/l/[slug]`.

@@ -1,15 +1,17 @@
 /**
- * Layout com metadata dinâmica para links YLADA (/l/[slug]).
- * Define og:image por tema/segmento para prévia correta no WhatsApp.
+ * Layout com metadata dinâmica para links YLADA (`/l/[slug]` e `/l/[slug]/[membro]`).
+ * `og:image` usa o mesmo host do pedido (ex.: www.ylada.com) para a prévia no WhatsApp carregar a imagem.
  */
 import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
+import { YLADA_OG_UNIFIED_SHARE_CARD_PATH } from '@/lib/ylada-og-fallback-logo'
+import { resolveYladaOgBaseUrlForMetadata } from '@/lib/ylada-public-link-base-url'
 import {
-  YLADA_OG_UNIFIED_SHARE_CARD_PATH,
-} from '@/lib/ylada-og-fallback-logo'
-import { buildEsteticaAestheticsOgDescriptionFallback } from '@/lib/pro-estetica/pro-estetica-public-link-og'
-
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://ylada.app'
+  buildEsteticaAestheticsOgDescriptionFallback,
+  getProEsteticaPublicOpenGraphImageUrl,
+} from '@/lib/pro-estetica/pro-estetica-public-link-og'
+import { getProLideresPresetOpenGraphImageUrl } from '@/lib/pro-lideres/pro-lideres-preset-og-image'
+import { getYladaOgImageUrl } from '@/lib/ylada-og-tema-imagem'
 
 function ogImageMime(url: string): 'image/jpeg' | 'image/png' | 'image/webp' {
   if (url.includes('.png')) return 'image/png'
@@ -20,6 +22,7 @@ function ogImageMime(url: string): 'image/jpeg' | 'image/png' | 'image/webp' {
 type Props = { params: Promise<{ slug: string }>; children: React.ReactNode }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const baseUrl = await resolveYladaOgBaseUrlForMetadata()
   const { slug } = await params
   if (!slug) {
     return defaultMetadata('Link YLADA', baseUrl)
@@ -49,13 +52,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const themeRaw =
     (meta.theme_raw as string) ?? (meta.theme as string) ?? (meta.theme_display as string) ?? ''
   const segment = (meta.segment_code as string) ?? (link.segment as string) ?? null
+  const proLideresFluxoId =
+    typeof meta.pro_lideres_fluxo_id === 'string' ? meta.pro_lideres_fluxo_id.trim() : ''
+  const isProLideresPreset = meta.pro_lideres_preset === true
+  const diagnosisVerticalRaw =
+    typeof meta.diagnosis_vertical === 'string' ? meta.diagnosis_vertical.trim().toLowerCase() : ''
+  const proEsteticaVertical =
+    diagnosisVerticalRaw === 'capilar' || diagnosisVerticalRaw === 'corporal' ? diagnosisVerticalRaw : null
+  const linkTemplateId = typeof link.template_id === 'string' ? link.template_id.trim() : ''
   const segmentLower = (segment || '').toLowerCase().trim()
   const isAestheticsSegment = segmentLower === 'estetica' || segmentLower === 'aesthetics'
 
-  /** Prévia social unificada (card azul + logo) até haver artes por fluxo vertical. */
-  const ogImageUrl = `${baseUrl.replace(/\/$/, '')}${YLADA_OG_UNIFIED_SHARE_CARD_PATH}`
+  const ogImageUrl =
+    isProLideresPreset && proLideresFluxoId
+      ? getProLideresPresetOpenGraphImageUrl(proLideresFluxoId, baseUrl)
+      : proEsteticaVertical
+        ? getProEsteticaPublicOpenGraphImageUrl(
+            proEsteticaVertical,
+            themeRaw || title,
+            segment,
+            baseUrl,
+            linkTemplateId || null
+          )
+        : getYladaOgImageUrl(themeRaw || title, segment, baseUrl)
   const ogMime = ogImageMime(ogImageUrl)
-  const pageUrl = `${baseUrl}/l/${slug}`
+  const pageUrl = `${baseUrl.replace(/\/$/, '')}/l/${slug}`
   const ogFromPage = typeof page.og_description === 'string' ? page.og_description.trim() : ''
   const esteticaOgFallback =
     isAestheticsSegment && !ogFromPage
