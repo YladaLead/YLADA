@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  /**
+   * Predefinição 60s: em Vercel (2 vCPU) a fase "Generating static pages" com ~1300+ rotas
+   * faz várias páginas falharem por timeout em paralelo. 180s reduz falhas espúrias no build.
+   * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/staticPageGenerationTimeout
+   */
+  staticPageGenerationTimeout: 180,
   async redirects() {
     const areas = [
       'nutri',
