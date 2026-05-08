@@ -13,3 +13,12 @@ node scripts/seed-pro-lideres-og-placeholders.mjs
 ```
 
 Sobrescrever todos os PNG (ex.: logo atualizado): `node scripts/seed-pro-lideres-og-placeholders.mjs --force`
+
+### Comprimir todas as PNG de uma vez (1200×630, WhatsApp)
+
+```bash
+npm run og:compress-pro-lideres
+```
+
+Simula sem gravar: `npm run og:compress-pro-lideres -- --dry-run`  
+Grava mesmo quando o ficheiro não fica menor: `npm run og:compress-pro-lideres -- --force`
