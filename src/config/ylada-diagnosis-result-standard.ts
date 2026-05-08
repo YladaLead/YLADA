@@ -60,7 +60,16 @@ export const YLADA_DIAGNOSIS_INVITATION_BY_VERTICAL: Record<
   },
   capilar: {
     mustReferenceSender: true,
-    invitationKeywords: ['avaliação', 'cabelo', 'couro cabeludo', 'protocolo', 'conversar'],
+    invitationKeywords: [
+      'avaliação',
+      'cabelo',
+      'couro cabeludo',
+      'orientação',
+      'conversar',
+      'entender',
+      'tirar dúvidas',
+      'protocolo',
+    ],
   },
   corporal: {
     mustReferenceSender: true,
@@ -85,6 +94,17 @@ export const YLADA_DIAGNOSIS_CORPORAL_VOICE_CHECKLIST: readonly string[] = [
   '`main_blocker` / `consequence`: explicar o padrão em palavras simples; jargão clínico-vendas (“protocolo avulso”, “critério” em excesso) só se necessário e mais abaixo.',
   '`dica_rapida` e `growth_potential`: valor prático; menção a sessões ou pacote não compete com o insight principal.',
   '`cta_text` e `whatsapp_prefill`: convite a conversa / avaliação — pode falar em próximos passos sem soar como fechamento comercial no diagnóstico.',
+]
+
+/**
+ * Pro Estética / links com `diagnosis_vertical = capilar`: mesmo arco útil que o corporal, com foco em fios e couro.
+ * Migração de referência: `migrations/427-pro-estetica-capilar-diagnosis-plain-language-refresh.sql`.
+ */
+export const YLADA_DIAGNOSIS_CAPILAR_VOICE_CHECKLIST: readonly string[] = [
+  '`profile_title` e primeiro bloco visível: linguagem da pessoa (rotina, espelho, sensação no couro/fios) — evitar “fechar plano/pacote” no título.',
+  '`main_blocker` / `consequence`: explicar o padrão em palavras simples; jargão clínico-vendas em excesso só se necessário e mais abaixo.',
+  '`dica_rapida` e `growth_potential`: valor prático; menção a sessões ou pacote não compete com o insight principal.',
+  '`cta_text` e `whatsapp_prefill`: convite a conversa / avaliação — próximos passos sem soar como fechamento comercial no diagnóstico.',
 ]
 
 /**
