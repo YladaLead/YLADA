@@ -433,7 +433,10 @@ function BibliotecaCard({
   } | null>(null)
   const [copyOkFlash, setCopyOkFlash] = useState(false)
   const { tempo, perguntas } = getMeta(item)
-  const tituloExibido = (segmentCode && getTituloAdaptadoFn(item.tema, segmentCode)) || item.titulo
+  /** Painel Pro capilar/corporal: cada modelo tem `titulo` próprio na DB; título adaptado por tema colidia vários cards (ex.: pele). */
+  const tituloExibido = stayOnProEsteticaPanel
+    ? item.titulo
+    : (segmentCode && getTituloAdaptadoFn(item.tema, segmentCode)) || item.titulo
   const mostraMaisUsado = item.tipo === 'quiz' && isTemaMaisUsado(item.tema)
   const isSugestao = variant === 'sugestao'
   const isComece = variant === 'comece'
@@ -1213,10 +1216,14 @@ function BibliotecaPageContentInner({
     if (!proEsteticaNarrow || !q) return itemsLista
     const seg = segParaTituloBiblioteca
     return itemsLista.filter((i) => {
-      const titulo = ((seg && getTituloAdaptado(i.tema, seg)) || i.titulo).toLowerCase()
+      const tituloBase = (i.titulo || '').toLowerCase()
+      const tituloAdapt = ((seg && getTituloAdaptado(i.tema, seg)) || '').toLowerCase()
       const desc = (i.description || '').toLowerCase()
+      const dor = (i.dor_principal || '').toLowerCase()
+      const obj = (i.objetivo_principal || '').toLowerCase()
       const temaLab = getTemaLabel(i.tema).toLowerCase()
-      return titulo.includes(q) || desc.includes(q) || temaLab.includes(q)
+      const haystack = [tituloBase, tituloAdapt, desc, dor, obj, temaLab].join('\n')
+      return haystack.includes(q)
     })
   }, [buscaNome, proEsteticaNarrow, itemsLista, segParaTituloBiblioteca])
 

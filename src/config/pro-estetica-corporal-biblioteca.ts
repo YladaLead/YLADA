@@ -1,14 +1,13 @@
 /**
  * Pro Estética Corporal — biblioteca (`subscope=estetica_corporal`):
  * **lista fechada por `template_id`**: calculadoras + quizzes corporais (migrations 236, 242, 293, 308, **333**, **342**, **347**, **348**).
- * Pacotes de resultado RISK por template (leve|moderado|urgente) + `diagnosis_vertical = corporal`: migrações **401** (b1000121,122,124,125,126), **402** (b1000142–151), **403** (b1000119, b1000120, b1000127), **404** (b1000038, b1000044, b1000046, b1000048, b1000050). Calculadoras **405** (`PROJECTION_CALCULATOR`: b1000025,26,27,28,31, b1000123).
+ * Pacotes de resultado RISK por template (leve|moderado|urgente) + `diagnosis_vertical = corporal`: migrações **401** (b1000121,122,124,125,126), **402** (b1000142–151), **403** (b1000119, b1000120, b1000127), **404** (b1000038, b1000044, b1000046, b1000048, b1000050). Calculadoras **405** (`PROJECTION_CALCULATOR`: b1000025,26,27,28,31, b1000123). Refresh de copy (linguagem leiga): **425**. Biblioteca `meta`, links, memória por link, `schema_json` e cache: **426**; verificação SQL: `scripts/verify-corporal-packaged-diagnosis.sql`. Peeling Hollywood / despigmentação / clareamento íntimo-axilas: **426** (b1000192–194).
  * Tópicos prontos + links que a pessoa cria continuam noutras áreas da UI; aqui só estes itens globais passam no filtro.
  */
 
 import type { IdeiaRapidaNoel } from '@/config/ylada-biblioteca'
 import {
   IDEIAS_RAPIDAS_ESTETICA_CORPORAIS,
-  getTituloAdaptado,
   type BibliotecaSegmentCode,
 } from '@/config/ylada-biblioteca'
 
@@ -66,6 +65,9 @@ export const TEMPLATE_IDS_BIBLIOTECA_ESTETICA_CORPORAL_PERMITIDOS = new Set([
   'b1000149-0149-4000-8000-000000000149',
   'b1000150-0150-4000-8000-000000000150',
   'b1000151-0151-4000-8000-000000000151',
+  'b1000192-0192-4000-8000-000000000192',
+  'b1000193-0193-4000-8000-000000000193',
+  'b1000194-0194-4000-8000-000000000194',
 ])
 
 export type BibliotecaItemSegmentFilter = {
@@ -111,6 +113,9 @@ export const TEMPLATE_IDS_ORDEM_DESTAQUE_ESTETICA_CORPORAL = [
   'b1000149-0149-4000-8000-000000000149',
   'b1000150-0150-4000-8000-000000000150',
   'b1000151-0151-4000-8000-000000000151',
+  'b1000192-0192-4000-8000-000000000192',
+  'b1000193-0193-4000-8000-000000000193',
+  'b1000194-0194-4000-8000-000000000194',
   'b1000123-0123-4000-8000-000000000123',
   'b1000124-0124-4000-8000-000000000124',
   'b1000125-0125-4000-8000-000000000125',
@@ -119,12 +124,15 @@ export const TEMPLATE_IDS_ORDEM_DESTAQUE_ESTETICA_CORPORAL = [
   'b1000050-0050-4000-8000-000000000050',
 ] as const
 
-/** Chave estável para agrupar o mesmo título que aparece no cartão (adaptado + base). */
+/**
+ * Chave para dedupe no painel corporal. Usa só `titulo` do item (lista fechada com nomes distintos).
+ * Não usar `getTituloAdaptado` aqui: para `tema=pele` o adaptado é único e colidia dezenas de fluxos num só cartão.
+ */
 export function tituloExibidoBibliotecaCorporalKey(
   item: { tema: string; titulo: string },
-  segmentCode: BibliotecaSegmentCode,
+  _segmentCode: BibliotecaSegmentCode,
 ): string {
-  const display = (getTituloAdaptado(item.tema, segmentCode) || item.titulo || '').trim()
+  const display = (item.titulo || '').trim()
   const key = display
     .toLowerCase()
     .normalize('NFD')
@@ -136,8 +144,8 @@ export function tituloExibidoBibliotecaCorporalKey(
 }
 
 /**
- * Um fluxo por título exibido (igual ao do cartão). Ignora `template_id` — duas linhas com o mesmo
- * texto visível ficam só com a primeira na ordem recebida (ordenar antes para priorizar destaques).
+ * Um fluxo por `titulo` do item. Duas linhas com o mesmo título ficam só com a primeira na ordem recebida
+ * (ordenar antes para priorizar destaques).
  */
 export function dedupeBibliotecaItensEsteticaCorporal<
   T extends { id: string; tema: string; titulo: string; template_id?: string | null },

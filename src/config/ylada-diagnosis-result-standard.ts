@@ -13,7 +13,7 @@
 import type { DiagnosisVertical } from '@/lib/ylada/diagnosis-types'
 
 /** Versão do padrão (incrementar quando a filosofia mudar de forma compatível com conteúdo legado). */
-export const YLADA_DIAGNOSIS_RESULT_STANDARD_VERSION = 1 as const
+export const YLADA_DIAGNOSIS_RESULT_STANDARD_VERSION = 2 as const
 
 /**
  * Arco narrativo obrigatório na entrega (por ordem de leitura na UI expandida).
@@ -64,9 +64,28 @@ export const YLADA_DIAGNOSIS_INVITATION_BY_VERTICAL: Record<
   },
   corporal: {
     mustReferenceSender: true,
-    invitationKeywords: ['avaliação', 'protocolo', 'corpo', 'orientação', 'conversar'],
+    invitationKeywords: [
+      'avaliação',
+      'corpo',
+      'orientação',
+      'conversar',
+      'entender',
+      'tirar dúvidas',
+      'protocolo',
+    ],
   },
 }
+
+/**
+ * Pro Estética / links com `diagnosis_vertical = corporal`: tom de **diagnóstico útil** antes do convite.
+ * Migração de referência: `migrations/425-pro-estetica-corporal-diagnosis-plain-language-refresh.sql`.
+ */
+export const YLADA_DIAGNOSIS_CORPORAL_VOICE_CHECKLIST: readonly string[] = [
+  '`profile_title` e primeiro bloco visível: linguagem da pessoa (sensação, rotina, espelho) — evitar “fechar plano/pacote” no título.',
+  '`main_blocker` / `consequence`: explicar o padrão em palavras simples; jargão clínico-vendas (“protocolo avulso”, “critério” em excesso) só se necessário e mais abaixo.',
+  '`dica_rapida` e `growth_potential`: valor prático; menção a sessões ou pacote não compete com o insight principal.',
+  '`cta_text` e `whatsapp_prefill`: convite a conversa / avaliação — pode falar em próximos passos sem soar como fechamento comercial no diagnóstico.',
+]
 
 /**
  * Na vertical Pro Líderes, evitar blocos que pareçam nutrição/clínica genérica sem tema.
