@@ -2,7 +2,7 @@
  * Pro Estética Capilar — biblioteca (`subscope=estetica_capilar`):
  * **lista fechada por `template_id`**: quizzes capilares (migration **284** + **376–380** blocos dor → sazonal).
  * Pacotes RISK `diagnosis_vertical = capilar` (leve|moderado|urgente): migração **407** (b1000103–107) e **408** (b1000152–191);
- * refresh de linguagem leiga: **427**; meta/cache/schema/memória: **428** (paridade com corporal **425**/**426**).
+ * refresh de linguagem leiga: **427**; meta/cache/schema/memória: **428** (paridade com corporal nas migrações **425** e **426**).
  * Intros/capas e descrições dos cards: migration **353** (padrão gancho + presencial + micro, alinhado ao corporal mig. 351).
  */
 
