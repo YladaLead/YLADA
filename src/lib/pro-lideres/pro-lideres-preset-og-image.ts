@@ -9,11 +9,18 @@ import {
   proLideresOgImageRelativeFile,
 } from '@/config/ylada-link-og-image-bank'
 
+/** Invalida cache WhatsApp/Meta após trocar PNGs (ex.: `2` na Vercel: `NEXT_PUBLIC_PRO_LIDERES_OG_ASSET_VERSION`). */
+function proLideresOgAssetCacheQuery(): string {
+  const v = process.env.NEXT_PUBLIC_PRO_LIDERES_OG_ASSET_VERSION?.trim()
+  return v ? `?v=${encodeURIComponent(v)}` : ''
+}
+
 export function getProLideresPresetOpenGraphImageUrl(fluxoId: string, baseUrl: string): string {
   const base = baseUrl.replace(/\/$/, '')
+  const q = proLideresOgAssetCacheQuery()
   const trimmed = fluxoId.trim()
   if (!trimmed) {
-    return `${base}${PRO_LIDERES_OG_IMAGE_DIR}/${PRO_LIDERES_OG_PLACEHOLDER_LOGO_FILE}`
+    return `${base}${PRO_LIDERES_OG_IMAGE_DIR}/${PRO_LIDERES_OG_PLACEHOLDER_LOGO_FILE}${q}`
   }
-  return `${base}${PRO_LIDERES_OG_IMAGE_DIR}/${proLideresOgImageRelativeFile(trimmed)}`
+  return `${base}${PRO_LIDERES_OG_IMAGE_DIR}/${proLideresOgImageRelativeFile(trimmed)}${q}`
 }

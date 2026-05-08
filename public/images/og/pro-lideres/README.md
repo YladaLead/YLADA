@@ -22,3 +22,8 @@ npm run og:compress-pro-lideres
 
 Simula sem gravar: `npm run og:compress-pro-lideres -- --dry-run`  
 Grava mesmo quando o ficheiro não fica menor: `npm run og:compress-pro-lideres -- --force`
+
+### Cache WhatsApp após trocar PNGs
+
+Na Vercel, define (ou incrementa) **`NEXT_PUBLIC_PRO_LIDERES_OG_ASSET_VERSION`** (ex.: `1`, `2`, …).  
+Isso acrescenta `?v=…` ao `og:image` e força o crawler a tratar como URL nova.
