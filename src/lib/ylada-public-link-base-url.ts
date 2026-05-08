@@ -31,7 +31,8 @@ export async function resolveYladaOgBaseUrlForMetadata(): Promise<string> {
   }
 
   if (fromEnv) return fromEnv
-  return 'https://ylada.app'
+  /** Produção canónica: `ylada.app` muitas vezes não tem DNS; não usar como fallback de OG. */
+  return 'https://www.ylada.com'
 }
 
 /**
