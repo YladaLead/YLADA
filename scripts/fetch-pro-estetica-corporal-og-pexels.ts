@@ -1,5 +1,5 @@
 /**
- * Baixa imagens OG (1200×630, PNG) da API Pexels para Pro Estética corporal.
+ * Baixa imagens OG (1200×630, JPEG otimizado) da API Pexels para Pro Estética corporal.
  * Consultas em `scripts/data/pro-estetica-corporal-og-pexels-queries.json` (intenção / stock).
  *
  * Requer: PEXELS_API_KEY em `.env.local`
@@ -97,12 +97,13 @@ async function main() {
         continue
       }
       const buf = await downloadBuffer(srcUrl)
-      const pngBuf = await sharp(buf)
+      /** JPEG ~80%: ficheiros bem menores que PNG de foto — WhatsApp pré-visualiza com mais consistência. */
+      const jpegBuf = await sharp(buf)
         .resize(OG_W, OG_H, { fit: 'cover', position: 'attention' })
-        .png({ compressionLevel: 9 })
+        .jpeg({ quality: 80, mozjpeg: true, chromaSubsampling: '4:2:0' })
         .toBuffer()
 
-      await writeFile(outPath, pngBuf)
+      await writeFile(outPath, jpegBuf)
 
       report.push({
         arquivo,

@@ -2,7 +2,7 @@
  * Copy **só** para o cartão OG gerado em `/l/[slug]/opengraph-image` (pré-visualização WhatsApp / redes).
  * Não altera título do fluxo, `config_json` nem migrações — ajusta aqui o texto que aparece **na imagem**.
  *
- * Chaves = stem do ficheiro em `pro-estetica-corporal` / `pro-estetica-capilar` (sem `.png`), alinhado a `ylada-link-og-image-bank.ts`.
+ * Chaves = stem do ficheiro em `pro-estetica-corporal` / `pro-estetica-capilar` (sem `.jpg`/`.png`), alinhado a `ylada-link-og-image-bank.ts`.
  */
 import {
   PRO_ESTETICA_CAPILAR_OG_IMAGE_BANK,
@@ -118,7 +118,7 @@ export function proEsteticaOgAssetStem(
     vertical === 'capilar' ? PRO_ESTETICA_CAPILAR_OG_IMAGE_BANK : PRO_ESTETICA_CORPORAL_OG_IMAGE_BANK
   const file = bank.byTemplateId[tid]
   if (!file) return null
-  return file.replace(/\.png$/i, '').trim() || null
+  return file.replace(/\.(png|jpe?g)$/i, '').trim() || null
 }
 
 export function getProEsteticaOgDynamicCardLines(input: {

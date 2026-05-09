@@ -22,6 +22,27 @@ function proEsteticaOgPath(bank: ProEsteticaOgImageBankEntry, filename: string):
 }
 
 /**
+ * Descrições que soam como nota interna (painel / “compartilhar”) — ruins na prévia do WhatsApp.
+ */
+export function isWeakOrInternalOgDescriptionForShare(description: string): boolean {
+  const d = (description || '').trim()
+  if (!d) return false
+  const lower = d
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+  if (/contexto\s+para\s+o\s+whatsapp/.test(lower)) return true
+  if (/\bconteudo\s+para\s+compartilhar\b/.test(lower)) return true
+  if (/\bbom\s+para\s+stories\b/.test(lower)) return true
+  if (/\babre\s+conversa\s+tecnica\b/.test(lower)) return true
+  if (/^hub:/.test(lower)) return true
+  if (/—\s*contexto\.?\s*$/i.test(d)) return true
+  if (/\beducacional\s+—\s+sem\s+diagnostico/.test(lower)) return true
+  if (/\bsem\s+autodiagnostico\b/.test(lower) && d.length < 95) return true
+  return false
+}
+
+/**
  * Texto curto para WhatsApp / Open Graph (prioridade sobre `page.subtitle` em `/l/[slug]`).
  */
 export function buildProEsteticaLinkOgDescription(input: {
@@ -32,12 +53,14 @@ export function buildProEsteticaLinkOgDescription(input: {
   objetivoPrincipal?: string | null
 }): string {
   const title = (input.linkTitle || '').trim()
-  const desc = (input.bibliotecaDescription || '').trim().replace(/\s+/g, ' ')
-  if (desc.length >= 40 && desc.length <= 220) {
-    return desc.length <= 200 ? desc : `${desc.slice(0, 197)}…`
+  const descRaw = (input.bibliotecaDescription || '').trim().replace(/\s+/g, ' ')
+  const descUsable =
+    descRaw.length > 0 && !isWeakOrInternalOgDescriptionForShare(descRaw) ? descRaw : ''
+  if (descUsable.length >= 40 && descUsable.length <= 220) {
+    return descUsable.length <= 200 ? descUsable : `${descUsable.slice(0, 197)}…`
   }
-  if (desc.length > 220) {
-    const cut = desc.slice(0, 197).trim()
+  if (descUsable.length > 220) {
+    const cut = descUsable.slice(0, 197).trim()
     const lastSpace = cut.lastIndexOf(' ')
     const head = lastSpace > 80 ? cut.slice(0, lastSpace) : cut
     return `${head}…`
@@ -46,9 +69,9 @@ export function buildProEsteticaLinkOgDescription(input: {
   if (dor.length >= 12) {
     const lead =
       input.vertical === 'capilar'
-        ? 'Couro cabeludo, fios e rotina: em poucos minutos você organiza o relato com clareza.'
-        : 'Corpo, hábitos e expectativa: em poucos minutos você vê um primeiro recorte do seu contexto.'
-    return `${lead} Foco aqui: ${dor.length > 90 ? `${dor.slice(0, 87)}…` : dor}`
+        ? 'Em poucos minutos você organiza o que está incomodando no cabelo ou no couro — para conversar com a profissional com clareza.'
+        : 'Em poucos minutos você vê um primeiro recorte do que está incomodando no corpo — para falar com a profissional sem enrolação.'
+    return `${lead} Foco: ${dor.length > 90 ? `${dor.slice(0, 87)}…` : dor}`
   }
   const obj = (input.objetivoPrincipal || '').trim()
   if (obj.length >= 12) {
@@ -56,9 +79,9 @@ export function buildProEsteticaLinkOgDescription(input: {
   }
   const short = title.length > 56 ? `${title.slice(0, 53)}…` : title
   if (input.vertical === 'capilar') {
-    return `Responda em poucos minutos e veja um primeiro recorte sobre «${short}» — couro cabeludo, fios e rotina, sem complicar.`
+    return `Abra o link e responda em poucos minutos sobre «${short}» — couro, fios e rotina. Se fizer sentido, chame a profissional: você já leva o contexto na mão.`
   }
-  return `Responda em poucos minutos e veja um primeiro recorte sobre «${short}» — corpo, hábitos e próximo passo com calma.`
+  return `Abra o link e responda em poucos minutos sobre «${short}» — corpo e hábitos. Depois, se quiser, siga com a profissional com tudo mais claro.`
 }
 
 /** Quando o mapa genérico cai em pele, unhas, logo ou arte facial, força imagem alinhada à vertical Pro Estética. */
@@ -120,11 +143,11 @@ export function buildEsteticaAestheticsOgDescriptionFallback(
   if (!blob) return null
   if (temaTextSuggestsCapilarOg(blob)) {
     const short = title.length > 78 ? `${title.slice(0, 75)}…` : title.trim()
-    return `Queda, couro ou rotina atrapalhando? Responda em poucos minutos e veja um primeiro recorte sobre «${short}» — foco fios e couro cabeludo, sem misturar com cuidados de pele do rosto.`
+    return `Abra o link, responda em poucos minutos e veja um primeiro recorte sobre «${short}» — foco em fios e couro cabeludo. Quando fizer sentido, é só chamar a profissional: você já chega com o contexto organizado.`
   }
   if (temaTextSuggestsCorporalBodyOg(blob)) {
     const short = title.length > 78 ? `${title.slice(0, 75)}…` : title.trim()
-    return `Corpo e hábitos: responda em poucos minutos e receba um primeiro encaixe sobre «${short}» — sem promessa vazia, alinhado ao que você sente no dia a dia.`
+    return `Abra o link e responda em poucos minutos: um primeiro encaixe sobre «${short}» — corpo e hábitos, sem promessa vazia. Depois, se quiser continuar, fale com a profissional com tudo mais claro.`
   }
   return null
 }
@@ -167,9 +190,10 @@ export function applyProEsteticaPublicLinkOgMetadata(
       : {}
   const existingOg =
     typeof pageExisting.og_description === 'string' ? pageExisting.og_description.trim() : ''
+  const keepExisting = existingOg.length > 0 && !isWeakOrInternalOgDescriptionForShare(existingOg)
   configJson.page = {
     ...pageExisting,
-    og_description: existingOg || og,
+    og_description: keepExisting ? existingOg : og,
   }
   const metaExisting =
     configJson.meta && typeof configJson.meta === 'object' && !Array.isArray(configJson.meta)

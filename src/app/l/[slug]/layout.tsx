@@ -10,6 +10,7 @@ import {
   buildEsteticaAestheticsOgDescriptionFallback,
   getProEsteticaPublicDynamicOgCardImageUrl,
   getProEsteticaPublicOpenGraphImageUrl,
+  isWeakOrInternalOgDescriptionForShare,
 } from '@/lib/pro-estetica/pro-estetica-public-link-og'
 import { getProLideresPresetOpenGraphImageUrl } from '@/lib/pro-lideres/pro-lideres-preset-og-image'
 import { getYladaOgImageUrl } from '@/lib/ylada-og-tema-imagem'
@@ -89,9 +90,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogMime =
     proEsteticaVertical && useProEsteticaDynamicOgCard ? 'image/png' : ogImageMime(ogImageUrl)
   const pageUrl = `${baseUrl.replace(/\/$/, '')}/l/${slug}`
-  const ogFromPage = typeof page.og_description === 'string' ? page.og_description.trim() : ''
+  const ogFromPageRaw = typeof page.og_description === 'string' ? page.og_description.trim() : ''
+  const ogFromPage =
+    ogFromPageRaw && !(proEsteticaVertical && isWeakOrInternalOgDescriptionForShare(ogFromPageRaw))
+      ? ogFromPageRaw
+      : ''
   const esteticaOgFallback =
-    isAestheticsSegment && !ogFromPage
+    !ogFromPage && (isAestheticsSegment || proEsteticaVertical)
       ? buildEsteticaAestheticsOgDescriptionFallback(title, themeRaw || null)
       : null
   const description =

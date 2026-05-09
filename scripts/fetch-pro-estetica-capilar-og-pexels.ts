@@ -1,5 +1,5 @@
 /**
- * Baixa imagens OG (1200×630, PNG) da API Pexels para Pro Estética capilar.
+ * Baixa imagens OG (1200×630, JPEG otimizado) da API Pexels para Pro Estética capilar.
  * Consultas: ferramentas, tratamentos de salão/clínica, terapias (LED, laser, micro, ozono, etc.).
  * Fonte: `scripts/data/pro-estetica-capilar-og-pexels-queries.json`.
  *
@@ -96,12 +96,12 @@ async function main() {
         continue
       }
       const buf = await downloadBuffer(srcUrl)
-      const pngBuf = await sharp(buf)
+      const jpegBuf = await sharp(buf)
         .resize(OG_W, OG_H, { fit: 'cover', position: 'attention' })
-        .png({ compressionLevel: 9 })
+        .jpeg({ quality: 80, mozjpeg: true, chromaSubsampling: '4:2:0' })
         .toBuffer()
 
-      await writeFile(outPath, pngBuf)
+      await writeFile(outPath, jpegBuf)
 
       report.push({
         arquivo,
