@@ -97,6 +97,7 @@ const PRO_ESTETICA_CORPORAL_OG_BY_TEMPLATE_ID: Record<string, string> = {
   'b1000192-0192-4000-8000-000000000192': 'black-peel-peeling-hollywood-pele-objetivo.jpg',
   'b1000193-0193-4000-8000-000000000193': 'despigmentacao-tatuagem-micro-labios-expectativa.jpg',
   'b1000194-0194-4000-8000-000000000194': 'clareamento-intimo-axilas-proximo-passo-seguro.jpg',
+  'b1000195-0195-4000-8000-000000000195': 'clareamento-virilha-proximo-passo-seguro.jpg',
 }
 
 export const PRO_ESTETICA_CORPORAL_OG_IMAGE_BANK: ProEsteticaOgImageBankEntry = {

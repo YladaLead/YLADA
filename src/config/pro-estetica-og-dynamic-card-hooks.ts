@@ -55,6 +55,7 @@ const CORPORAL_OG_HOOKS: [string, string][] = [
   ['black-peel-peeling-hollywood-pele-objetivo', 'Black peel / Hollywood: pele e objetivo sem promessa vazia.'],
   ['despigmentacao-tatuagem-micro-labios-expectativa', 'Despigmentação, tatuagem, micro: expectativa alinhada.'],
   ['clareamento-intimo-axilas-proximo-passo-seguro', 'Clareamento íntimo/axilas: próximo passo com segurança.'],
+  ['clareamento-virilha-proximo-passo-seguro', 'Clareamento de virilha: próximo passo com segurança.'],
 ]
 
 const CAPILAR_OG_HOOKS: [string, string][] = [
