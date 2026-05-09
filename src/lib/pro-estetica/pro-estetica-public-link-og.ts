@@ -140,6 +140,16 @@ export function getProEsteticaPublicOpenGraphImageUrl(
   return `${baseUrl.replace(/\/$/, '')}${path}`
 }
 
+/**
+ * Cartão OG dinâmico (texto de gancho para WhatsApp) — rota `GET /l/[slug]/og/pro-estetica`.
+ * Copy da imagem vem de `pro-estetica-og-dynamic-card-hooks.ts`, independente do texto do fluxo.
+ */
+export function getProEsteticaPublicDynamicOgCardImageUrl(baseUrl: string, slug: string): string {
+  const root = baseUrl.replace(/\/$/, '')
+  const seg = slug.trim()
+  return `${root}/l/${seg}/og/pro-estetica`
+}
+
 export function applyProEsteticaPublicLinkOgMetadata(
   configJson: Record<string, unknown>,
   input: {

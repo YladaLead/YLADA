@@ -8,6 +8,7 @@ import { YLADA_OG_UNIFIED_SHARE_CARD_PATH } from '@/lib/ylada-og-fallback-logo'
 import { resolveYladaOgBaseUrlForMetadata } from '@/lib/ylada-public-link-base-url'
 import {
   buildEsteticaAestheticsOgDescriptionFallback,
+  getProEsteticaPublicDynamicOgCardImageUrl,
   getProEsteticaPublicOpenGraphImageUrl,
 } from '@/lib/pro-estetica/pro-estetica-public-link-og'
 import { getProLideresPresetOpenGraphImageUrl } from '@/lib/pro-lideres/pro-lideres-preset-og-image'
@@ -68,19 +69,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const segmentLower = (segment || '').toLowerCase().trim()
   const isAestheticsSegment = segmentLower === 'estetica' || segmentLower === 'aesthetics'
 
+  const useProEsteticaDynamicOgCard =
+    Boolean(proEsteticaVertical) && process.env.NEXT_PUBLIC_PRO_ESTETICA_DYNAMIC_OG_CARD !== 'false'
+
   const ogImageUrl =
     isProLideresPreset
       ? getProLideresPresetOpenGraphImageUrl(proLideresFluxoId, baseUrl, proLideresKind)
-      : proEsteticaVertical
-        ? getProEsteticaPublicOpenGraphImageUrl(
-            proEsteticaVertical,
-            themeRaw || title,
-            segment,
-            baseUrl,
-            linkTemplateId || null
-          )
-        : getYladaOgImageUrl(themeRaw || title, segment, baseUrl)
-  const ogMime = ogImageMime(ogImageUrl)
+      : proEsteticaVertical && useProEsteticaDynamicOgCard
+        ? getProEsteticaPublicDynamicOgCardImageUrl(baseUrl, slug)
+        : proEsteticaVertical
+          ? getProEsteticaPublicOpenGraphImageUrl(
+              proEsteticaVertical,
+              themeRaw || title,
+              segment,
+              baseUrl,
+              linkTemplateId || null
+            )
+          : getYladaOgImageUrl(themeRaw || title, segment, baseUrl)
+  const ogMime =
+    proEsteticaVertical && useProEsteticaDynamicOgCard ? 'image/png' : ogImageMime(ogImageUrl)
   const pageUrl = `${baseUrl.replace(/\/$/, '')}/l/${slug}`
   const ogFromPage = typeof page.og_description === 'string' ? page.og_description.trim() : ''
   const esteticaOgFallback =
