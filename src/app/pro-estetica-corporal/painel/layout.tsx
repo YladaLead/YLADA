@@ -38,6 +38,7 @@ export default async function ProEsteticaCorporalPainelLayout({ children }: { ch
         previewWithoutLogin,
         verticalCode,
         dailyTasksVisibleToTeam: true,
+        noelMemberShowSidebarNav: false,
         painelBasePath: '/pro-estetica-corporal/painel',
       }}
     >

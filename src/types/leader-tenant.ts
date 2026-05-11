@@ -1,6 +1,9 @@
 /** Papel no espaço Pro Líderes (consultoria + tenant). */
 export type ProLideresTenantRole = 'leader' | 'member'
 
+/** Escopo da oferta Noel membro (treino de campo) no Pro Líderes. */
+export type ProLideresNoelMemberOfferScope = 'all_members' | 'tabulators_only'
+
 /** Tenant Pro Líderes (tabela leader_tenants). */
 export type LeaderTenantRow = {
   id: string
@@ -19,6 +22,10 @@ export type LeaderTenantRow = {
   vertical_code?: string
   /** Máximo de convites pending (não expirados) em simultâneo. */
   team_invite_pending_quota?: number
+  /** Se true, membros elegíveis podem aderir ao Noel campo (pago à parte). */
+  noel_member_offer_enabled?: boolean
+  /** Quem vê a oferta: toda a equipa ativa ou só quem tem tabulador no convite. */
+  noel_member_offer_scope?: ProLideresNoelMemberOfferScope
   /** Se false, a equipe não vê Tarefas diárias (líder vê sempre). */
   daily_tasks_visible_to_team?: boolean
   /** Pontos extra uma vez por dia quando o membro marca todas as tarefas desse dia. */

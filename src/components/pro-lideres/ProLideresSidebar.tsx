@@ -16,8 +16,14 @@ interface ProLideresSidebarProps {
 export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose }: ProLideresSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const { canManageAsLeader, isLeaderWorkspace, teamViewPreview, dailyTasksVisibleToTeam, painelBasePath } =
-    useProLideresPainel()
+  const {
+    canManageAsLeader,
+    isLeaderWorkspace,
+    teamViewPreview,
+    dailyTasksVisibleToTeam,
+    painelBasePath,
+    noelMemberShowSidebarNav,
+  } = useProLideresPainel()
   const { signOut, user, userProfile } = useAuth()
   const userName =
     userProfile?.nome_completo ||
@@ -40,10 +46,13 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
         if (item.key === 'tarefas' && !isLeaderWorkspace && !dailyTasksVisibleToTeam) {
           return false
         }
+        if (item.requireNoelMemberNav && !noelMemberShowSidebarNav) {
+          return false
+        }
         return isLeaderWorkspace || !item.leaderOnly
       }),
     })).filter((g) => g.items.length > 0)
-  }, [isLeaderWorkspace, dailyTasksVisibleToTeam])
+  }, [isLeaderWorkspace, dailyTasksVisibleToTeam, noelMemberShowSidebarNav])
 
   const itemHref = useCallback(
     (item: ProLideresMenuItem) => proLideresItemHrefWithBase(painelBasePath, item.path),

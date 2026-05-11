@@ -11,7 +11,7 @@ import {
   proLideresTeamSubscriptionAllowsAccess,
   requireProLideresPaidContext,
 } from '@/lib/pro-lideres-subscription-access'
-import type { LeaderTenantRow } from '@/types/leader-tenant'
+import type { LeaderTenantRow, ProLideresNoelMemberOfferScope } from '@/types/leader-tenant'
 import { parseTeamBankPaymentUrlField } from '@/lib/pro-lideres-team-bank-payment-url'
 
 const MAX_LEN = 500
@@ -140,6 +140,20 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Bónus de dia completo inválido (0–100000).' }, { status: 400 })
     }
     payload.daily_tasks_full_day_bonus_points = Math.floor(n)
+  }
+
+  if (body.noel_member_offer_enabled !== undefined) {
+    payload.noel_member_offer_enabled = Boolean(body.noel_member_offer_enabled)
+  }
+  if (body.noel_member_offer_scope !== undefined) {
+    const s = String(body.noel_member_offer_scope).trim()
+    if (s !== 'all_members' && s !== 'tabulators_only') {
+      return NextResponse.json(
+        { error: 'noel_member_offer_scope deve ser all_members ou tabulators_only.' },
+        { status: 400 }
+      )
+    }
+    payload.noel_member_offer_scope = s as ProLideresNoelMemberOfferScope
   }
 
   if (Object.prototype.hasOwnProperty.call(body, 'team_bank_payment_url')) {

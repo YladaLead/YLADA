@@ -4,7 +4,7 @@
  */
 export const PRO_LIDERES_BASE_PATH = '/pro-lideres/painel'
 
-/** Área só da equipa (convites): URL distinta do painel do líder. */
+/** Área só da equipe (convites): URL distinta do painel do líder. */
 export const PRO_LIDERES_MEMBER_BASE_PATH = '/pro-lideres/membro'
 
 export type ProLideresMenuItem = {
@@ -16,6 +16,8 @@ export type ProLideresMenuItem = {
   subtitle?: string
   /** Só o dono do tenant (líder) vê; equipe usa ambiente reduzido. */
   leaderOnly?: boolean
+  /** Só quando o líder disponibilizou o Noel para a equipe e o membro está no escopo. */
+  requireNoelMemberNav?: boolean
 }
 
 export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem[] }[] = [
@@ -31,6 +33,13 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
         icon: '🛠️',
       },
       { key: 'scripts', label: 'Scripts', path: 'scripts', icon: '📝' },
+      {
+        key: 'noel-membro',
+        label: 'Noel',
+        path: 'noel-membro',
+        icon: '💬',
+        requireNoelMemberNav: true,
+      },
       { key: 'tarefas', label: 'Tarefas diárias', path: 'tarefas', icon: '✅' },
       { key: 'equipe', label: 'Análise da equipe', path: 'equipe', icon: '👥', leaderOnly: true },
       { key: 'links', label: 'Convites equipe', path: 'links', icon: '🔗', leaderOnly: true },
@@ -44,7 +53,7 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
       },
       {
         key: 'configuracao',
-        label: 'Configurações',
+        label: 'Noel equipe',
         path: 'configuracao',
         icon: '⚙️',
         leaderOnly: true,

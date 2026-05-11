@@ -22,6 +22,8 @@ export type NoelArea =
   | 'joias'
   /** Mentor no painel Pro Líderes (operador / equipe; contexto em /api/pro-lideres/noel). */
   | 'pro_lideres'
+  /** Noel campo para membros Pro Líderes (/api/pro-lideres/membro/noel). */
+  | 'pro_lideres_member'
   /** Mentor no painel Pro Estética Corporal (/api/pro-estetica-corporal/noel). */
   | 'pro_estetica_corporal'
   /** Mentor no painel Pro Estética Capilar (/api/pro-estetica-capilar/noel). */
@@ -151,6 +153,24 @@ const PRO_LIDERES_SUGGESTIONS = [
     label: 'Atender no WhatsApp',
     prompt:
       'Me dá um roteiro para conduzir a conversa no WhatsApp depois que a pessoa respondeu ao link: tirar dúvidas, criar confiança e próximo passo.',
+  },
+]
+
+const PRO_LIDERES_MEMBER_SUGGESTIONS = [
+  {
+    label: 'O que falar na lista',
+    prompt:
+      'Preciso de ideias curtas: quem priorizar na minha lista hoje e uma primeira mensagem que soe natural (sem parecer robô).',
+  },
+  {
+    label: 'Objeção na conversa',
+    prompt:
+      'A pessoa soltou uma objeção (preço, tempo ou desconfiança). Me ajuda a responder com calma, sem pressão, e a pedir o próximo passo.',
+  },
+  {
+    label: 'Script ou post',
+    prompt:
+      'Quero ajustar um script de WhatsApp ou pensar um post/story simples: me dá 2 opções de texto no meu tom, curtas.',
   },
 ]
 
@@ -306,6 +326,11 @@ const NOEL_UX_BY_AREA: Record<NoelArea, NoelUxContentWithoutWelcome> = {
     placeholder: 'Escreva aqui…',
     placeholderExample: 'Ex.: roteiro para follow-up ou dúvida da equipe',
   },
+  pro_lideres_member: {
+    suggestions: PRO_LIDERES_MEMBER_SUGGESTIONS,
+    placeholder: 'Escreva o que está travando (fala, objeção, script ou post)…',
+    placeholderExample: 'Ex.: o que responder se a pessoa sumir depois do link',
+  },
   pro_estetica_corporal: {
     suggestions: PRO_ESTETICA_CORPORAL_SUGGESTIONS,
     placeholder: 'Escreva o que precisa…',
@@ -322,6 +347,7 @@ export function getNoelUxContent(area: NoelArea): NoelUxContent {
   const row = NOEL_UX_BY_AREA[area] ?? DEFAULT_NOEL_UX_ROW
   let welcomeMessage = NOEL_UNIVERSAL_WELCOME
   if (area === 'pro_lideres') welcomeMessage = NOEL_PRO_LIDERES_WELCOME
+  if (area === 'pro_lideres_member') welcomeMessage = ''
   if (area === 'pro_estetica_corporal' || area === 'pro_estetica_capilar') welcomeMessage = ''
   return {
     welcomeMessage,

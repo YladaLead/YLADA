@@ -9,6 +9,7 @@ import {
 } from '@/lib/pro-lideres-server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { getProLideresMemberMandatoryProfileGap } from '@/lib/pro-lideres-member-mandatory-profile'
+import { resolveProLideresNoelMemberSurface } from '@/lib/pro-lideres-noel-member-access'
 import ProLideresAreaShell from '@/components/pro-lideres/ProLideresAreaShell'
 import { PRO_LIDERES_BASE_PATH, mapProLideresPathToMemberArea } from '@/config/pro-lideres-menu'
 
@@ -58,6 +59,15 @@ export default async function ProLideresPainelLayout({ children }: { children: R
   const verticalCode = (gate.tenant.vertical_code ?? 'h-lider').trim() || 'h-lider'
   const dailyTasksVisibleToTeam = gate.tenant.daily_tasks_visible_to_team !== false
 
+  let noelMemberShowSidebarNav = false
+  if (admin && user?.id) {
+    const nm = await resolveProLideresNoelMemberSurface(admin, user, gate, {
+      isActiveMemberRow: ui.isActiveMemberRow,
+      teamViewPreview: ui.teamViewPreview,
+    })
+    noelMemberShowSidebarNav = nm.showSidebarNav
+  }
+
   return (
     <ProLideresAreaShell
       painelContext={{
@@ -69,6 +79,7 @@ export default async function ProLideresPainelLayout({ children }: { children: R
         devStubPanel: isProLideresDevStubTenant(gate.tenant),
         verticalCode,
         dailyTasksVisibleToTeam,
+        noelMemberShowSidebarNav,
         painelBasePath: PRO_LIDERES_BASE_PATH,
       }}
     >

@@ -433,6 +433,8 @@ function devStubLeaderTenant(userId: string): LeaderTenantRow {
     daily_tasks_full_day_bonus_points: 10,
     team_bank_payment_url: null,
     team_bank_pix_payment_url: null,
+    noel_member_offer_enabled: false,
+    noel_member_offer_scope: 'all_members',
     created_at: now,
     updated_at: now,
   }

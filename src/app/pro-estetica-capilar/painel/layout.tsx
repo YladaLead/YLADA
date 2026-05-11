@@ -26,6 +26,7 @@ export default async function ProEsteticaCapilarPainelLayout({ children }: { chi
         previewWithoutLogin,
         verticalCode,
         dailyTasksVisibleToTeam: true,
+        noelMemberShowSidebarNav: false,
         painelBasePath: '/pro-estetica-capilar/painel',
       }}
     >

@@ -49,8 +49,9 @@ export default function ProLideresAreaShell({
             className="border-b border-amber-200 bg-amber-50 px-3 py-2 text-center text-xs text-amber-950 sm:px-4"
             role="status"
           >
-            Modo desenvolvimento: painel sem tenant na base de dados. Convites, fluxos e dados reais não aplicam até
-            criares o tenant ou desligares o bypass com <code className="rounded bg-amber-100/80 px-1">PRO_LIDERES_DEV_OPEN_PAINEL=false</code>.
+            Modo desenvolvimento: painel sem tenant na base de dados. Convites, fluxos e dados reais não se aplicam até
+            você criar o tenant ou desligar o bypass com{' '}
+            <code className="rounded bg-amber-100/80 px-1">PRO_LIDERES_DEV_OPEN_PAINEL=false</code>.
           </div>
         )}
         {teamViewPreview && (
@@ -58,9 +59,9 @@ export default function ProLideresAreaShell({
             className="border-b border-emerald-200 bg-emerald-50 px-3 py-2.5 text-center text-xs text-emerald-950 sm:px-4"
             role="status"
           >
-            <strong className="font-semibold">A ver como a equipe</strong> — menu e ecrãs iguais ao que a tua equipe
-            vê. As tuas permissões de líder mantêm-se nas APIs; usa o menu para{' '}
-            <span className="font-medium">voltar ao ambiente do líder</span> quando terminares.
+            <strong className="font-semibold">Visualizando como a equipe</strong> — menu e telas iguais ao que a sua
+            equipe vê. Suas permissões de líder continuam nas APIs; use o menu para{' '}
+            <span className="font-medium">voltar ao ambiente do líder</span> quando terminar.
           </div>
         )}
         {/* Única barra de marca: mobile-first (44px mín. toque no menu) */}

@@ -96,6 +96,9 @@ function ContasDemoContent() {
           <span className="block">
             Pró Líderes (mesmo e-mail da tabela): para criar o líder demo, tenant, equipe sintética e telemetria, aplicar{' '}
             <code className="bg-gray-100 px-1 rounded">scripts/pro-lideres-demo-prolider-equipe.sql</code>
+            {' '}(inclui convite fixo de membro:{' '}
+            <code className="bg-gray-100 px-1 rounded">/pro-lideres/convite/ylada_pl_demo_membro_noel_v1</code> — conta{' '}
+            <code className="bg-gray-100 px-1 rounded">pldemo.noel.membro@ylada.app</code>).
           </span>
         </p>
       </main>

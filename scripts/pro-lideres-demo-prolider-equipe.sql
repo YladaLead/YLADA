@@ -155,6 +155,26 @@ BEGIN
     VALUES (v_leader_id, 'demo@prolider.com', 'Demo Pro Líderes', 'seller', now());
   END IF;
 
+  -- Tabulador + convite fixo para cadastrar um membro humano (teste Noel membro / checkout)
+  -- URL: /pro-lideres/convite/ylada_pl_demo_membro_noel_v1 — e-mail da conta: pldemo.noel.membro@ylada.app
+  INSERT INTO leader_tenant_tabulators (leader_tenant_id, label, sort_order)
+  SELECT v_tenant_id, 'Demonstração', 0
+  WHERE NOT EXISTS (
+    SELECT 1 FROM leader_tenant_tabulators t
+    WHERE t.leader_tenant_id = v_tenant_id AND lower(trim(t.label)) = 'demonstração'
+  );
+  DELETE FROM leader_tenant_invites WHERE token = 'ylada_pl_demo_membro_noel_v1';
+  INSERT INTO leader_tenant_invites (
+    leader_tenant_id, token, invited_email, created_by_user_id, expires_at, status
+  ) VALUES (
+    v_tenant_id,
+    'ylada_pl_demo_membro_noel_v1',
+    'pldemo.noel.membro@ylada.app',
+    v_leader_id,
+    now() + interval '10 years',
+    'pending'::leader_tenant_invite_status
+  );
+
   -- Membros 01..36
   FOR v_i IN 1..36 LOOP
     v_email := format('pl-equipe-demo-%s@ylada.demo', lpad(v_i::text, 2, '0'));

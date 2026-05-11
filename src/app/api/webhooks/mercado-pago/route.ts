@@ -144,6 +144,10 @@ function determineFeatures(
     return ['equipe']
   }
 
+  if (area === 'pro_lideres_noel_member') {
+    return ['noel_campo_pro_lideres']
+  }
+
   if (area === 'nutri') {
     if (productType === 'formation_only') {
       return ['cursos']
@@ -1240,6 +1244,7 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     let userId = metadata.user_id
     let area = metadata.area || (data.external_reference?.split('_')[0]) || ''
     if (area === 'prolideres') area = 'pro_lideres_team'
+    if (area === 'plnoelmem') area = 'pro_lideres_noel_member'
     let planType = metadata.plan_type || (data.external_reference?.split('_')[1]) || ''
     const productType = metadata.product_type || metadata.productType
     // Sem ref na URL = matriz (ida); com ref=paula (etc) = esse vendedor
@@ -1272,8 +1277,17 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
 
     // Fallback: área e plano pela descrição (reason)
     const reasonUpper = (data.reason || '').toUpperCase()
-    if (!area || !['wellness', 'nutri', 'coach', 'nutra', 'pro_lideres_team'].includes(area)) {
-      if (reasonUpper.includes('PRO LÍDERES') || reasonUpper.includes('PRO LIDERES')) area = 'pro_lideres_team'
+    if (
+      !area ||
+      !['wellness', 'nutri', 'coach', 'nutra', 'pro_lideres_team', 'pro_lideres_noel_member'].includes(area)
+    ) {
+      if (
+        reasonUpper.includes('NOEL CAMPO') ||
+        reasonUpper.includes('NOEL MEMBRO') ||
+        reasonUpper.includes('NOEL MEMBRO PRO')
+      ) {
+        area = 'pro_lideres_noel_member'
+      } else if (reasonUpper.includes('PRO LÍDERES') || reasonUpper.includes('PRO LIDERES')) area = 'pro_lideres_team'
       else if (reasonUpper.includes('WELLNESS')) area = 'wellness'
       else if (reasonUpper.includes('NUTRI')) area = 'nutri'
       else if (reasonUpper.includes('COACH')) area = 'coach'
@@ -1341,6 +1355,9 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     }
     if (area === 'pro_lideres_team' && (!features || features.length === 0)) {
       features = ['equipe']
+    }
+    if (area === 'pro_lideres_noel_member' && (!features || features.length === 0)) {
+      features = ['noel_campo_pro_lideres']
     }
     console.log('🎯 Features determinadas (Subscription):', { area, planType, productType, features })
 
@@ -1446,7 +1463,8 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
       !subscription.welcome_email_sent &&
       mappedStatus === 'active' &&
       payerEmail &&
-      area !== 'pro_lideres_team'
+      area !== 'pro_lideres_team' &&
+      area !== 'pro_lideres_noel_member'
     ) {
       try {
         // Obter base URL

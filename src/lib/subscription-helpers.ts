@@ -25,6 +25,8 @@ export type SubscriptionArea =
   | 'perfumaria'
   | 'seller'
   | 'pro_lideres_team'
+  /** Add-on: Noel campo no Pro Líderes (cobrado no user_id do membro). */
+  | 'pro_lideres_noel_member'
 
 /** Mapeia perfil da matriz YLADA (lado /pt) para coluna `subscriptions.area`. */
 export function perfilMatrizToSubscriptionArea(perfil: string | null | undefined): SubscriptionArea | null {

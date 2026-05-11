@@ -9,6 +9,7 @@ import {
 } from '@/lib/pro-lideres-server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { getProLideresMemberMandatoryProfileGap } from '@/lib/pro-lideres-member-mandatory-profile'
+import { resolveProLideresNoelMemberSurface } from '@/lib/pro-lideres-noel-member-access'
 import ProLideresAreaShell from '@/components/pro-lideres/ProLideresAreaShell'
 import {
   PRO_LIDERES_MEMBER_BASE_PATH,
@@ -16,9 +17,9 @@ import {
 } from '@/config/pro-lideres-menu'
 
 /**
- * Área autenticada só para equipa (convidados). Líderes reais são enviados para `/pro-lideres/painel`.
+ * Área autenticada só para a equipe (convidados). Líderes reais são enviados para `/pro-lideres/painel`.
  * Nota: não usar `cookies().delete()` aqui — no App Router só Route Handlers / Server Actions podem alterar cookies.
- * O modo «ver como equipe» já fica desligado na UI via `teamViewPreview: false` e `canManageAsLeader: false`.
+ * Exceção: líder com cookie «Ver como equipe» pode abrir rotas em `/membro` para pré-visualizar (ex.: Noel membro).
  */
 export default async function ProLideresMembroAreaLayout({ children }: { children: ReactNode }) {
   const gate = await ensureLeaderTenantAccess()
@@ -43,7 +44,7 @@ export default async function ProLideresMembroAreaLayout({ children }: { childre
           isLeaderWorkspace: false,
         }
 
-  if (ui.canManageAsLeader) {
+  if (ui.canManageAsLeader && !ui.teamViewPreview) {
     redirect(mapProLideresPathToLeaderArea(pathname))
   }
 
@@ -66,17 +67,27 @@ export default async function ProLideresMembroAreaLayout({ children }: { childre
   const verticalCode = (gate.tenant.vertical_code ?? 'h-lider').trim() || 'h-lider'
   const dailyTasksVisibleToTeam = gate.tenant.daily_tasks_visible_to_team !== false
 
+  let noelMemberShowSidebarNav = false
+  if (admin && user?.id) {
+    const nm = await resolveProLideresNoelMemberSurface(admin, user, gate, {
+      isActiveMemberRow: ui.isActiveMemberRow,
+      teamViewPreview: ui.teamViewPreview,
+    })
+    noelMemberShowSidebarNav = nm.showSidebarNav
+  }
+
   return (
     <ProLideresAreaShell
       painelContext={{
         role: gate.role,
-        canManageAsLeader: false,
+        canManageAsLeader: Boolean(ui.canManageAsLeader && ui.teamViewPreview),
         isLeaderWorkspace: false,
-        teamViewPreview: false,
+        teamViewPreview: ui.teamViewPreview,
         operationLabel,
         devStubPanel: isProLideresDevStubTenant(gate.tenant),
         verticalCode,
         dailyTasksVisibleToTeam,
+        noelMemberShowSidebarNav,
         painelBasePath: PRO_LIDERES_MEMBER_BASE_PATH,
       }}
     >

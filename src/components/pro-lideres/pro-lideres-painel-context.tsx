@@ -30,6 +30,8 @@ export type ProLideresPainelContextValue = {
    * Líder e pré-visualização «ver como equipe» seguem a mesma regra da equipe.
    */
   dailyTasksVisibleToTeam: boolean
+  /** Noel membro: oferta ativa + membro no escopo (item no menu da equipe). */
+  noelMemberShowSidebarNav: boolean
   /**
    * Prefixo das rotas deste shell (`/pro-lideres/painel` ou `/pro-lideres/membro`).
    * Links do menu, logo e perfil usam isto.

@@ -370,6 +370,7 @@ interface NoelChatProps {
 function isProLideresNoelApiPath(path: string | undefined): boolean {
   return Boolean(
     path?.includes('/pro-lideres/noel') ||
+      path?.includes('/pro-lideres/membro/noel') ||
       path?.includes('/pro-estetica-corporal/noel') ||
       path?.includes('/pro-estetica-capilar/noel')
   )
@@ -404,7 +405,9 @@ export default function NoelChat({
       ? '/pro-estetica-corporal/painel/catalogo'
       : area === 'pro_estetica_capilar'
         ? '/pro-estetica-capilar/painel/biblioteca-links'
-        : '/pro-lideres/painel/catalogo'
+        : area === 'pro_lideres_member' || resolvedChatApi?.includes('/membro/noel')
+          ? '/pro-lideres/membro/catalogo'
+          : '/pro-lideres/painel/catalogo'
   /** Guia «publicar na biblioteca» + PATCH link-meta: só o Noel do painel Pro Líderes clássico. */
   const proLideresLeaderLibraryFlow = Boolean(resolvedChatApi?.includes('/pro-lideres/noel'))
   /** Noel embed Pro Estética: mesmos atalhos de testar link / catálogo que o líder, sem modal Vendas/Recrutamento. */
@@ -419,7 +422,10 @@ export default function NoelChat({
     resolvedChatApi?.includes('/pro-estetica-corporal/noel') ||
     resolvedChatApi?.includes('/pro-estetica-capilar/noel')
       ? getYladaAreaPathPrefix('estetica')
-      : area === 'pro_lideres' || resolvedChatApi?.includes('/pro-lideres/noel')
+      : area === 'pro_lideres' ||
+          area === 'pro_lideres_member' ||
+          resolvedChatApi?.includes('/pro-lideres/noel') ||
+          resolvedChatApi?.includes('/membro/noel')
         ? getYladaAreaPathPrefix('ylada')
         : getYladaAreaPathPrefix(area)
 
@@ -434,10 +440,16 @@ export default function NoelChat({
       ? '/pro-estetica-corporal/painel/biblioteca-links'
       : area === 'pro_estetica_capilar'
         ? '/pro-estetica-capilar/painel/biblioteca-links'
-        : '/pro-lideres/painel/links'
+        : area === 'pro_lideres_member' || resolvedChatApi?.includes('/membro/noel')
+          ? '/pro-lideres/membro/perfil'
+          : '/pro-lideres/painel/links'
 
   const noelPainelSecondaryToolsLabel =
-    area === 'pro_estetica_corporal' || area === 'pro_estetica_capilar' ? 'Links' : 'Convites equipe'
+    area === 'pro_estetica_corporal' || area === 'pro_estetica_capilar'
+      ? 'Links'
+      : area === 'pro_lideres_member' || resolvedChatApi?.includes('/membro/noel')
+        ? 'Perfil'
+        : 'Convites equipe'
   const capilarFeedbackEnabled = area === 'pro_estetica_capilar'
   const [capilarFeedbackByMsgId, setCapilarFeedbackByMsgId] = useState<Record<string, 'up' | 'down'>>({})
   const capilarFeedbackSubmittedRef = useRef<Set<string>>(new Set())
