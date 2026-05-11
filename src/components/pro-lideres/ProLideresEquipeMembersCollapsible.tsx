@@ -1,5 +1,6 @@
 'use client'
 
+import { BadgeCheck, Eye, MessageCircle, MousePointerClick } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -20,11 +21,58 @@ type MemberDiagRow = {
   whatsappClicks: number
 }
 
-function MemberToolsDiagBlock({ memberUserId, memberLabel }: { memberUserId: string; memberLabel: string }) {
+type MemberDiagRowScored = MemberDiagRow & { score: number }
+
+function rowInsight(r: MemberDiagRow): string | null {
+  if (r.views === 0) return null
+  if (r.views >= 2 && r.whatsappClicks === 0 && r.completions > 0) {
+    return 'Chegou ao resultado, mas ainda sem WhatsApp'
+  }
+  if (r.views >= 2 && r.starts === 0) {
+    return 'Muitas vistas, poucos inícios de fluxo'
+  }
+  if (r.starts > 0 && r.completions === 0) {
+    return 'Início sem conclusão / resultado'
+  }
+  return null
+}
+
+/** Métricas por ferramenta: só números + rótulos (sem gráfico de barras). */
+function ToolMetricsNumbers({ row }: { row: MemberDiagRow }) {
+  const items: { n: number; label: string }[] = [
+    { n: row.views, label: 'Ver link' },
+    { n: row.starts, label: 'Clicou' },
+    { n: row.completions, label: 'Resultado' },
+    { n: row.whatsappClicks, label: 'WhatsApp' },
+  ]
+  return (
+    <div className="mt-2 grid grid-cols-4 gap-1 rounded-lg bg-gray-50/95 px-1 py-2 sm:gap-2 sm:px-2">
+      {items.map((it) => (
+        <div key={it.label} className="min-w-0 text-center">
+          <p className="text-base font-bold tabular-nums leading-none text-gray-900 sm:text-lg">{it.n}</p>
+          <p className="mt-1 text-[9px] font-medium uppercase leading-tight tracking-wide text-gray-500 sm:text-[10px]">
+            {it.label}
+          </p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function MemberToolsDiagBlock({
+  memberUserId,
+  memberLabel,
+  tabulatorName,
+}: {
+  memberUserId: string
+  memberLabel: string
+  tabulatorName: string | null
+}) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [rows, setRows] = useState<MemberDiagRow[]>([])
+  const [truncated, setTruncated] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -42,14 +90,19 @@ function MemberToolsDiagBlock({ memberUserId, memberLabel }: { memberUserId: str
           if (!cancelled) {
             setError((data as { error?: string }).error || 'Não foi possível carregar.')
             setRows([])
+            setTruncated(false)
           }
           return
         }
-        if (!cancelled) setRows((data as { rows?: MemberDiagRow[] }).rows ?? [])
+        if (!cancelled) {
+          setRows((data as { rows?: MemberDiagRow[] }).rows ?? [])
+          setTruncated(Boolean((data as { truncated?: boolean }).truncated))
+        }
       } catch {
         if (!cancelled) {
           setError('Erro de rede.')
           setRows([])
+          setTruncated(false)
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -60,7 +113,7 @@ function MemberToolsDiagBlock({ memberUserId, memberLabel }: { memberUserId: str
     }
   }, [open, memberUserId])
 
-  const ranked = useMemo(() => {
+  const ranked = useMemo((): MemberDiagRowScored[] => {
     const withScore = rows.map((r) => ({
       ...r,
       score: r.views + r.starts * 2 + r.completions * 3 + r.whatsappClicks * 4,
@@ -72,22 +125,41 @@ function MemberToolsDiagBlock({ memberUserId, memberLabel }: { memberUserId: str
   const used = ranked.filter((r) => r.score > 0)
   const unused = ranked.filter((r) => r.score === 0)
 
+  const totals = useMemo(() => {
+    return used.reduce(
+      (acc, r) => ({
+        views: acc.views + r.views,
+        starts: acc.starts + r.starts,
+        completions: acc.completions + r.completions,
+        whatsapp: acc.whatsapp + r.whatsappClicks,
+      }),
+      { views: 0, starts: 0, completions: 0, whatsapp: 0 }
+    )
+  }, [used])
+
   return (
     <div className="mt-3 border-t border-gray-100 pt-3">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="text-xs font-semibold text-blue-700 underline-offset-2 hover:underline"
+        className="text-left text-xs font-semibold text-blue-700 underline-offset-2 hover:underline"
         aria-expanded={open}
       >
         {open ? 'Ocultar' : 'Ver'} uso das ferramentas (30 dias) — {memberLabel}
       </button>
       {open ? (
-        <div className="mt-2 rounded-lg border border-gray-100 bg-gray-50/90 p-3">
-          <p className="text-[11px] leading-snug text-gray-600">
-            Só conta tráfego no <strong className="text-gray-800">link rastreado</strong> desta pessoa (com código de
-            membro). Se ela ainda não divulgou esse link, os números ficam zerados mesmo usando o catálogo por dentro.
-          </p>
+        <div className="mt-2 rounded-xl border border-gray-200/90 bg-gradient-to-b from-white to-gray-50/80 p-3 shadow-sm">
+          {tabulatorName ? (
+            <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[11px] font-medium text-gray-800">
+              <span className="text-gray-500">Tabulador</span>
+              <span className="max-w-[12rem] truncate text-gray-900">{tabulatorName}</span>
+            </p>
+          ) : null}
+          <div className="rounded-lg border border-blue-100 bg-blue-50/90 px-2.5 py-2 text-[11px] leading-relaxed text-blue-950">
+            <strong className="font-semibold">Como isto é contado:</strong> só entra tráfego feito com o{' '}
+            <strong>link rastreado</strong> desta pessoa (código na partilha). Se ela ainda não partilhou o link
+            pessoal, os números ficam em zero mesmo que use ferramentas por dentro da conta.
+          </div>
           {error ? (
             <p className="mt-2 text-xs font-medium text-red-600" role="alert">
               {error}
@@ -98,33 +170,104 @@ function MemberToolsDiagBlock({ memberUserId, memberLabel }: { memberUserId: str
           ) : ranked.length === 0 ? (
             <p className="mt-2 text-xs text-gray-600">Nenhuma ferramenta catalogada para este espaço.</p>
           ) : (
-            <div className="mt-2 space-y-3">
+            <div className="mt-3 space-y-3">
+              {truncated ? (
+                <p className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-950">
+                  A amostra de eventos atingiu o limite do servidor neste período — os totais podem estar subestimados.
+                  Se precisar de números mais completos, use um período mais curto ou exporte pelo painel (Excel).
+                </p>
+              ) : null}
+              {used.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <div className="rounded-lg border border-gray-200 bg-white px-2 py-2 text-center shadow-sm">
+                      <div className="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                        <Eye className="h-3.5 w-3.5 text-sky-600" aria-hidden />
+                        Ver link
+                      </div>
+                      <p className="mt-0.5 text-lg font-bold tabular-nums text-gray-900">{totals.views}</p>
+                    </div>
+                    <div className="rounded-lg border border-gray-200 bg-white px-2 py-2 text-center shadow-sm">
+                      <div className="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                        <MousePointerClick className="h-3.5 w-3.5 text-indigo-600" aria-hidden />
+                        Início
+                      </div>
+                      <p className="mt-0.5 text-lg font-bold tabular-nums text-gray-900">{totals.starts}</p>
+                    </div>
+                    <div className="rounded-lg border border-gray-200 bg-white px-2 py-2 text-center shadow-sm">
+                      <div className="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                        <BadgeCheck className="h-3.5 w-3.5 text-violet-600" aria-hidden />
+                        Resultado
+                      </div>
+                      <p className="mt-0.5 text-lg font-bold tabular-nums text-gray-900">{totals.completions}</p>
+                    </div>
+                    <div className="rounded-lg border border-gray-200 bg-white px-2 py-2 text-center shadow-sm">
+                      <div className="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                        <MessageCircle className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
+                        WhatsApp
+                      </div>
+                      <p className="mt-0.5 text-lg font-bold tabular-nums text-gray-900">{totals.whatsapp}</p>
+                    </div>
+                  </div>
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                    Resumo no período · {used.length} ferramenta(s) com atividade rastreada
+                  </p>
+                </>
+              ) : null}
+
               {used.length > 0 ? (
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">
+                  <p className="text-[11px] font-semibold text-gray-600">
                     Ranking: mais uso → menos uso (link rastreado)
                   </p>
-                  <ul className="mt-1.5 space-y-1.5 text-xs">
-                    {used.map((r) => (
-                      <li
-                        key={r.linkId}
-                        className="flex flex-wrap items-baseline justify-between gap-2 rounded-md border border-white bg-white/90 px-2 py-1.5"
-                      >
-                        <span className="min-w-0 font-medium text-gray-900">{r.title}</span>
-                        <span className="shrink-0 tabular-nums text-gray-600">
-                          {r.views} viu link · {r.starts} clicou no link · {r.completions} viu resultado ·{' '}
-                          {r.whatsappClicks} chamou WhatsApp
-                        </span>
-                      </li>
-                    ))}
+                  <ul className="mt-2 space-y-3">
+                    {used.map((r) => {
+                      const insight = rowInsight(r)
+                      const primary =
+                        r.whatsappClicks > 0
+                          ? `${r.whatsappClicks} contato(s) WhatsApp`
+                          : r.completions > 0
+                            ? `${r.completions} resultado(s)`
+                            : r.starts > 0
+                              ? `${r.starts} início(s) de fluxo`
+                              : `${r.views} visualização(ões) do link`
+                      return (
+                        <li
+                          key={r.linkId}
+                          className="rounded-lg border border-gray-200/90 bg-white p-3 shadow-sm ring-1 ring-gray-100/80"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold leading-snug text-gray-900">{r.title}</p>
+                              <p className="mt-0.5 text-[11px] text-gray-500">Slug: {r.slug}</p>
+                            </div>
+                            <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-900 ring-1 ring-emerald-100">
+                              {primary}
+                            </span>
+                          </div>
+                          {insight ? (
+                            <p className="mt-2 text-[11px] font-medium text-amber-800">{insight}</p>
+                          ) : null}
+                          <ToolMetricsNumbers row={r} />
+                        </li>
+                      )
+                    })}
                   </ul>
                 </div>
               ) : (
-                <p className="text-xs text-gray-600">Nenhum evento rastreado para esta pessoa no período.</p>
+                <div className="rounded-lg border border-gray-200 bg-white px-3 py-3 text-xs text-gray-700">
+                  <p className="font-semibold text-gray-900">Nenhum uso rastreado nestes 30 dias</p>
+                  <ul className="mt-2 list-inside list-disc space-y-1.5 text-[11px] leading-relaxed text-gray-600">
+                    <li>Confirme se a pessoa já está a partilhar o link com o código pessoal (área do membro).</li>
+                    <li>Peça um teste: abrir o link partilhado noutro celular e ver se as métricas sobem no dia seguinte.</li>
+                    <li>Compare com outro membro da equipe que já tenha números — ajuda a ver se é hábito ou configuração.</li>
+                  </ul>
+                </div>
               )}
-              {unused.length > 0 && used.length > 0 ? (
-                <p className="text-[11px] text-gray-500">
-                  Outras {unused.length} ferramenta(s) sem cliques rastreados neste período.
+              {unused.length > 0 ? (
+                <p className="text-[11px] leading-relaxed text-gray-500">
+                  {used.length > 0 ? 'Outras ' : ''}
+                  <strong>{unused.length}</strong> ferramenta(s) no catálogo sem cliques rastreados neste período.
                 </p>
               ) : null}
             </div>
@@ -639,7 +782,11 @@ export function ProLideresEquipeMembersCollapsible({
                     </div>
 
                     {canManageMembers && m.role === 'member' && m.teamAccessState === 'active' ? (
-                      <MemberToolsDiagBlock memberUserId={m.userId} memberLabel={title} />
+                      <MemberToolsDiagBlock
+                        memberUserId={m.userId}
+                        memberLabel={title}
+                        tabulatorName={m.tabulatorName}
+                      />
                     ) : null}
                   </li>
                 )

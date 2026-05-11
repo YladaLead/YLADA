@@ -1,7 +1,9 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { ProLideresEquipeAttributionPanel } from '@/components/pro-lideres/ProLideresEquipeAttributionPanel'
 import { ProLideresEquipeMembersCollapsible } from '@/components/pro-lideres/ProLideresEquipeMembersCollapsible'
+import { proLideresItemHref } from '@/config/pro-lideres-menu'
 import { ensureLeaderTenantAccess, loadProLideresPainelUiForRequest } from '@/lib/pro-lideres-server'
 import {
   fetchProLideresMembersEnriched,
@@ -45,6 +47,16 @@ export default async function ProLideresEquipePage() {
             </>
           )}
         </p>
+        {isLeader ? (
+          <p className="mt-3 rounded-lg border border-gray-200 bg-gray-50/90 px-3 py-2 text-sm text-gray-700">
+            <strong className="text-gray-900">Download por tabulador (Excel):</strong> use o menu lateral{' '}
+            <Link href={proLideresItemHref('tabuladores')} className="font-semibold text-blue-700 underline hover:text-blue-800">
+              Tabuladores
+            </Link>
+            — lá pode escolher o período e baixar o arquivo (ranking de links e de membros, conversões, detalhe por
+            ferramenta, tabuladores e tarefas).
+          </p>
+        ) : null}
       </div>
 
       <ProLideresEquipeMembersCollapsible members={members} canManageMembers={isLeader} />

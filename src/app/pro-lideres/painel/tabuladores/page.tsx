@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 
+import { ProLideresLeaderExportExcelSection } from '@/components/pro-lideres/ProLideresLeaderExportExcelSection'
 import { ProLideresTabuladoresPanel } from '@/components/pro-lideres/ProLideresTabuladoresPanel'
 import { ensureLeaderTenantAccess, loadProLideresPainelUiForRequest } from '@/lib/pro-lideres-server'
 
@@ -19,6 +20,7 @@ export default async function ProLideresTabuladoresPage() {
         Cadastre os nomes de tabulador da sua operação. Essa lista aparece no link de convite para a equipe escolher o
         tabulador ao criar conta ou ao aceitar o convite.
       </p>
+      <ProLideresLeaderExportExcelSection />
       <ProLideresTabuladoresPanel />
     </div>
   )

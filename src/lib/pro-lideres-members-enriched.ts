@@ -30,6 +30,8 @@ export type ProLideresMemberListItem = {
   createdAt: string
   displayName: string | null
   email: string | null
+  /** Nome do tabulador escolhido no convite (sub-equipa), se existir. */
+  tabulatorName: string | null
 }
 
 /** Lista membros do tenant com nome/e-mail de user_profiles (só servidor, service role). */
@@ -40,7 +42,7 @@ export async function fetchProLideresMembersEnriched(
 
   const { data: rows, error } = await supabaseAdmin
     .from('leader_tenant_members')
-    .select('user_id, role, team_access_state, team_access_expires_at, created_at')
+    .select('user_id, role, team_access_state, team_access_expires_at, created_at, pro_lideres_tabulator_name')
     .eq('leader_tenant_id', tenantId)
     .order('role', { ascending: false })
     .order('created_at', { ascending: true })
@@ -65,6 +67,9 @@ export async function fetchProLideresMembersEnriched(
           ? 'pending_activation'
           : 'active'
     const exp = r.team_access_expires_at
+    const tabRaw = (r as { pro_lideres_tabulator_name?: string | null }).pro_lideres_tabulator_name
+    const tabulatorName =
+      typeof tabRaw === 'string' && tabRaw.trim() ? tabRaw.trim() : null
     return {
       userId: r.user_id as string,
       role: r.role as ProLideresTenantRole,
@@ -73,6 +78,7 @@ export async function fetchProLideresMembersEnriched(
       createdAt: r.created_at as string,
       displayName: (p?.nome_completo as string | null) ?? null,
       email: (p?.email as string | null) ?? null,
+      tabulatorName,
     }
   })
 }
