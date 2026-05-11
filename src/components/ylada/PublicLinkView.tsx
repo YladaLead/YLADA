@@ -2242,7 +2242,15 @@ function DiagnosticoQuiz({
   const isComplete = currentIndex >= questions.length && questions.length > 0
 
   const completeSent = useRef(false)
+  const resultViewSent = useRef(false)
   const [showFullAnalysis, setShowFullAnalysis] = useState(false)
+
+  useEffect(() => {
+    if (step !== 'result' || !isComplete) return
+    if (resultViewSent.current) return
+    resultViewSent.current = true
+    trackLinkEvent(slug, 'result_view')
+  }, [step, isComplete, slug])
 
   const handleShareQuizResult = async () => {
     trackLinkEvent(slug, 'share_click')

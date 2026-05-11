@@ -112,7 +112,7 @@ export default async function ProLideresMembroVisaoPage() {
           <div>
             <h2 className="text-base font-semibold text-gray-900">Ferramentas em uso</h2>
             <p className="text-xs text-gray-500">
-              Eventos com a sua identificação na equipe (aberturas, inícios, conclusões, WhatsApp).
+              Eventos com a sua identificação na equipe: viu link, clicou no link, viu resultado e chamou WhatsApp.
             </p>
           </div>
           {truncated ? (
@@ -136,7 +136,7 @@ export default async function ProLideresMembroVisaoPage() {
                   Meus links
                 </Link>{' '}
                 e use <strong className="font-semibold text-gray-800">Copiar link</strong> (URLs com o teu código de
-                equipa contam aberturas e WhatsApp na tua área).
+                equipa contam viu link e chamou WhatsApp na tua área).
               </>
             )}
           </p>
@@ -144,31 +144,31 @@ export default async function ProLideresMembroVisaoPage() {
           <>
             <div className="grid grid-cols-2 gap-3 border-b border-gray-100 px-4 py-3 sm:grid-cols-4">
               <div>
-                <p className="text-xs text-gray-500">Visualizações</p>
+                <p className="text-xs text-gray-500">Viu link</p>
                 <p className="text-lg font-semibold text-gray-900">{totals.views}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Inícios</p>
+                <p className="text-xs text-gray-500">Clicou no link</p>
                 <p className="text-lg font-semibold text-gray-900">{totals.starts}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Conclusões</p>
+                <p className="text-xs text-gray-500">Viu resultado</p>
                 <p className="text-lg font-semibold text-gray-900">{totals.completions}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">WhatsApp</p>
+                <p className="text-xs text-gray-500">Chamou WhatsApp</p>
                 <p className="text-lg font-semibold text-gray-900">{totals.whatsapp}</p>
               </div>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
-                <thead className="bg-gray-50 text-xs font-medium uppercase tracking-wide text-gray-500">
+                <thead className="bg-gray-50 text-xs font-medium tracking-wide text-gray-500">
                   <tr>
                     <th className="px-4 py-2">Ferramenta</th>
-                    <th className="px-4 py-2 text-right">Ver</th>
-                    <th className="px-4 py-2 text-right">Início</th>
-                    <th className="px-4 py-2 text-right">Fim</th>
-                    <th className="hidden px-4 py-2 text-right sm:table-cell">WA</th>
+                    <th className="px-4 py-2 text-right">Viu link</th>
+                    <th className="px-4 py-2 text-right">Clicou no link</th>
+                    <th className="px-4 py-2 text-right">Viu resultado</th>
+                    <th className="hidden px-4 py-2 text-right sm:table-cell">Chamou WhatsApp</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">

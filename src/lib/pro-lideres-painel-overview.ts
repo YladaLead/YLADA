@@ -54,7 +54,7 @@ export type PainelOverviewAlert = {
 export type PainelOverviewFunnel = {
   /** Visualizações de links (todos os eventos view). */
   linkViews: number
-  /** Fluxos concluídos (eventos complete + result_view). */
+  /** Chegadas à página de resultado (`result_view` apenas; evita dupla contagem com `complete`). */
   diagnosticsCompleted: number
   /** Cliques no WhatsApp (cta_click). */
   whatsappClicks: number
@@ -777,7 +777,7 @@ export async function fetchProLideresPainelOverview(opts: {
             viewsByMember.set(mid, cur)
           }
         }
-        if (et === 'complete' || et === 'result_view') {
+        if (et === 'result_view') {
           funnelDiagnostics += 1
         }
       }

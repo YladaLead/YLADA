@@ -112,7 +112,8 @@ function MemberToolsDiagBlock({ memberUserId, memberLabel }: { memberUserId: str
                       >
                         <span className="min-w-0 font-medium text-gray-900">{r.title}</span>
                         <span className="shrink-0 tabular-nums text-gray-600">
-                          {r.views} abert. · {r.starts} início · {r.completions} concl. · {r.whatsappClicks} WA
+                          {r.views} viu link · {r.starts} clicou no link · {r.completions} viu resultado ·{' '}
+                          {r.whatsappClicks} chamou WhatsApp
                         </span>
                       </li>
                     ))}
@@ -182,11 +183,9 @@ function validadeAjuda(m: ProLideresMemberListItem, canManage: boolean): string 
 
 export function ProLideresEquipeMembersCollapsible({
   members,
-  viewerRoleLabel,
   canManageMembers = false,
 }: {
   members: ProLideresMemberListItem[]
-  viewerRoleLabel: string
   /** Só o líder no painel real (não preview) altera pausa / remoção. */
   canManageMembers?: boolean
 }) {
@@ -290,7 +289,7 @@ export function ProLideresEquipeMembersCollapsible({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-emerald-200/80 bg-white shadow-sm ring-1 ring-emerald-100/60">
       {activateUserId && activateFlow ? (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
@@ -424,26 +423,25 @@ export function ProLideresEquipeMembersCollapsible({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-start justify-between gap-3 border-b border-gray-100 bg-gray-50 px-4 py-3 text-left transition hover:bg-gray-100/90"
+        className="flex w-full items-center justify-between gap-3 border-b border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-green-50/90 to-teal-50/40 px-4 py-3 text-left transition hover:from-emerald-100/80 hover:via-green-50 hover:to-teal-50/50"
         aria-expanded={open}
-        id="pro-lideres-equipe-pessoas-heading"
+        id="pro-lideres-equipe-analise-heading"
       >
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-gray-900">Pessoas neste espaço</p>
-          <p className="text-xs text-gray-500">O seu papel aqui: {viewerRoleLabel}</p>
+          <p className="text-sm font-semibold text-emerald-950">Análise da sua equipe</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-gray-700 ring-1 ring-gray-200">
+          <span className="rounded-full bg-white/95 px-2 py-0.5 text-xs font-semibold text-emerald-900 shadow-sm ring-1 ring-emerald-200/80">
             {members.length}
           </span>
-          <span className="text-gray-500" aria-hidden>
+          <span className="text-emerald-700/80" aria-hidden>
             {open ? '▲' : '▼'}
           </span>
         </div>
       </button>
 
       {open ? (
-        <div className="border-t border-gray-100">
+        <div className="border-t border-emerald-100/90">
           <div className="border-b border-gray-100 bg-white px-4 py-3">
             <label htmlFor="pro-lideres-equipe-busca" className="mb-1.5 block text-xs font-semibold text-gray-700">
               Buscar por nome ou e-mail
@@ -488,7 +486,7 @@ export function ProLideresEquipeMembersCollapsible({
           </div>
           <ul
             className="max-h-[min(60vh,28rem)] divide-y divide-gray-100 overflow-y-auto overscroll-contain"
-            aria-labelledby="pro-lideres-equipe-pessoas-heading"
+            aria-labelledby="pro-lideres-equipe-analise-heading"
           >
             {canManageMembers ? (
               <li className="hidden px-4 py-2 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,11rem)_auto] sm:gap-3 sm:bg-gray-50/80">

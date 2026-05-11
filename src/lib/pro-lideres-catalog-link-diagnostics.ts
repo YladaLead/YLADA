@@ -25,6 +25,9 @@ export type FetchProLideresCatalogLinkDiagnosticsArgs = {
 /**
  * Métricas de utilização das ferramentas do catálogo (links do dono do tenant).
  * Reutilizado pelo endpoint de diagnóstico do líder e pela visão geral do membro.
+ *
+ * «Viu resultado» (completions): só eventos `result_view` — uma vez por exibição da página
+ * de resultado no cliente (evita somar `complete` + `result_view` no mesmo fluxo).
  */
 export async function fetchProLideresCatalogLinkDiagnosticRows(
   admin: SupabaseClient,
@@ -115,7 +118,7 @@ export async function fetchProLideresCatalogLinkDiagnosticRows(
     const c = counts.get(lid)!
     if (et === 'view') c.views += 1
     else if (et === 'start') c.starts += 1
-    else if (et === 'complete' || et === 'result_view') c.completions += 1
+    else if (et === 'result_view') c.completions += 1
     else if (et === 'cta_click') c.whatsapp += 1
   }
 

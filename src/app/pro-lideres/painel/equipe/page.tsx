@@ -7,12 +7,6 @@ import {
   fetchProLideresMembersEnriched,
   syncProLideresMemberExpiryPauses,
 } from '@/lib/pro-lideres-members-enriched'
-import type { ProLideresTenantRole } from '@/types/leader-tenant'
-
-function roleLabel(role: ProLideresTenantRole): string {
-  return role === 'leader' ? 'Líder' : 'Equipe'
-}
-
 export default async function ProLideresEquipePage() {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) redirect(gate.redirect)
@@ -25,7 +19,6 @@ export default async function ProLideresEquipePage() {
 
   await syncProLideresMemberExpiryPauses(gate.tenant.id)
   const members = await fetchProLideresMembersEnriched(gate.tenant.id)
-  const ctx = { tenant: gate.tenant, role: gate.role }
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -54,11 +47,7 @@ export default async function ProLideresEquipePage() {
         </p>
       </div>
 
-      <ProLideresEquipeMembersCollapsible
-        members={members}
-        viewerRoleLabel={roleLabel(ctx.role)}
-        canManageMembers={isLeader}
-      />
+      <ProLideresEquipeMembersCollapsible members={members} canManageMembers={isLeader} />
 
       {isLeader ? <ProLideresEquipeAttributionPanel /> : null}
     </div>
