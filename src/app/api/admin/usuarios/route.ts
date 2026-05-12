@@ -6,6 +6,7 @@ import { isPerfilMatrizYlada, PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-con
 import { parseYladaFreeGrantKind } from '@/lib/admin-ylada-free-matriz'
 import { isAdminTestAccountEmail } from '@/lib/admin-test-accounts'
 import { fetchAdminProProductBadgesByUserId } from '@/lib/admin-usuarios-pro-product-badge'
+import { fetchProEsteticaConsultoriaAccessUntilByUserId } from '@/lib/admin-usuarios-pro-estetica-consultoria-access'
 import { toYmdInTimeZone } from '@/lib/date-utils'
 
 /**
@@ -237,6 +238,16 @@ export async function GET(request: NextRequest) {
     // Buscar assinaturas (ativas e vencidas) para todos os usuários
     const userIds = profiles.map(p => p.user_id)
     const proProductBadgesByUser = await fetchAdminProProductBadgesByUserId(supabaseAdmin, userIds)
+
+    const userIdToEmailPro = new Map<string, string>()
+    for (const p of profiles) {
+      const em = (p.email && String(p.email).trim()) || emailDoAuth.get(p.user_id) || ''
+      if (em.trim()) userIdToEmailPro.set(p.user_id, em.trim())
+    }
+    const proConsultoriaByUser = await fetchProEsteticaConsultoriaAccessUntilByUserId(supabaseAdmin, {
+      userIds,
+      userIdToEmail: userIdToEmailPro,
+    })
 
     const { data: subscriptions } = await supabaseAdmin
       .from('subscriptions')
@@ -561,6 +572,8 @@ export async function GET(request: NextRequest) {
       const whatsappExibicao =
         (profile.whatsapp && profile.whatsapp.trim()) || whatsappDoAuth.get(profile.user_id) || null
 
+      const proConsultoria = proConsultoriaByUser.get(profile.user_id)
+
       return {
         id: profile.user_id,
         nome: profile.nome_completo || emailExibicao.split('@')[0] || 'Sem nome',
@@ -573,6 +586,8 @@ export async function GET(request: NextRequest) {
         assinaturaId: subscriptionToEdit?.id || null,
         assinaturaVencimento: assinaturaVencimento ? toYmdInTimeZone(assinaturaVencimento) : null,
         dataCadastro: profile.created_at ? toYmdInTimeZone(profile.created_at) : null,
+        proEsteticaConsultoriaAccessUntil: proConsultoria?.until ?? null,
+        proEsteticaConsultoriaSegment: proConsultoria?.segment ?? null,
         leadsGerados: whatsappLeadsPorUsuario[profile.user_id] || 0,
         cursosCompletos: templatesPorUsuario[profile.user_id] || 0, // legacy (UI não deve mais exibir como cursos)
         linksEnviados: templatesPorUsuario[profile.user_id] || 0,

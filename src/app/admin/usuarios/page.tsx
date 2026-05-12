@@ -60,6 +60,10 @@ interface Usuario {
   everHadPaid?: boolean
   /** Produto Pro (tenant vertical); coluna Área — ver API GET /api/admin/usuarios */
   proProductBadge?: 'pro_terapia_capilar' | 'pro_estetica_corporal' | 'pro_lideres' | null
+  /** Fim do acesso ao painel Pro Estética (consultoria), YYYY-MM-DD — ver API */
+  proEsteticaConsultoriaAccessUntil?: string | null
+  /** Segmento da ficha consultoria (capilar / corporal / ambos) quando disponível */
+  proEsteticaConsultoriaSegment?: string | null
 }
 
 interface Stats {
@@ -793,8 +797,8 @@ export default function AdminUsuarios() {
 
   const exportarPlanilhaUsuarios = () => {
     const headers = mostrarColunasPresidente
-      ? [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.isPresident, t.table.president, t.table.subscription, t.filters.paymentHistory, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel, t.table.shareYladaLabel, t.table.fullAnalysisExpandLabel]
-      : [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.subscription, t.filters.paymentHistory, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel, t.table.shareYladaLabel, t.table.fullAnalysisExpandLabel]
+      ? [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.isPresident, t.table.president, t.table.subscription, t.filters.paymentHistory, t.table.enrollment, t.table.proConsultoriaStamp, t.table.leads, t.table.linksLabel, t.table.clicksLabel, t.table.shareYladaLabel, t.table.fullAnalysisExpandLabel]
+      : [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.subscription, t.filters.paymentHistory, t.table.enrollment, t.table.proConsultoriaStamp, t.table.leads, t.table.linksLabel, t.table.clicksLabel, t.table.shareYladaLabel, t.table.fullAnalysisExpandLabel]
     const rows = usuariosVisiveis.map((u) => {
       const base = [
         u.nome,
@@ -809,6 +813,7 @@ export default function AdminUsuarios() {
         getAssinaturaListLabel(u),
         getPaymentHistoryLabel(u),
         u.dataCadastro ? formatYmdSlashPtBr(u.dataCadastro) : '',
+        u.proEsteticaConsultoriaAccessUntil ? formatYmdSlashPtBr(u.proEsteticaConsultoriaAccessUntil) : '',
         String(u.leadsGerados),
         String(u.linksEnviados ?? 0),
         String(u.cliquesLinks ?? 0),
@@ -1179,7 +1184,7 @@ export default function AdminUsuarios() {
                         </>
                       )}
                       <th className="w-[6.5rem] sm:w-24 px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.subscription}</th>
-                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[6.25rem]" title={`${t.table.enrollmentSub}\n\n${t.table.enrollmentConsultoriaHint}`}>
                         {t.table.enrollment}
                       </th>
                       <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1306,13 +1311,33 @@ export default function AdminUsuarios() {
                           })()}
                         </td>
                         <td
-                          className="px-2 py-2 whitespace-nowrap text-xs text-gray-600"
-                          title={t.table.enrollmentSub}
+                          className="px-2 py-2 align-top text-xs text-gray-600 min-w-[6.25rem] max-w-[8.5rem]"
+                          title={`${t.table.enrollmentSub}\n\n${t.table.enrollmentConsultoriaHint}`}
                         >
                           <div className="text-[9px] text-gray-400 uppercase tracking-wide mb-0.5">{t.table.profileDateStamp}</div>
                           {usuario.dataCadastro
                             ? formatYmdSlashPtBr(usuario.dataCadastro)
                             : <span className="text-gray-400">—</span>}
+                          {usuario.proEsteticaConsultoriaAccessUntil ? (
+                            <div className="mt-1.5 pt-1.5 border-t border-gray-100">
+                              <div className="text-[9px] text-gray-400 uppercase tracking-wide mb-0.5">{t.table.proConsultoriaStamp}</div>
+                              <span
+                                className={
+                                  usuario.proEsteticaConsultoriaAccessUntil <
+                                  new Date().toISOString().slice(0, 10)
+                                    ? 'text-red-700 font-medium tabular-nums'
+                                    : 'text-gray-800 tabular-nums'
+                                }
+                                title={
+                                  usuario.proEsteticaConsultoriaSegment
+                                    ? `${t.table.enrollmentConsultoriaHint} (${usuario.proEsteticaConsultoriaSegment})`
+                                    : t.table.enrollmentConsultoriaHint
+                                }
+                              >
+                                {formatYmdSlashPtBr(usuario.proEsteticaConsultoriaAccessUntil)}
+                              </span>
+                            </div>
+                          ) : null}
                         </td>
                         <td
                           className="px-2 py-2 whitespace-nowrap min-w-[6.75rem]"

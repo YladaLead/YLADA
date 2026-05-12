@@ -136,6 +136,10 @@ export interface AdminUsuariosTranslations {
     paymentHistoryNeverBadge: string
     /** Chip: já teve mensal ou anual em algum momento */
     paymentHistoryFormerBadge: string
+    /** Sublinha na coluna Cadastro: data “Acesso válido até” (consultoria Pro Estética) */
+    proConsultoriaStamp: string
+    /** Tooltip da sublinha Pro consultoria (painel vs conta) */
+    enrollmentConsultoriaHint: string
   }
   subscriptionBadge: {
     active: string
@@ -356,6 +360,9 @@ const pt: AdminUsuariosTranslations = {
     testAccountBadge: 'Teste',
     paymentHistoryNeverBadge: 'Só free / nunca pagou recorrente',
     paymentHistoryFormerBadge: 'Já foi assinante (mensal ou anual)',
+    proConsultoriaStamp: 'Pro consultoria (até)',
+    enrollmentConsultoriaHint:
+      'Fim do acesso ao painel Pro Estética (capilar/corporal): campo “Acesso válido até” em Admin → Consultoria. Liga por Leader tenant ID na ficha ou pelo e-mail da ficha.',
   },
   subscriptionBadge: {
     active: 'Ativa',
@@ -579,6 +586,9 @@ const es: AdminUsuariosTranslations = {
     testAccountBadge: 'Prueba',
     paymentHistoryNeverBadge: 'Solo gratis / nunca pagó recurrente',
     paymentHistoryFormerBadge: 'Ya fue suscriptor (mensual o anual)',
+    proConsultoriaStamp: 'Pro consultoría (hasta)',
+    enrollmentConsultoriaHint:
+      'Fin del acceso al panel Pro Estética (capilar/corporal): campo “Acceso válido hasta” en Admin → Consultoría. Enlace con Leader tenant ID en la ficha o por el correo de la ficha.',
   },
   subscriptionBadge: {
     active: 'Activa',
@@ -802,6 +812,9 @@ const en: AdminUsuariosTranslations = {
     testAccountBadge: 'Test',
     paymentHistoryNeverBadge: 'Free only / never paid recurring',
     paymentHistoryFormerBadge: 'Former subscriber (monthly or annual)',
+    proConsultoriaStamp: 'Pro consulting (until)',
+    enrollmentConsultoriaHint:
+      'Pro Estética panel access ends on this date (capilar/corporal): “Access valid until” in Admin → Consultoria. Matched via Leader tenant ID on the record or the record email.',
   },
   subscriptionBadge: {
     active: 'Active',
