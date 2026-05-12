@@ -31,6 +31,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308)
   }
 
+  // Landing promocional canónica (substitui URL antiga /parceiros/bem-estar)
+  if (normalized === '/parceiros/bem-estar') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/promo/bem-estar'
+    return NextResponse.redirect(url, 308)
+  }
+
   // Raiz → /pt (primeira tela só “Explique menos”; segmentos em /pt/segmentos após CTA).
   if (pathname === '/' || pathname === '') {
     const url = request.nextUrl.clone()
@@ -77,6 +84,8 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/templates-environment') ||
     pathname.startsWith('/template/') ||
     pathname.startsWith('/calculadora-imc') ||
+    pathname === '/promo' ||
+    pathname.startsWith('/promo/') ||
     pathname.startsWith('/admin') || // IMPORTANTE: Admin SEMPRE sem /pt
     pathname.startsWith('/pro-lideres') || // YLADA Pro Líderes — canônico sem /pt
     pathname.startsWith('/pro-estetica-corporal') || // YLADA Pro Estética Corporal — canônico sem /pt

@@ -10,6 +10,7 @@ import { createRecurringSubscription, CreateSubscriptionRequest } from './mercad
 import { getStripeInstance, getStripePriceId } from './stripe-helpers'
 import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from './resend'
 import Stripe from 'stripe'
+import { PROMO_BEM_ESTAR_BR, PROMO_BEM_ESTAR_SLUG } from './promo-bem-estar'
 
 /** Quando o checkout anual do Wellness está desativado (API + UI alinhadas). */
 export const WELLNESS_ANNUAL_CHECKOUT_DISABLED_MESSAGE =
@@ -28,6 +29,8 @@ export interface CheckoutRequest {
   refVendedor?: string
   payerFirstName?: string
   payerLastName?: string
+  /** Preço promocional BR (coach/nutra) — apenas slug da landing `/promo/bem-estar`. */
+  promoSlug?: 'bem-estar'
 }
 
 export interface CheckoutResponse {
@@ -68,7 +71,8 @@ function getPrice(
   area: string, 
   planType: 'monthly' | 'annual', 
   countryCode: string,
-  productType?: 'platform_monthly' | 'platform_monthly_12x' | 'platform_annual' | 'formation_only'
+  productType?: 'platform_monthly' | 'platform_monthly_12x' | 'platform_annual' | 'formation_only',
+  promoSlug?: 'bem-estar'
 ): number {
   // Preços em BRL para Brasil
   if (countryCode === 'BR') {
@@ -86,6 +90,13 @@ function getPrice(
       if (productType === 'platform_annual') {
         return 1800.00 // R$ 1.800/ano (12× de R$ 150)
       }
+    }
+
+    if (
+      promoSlug === PROMO_BEM_ESTAR_SLUG &&
+      (area === 'coach' || area === 'nutra')
+    ) {
+      return planType === 'monthly' ? PROMO_BEM_ESTAR_BR.monthly : PROMO_BEM_ESTAR_BR.annualTotal
     }
     
     const prices: Record<string, Record<string, number>> = {
@@ -140,7 +151,13 @@ async function createMercadoPagoCheckout(
   baseUrl: string
 ): Promise<CheckoutResponse> {
   console.log('💳 Criando checkout Mercado Pago...')
-  const amount = getPrice(request.area, request.planType, request.countryCode || 'BR', request.productType)
+  const amount = getPrice(
+    request.area,
+    request.planType,
+    request.countryCode || 'BR',
+    request.productType,
+    request.promoSlug
+  )
   
   // Log informativo (se for internacional)
   if (request.countryCode && request.countryCode !== 'BR') {
@@ -470,7 +487,11 @@ export async function createCheckout(
   request: CheckoutRequest,
   httpRequest?: Request
 ): Promise<CheckoutResponse> {
-  if (request.area === 'wellness' && request.planType === 'annual') {
+  if (
+    request.area === 'wellness' &&
+    request.planType === 'annual' &&
+    request.promoSlug !== PROMO_BEM_ESTAR_SLUG
+  ) {
     throw new Error(WELLNESS_ANNUAL_CHECKOUT_DISABLED_MESSAGE)
   }
 

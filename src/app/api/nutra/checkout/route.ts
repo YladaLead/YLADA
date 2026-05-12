@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { createCheckout } from '@/lib/payment-gateway'
 import { detectCountryCode } from '@/lib/payment-helpers'
+import { PROMO_BEM_ESTAR_SLUG } from '@/lib/promo-bem-estar'
 
 /**
  * POST /api/nutra/checkout
@@ -17,6 +18,11 @@ export async function POST(request: NextRequest) {
     console.log('📋 Body recebido:', { planType: body.planType, hasEmail: !!body.email })
 
     const { planType, language, paymentMethod, email, countryCode: bodyCountryCode } = body
+
+    const promoSlug =
+      typeof body.promoSlug === 'string' && body.promoSlug.trim() === PROMO_BEM_ESTAR_SLUG
+        ? PROMO_BEM_ESTAR_SLUG
+        : undefined
 
     if (!planType || !['monthly', 'annual'].includes(planType)) {
       return NextResponse.json(
@@ -78,6 +84,7 @@ export async function POST(request: NextRequest) {
       countryCode,
       language: language || 'pt',
       paymentMethod: paymentMethod,
+      ...(promoSlug ? { promoSlug } : {}),
     }, request)
 
     const checkoutDuration = Date.now() - checkoutStartTime

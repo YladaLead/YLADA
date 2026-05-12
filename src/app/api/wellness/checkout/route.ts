@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { createCheckout, WELLNESS_ANNUAL_CHECKOUT_DISABLED_MESSAGE } from '@/lib/payment-gateway'
 import { detectCountryCode } from '@/lib/payment-helpers'
-import { supabaseAdmin } from '@/lib/supabase'
+import { PROMO_BEM_ESTAR_SLUG } from '@/lib/promo-bem-estar'
 
 /**
  * POST /api/wellness/checkout
@@ -18,7 +18,11 @@ export async function POST(request: NextRequest) {
     console.log('📋 Body recebido:', { planType: body.planType, hasEmail: !!body.email })
     
     const { planType, language, paymentMethod, email, countryCode: bodyCountryCode } = body
-    // countryCode: opcional; se enviado pelo cliente (ex: BR), evita bloqueio quando geo retorna US (VPN/proxy)
+
+    const promoSlug =
+      typeof body.promoSlug === 'string' && body.promoSlug.trim() === PROMO_BEM_ESTAR_SLUG
+        ? PROMO_BEM_ESTAR_SLUG
+        : undefined
 
     if (!planType || !['monthly', 'annual'].includes(planType)) {
       return NextResponse.json(
@@ -27,7 +31,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (planType === 'annual') {
+    if (planType === 'annual' && promoSlug !== PROMO_BEM_ESTAR_SLUG) {
       return NextResponse.json({ error: WELLNESS_ANNUAL_CHECKOUT_DISABLED_MESSAGE }, { status: 400 })
     }
 
@@ -102,6 +106,7 @@ export async function POST(request: NextRequest) {
       countryCode,
       language: language || 'pt',
       paymentMethod: paymentMethod, // 'auto' ou 'pix' para plano mensal
+      ...(promoSlug ? { promoSlug } : {}),
     }, request)
 
     const checkoutDuration = Date.now() - checkoutStartTime
