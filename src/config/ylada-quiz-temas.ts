@@ -125,61 +125,61 @@ const QUIZ_INTESTINO: QuizQuestion[] = [
   },
 ]
 
-/** Quiz Metabolismo — baseado em perfil-metabolico (Nutri/Wellness). */
+/** Quiz Metabolismo — alinhado a `avaliacao-perfil-metabolico-quiz-questions.ts` (descoberta, não qualificação comercial). */
 const QUIZ_METABOLISMO: QuizQuestion[] = [
   {
     id: 'q1',
-    label: 'Como você descreveria seu metabolismo?',
+    label: 'Na prática, como você sente que seu corpo “queima” energia no dia a dia?',
     type: 'single',
     options: [
-      'Muito lento, ganho peso facilmente',
-      'Lento, tenho dificuldade para perder peso',
-      'Moderado, equilibrado',
-      'Rápido, queimo calorias facilmente',
+      'Parece que gasta pouco: fácil acumular e difícil ver mudança no espelho ou na roupa',
+      'Mais para lento: demoro a ver resultado e um desvio na rotina pesa rápido',
+      'Algo no meio: nem extremamente rápido nem travado',
+      'Mais acelerado: costumo sentir fome ou esfriar energia se como pouco ou pulo refeição',
     ],
   },
   {
     id: 'q2',
-    label: 'Você sente que precisa de ajuda para otimizar seu metabolismo?',
+    label: 'Como está sua energia ao longo do dia?',
     type: 'single',
     options: [
-      'Sim, preciso muito de orientação profissional',
-      'Sim, seria útil ter um acompanhamento',
-      'Talvez, se for algo prático e personalizado',
-      'Não, consigo otimizar sozinho(a)',
+      'Bem irregular: difícil acordar e à tarde “apago”, dependo de estímulo pra segurar',
+      'Quedas frequentes: bom trecho e depois cansaço ou sonolência',
+      'Oscila, mas na maior parte do tempo me viro',
+      'Relativamente estável: picos existem, mas recupero com descanso ou refeição',
     ],
   },
   {
     id: 'q3',
-    label: 'Você valoriza ter um plano personalizado baseado no seu perfil metabólico?',
+    label: 'Como descrever sua fome e vontade de comer no dia a dia?',
     type: 'single',
     options: [
-      'Muito, é essencial para resultados eficazes',
-      'Bastante, acredito que faria diferença',
-      'Moderadamente, se for algo prático',
-      'Pouco, prefiro seguir padrões gerais',
+      'Muito intensa ou “fora de hora”: doce/carboidrato chama forte várias vezes',
+      'Picos claros de fome ou ansiedade por comida, nem sempre ligados à fome real',
+      'Mais previsível, alinhada às refeições',
+      'Leve ou fácil de saciar com pouco',
     ],
   },
   {
     id: 'q4',
-    label: 'Como o metabolismo impacta seus objetivos de saúde?',
+    label: 'E quanto a sensação de corpo “pesado”, inchado ou digestão lenta?',
     type: 'single',
     options: [
-      'Muito, é o principal obstáculo',
-      'Moderado, atrapalha algumas metas',
-      'Pouco, mas gostaria de otimizar',
-      'Quase não impacta',
+      'Frequente: inchaço, desconforto ou sensação de corpo travado',
+      'Comum depois de certas refeições ou em alguns períodos do mês/dia',
+      'Acontece às vezes, depende do que como ou do sono',
+      'Raramente ou quase nunca',
     ],
   },
   {
     id: 'q5',
-    label: 'Qual seu principal objetivo em relação ao metabolismo?',
+    label: 'Sono, estresse e regularidade da rotina — como você avalia hoje?',
     type: 'single',
     options: [
-      'Entender melhor o que está acontecendo',
-      'Saber por onde começar',
-      'Falar com alguém que entende',
-      'Só quero me informar',
+      'Muito desalinhado: sono ruim ou curto e estresse alto na maior parte dos dias',
+      'Um dos dois pesa: ou sono frágil ou estresse que desorganiza comida e energia',
+      'Razoável: tem dias ruins, mas não é o padrão dominante',
+      'Relativamente estável: consigo manter rotina e descanso aceitáveis',
     ],
   },
 ]

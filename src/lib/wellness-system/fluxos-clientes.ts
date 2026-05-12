@@ -437,11 +437,17 @@ export const fluxosClientes: FluxoCliente[] = [
     diagnostico: {
       titulo: 'Perfil metabólico (visão geral)',
       descricao:
-        'Questionário alinhado ao Wellness; o próximo passo é alinhar expectativas e opções com quem compartilhou o link.',
-      sintomas: ['Como você percebe seu metabolismo', 'Abertura a plano e acompanhamento'],
-      beneficios: ['Mesmas opções de resposta que no app Wellness', 'Continuidade da conversa no WhatsApp'],
+        'Questionário de autopercepção (energia, fome, corpo, sono/rotina); o diagnóstico ajuda a pessoa a se reconhecer antes de falar com quem enviou o link.',
+      sintomas: [
+        'Como sente que o corpo “queima” energia no dia a dia',
+        'Energia, fome, sensação corporal e regularidade da rotina',
+      ],
+      beneficios: [
+        'Perguntas centradas na vivência: energia, fome, corpo e rotina',
+        'Mesmo fluxo do app Wellness — continuidade natural no WhatsApp',
+      ],
       mensagemPositiva:
-        'Pequenos ajustes com orientação costumam destravar o que o questionário mostrou como prioridade.',
+        'Quando a pessoa enxerga o próprio padrão, fica muito mais fácil alinhar o que faz sentido na conversa com o líder.',
     },
     kitRecomendado: 'acelera',
     cta: 'Falar agora com o Especialista',

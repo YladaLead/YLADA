@@ -1,8 +1,8 @@
 /**
  * DIAGNÓSTICOS: Avaliação do Perfil Metabólico - ÁREA WELLNESS
- * 
- * Diagnósticos focados em identificar perfil metabólico e otimização
- * que estimulam contato com especialista em bem-estar
+ *
+ * Textos pós-resultado: priorizam leitura educativa do padrão (energia, fome, rotina).
+ * Convite a falar com quem acompanha aparece de forma única, sem lista repetitiva de produtos.
  */
 
 import { DiagnosticosPorFerramenta } from '../types'
@@ -10,32 +10,52 @@ import { DiagnosticosPorFerramenta } from '../types'
 export const perfilMetabolicoDiagnosticos: DiagnosticosPorFerramenta = {
   wellness: {
     metabolismoLento: {
-      diagnostico: '⚡ DIAGNÓSTICO: Seu perfil indica que seu metabolismo está lento e precisa de otimização urgente. Um acompanhamento especializado pode acelerar seu metabolismo e transformar seus resultados de forma significativa.',
-      causaRaiz: '🔍 CAUSA RAIZ: Metabolismo lento pode ser causado por diversos fatores como desequilíbrios nutricionais, falta de atividade física, padrões alimentares inadequados e até mesmo genética. Pesquisas mostram que pessoas com metabolismo lento, quando recebem acompanhamento personalizado e produtos adequados, conseguem acelerar seu metabolismo em até 40% em 30 dias. Um especialista em bem-estar experiente pode criar um plano personalizado que inclui produtos específicos para acelerar o metabolismo, estratégias nutricionais otimizadas e acompanhamento constante para garantir resultados duradouros.',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Busque um acompanhamento especializado com um especialista em bem-estar para acelerar seu metabolismo. Um profissional experiente pode criar um plano personalizado que inclui produtos termogênicos, estratégias nutricionais otimizadas, protocolos de exercícios adequados e acompanhamento constante. Produtos de qualidade como shakes nutritivos e suplementos específicos podem ser fundamentais para acelerar seu metabolismo de forma segura e eficaz.',
-      plano7Dias: '📅 PLANO 7 DIAS: Conecte-se com um especialista em bem-estar para receber um plano personalizado que inclui: produtos termogênicos e aceleradores metabólicos, estratégias nutricionais otimizadas para seu perfil, protocolo de exercícios adequado, cronograma detalhado de uso dos produtos, acompanhamento diário para monitorar progresso e ajustes conforme sua resposta individual. O suporte profissional é essencial para acelerar resultados de forma segura.',
-      suplementacao: '💊 SUPLEMENTAÇÃO: Um especialista em bem-estar pode recomendar produtos específicos para acelerar seu metabolismo, como termogênicos naturais, suplementos que aumentam energia e disposição, produtos que otimizam queima de gordura, e protocolos personalizados de suplementação. O acompanhamento profissional garante que você use os produtos certos nas doses adequadas, maximizando resultados e acelerando seu metabolismo de forma segura.',
-      alimentacao: '🍎 ALIMENTAÇÃO: Com o acompanhamento de um especialista em bem-estar, você receberá orientações personalizadas sobre alimentação que acelera o metabolismo, como estratégias de timing nutricional, combinações de alimentos que aumentam termogênese, receitas práticas e deliciosas, e suporte constante para criar hábitos alimentares que mantêm seu metabolismo acelerado. O mentor te ajuda a entender como cada alimento impacta seu metabolismo.',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Seu metabolismo pode ser acelerado com as estratégias certas! Entre em contato com um especialista em bem-estar para receber um acompanhamento especializado que vai desde produtos específicos para acelerar seu metabolismo até estratégias personalizadas de nutrição e exercícios. Você não precisa conviver com metabolismo lento — um profissional pode te ajudar a transformar seus resultados. Sua jornada para um metabolismo acelerado começa agora!'
+      diagnostico:
+        '⚡ DIAGNÓSTICO: Pelo conjunto de sinais (energia irregular, fome intensa, corpo “pesado” ou sono/estresse desalinhados), seu perfil se aproxima de um metabolismo mais lento ou sob pressão — ou seja, o corpo parece estar economizando ou reagindo ao ambiente, não “falhando”.',
+      causaRaiz:
+        '🔍 CAUSA RAIZ: Metabolismo “lento” na vivência costuma misturar sono, estresse, padrão de refeições, digestão e nível de movimento. Não dá para reduzir a um único vilão; o valor está em ver o padrão que você acabou de descrever e testar pequenos ajustes com método (horários, proteína, descanso, hidratação) antes de qualquer promessa milagrosa.',
+      acaoImediata:
+        '⚡ AÇÃO IMEDIATA: Por uma semana, anote só três coisas: horário em que a energia cai, o que comeu antes e como dormiu. Esse triângulo costuma mostrar onde mexer primeiro. Se algo do histórico de saúde te preocupa, procure um profissional habilitado — o questionário não substitui avaliação individual.',
+      plano7Dias:
+        '📅 PLANO 7 DIAS: (1) Escolher horário fixo para café e almoço em 5 dias úteis. (2) Incluir fonte de proteína na refeição em que a fome costuma “explodir”. (3) Caminhada leve ou alongamento em dias de maior inchaço. (4) Uma meta de sono: desligar telas 30 minutos antes. (5) No fim da semana, reler suas anotações e decidir um único ajuste para manter.',
+      suplementacao:
+        '💊 SUPLEMENTAÇÃO: Suplementos ou “aceleradores” só fazem sentido depois que sono, refeições e digestão estão minimamente organizados — e com orientação de quem conhece seu caso. Evite combinar vários produtos por conta própria.',
+      alimentacao:
+        '🍎 ALIMENTAÇÃO: Priorize refeições completas em horários previsíveis, fibra e água ao longo do dia, e perceba se doces refinados aparecem mais em dias de cansaço ou estresse. O objetivo é estabilizar energia, não passar fome “de prova”.',
+      proximoPasso:
+        '🎯 PRÓXIMO PASSO: Use este resultado como mapa na conversa com quem te acompanha (nutrição, bem-estar ou médico): ele resume o que você sente hoje, não um rótulo definitivo. Juntos dá para priorizar 1–2 mudanças pequenas e mensuráveis.',
     },
     metabolismoModerado: {
-      diagnostico: '⚡ DIAGNÓSTICO: Seu metabolismo está moderado mas pode ser otimizado. Um plano personalizado pode acelerar seus resultados e melhorar significativamente sua eficiência metabólica.',
-      causaRaiz: '🔍 CAUSA RAIZ: Metabolismo moderado indica boa base, mas há oportunidades de otimização. Pesquisas mostram que pessoas com metabolismo moderado, quando recebem estratégias personalizadas e produtos adequados, conseguem acelerar sua eficiência metabólica em até 25% e melhorar resultados de forma consistente. Um especialista em bem-estar pode identificar oportunidades específicas de otimização, criar estratégias personalizadas e recomendar produtos que potencializam seu metabolismo, elevando seus resultados para o próximo nível.',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Conecte-se com um especialista em bem-estar para receber estratégias de otimização metabólica personalizadas. Um profissional pode criar um plano que inclui produtos que aceleram o metabolismo, estratégias nutricionais otimizadas, ajustes no estilo de vida e acompanhamento para garantir que você alcance máxima eficiência metabólica. Com pequenos ajustes personalizados, você pode acelerar significativamente seus resultados.',
-      plano7Dias: '📅 PLANO 7 DIAS: Um especialista em bem-estar pode criar um plano de otimização metabólica que inclui: produtos específicos para acelerar metabolismo, estratégias nutricionais otimizadas, ajustes no timing das refeições, protocolo de exercícios adequado, acompanhamento para monitorar melhorias e ajustes conforme seu progresso individual. O acompanhamento regular garante otimização contínua.',
-      suplementacao: '💊 SUPLEMENTAÇÃO: Com base no seu perfil, um especialista em bem-estar pode recomendar produtos que otimizam seu metabolismo, como termogênicos suaves, suplementos que aumentam energia, produtos para melhorar eficiência metabólica e protocolos personalizados. O acompanhamento profissional garante escolhas adequadas e maximiza resultados.',
-      alimentacao: '🍎 ALIMENTAÇÃO: Um especialista em bem-estar pode fornecer orientações sobre otimização nutricional metabólica, estratégias de timing alimentar, combinações de alimentos que aumentam termogênese, receitas práticas e suporte para criar hábitos que mantêm metabolismo otimizado. O acompanhamento ajuda a transformar conhecimento em ação prática.',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Com estratégias personalizadas, você pode otimizar seu metabolismo e acelerar seus resultados. Entre em contato com um especialista em bem-estar para receber um plano de otimização metabólica. Produtos adequados e estratégias personalizadas podem fazer toda diferença na sua eficiência metabólica!'
+      diagnostico:
+        '⚡ DIAGNÓSTICO: Seu perfil está no meio do espectro: há sinais de que dá para afinar energia, digestão ou rotina, mas sem o “modo emergência” do extremo lento. É um bom lugar para aprender o que mais pesa para você — sono, fome ou estresse.',
+      causaRaiz:
+        '🔍 CAUSA RAIZ: Metabolismo moderado na prática significa que alguns pilares já funcionam e outros oscilam. Pequenos desvios (noite mal dormida, dia sem proteína, muito estímulo de cafeína) podem ser o suficiente para sentir queda de rendimento sem que nada “grave” apareça nos exames.',
+      acaoImediata:
+        '⚡ AÇÃO IMEDIATA: Escolha **um** eixo para observar 10 dias: ou sono, ou horário da janta, ou lanche da tarde. Mudar tudo de uma vez esconde o que realmente ajuda. Se quiser ir além do autoconhecimento, leve essas observações para quem te orienta.',
+      plano7Dias:
+        '📅 PLANO 7 DIAS: Mantenha o resto da rotina e teste só o eixo escolhido (ex.: jantar 1h mais cedo, ou lanche com proteína às 16h). No fim, avalie: energia, fome à noite e sensação abdominal. Um ajuste que “bate” vale mais que cinco meia-boca.',
+      suplementacao:
+        '💊 SUPLEMENTAÇÃO: Se já usa algo, revise com profissional se ainda combina com seu sono e digestão **agora**. Novidades de suplemento entram depois de hábito — não antes.',
+      alimentacao:
+        '🍎 ALIMENTAÇÃO: Reforce o que já funciona e corrija só o ponto fraco (por exemplo, pular almoço em dias corridos ou jantar muito tarde). Metabolismo “no meio” responde bem a consistência moderada.',
+      proximoPasso:
+        '🎯 PRÓXIMO PASSO: Traga este perfil para quem te acompanha e peça ajuda para validar **uma** hipótese por vez — assim o próximo passo fica claro e mensurável.',
     },
     metabolismoRapido: {
-      diagnostico: '⚡ DIAGNÓSTICO: Excelente! Você tem um metabolismo rápido! Mesmo assim, um acompanhamento preventivo pode ajudar a manter sua eficiência metabólica e otimizar ainda mais seus resultados.',
-      causaRaiz: '🔍 CAUSA RAIZ: Ter um metabolismo rápido é um grande ativo, mas pode ser otimizado ainda mais com estratégias preventivas e produtos adequados. Pesquisas mostram que pessoas com metabolismo rápido, quando recebem estratégias avançadas e produtos de qualidade, conseguem manter e até superar sua eficiência metabólica, otimizando resultados a longo prazo. Um especialista em bem-estar pode criar estratégias preventivas personalizadas, recomendar produtos que mantêm metabolismo ativo e fornecer orientações para você continuar otimizando seus resultados.',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Considere um acompanhamento preventivo com um especialista em bem-estar para manter e otimizar seu metabolismo rápido. Um profissional pode criar estratégias avançadas, recomendar produtos que mantêm metabolismo ativo e fornecer orientações para você continuar otimizando seus resultados. A prevenção garante que você mantenha sua excelente eficiência metabólica.',
-      plano7Dias: '📅 PLANO 7 DIAS: Um especialista em bem-estar pode criar um plano preventivo personalizado que inclui: estratégias avançadas de otimização metabólica, produtos que mantêm metabolismo ativo, otimização nutricional contínua, protocolos de manutenção e acompanhamento para garantir que você mantenha sua excelente eficiência metabólica. A prevenção é a melhor estratégia.',
-      suplementacao: '💊 SUPLEMENTAÇÃO: Com base no seu perfil, um especialista em bem-estar pode recomendar produtos preventivos que mantêm seu metabolismo ativo, como suplementos de manutenção, produtos para energia sustentável, e protocolos personalizados. A suplementação preventiva mantém sua excelente eficiência metabólica.',
-      alimentacao: '🍎 ALIMENTAÇÃO: Um especialista em bem-estar pode fornecer orientações sobre otimização nutricional avançada, estratégias para manter metabolismo ativo, receitas otimizadas, e suporte para criar hábitos que mantêm sua excelente eficiência metabólica. A prevenção garante qualidade de vida contínua.',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Mantenha seu metabolismo rápido otimizado com estratégias preventivas personalizadas. Entre em contato com um especialista em bem-estar para receber orientações e produtos que mantêm sua eficiência metabólica. A prevenção é o melhor investimento para sua saúde a longo prazo!'
-    }
-  }
+      diagnostico:
+        '⚡ DIAGNÓSTICO: Pelas respostas, seu dia a dia parece mais estável: menos travamentos clássicos de energia, fome ou corpo. Isso sugere um perfil mais favorável no agora — com o cuidado de não confundir “bem hoje” com “imune” a mudanças de rotina.',
+      causaRaiz:
+        '🔍 CAUSA RAIZ: Quem se sente mais “rápido” ou equilibrado ainda pode perder o fio se sono piorar, treino aumentar sem refeição adequada ou o estresse subir. Metabolismo é dinâmico; o que você descreveu é uma fotografia.',
+      acaoImediata:
+        '⚡ AÇÃO IMEDIATA: Proteja o básico: não ficar longas horas sem comer se você já sente queda brusca de energia, e mantenha hidratação em dias quentes ou de muito café. São os primeiros pontos a ruir quando a agenda aperta.',
+      plano7Dias:
+        '📅 PLANO 7 DIAS: Use a semana para **consolidar** hábitos que sustentam esse bom padrão (proteína nas refeições principais, janela de sono, pausa real no almoço). Prevenção aqui é manter o que funciona visível — não buscar “otimização” por ansiedade.',
+      suplementacao:
+        '💊 SUPLEMENTAÇÃO: Sem necessidade aparente de “empurrar” o metabolismo. Se usar algo esportivo ou energético, confira periodicamente com profissional se ainda faz sentido para seu sono e estômago.',
+      alimentacao:
+        '🍎 ALIMENTAÇÃO: Continue com variedade e refeições regulares; se a rotina mudar (viagem, turno, mais treino), planeje onde encaixar proteína e refeição completa antes de cortar calorias por impulso.',
+      proximoPasso:
+        '🎯 PRÓXIMO PASSO: Guarde este resultado como linha de base. Se a vida mudar bastante, refaça a avaliação e compare — é a forma mais honesta de ver se o perfil acompanhou você ou se pediu ajuste.',
+    },
+  },
 }
-

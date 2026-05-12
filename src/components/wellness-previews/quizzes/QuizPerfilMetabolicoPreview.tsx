@@ -42,15 +42,15 @@ export default function QuizPerfilMetabolicoPreview({ etapa, onEtapaChange }: Qu
         {etapa === 0 && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border-2 border-blue-200">
             <h4 className="text-xl font-bold text-gray-900 mb-2">⚡ Avaliação do Perfil Metabólico</h4>
-            <p className="text-gray-700 mb-3">Descubra seu perfil metabólico e como otimizá-lo</p>
-            <p className="text-blue-600 font-semibold">🚀 Uma avaliação personalizada para entender seu metabolismo e criar estratégias eficazes.</p>
+            <p className="text-gray-700 mb-3">Cinco reflexões sobre energia, fome, corpo e rotina</p>
+            <p className="text-blue-600 font-semibold">🚀 Para a pessoa perceber o próprio padrão; a conversa com você fica no passo seguinte.</p>
             <div className="bg-white rounded-lg p-4 mt-4 border border-blue-200">
-              <p className="text-sm text-gray-700 mb-2"><strong>💡 O que você vai descobrir:</strong></p>
+              <p className="text-sm text-gray-700 mb-2"><strong>💡 O que ela vai perceber:</strong></p>
               <div className="space-y-2 text-sm text-gray-600">
-                <p>✓ Seu perfil metabólico completo</p>
-                <p>✓ Como acelerar seu metabolismo</p>
-                <p>✓ Estratégias personalizadas</p>
-                <p>✓ Produtos otimizados para seu perfil</p>
+                <p>✓ Como o corpo parece “gastar” energia no dia a dia</p>
+                <p>✓ Picos e quedas de disposição</p>
+                <p>✓ Fome e relação com comida</p>
+                <p>✓ Inchaço/digestão e sono ou estresse</p>
               </div>
             </div>
           </div>
@@ -104,7 +104,7 @@ export default function QuizPerfilMetabolicoPreview({ etapa, onEtapaChange }: Qu
                       ))}
                     </div>
                     <p className={`text-xs ${textColor.replace('900', '600')} mt-2`}>
-                      💡 Gatilho: Reflexão sobre metabolismo e necessidade de otimização
+                      💡 Tom: curiosidade sobre o corpo — qualificação fica com o líder depois do resultado.
                     </p>
                   </div>
                 )

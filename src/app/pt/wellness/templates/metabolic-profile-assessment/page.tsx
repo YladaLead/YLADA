@@ -35,12 +35,13 @@ export default function AvaliacaoPerfilMetabolico({ config }: TemplateBaseProps)
 
   const perguntas: Pergunta[] = getAvaliacaoPerfilMetabolicoPerguntasTemplate()
 
+  /** Índice da opção 0 = mais pontos: sinais de metabolismo “pesado” na vivência (gasto baixo, energia irregular, etc.). */
   const pontosPorOpcao = [
-    [3, 2, 1, 0], // Pergunta 1: mais lento = mais pontos
-    [3, 2, 1, 0], // Pergunta 2: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais valorização = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais valorização = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais crença = mais pontos
+    [3, 2, 1, 0],
+    [3, 2, 1, 0],
+    [3, 2, 1, 0],
+    [3, 2, 1, 0],
+    [3, 2, 1, 0],
   ]
 
   const iniciarQuiz = () => {
@@ -76,38 +77,41 @@ export default function AvaliacaoPerfilMetabolico({ config }: TemplateBaseProps)
 
     if (pontuacaoTotal >= 12) {
       perfil = 'Metabolismo Lento - Necessita Otimização'
-      descricao = 'Seu perfil indica que seu metabolismo está lento e precisa de otimização urgente. Um acompanhamento especializado pode acelerar seu metabolismo e transformar seus resultados.'
+      descricao =
+        'Pelas respostas, seu corpo parece estar pedindo mais apoio: energia oscilante, fome ou corpo “pesado” aparecem com frequência. Isso sugere um perfil mais lento ou sob estresse — um mapa útil para conversar com quem te acompanha.'
       cor = 'red'
       recomendacoes = [
-        'Buscar acompanhamento profissional para acelerar metabolismo',
-        'Criar um plano personalizado baseado no seu perfil',
-        'Utilizar produtos específicos para otimização metabólica',
-        'Ter suporte constante para manter resultados',
-        'Aprender estratégias para manter metabolismo acelerado'
+        'Observar em quais horários a energia cai mais e o que você come antes',
+        'Anotar dias com mais inchaço ou fome “fora de hora”',
+        'Priorizar sono regular por uma ou duas semanas como teste simples',
+        'Registrar uma semana de refeições sem julgar — só perceber padrões',
+        'Levar essas observações para quem te orienta em nutrição ou bem-estar',
       ]
       diagnosticoId = 'metabolismoLento'
     } else if (pontuacaoTotal >= 8) {
       perfil = 'Metabolismo Moderado - Otimização Necessária'
-      descricao = 'Seu metabolismo está moderado mas pode ser otimizado. Um plano personalizado pode acelerar seus resultados e melhorar sua eficiência metabólica.'
+      descricao =
+        'Há um meio-termo interessante: você não está no extremo, mas já nota sinais (energia, digestão ou rotina) que podem ser afinados. É um perfil com boa margem para ajustes conscientes.'
       cor = 'yellow'
       recomendacoes = [
-        'Investir em otimização metabólica personalizada',
-        'Ter um plano alimentar adaptado ao seu perfil',
-        'Utilizar produtos que aceleram o metabolismo',
-        'Acompanhar progresso com suporte profissional',
-        'Aprender estratégias para potencializar metabolismo'
+        'Escolher um único hábito (sono, horário da janta ou caminhada) para observar por 10 dias',
+        'Notar se a fome bate junto com estresse ou cansaço',
+        'Experimentar refeições mais estáveis no horário que costuma ser mais difícil',
+        'Perceber se o inchaço segue algum padrão de alimento ou horário',
+        'Usar o resultado como roteiro na conversa com seu acompanhamento',
       ]
       diagnosticoId = 'metabolismoModerado'
     } else {
       perfil = 'Metabolismo Rápido - Manutenção Preventiva'
-      descricao = 'Você tem um metabolismo rápido! Mesmo assim, um acompanhamento preventivo pode ajudar a manter sua eficiência metabólica e otimizar ainda mais seus resultados.'
+      descricao =
+        'Na leitura das respostas, seu ritmo parece mais favorável: menos travamentos no dia a dia. Ainda assim, manter sono, refeições e estresse sob controle ajuda a não “gastar” esse bom padrão ao longo do tempo.'
       cor = 'green'
       recomendacoes = [
-        'Manter metabolismo acelerado com estratégias preventivas',
-        'Otimizar ainda mais com plano personalizado',
-        'Utilizar produtos que mantêm metabolismo ativo',
-        'Ter acompanhamento preventivo',
-        'Aprender estratégias avançadas de otimização'
+        'Manter proteína e refeições regulares nos dias mais corridos',
+        'Evitar pular refeições por longos períodos se você já sente queda de energia',
+        'Continuar observando sono — é onde muita gente perde o equilíbrio metabólico',
+        'Reforçar hidratação em dias de mais estresse ou treino',
+        'Revisar o perfil de tempos em tempos se a rotina mudar muito',
       ]
       diagnosticoId = 'metabolismoRapido'
     }
@@ -142,7 +146,7 @@ export default function AvaliacaoPerfilMetabolico({ config }: TemplateBaseProps)
         title={config?.title}
         description={config?.description}
         defaultTitle="Avaliação do Perfil Metabólico"
-        defaultDescription="Descubra seu perfil metabólico e como otimizá-lo"
+        defaultDescription="Perguntas sobre energia, fome, corpo e rotina para você reconhecer seu padrão metabólico."
       />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
@@ -158,17 +162,17 @@ export default function AvaliacaoPerfilMetabolico({ config }: TemplateBaseProps)
               defaultDescription={
                 <>
                   <p className="text-xl text-gray-600 mb-2">
-                    Descubra seu perfil metabólico e como otimizá-lo
+                    Descubra como seu corpo está vivendo energia, fome e rotina hoje
                   </p>
                   <p className="text-gray-600">
-                    Uma avaliação personalizada para entender seu metabolismo e criar estratégias eficazes
+                    Cinco reflexões rápidas para montar um primeiro mapa do seu perfil metabólico — sem julgamento, só clareza.
                   </p>
                 </>
               }
               discover={templateBenefits.discover || []}
               benefits={templateBenefits.whyUse || []}
               onStart={iniciarQuiz}
-              buttonText="⚡ Começar Avaliação Metabólica - É Grátis"
+              buttonText="⚡ Começar — leva poucos minutos"
             />
           )
         })()}

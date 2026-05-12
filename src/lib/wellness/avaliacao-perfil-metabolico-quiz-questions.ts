@@ -1,7 +1,9 @@
 /**
- * Perguntas canónicas da Avaliação do Perfil Metabólico (Wellness).
- * Usadas na ferramenta real, no preview dedicado e como override no DynamicTemplatePreview
- * quando o content em BD está incompleto ou desatualizado.
+ * Perguntas canónicas da Avaliação do Perfil Metabólico (Wellness / Pro Líderes).
+ * Foco em **autopercepção e rotina** (energia, fome, corpo, sono/estresse), não em intenção de compra.
+ *
+ * Ordem das opções em cada pergunta: índice **0** = sinais mais associados a metabolismo “pesado” ou
+ * menos favorável na vivência da pessoa (maior pontuação no motor do template); índice **3** = mais leve/equilibrado.
  */
 
 export type PerfilMetabolicoQuizOption = { id: string; label: string }
@@ -16,48 +18,48 @@ const toOptions = (labels: string[]): PerfilMetabolicoQuizOption[] =>
 
 const RAW_PERGUNTAS: Array<{ question: string; labels: string[] }> = [
   {
-    question: 'Como você descreveria seu metabolismo?',
+    question: 'Na prática, como você sente que seu corpo “queima” energia no dia a dia?',
     labels: [
-      'Muito lento, ganho peso facilmente',
-      'Lento, tenho dificuldade para perder peso',
-      'Moderado, equilibrado',
-      'Rápido, queimo calorias facilmente',
+      'Parece que gasta pouco: fácil acumular e difícil ver mudança no espelho ou na roupa',
+      'Mais para lento: demoro a ver resultado e um desvio na rotina pesa rápido',
+      'Algo no meio: nem extremamente rápido nem travado',
+      'Mais acelerado: costumo sentir fome ou esfriar energia se como pouco ou pulo refeição',
     ],
   },
   {
-    question: 'Você sente que precisa de ajuda para otimizar seu metabolismo?',
+    question: 'Como está sua energia ao longo do dia?',
     labels: [
-      'Sim, preciso muito de orientação profissional',
-      'Sim, seria útil ter um acompanhamento',
-      'Talvez, se for algo prático e personalizado',
-      'Não, consigo otimizar sozinho(a)',
+      'Bem irregular: difícil acordar e à tarde “apago”, dependo de estímulo pra segurar',
+      'Quedas frequentes: bom trecho e depois cansaço ou sonolência',
+      'Oscila, mas na maior parte do tempo me viro',
+      'Relativamente estável: picos existem, mas recupero com descanso ou refeição',
     ],
   },
   {
-    question: 'Você valoriza ter um plano personalizado baseado no seu perfil metabólico?',
+    question: 'Como descrever sua fome e vontade de comer no dia a dia?',
     labels: [
-      'Muito, é essencial para resultados eficazes',
-      'Bastante, acredito que faria diferença',
-      'Moderadamente, se for algo prático',
-      'Pouco, prefiro seguir padrões gerais',
+      'Muito intensa ou “fora de hora”: doce/carboidrato chama forte várias vezes',
+      'Picos claros de fome ou ansiedade por comida, nem sempre ligados à fome real',
+      'Mais previsível, alinhada às refeições',
+      'Leve ou fácil de saciar com pouco',
     ],
   },
   {
-    question: 'Você sente que produtos específicos para seu metabolismo ajudariam seus resultados?',
+    question: 'E quanto a sensação de corpo “pesado”, inchado ou digestão lenta?',
     labels: [
-      'Sim, faria toda diferença e aceleraria resultados',
-      'Sim, acredito que seria muito útil',
-      'Talvez, se for algo comprovado e eficaz',
-      'Não, não vejo necessidade',
+      'Frequente: inchaço, desconforto ou sensação de corpo travado',
+      'Comum depois de certas refeições ou em alguns períodos do mês/dia',
+      'Acontece às vezes, depende do que como ou do sono',
+      'Raramente ou quase nunca',
     ],
   },
   {
-    question: 'Você acredita que um acompanhamento especializado pode transformar seu metabolismo?',
+    question: 'Sono, estresse e regularidade da rotina — como você avalia hoje?',
     labels: [
-      'Sim, absolutamente! Estou pronto(a) para mudanças',
-      'Sim, acredito que pode fazer diferença',
-      'Talvez, se for algo estruturado e eficaz',
-      'Não, acho que não é necessário',
+      'Muito desalinhado: sono ruim ou curto e estresse alto na maior parte dos dias',
+      'Um dos dois pesa: ou sono frágil ou estresse que desorganiza comida e energia',
+      'Razoável: tem dias ruins, mas não é o padrão dominante',
+      'Relativamente estável: consigo manter rotina e descanso aceitáveis',
     ],
   },
 ]
