@@ -2,6 +2,7 @@
  * Quizzes por tema — conteúdo baseado em Nutri (textos e nomes).
  * Usado quando o usuário cria link com flow_id + tema.
  * O diagnóstico é gerado pelo motor YLADA (adapta por segment_code).
+ * Perguntas 2 e 4: foco em vivência (sinais, rotina), não em “valoriza plano” ou venda.
  * @see docs/YLADA-SEGMENTOS-E-VARIANTES-IMPLANTACAO.md
  */
 
@@ -22,13 +23,13 @@ const QUIZ_ENERGIA: QuizQuestion[] = [
   },
   {
     id: 'q2',
-    label: 'Você sente que precisa de ajuda para melhorar sua energia?',
+    label: 'No dia a dia, como sua energia “se segura”?',
     type: 'single',
     options: [
-      'Sim, preciso muito de orientação profissional',
-      'Sim, seria muito útil ter um acompanhamento',
-      'Talvez, se for algo prático e eficaz',
-      'Não, consigo resolver sozinho(a)',
+      'Dependo muito de café, doce ou estímulo para funcionar — sem isso apago',
+      'Tenho quedas fortes e ainda não sei bem o que estabiliza de verdade',
+      'Oscila, mas já percebo alguns gatilhos (sono, fome, estresse)',
+      'Consigo manter ritmo aceitável com o que já faço hoje',
     ],
   },
   {
@@ -44,13 +45,13 @@ const QUIZ_ENERGIA: QuizQuestion[] = [
   },
   {
     id: 'q4',
-    label: 'Você valoriza ter um plano personalizado para aumentar sua disposição?',
+    label: 'Sono e refeições — como estão sustentando sua energia?',
     type: 'single',
     options: [
-      'Muito, é essencial para meu bem-estar',
-      'Bastante, acredito que faria diferença',
-      'Moderadamente, se for algo eficaz',
-      'Pouco, prefiro seguir padrões gerais',
+      'Bem difíceis: noites curtas ou irregulares e refeições muito soltas',
+      'Um dos dois costuma falhar (sono OU horário de comer)',
+      'Razoáveis na maior parte das semanas',
+      'Consistentes o suficiente para eu sentir diferença no dia',
     ],
   },
   {
@@ -81,13 +82,13 @@ const QUIZ_INTESTINO: QuizQuestion[] = [
   },
   {
     id: 'q2',
-    label: 'Você sente que precisa de ajuda para melhorar sua saúde intestinal?',
+    label: 'Depois de comer, o seu abdômen costuma reagir como?',
     type: 'single',
     options: [
-      'Sim, preciso muito de orientação profissional',
-      'Sim, seria muito útil ter um acompanhamento',
-      'Talvez, se for algo prático e eficaz',
-      'Não, consigo resolver sozinho(a)',
+      'Muito: desconforto, gases ou “peso” quase sempre',
+      'Frequentemente incomoda, depende do que como',
+      'Às vezes, em dias ou refeições específicas',
+      'Raramente incomoda de forma relevante',
     ],
   },
   {
@@ -103,13 +104,13 @@ const QUIZ_INTESTINO: QuizQuestion[] = [
   },
   {
     id: 'q4',
-    label: 'Você valoriza ter um plano personalizado para sua saúde digestiva?',
+    label: 'E evacuar — você sente regularidade e leveza na rotina?',
     type: 'single',
     options: [
-      'Muito, é essencial para meu bem-estar',
-      'Bastante, acredito que faria diferença',
-      'Moderadamente, se for algo eficaz',
-      'Pouco, prefiro seguir padrões gerais',
+      'Não: muito irregular ou desconfortável na maior parte do tempo',
+      'Costuma ser instável ou incomodo várias vezes por semana',
+      'Oscila, mas tem períodos ok',
+      'Na maior parte do tempo é aceitável e previsível',
     ],
   },
   {
@@ -199,13 +200,13 @@ const QUIZ_INCHAO: QuizQuestion[] = [
   },
   {
     id: 'q2',
-    label: 'Você sente que precisa de ajuda profissional para identificar e tratar retenção de líquidos?',
+    label: 'Quando incha, isso costuma coincidir com quê?',
     type: 'single',
     options: [
-      'Sim, preciso muito de orientação especializada',
-      'Sim, seria muito útil ter um acompanhamento',
-      'Talvez, se for algo prático e personalizado',
-      'Não, consigo resolver sozinho(a)',
+      'Com quase tudo: sal, final do dia, hormônios, viagem — difícil prever',
+      'Com refeições mais pesadas ou pouca água no dia',
+      'Só em alguns contextos que já identifiquei',
+      'É raro ou tenho um padrão bem claro e controlável',
     ],
   },
   {
@@ -221,13 +222,13 @@ const QUIZ_INCHAO: QuizQuestion[] = [
   },
   {
     id: 'q4',
-    label: 'Você valoriza ter um plano personalizado para reduzir retenção?',
+    label: 'Movimento e pernas no fim do dia — o que mais combina com você?',
     type: 'single',
     options: [
-      'Muito, é essencial para meu bem-estar',
-      'Bastante, acredito que faria diferença',
-      'Moderadamente, se for algo eficaz',
-      'Pouco, prefiro seguir padrões gerais',
+      'Passo muitas horas parado(a) e sinto pernas/pés pesados quase sempre',
+      'Pouco movimento e final do dia costuma piorar',
+      'Depende do dia; quando me movimento melhora',
+      'Movimento e hidratação já ajudam bastante a evitar o pior',
     ],
   },
   {
@@ -258,13 +259,13 @@ const QUIZ_PESO: QuizQuestion[] = [
   },
   {
     id: 'q2',
-    label: 'Você sente que precisa de ajuda profissional para emagrecer com saúde?',
+    label: 'Sobre tentativas de mudar peso ou hábito — o que mais descreve você?',
     type: 'single',
     options: [
-      'Sim, preciso muito de orientação especializada',
-      'Sim, seria muito útil ter um acompanhamento',
-      'Talvez, se for algo prático e personalizado',
-      'Não, consigo fazer sozinho(a)',
+      'Já passei por muitos ciclos de ir e voltar — cansa e confunde',
+      'Algumas tentativas sem conseguir manter consistência',
+      'Estou num momento de retomada com mais clareza',
+      'É um começo recente ou nunca encarei com método de verdade',
     ],
   },
   {
@@ -280,13 +281,13 @@ const QUIZ_PESO: QuizQuestion[] = [
   },
   {
     id: 'q4',
-    label: 'Como o peso impacta seu dia a dia?',
+    label: 'Sono, estresse e rotina alimentar — como estão hoje em relação ao peso?',
     type: 'single',
     options: [
-      'Muito, atrapalha bastante',
-      'Moderado, às vezes incomoda',
-      'Pouco, mas quero mudar',
-      'Quase não impacta',
+      'Na maior parte do tempo ajudam mais do que atrapalham',
+      'Oscilam, mas não é o tempo todo',
+      'Um ou dois desses fatores pesa forte na semana',
+      'Muito desalinhados: noites ruins e dias em que a comida “compensa” o cansaço',
     ],
   },
   {
@@ -317,13 +318,13 @@ const QUIZ_ESTRESSE: QuizQuestion[] = [
   },
   {
     id: 'q2',
-    label: 'Você sente que precisa de ajuda para lidar com estresse e ansiedade?',
+    label: 'Quando o estresse sobe, o corpo costuma reagir como?',
     type: 'single',
     options: [
-      'Sim, preciso muito de orientação',
-      'Sim, seria útil ter um acompanhamento',
-      'Talvez, se for algo prático',
-      'Não, consigo lidar sozinho(a)',
+      'Tudo de uma vez: peito apertado, taquicardia, choro ou explosão frequente',
+      'Irritação, tensão muscular ou comer sem fome aparecem bastante',
+      'Sinto cansaço ou dificuldade de foco, mas consigo contornar às vezes',
+      'Consigo perceber cedo e usar algo que me acalma (ar, movimento, pausa)',
     ],
   },
   {
@@ -339,13 +340,13 @@ const QUIZ_ESTRESSE: QuizQuestion[] = [
   },
   {
     id: 'q4',
-    label: 'Você valoriza ter estratégias personalizadas para equilíbrio emocional?',
+    label: 'Sono e “desligar” a cabeça — o que mais combina?',
     type: 'single',
     options: [
-      'Muito, é essencial para meu bem-estar',
-      'Bastante, acredito que faria diferença',
-      'Moderadamente, se for algo eficaz',
-      'Pouco, prefiro seguir sozinho(a)',
+      'Muito difícil: demoro a dormir ou acordo com a mente acelerada',
+      'Durmo, mas acordo cansado(a) ou com pensamentos intrusivos',
+      'Tem noites ruins, mas há padrão de recuperação',
+      'Consigo desligar razoavelmente e acordar com sensação de descanso',
     ],
   },
   {
@@ -376,13 +377,13 @@ const QUIZ_SONO: QuizQuestion[] = [
   },
   {
     id: 'q2',
-    label: 'Você sente que precisa de ajuda para melhorar seu sono?',
+    label: 'Noite e rotina antes de dormir — como tem sido?',
     type: 'single',
     options: [
-      'Sim, preciso muito de orientação',
-      'Sim, seria útil ter um acompanhamento',
-      'Talvez, se for algo prático',
-      'Não, consigo resolver sozinho(a)',
+      'Horários muito soltos, telas até tarde e cabeça acelerada',
+      'Demoro a pegar no sono ou acordo no meio da noite várias vezes',
+      'Alguns deslizes, mas em parte dos dias consigo ritual mínimo',
+      'Tenho janela de sono mais estável e ritual que ajuda a fechar o dia',
     ],
   },
   {
@@ -398,13 +399,13 @@ const QUIZ_SONO: QuizQuestion[] = [
   },
   {
     id: 'q4',
-    label: 'Você valoriza ter um plano personalizado para dormir melhor?',
+    label: 'E no dia seguinte — como o sono paga na energia e no humor?',
     type: 'single',
     options: [
-      'Muito, é essencial para meu bem-estar',
-      'Bastante, acredito que faria diferença',
-      'Moderadamente, se for algo eficaz',
-      'Pouco, prefiro seguir padrões gerais',
+      'Muito mal: arrasto, irritação ou sonolência até de noite',
+      'Impacto claro em foco ou humor em vários dias da semana',
+      'Sinto em alguns dias, mas recupero em parte',
+      'Na maior parte do tempo o dia segue aceitável quando durmo ok',
     ],
   },
   {
@@ -435,13 +436,13 @@ const QUIZ_VITALIDADE: QuizQuestion[] = [
   },
   {
     id: 'q2',
-    label: 'Você sente que precisa de ajuda para melhorar sua qualidade de vida?',
+    label: 'Hábitos básicos (água, movimento, refeições) na semana — como estão?',
     type: 'single',
     options: [
-      'Sim, preciso muito de orientação',
-      'Sim, seria útil ter um acompanhamento',
-      'Talvez, se for algo prático',
-      'Não, consigo sozinho(a)',
+      'Bem fragmentados: dias inteiros sem estrutura mínima',
+      'Falha em mais de um pilar na maior parte dos dias',
+      'Um pilar costuma falhar, os outros seguram um pouco',
+      'Tenho base simples que sustenta a semana na maior parte do tempo',
     ],
   },
   {
@@ -457,13 +458,13 @@ const QUIZ_VITALIDADE: QuizQuestion[] = [
   },
   {
     id: 'q4',
-    label: 'Você valoriza ter um plano personalizado para sua saúde?',
+    label: 'Quando pensa em mudar um hábito, o que mais acontece?',
     type: 'single',
     options: [
-      'Muito, é essencial',
-      'Bastante, acredito que faria diferença',
-      'Moderadamente, se for algo eficaz',
-      'Pouco, prefiro seguir sozinho(a)',
+      'Paraliso ou começo forte e paro em poucos dias',
+      'Começo, mas sem clareza do próximo passo — desanimo',
+      'Consigo pequenas sequências com altos e baixos',
+      'Consigo manter micro-hábitos e ajustar quando a vida muda',
     ],
   },
   {

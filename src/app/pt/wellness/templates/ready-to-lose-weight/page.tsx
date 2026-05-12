@@ -46,56 +46,56 @@ export default function ProntoEmagrecer({ config }: TemplateBaseProps) {
     },
     {
       id: 2,
-      pergunta: 'Você sente que precisa de ajuda profissional para emagrecer com saúde?',
+      pergunta: 'Sobre tentativas de mudar peso ou hábito — o que mais descreve você?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, preciso muito de orientação especializada',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo fazer sozinho(a)'
+        'Histórico de ir e voltar ou frustração forte com balança/espelho',
+        'Algumas tentativas sem manter consistência',
+        'Retomada agora com mais consciência do que antes',
+        'Início recente ou primeira vez encarando com método'
       ]
     },
     {
       id: 3,
-      pergunta: 'Você valoriza ter um plano personalizado para emagrecimento saudável?',
+      pergunta: 'Rotina de refeições (horários e regularidade) — como está hoje?',
       tipo: 'multipla',
       opcoes: [
-        'Muito, é essencial para ter resultados duradouros',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, prefiro seguir padrões gerais'
+        'Muito irregular: improviso ou pular refeições é comum',
+        'Falha em mais de um dia da semana',
+        'Oscila, mas tem dias bem organizados',
+        'Tenho base de horários na maior parte do tempo'
       ]
     },
     {
       id: 4,
-      pergunta: 'Você acredita que produtos de qualidade e acompanhamento podem acelerar seu emagrecimento?',
+      pergunta: 'Sono, estresse e comer “por nervoso” — o que mais combina?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, absolutamente! É o que estou procurando',
-        'Sim, acredito que pode fazer diferença',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Quase sempre: noites ruins ou dias em que como fora de fome real',
+        'Frequentemente em semanas mais carregadas',
+        'Às vezes; já percebo alguns gatilhos',
+        'Raramente: comida segue fome e descanso razoável'
       ]
     },
     {
       id: 5,
-      pergunta: 'Você está aberto(a) para ter um mentor que te guie em sua jornada de emagrecimento?',
+      pergunta: 'Que tipo de apoio faria mais sentido para você neste momento?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um mentor',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro seguir sozinho(a)'
+        'Conversa para montar próximos passos realistas com quem entende o caso',
+        'Clareza de etapas com acompanhamento em algumas semanas',
+        'Material ou desafio para testar sozinho(a) com calma',
+        'Só explorando informação, sem compromisso ainda'
       ]
     }
   ]
 
   const pontosPorOpcao = [
-    [3, 2, 1, 0], // Pergunta 1: mais motivação = mais pontos
-    [3, 2, 1, 0], // Pergunta 2: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais valorização = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais crença = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais abertura = mais pontos
+    [3, 2, 1, 0], // Pergunta 1: mais motivação declarada = mais pontos
+    [3, 2, 1, 0], // Pergunta 2: mais fricção com tentativas passadas = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: mais desorganização alimentar = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: mais sono/estresse alimentar = mais pontos
+    [3, 2, 1, 0], // Pergunta 5: mais busca de apoio estruturado = mais pontos
   ]
 
   const iniciarQuiz = () => {

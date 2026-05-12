@@ -36,46 +36,46 @@ export default function QuizAlimentacaoSaudavelPreview({ etapa, onEtapaChange }:
     },
     {
       numero: 2,
-      texto: 'Você sente que precisa de ajuda profissional para criar uma alimentação saudável?',
+      texto: 'Refeições no horário — o que mais descreve sua semana?',
       cor: 'teal',
       opcoes: [
-        'Sim, preciso muito de orientação especializada',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo fazer sozinho(a)'
+        'Muito soltas: pulo refeições ou janto muito tarde com frequência',
+        'Irregular em mais de metade dos dias',
+        'Oscila, mas tem dias bem previsíveis',
+        'Na maior parte do tempo consigo horários estáveis'
       ]
     },
     {
       numero: 3,
-      texto: 'Você valoriza ter um plano alimentar personalizado e saudável?',
+      texto: 'Ultraprocessados, doces e fritura — como entram no seu dia?',
       cor: 'emerald',
       opcoes: [
-        'Muito, é essencial para minha saúde',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, prefiro seguir padrões gerais'
+        'Muito: aparecem em quase todas as refeições ou lanches',
+        'Frequentemente, principalmente em dias corridos',
+        'Pontualmente, já tento alternar',
+        'Pouco: consigo priorizar comida minimamente preparada na maior parte do tempo'
       ]
     },
     {
       numero: 4,
-      texto: 'Você acredita que produtos de qualidade podem ajudar na sua alimentação saudável?',
+      texto: 'Água, fruta e vegetais — na prática, como está hoje?',
       cor: 'teal',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Bem abaixo do que eu mesma(o) consideraria ok',
+        'Falha em mais de um desses na maior parte dos dias',
+        'Tem dias bons e dias ruins',
+        'Consigo manter hidratação e variedade de plantas com frequência'
       ]
     },
     {
       numero: 5,
-      texto: 'Você está aberto(a) para ter um acompanhamento especializado em alimentação saudável?',
+      texto: 'Que apoio faria mais sentido para encaixar hábitos melhores?',
       cor: 'emerald',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro fazer sozinho(a)'
+        'Conversa para montar próximos passos com quem entende rotina real',
+        'Check-ins ou plano simples por algumas semanas',
+        'Receitas e lista de compras para testar sozinha(o)',
+        'Só curiosidade e informação por enquanto'
       ]
     }
   ]

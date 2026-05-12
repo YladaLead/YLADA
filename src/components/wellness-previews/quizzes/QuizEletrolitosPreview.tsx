@@ -36,46 +36,46 @@ export default function QuizEletrolitosPreview({ etapa, onEtapaChange }: QuizEle
     },
     {
       numero: 2,
-      texto: 'Você sente que precisa de ajuda para equilibrar seus eletrólitos?',
+      texto: 'Treino, calor ou dia de muito suor — você sente cãibra, tontura ou “bater” do coração depois?',
       cor: 'blue',
       opcoes: [
-        'Sim, preciso muito de orientação profissional',
-        'Sim, seria útil ter um acompanhamento',
-        'Talvez, se for algo prático e eficaz',
-        'Não, consigo equilibrar sozinho(a)'
+        'Com frequência, mesmo hidratando um pouco',
+        'Às vezes, em dias mais intensos',
+        'Raro; quando acontece percebo falta de água ou sal',
+        'Quase nunca'
       ]
     },
     {
       numero: 3,
-      texto: 'Você valoriza produtos que ajudam a manter o equilíbrio eletrolítico?',
+      texto: 'No dia a dia, quanta água (e algo com eletrólitos em treinos longos) você sente que toma?',
       cor: 'cyan',
       opcoes: [
-        'Muito, é essencial para meu bem-estar',
-        'Bastante, procuro opções adequadas',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, não me preocupo muito'
+        'Pouco: esqueço fácil ou só bebo quando bate sede forte',
+        'Irregular: dias bons e dias muito secos',
+        'Razoável na maior parte do tempo',
+        'Consciente: distribuo ao longo do dia e ajusto em calor/treino'
       ]
     },
     {
       numero: 4,
-      texto: 'Você acredita que um plano personalizado pode melhorar seu equilíbrio eletrolítico?',
+      texto: 'Café em excesso ou pouca comida antes de suar — isso pesa em você?',
       cor: 'blue',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Sim, combina com sintomas (cabeça leve, mão formigando, irritação)',
+        'Às vezes, quando a agenda aperta',
+        'Raro; já percebo o padrão',
+        'Não costuma ser meu caso'
       ]
     },
     {
       numero: 5,
-      texto: 'Você está aberto(a) para ter um acompanhamento especializado em hidratação e eletrólitos?',
+      texto: 'Próximo passo que faria mais sentido para organizar hidratação e minerais?',
       cor: 'cyan',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro fazer sozinho(a)'
+        'Conversa para entender se é hábito, calor ou outra causa',
+        'Plano simples de copos/horários por algumas semanas',
+        'Testar por conta própria com checklist',
+        'Só informação por agora'
       ]
     }
   ]

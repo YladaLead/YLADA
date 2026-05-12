@@ -46,56 +46,56 @@ export default function VoceConheceSeuCorpo({ config }: TemplateBaseProps) {
     },
     {
       id: 2,
-      pergunta: 'Você sente que precisa de ajuda profissional para entender melhor seu corpo?',
+      pergunta: 'Você costuma perceber fome, sono ou dor antes de virar crise?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, preciso muito de orientação especializada',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo entender sozinho(a)'
+        'Quase nunca — só noto quando já “estourou”',
+        'Às vezes percebo tarde demais',
+        'Na maior parte do tempo percebo com antecedência',
+        'Escuto esses sinais cedo e ajusto o dia com frequência'
       ]
     },
     {
       id: 3,
-      pergunta: 'Você valoriza ter um conhecimento profundo sobre seu corpo e saúde?',
+      pergunta: 'Quão claros são os sintomas que você sente no corpo (energia, digestão, humor)?',
       tipo: 'multipla',
       opcoes: [
-        'Muito, é essencial para meu bem-estar',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo útil',
-        'Pouco, prefiro ir no automático'
+        'Bem confusos: misturo cansaço com fome, estresse ou doença',
+        'Um pouco confusos em alguns dias',
+        'Razoavelmente claros na maior parte do tempo',
+        'Consigo nomear o que muda com sono, comida ou ciclo'
       ]
     },
     {
       id: 4,
-      pergunta: 'Você acredita que produtos e estratégias personalizadas podem ajudar você a conhecer melhor seu corpo?',
+      pergunta: 'Com que frequência você para para observar o corpo (respiração, tensão, postura) no dia?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Quase nunca — vivo no automático',
+        'Só quando algo dói ou incomoda forte',
+        'Algumas pausas curtas em dias mais tranquilos',
+        'Tenho pequenos rituais que me reconectam com o corpo'
       ]
     },
     {
       id: 5,
-      pergunta: 'Você está aberto(a) para ter um acompanhamento especializado para conhecer melhor seu corpo?',
+      pergunta: 'O que mais descreve o seu próximo passo em relação a esse autoconhecimento?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro descobrir sozinho(a)'
+        'Preciso de alguém que me ajude a juntar as peças — sozinho(a) não estou conseguindo',
+        'Quero conversa para validar hipóteses e montar próximos passos com método',
+        'Quero testar um ajuste pequeno e ver como o corpo reage',
+        'Por agora só quero observar e anotar por conta própria'
       ]
     }
   ]
 
   const pontosPorOpcao = [
-    [3, 2, 1, 0], // Pergunta 1: menos conhecimento = mais pontos
-    [3, 2, 1, 0], // Pergunta 2: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais valorização = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais crença = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais abertura = mais pontos
+    [3, 2, 1, 0], // Pergunta 1: menos conhecimento percebido = mais pontos
+    [3, 2, 1, 0], // Pergunta 2: menos escuta aos sinais = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: mais confusão sobre sintomas = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: menos observação corporal = mais pontos
+    [3, 2, 1, 0], // Pergunta 5: mais necessidade de estrutura/apoio = mais pontos
   ]
 
   const iniciarQuiz = () => {
