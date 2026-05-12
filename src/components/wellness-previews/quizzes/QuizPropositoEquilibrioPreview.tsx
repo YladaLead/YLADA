@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
 import { propositoEquilibrioDiagnosticos } from '@/lib/diagnostics'
+import { PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS } from '@/lib/pro-lideres/pro-lideres-recruitment-unified-perguntas'
+
+const CORES_PROPOSITO = ['purple', 'indigo', 'purple', 'indigo'] as const
 
 interface QuizPropositoEquilibrioPreviewProps {
   etapa: number
@@ -10,7 +12,7 @@ interface QuizPropositoEquilibrioPreviewProps {
 
 export default function QuizPropositoEquilibrioPreview({ etapa, onEtapaChange }: QuizPropositoEquilibrioPreviewProps) {
   const diagnosticos = propositoEquilibrioDiagnosticos.wellness
-  const totalEtapas = 6 // 0=landing, 1-5=perguntas, 6=resultados
+  const totalEtapas = 5
 
   const handleNext = () => {
     onEtapaChange(Math.min(totalEtapas, etapa + 1))
@@ -20,65 +22,14 @@ export default function QuizPropositoEquilibrioPreview({ etapa, onEtapaChange }:
     onEtapaChange(Math.max(0, etapa - 1))
   }
 
-  const labels = ['Início', '1', '2', '3', '4', '5', 'Resultados']
+  const labels = ['Início', '1', '2', '3', '4', 'Resultados']
 
-  const perguntas = [
-    {
-      numero: 1,
-      texto: 'Você sente que seu dia a dia está alinhado com seus sonhos e propósito de vida?',
-      cor: 'purple',
-      opcoes: [
-        'Não, sinto que estou muito distante dos meus sonhos',
-        'Parcialmente, mas gostaria de estar mais alinhado',
-        'Bastante, mas sempre posso melhorar o equilíbrio',
-        'Sim, sinto que estou muito alinhado com meu propósito'
-      ]
-    },
-    {
-      numero: 2,
-      texto: 'Você está aberto(a) para conhecer caminhos que podem te ajudar a viver mais alinhado com seu propósito?',
-      cor: 'indigo',
-      opcoes: [
-        'Sim, estou muito interessado(a) em descobrir!',
-        'Sim, gostaria de conhecer opções que me ajudem',
-        'Talvez, se for algo que realmente faça sentido',
-        'Não, prefiro manter como está'
-      ]
-    },
-    {
-      numero: 3,
-      texto: 'Você valoriza ter equilíbrio entre vida pessoal, profissional e tempo para o que realmente importa?',
-      cor: 'purple',
-      opcoes: [
-        'Muito, é um dos meus maiores objetivos',
-        'Bastante, gostaria de ter mais equilíbrio',
-        'Moderadamente, seria interessante',
-        'Pouco, não é uma prioridade para mim'
-      ]
-    },
-    {
-      numero: 4,
-      texto: 'Você acredita que pode viver seu propósito trabalhando com algo que também transforma a vida de outras pessoas?',
-      cor: 'indigo',
-      opcoes: [
-        'Sim, acredito muito nessa possibilidade!',
-        'Sim, gostaria de entender como isso funciona',
-        'Talvez, se for algo genuíno e significativo',
-        'Não, não acredito nisso'
-      ]
-    },
-    {
-      numero: 5,
-      texto: 'Você está interessado(a) em conversar com quem te enviou este quiz sobre propósito e equilíbrio?',
-      cor: 'purple',
-      opcoes: [
-        'Sim, estou muito interessado(a) em saber mais!',
-        'Sim, gostaria de entender melhor as possibilidades',
-        'Talvez, se for algo que realmente possa me ajudar',
-        'Não, não tenho interesse no momento'
-      ]
-    }
-  ]
+  const perguntas = PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS.map((p, i) => ({
+    numero: i + 1,
+    texto: p.texto,
+    cor: CORES_PROPOSITO[i] ?? 'purple',
+    opcoes: [...p.opcoes],
+  }))
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -92,21 +43,20 @@ export default function QuizPropositoEquilibrioPreview({ etapa, onEtapaChange }:
           <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border-2 border-purple-200">
             <h4 className="text-xl font-bold text-gray-900 mb-2">🎯 Quiz: Propósito e Equilíbrio</h4>
             <p className="text-gray-700 mb-3">Descubra se seu dia a dia está alinhado com seus sonhos</p>
-            <p className="text-purple-600 font-semibold">🚀 Uma avaliação personalizada para entender seu alinhamento com propósito.</p>
+            <p className="text-purple-600 font-semibold">🚀 Entrada temática Propósito — mesmas 4 perguntas do núcleo Ganhos no link Pro Líderes.</p>
             <div className="bg-white rounded-lg p-4 mt-4 border border-purple-200">
               <p className="text-sm text-gray-700 mb-2"><strong>💡 O que você vai descobrir:</strong></p>
               <div className="space-y-2 text-sm text-gray-600">
-                <p>✓ Seu alinhamento com propósito</p>
-                <p>✓ Oportunidades de equilíbrio</p>
-                <p>✓ Insights personalizados</p>
-                <p>✓ Caminhos para viver seus sonhos</p>
+                <p>✓ Leitura da situação financeira e do uso do tempo</p>
+                <p>✓ Faixa de resultado (0 a 12 pontos)</p>
+                <p>✓ Texto pós-resultado específico deste fluxo no Pro Líderes</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Perguntas 1-5 */}
-        {etapa >= 1 && etapa <= 5 && (
+        {/* Perguntas 1-4 (unificado com quiz Ganhos / Pro Líderes) */}
+        {etapa >= 1 && etapa <= 4 && (
           <div className="space-y-6">
             {perguntas.map((pergunta) => {
               if (etapa === pergunta.numero) {
@@ -134,7 +84,7 @@ export default function QuizPropositoEquilibrioPreview({ etapa, onEtapaChange }:
                   <div key={pergunta.numero} className={`${bgColor} p-4 rounded-lg border-2 ${borderColor}`}>
                     <div className="flex items-center justify-between mb-3">
                       <span className={`${badgeColor} text-white px-3 py-1 rounded-full text-sm font-semibold`}>
-                        Pergunta {pergunta.numero} de 5
+                        Pergunta {pergunta.numero} de 4
                       </span>
                       <span className="text-xs text-gray-600 font-medium">Propósito e Equilíbrio</span>
                     </div>
@@ -163,8 +113,8 @@ export default function QuizPropositoEquilibrioPreview({ etapa, onEtapaChange }:
           </div>
         )}
 
-        {/* Tela de Resultados - Etapa 6 */}
-        {etapa === 6 && (
+        {/* Tela de Resultados */}
+        {etapa === 5 && (
           <div className="space-y-6">
             <div className="text-center space-y-1 mb-6">
               <h4 className="text-xl font-bold text-gray-900">📊 Resultados Possíveis do Quiz</h4>
@@ -206,7 +156,7 @@ export default function QuizPropositoEquilibrioPreview({ etapa, onEtapaChange }:
             <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
               <div className="flex items-center justify-between mb-4">
                 <h5 className="text-lg font-bold text-green-900">🎯 {diagnosticos.altoPotencial.titulo ?? 'Alto Potencial para Propósito e Equilíbrio'}</h5>
-                <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">12-15 pontos</span>
+                <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">9-12 pontos</span>
               </div>
               <div className="bg-white rounded-lg p-4 space-y-4">
                 <div className="bg-green-50 p-3 rounded-lg">
@@ -237,7 +187,7 @@ export default function QuizPropositoEquilibrioPreview({ etapa, onEtapaChange }:
             <div className="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
               <div className="flex items-center justify-between mb-4">
                 <h5 className="text-lg font-bold text-yellow-900">🎯 {diagnosticos.potencialModerado.titulo ?? 'Potencial Moderado para Alinhamento'}</h5>
-                <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">8-11 pontos</span>
+                <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">6-8 pontos</span>
               </div>
               <div className="bg-white rounded-lg p-4 space-y-4">
                 <div className="bg-yellow-50 p-3 rounded-lg">
@@ -268,7 +218,7 @@ export default function QuizPropositoEquilibrioPreview({ etapa, onEtapaChange }:
             <div className="bg-blue-50 rounded-lg p-6 border-2 border-blue-200">
               <div className="flex items-center justify-between mb-4">
                 <h5 className="text-lg font-bold text-blue-900">🎯 {diagnosticos.bomPotencial.titulo ?? 'Bom Potencial para Expansão'}</h5>
-                <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">0-7 pontos</span>
+                <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">0-5 pontos</span>
               </div>
               <div className="bg-white rounded-lg p-4 space-y-4">
                 <div className="bg-blue-50 p-3 rounded-lg">

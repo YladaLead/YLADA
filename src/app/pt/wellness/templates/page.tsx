@@ -93,9 +93,9 @@ export default function WellnessTemplatesPage() {
   const [etapaPreviewQuizConheceSeuCorpo, setEtapaPreviewQuizConheceSeuCorpo] = useState(0) // Para quiz-conhece-seu-corpo: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizNutridoVsAlimentado, setEtapaPreviewQuizNutridoVsAlimentado] = useState(0) // Para quiz-nutrido-vs-alimentado: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewQuizAlimentacaoRotina, setEtapaPreviewQuizAlimentacaoRotina] = useState(0) // Para quiz-alimentacao-rotina: 0 = landing, 1-5 = perguntas, 6 = resultados
-  const [etapaPreviewQuizGanhosProsperidade, setEtapaPreviewQuizGanhosProsperidade] = useState(0) // Para quiz-ganhos-prosperidade: 0 = landing, 1-5 = perguntas, 6 = resultados
-  const [etapaPreviewQuizPotencialCrescimento, setEtapaPreviewQuizPotencialCrescimento] = useState(0) // Para quiz-potencial-crescimento: 0 = landing, 1-5 = perguntas, 6 = resultados
-  const [etapaPreviewQuizPropositoEquilibrio, setEtapaPreviewQuizPropositoEquilibrio] = useState(0) // Para quiz-proposito-equilibrio: 0 = landing, 1-5 = perguntas, 6 = resultados
+  const [etapaPreviewQuizGanhosProsperidade, setEtapaPreviewQuizGanhosProsperidade] = useState(0) // 0=landing, 1-4=perguntas, 5=resultados (espelho Pro Líderes)
+  const [etapaPreviewQuizPotencialCrescimento, setEtapaPreviewQuizPotencialCrescimento] = useState(0) // idem (mesmas 4 MCQs)
+  const [etapaPreviewQuizPropositoEquilibrio, setEtapaPreviewQuizPropositoEquilibrio] = useState(0) // idem
   const [etapaPreviewGuiaHidratacao, setEtapaPreviewGuiaHidratacao] = useState(0) // Para guia-hidratacao: 0 = landing, 1-5 = perguntas, 6 = resultados
   const [etapaPreviewDesafio7Dias, setEtapaPreviewDesafio7Dias] = useState(0) // Para desafio-7-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
   const [etapaPreviewDesafio21Dias, setEtapaPreviewDesafio21Dias] = useState(0) // Para desafio-21-dias: 0 = landing, 1-7 = perguntas, 8 = resultados
