@@ -33,7 +33,7 @@ function upgradeFluxoForNoel(fluxo: FluxoCliente): FluxoCliente {
 
   return {
     ...fluxo,
-    /** Mesmo questionário que o quiz Ganhos no Wellness — comparação de diagnóstico por `flow_id` só. */
+    /** Mesmo questionário que o quiz Ganhos no Wellness (5 MCQs) — comparação de diagnóstico por `flow_id` só. */
     perguntas: PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS,
     objetivo: objetivosNoel,
     diagnostico: {

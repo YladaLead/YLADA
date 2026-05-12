@@ -77,6 +77,18 @@ export default function QuizGanhos({ config }: TemplateBaseProps) {
         'Sim, estou no meu limite atual',
         'Sim, estou prosperando como desejado'
       ]
+    },
+    {
+      id: 5,
+      pergunta:
+        'Olhando com honestidade para as próximas semanas: o que mais descreve sua relação com a ideia de renda extra ou de mudar esse quadro?',
+      tipo: 'multipla',
+      opcoes: [
+        'Só consigo pensar no dia a dia; renda extra parece distante',
+        'Acho possível, mas ainda não organizei ideias concretas',
+        'Se fizer sentido no meu tempo, quero avaliar com cuidado',
+        'Quero um próximo passo claro, ainda que pequeno, nas próximas semanas'
+      ]
     }
   ]
 
@@ -84,7 +96,8 @@ export default function QuizGanhos({ config }: TemplateBaseProps) {
     [0, 1, 2, 3], // Pergunta 1
     [0, 1, 2, 3], // Pergunta 2
     [0, 1, 2, 3], // Pergunta 3
-    [0, 1, 2, 3]  // Pergunta 4
+    [0, 1, 2, 3], // Pergunta 4
+    [0, 1, 2, 3], // Pergunta 5 (reflexão / intenção nas próximas semanas)
   ]
 
   const iniciarQuiz = () => {
@@ -116,9 +129,9 @@ export default function QuizGanhos({ config }: TemplateBaseProps) {
     let cor = ''
     let recomendacoes: string[] = []
 
-    // Mesmos diagnósticos do preview: 3 faixas (alto / moderado / bom)
+    // Mesmos diagnósticos do preview: 3 faixas (alto / moderado / bom). Score máx. 15 (5×3); ~75% / ~50% dos antigos 9/12 em 12.
     let resultadoId: 'altoPotencial' | 'potencialModerado' | 'bomPotencial' = 'bomPotencial'
-    if (score >= 9) {
+    if (score >= 11) {
       cor = 'green'
       resultadoId = 'altoPotencial'
       recomendacoes = [
@@ -127,7 +140,7 @@ export default function QuizGanhos({ config }: TemplateBaseProps) {
         'Mentorear outros para crescer junto',
         'Expandir negócios existentes'
       ]
-    } else if (score >= 6) {
+    } else if (score >= 8) {
       cor = 'blue'
       resultadoId = 'potencialModerado'
       recomendacoes = [

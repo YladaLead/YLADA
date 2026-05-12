@@ -1,6 +1,7 @@
 /**
- * Questionário único do recrutamento Pro Líderes (biblioteca): mesmas 4 perguntas e opções
- * do template Wellness `src/app/pt/wellness/templates/ganhos/page.tsx`.
+ * Questionário único do recrutamento Pro Líderes (biblioteca): mesmas perguntas e opções
+ * do template Wellness `src/app/pt/wellness/templates/ganhos/page.tsx` (5 MCQs: 4 raio‑X
+ * financeiro + 1 reflexiva para autoconsciência / próximo passo).
  *
  * Todos os fluxos de `getProLideresRecruitmentPresetFluxos()` usam este bloco; o `flow_id`
  * continua a selecionar copy/outcomes em `ylada_flow_diagnosis_outcomes`.
@@ -52,6 +53,18 @@ export const PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS: FluxoCliente['perguntas'
       'Parcialmente, consigo mais se me dedicar',
       'Sim, estou no meu limite atual',
       'Sim, estou prosperando como desejado',
+    ],
+  },
+  {
+    id: 'p5',
+    texto:
+      'Olhando com honestidade para as próximas semanas: o que mais descreve sua relação com a ideia de renda extra ou de mudar esse quadro?',
+    tipo: 'multipla_escolha',
+    opcoes: [
+      'Só consigo pensar no dia a dia; renda extra parece distante',
+      'Acho possível, mas ainda não organizei ideias concretas',
+      'Se fizer sentido no meu tempo, quero avaliar com cuidado',
+      'Quero um próximo passo claro, ainda que pequeno, nas próximas semanas',
     ],
   },
 ]

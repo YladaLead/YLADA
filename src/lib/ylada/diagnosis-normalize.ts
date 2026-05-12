@@ -210,7 +210,7 @@ export function normalizeVisitorAnswers(
           break
         }
         // Respostas em texto livre (sem opções 0-3): garantir nível para o motor não falhar
-        const hasAnyText = [q1Raw, q2Raw, q3Raw, q4Raw].some(
+        const hasAnyText = [q1Raw, q2Raw, q3Raw, q4Raw, q5Raw].some(
           (v) => typeof v === 'string' && String(v).trim().length > 0
         )
         if (hasAnyText) {

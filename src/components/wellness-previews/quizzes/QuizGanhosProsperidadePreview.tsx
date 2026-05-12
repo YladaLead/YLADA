@@ -3,8 +3,8 @@
 import { ganhosProsperidadeDiagnosticos } from '@/lib/diagnostics'
 import { PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS } from '@/lib/pro-lideres/pro-lideres-recruitment-unified-perguntas'
 
-/** Mesmas 4 MCQs de `ganhos/page.tsx` e do link Pro Líderes (`quiz-recrut-*`, presets clássicos). */
-const CORES_GANHOS = ['amber', 'yellow', 'amber', 'yellow'] as const
+/** Mesmas 5 MCQs de `ganhos/page.tsx` e do link Pro Líderes (`quiz-recrut-*`, presets clássicos). */
+const CORES_GANHOS = ['amber', 'yellow', 'amber', 'yellow', 'amber'] as const
 
 interface QuizGanhosProsperidadePreviewProps {
   etapa: number
@@ -13,7 +13,7 @@ interface QuizGanhosProsperidadePreviewProps {
 
 export default function QuizGanhosProsperidadePreview({ etapa, onEtapaChange }: QuizGanhosProsperidadePreviewProps) {
   const diagnosticos = ganhosProsperidadeDiagnosticos.wellness
-  const totalEtapas = 5 // 0=landing, 1-4=perguntas, 5=resultados (4 MCQs = template ganhos / Pro Líderes)
+  const totalEtapas = 6 // 0=landing, 1-5=perguntas, 6=resultados (5 MCQs = template ganhos / Pro Líderes)
 
   const handleNext = () => {
     onEtapaChange(Math.min(totalEtapas, etapa + 1))
@@ -23,7 +23,7 @@ export default function QuizGanhosProsperidadePreview({ etapa, onEtapaChange }: 
     onEtapaChange(Math.max(0, etapa - 1))
   }
 
-  const labels = ['Início', '1', '2', '3', '4', 'Resultados']
+  const labels = ['Início', '1', '2', '3', '4', '5', 'Resultados']
 
   const perguntas = PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS.map((p, i) => ({
     numero: i + 1,
@@ -44,20 +44,20 @@ export default function QuizGanhosProsperidadePreview({ etapa, onEtapaChange }: 
           <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-6 rounded-lg border-2 border-amber-200">
             <h4 className="text-xl font-bold text-gray-900 mb-2">💰 Quiz: Ganhos e Prosperidade</h4>
             <p className="text-gray-700 mb-3">Descubra seu potencial para ganhos e prosperidade</p>
-            <p className="text-amber-600 font-semibold">🚀 Quatro perguntas sobre renda, tempo e satisfação — mesmo núcleo usado no link Pro Líderes.</p>
+            <p className="text-amber-600 font-semibold">🚀 Cinco perguntas (renda, tempo, satisfação + uma reflexiva) — mesmo núcleo do link Pro Líderes.</p>
             <div className="bg-white rounded-lg p-4 mt-4 border border-amber-200">
               <p className="text-sm text-gray-700 mb-2"><strong>💡 O que você vai descobrir:</strong></p>
               <div className="space-y-2 text-sm text-gray-600">
                 <p>✓ Leitura da situação financeira e do uso do tempo</p>
-                <p>✓ Faixa de resultado (0 a 12 pontos) como no quiz Ganhos</p>
+                <p>✓ Faixa de resultado (0 a 15 pontos) como no quiz Ganhos</p>
                 <p>✓ Próximo passo com quem enviou o link</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Perguntas 1-4 (unificado Pro Líderes + template Ganhos) */}
-        {etapa >= 1 && etapa <= 4 && (
+        {/* Perguntas 1-5 (unificado Pro Líderes + template Ganhos) */}
+        {etapa >= 1 && etapa <= 5 && (
           <div className="space-y-6">
             {perguntas.map((pergunta) => {
               if (etapa === pergunta.numero) {
@@ -85,7 +85,7 @@ export default function QuizGanhosProsperidadePreview({ etapa, onEtapaChange }: 
                   <div key={pergunta.numero} className={`${bgColor} p-4 rounded-lg border-2 ${borderColor}`}>
                     <div className="flex items-center justify-between mb-3">
                       <span className={`${badgeColor} text-white px-3 py-1 rounded-full text-sm font-semibold`}>
-                        Pergunta {pergunta.numero} de 4
+                        Pergunta {pergunta.numero} de 5
                       </span>
                       <span className="text-xs text-gray-600 font-medium">Ganhos e Prosperidade</span>
                     </div>
@@ -115,7 +115,7 @@ export default function QuizGanhosProsperidadePreview({ etapa, onEtapaChange }: 
         )}
 
         {/* Tela de Resultados */}
-        {etapa === 5 && (
+        {etapa === 6 && (
           <div className="space-y-6">
             <div className="text-center space-y-1 mb-6">
               <h4 className="text-xl font-bold text-gray-900">📊 Resultados Possíveis do Quiz</h4>
@@ -157,7 +157,7 @@ export default function QuizGanhosProsperidadePreview({ etapa, onEtapaChange }: 
             <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
               <div className="flex items-center justify-between mb-4">
                 <h5 className="text-lg font-bold text-green-900">💰 {diagnosticos.altoPotencial.titulo ?? 'Alto Potencial para Ganhos e Prosperidade'}</h5>
-                <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">9-12 pontos</span>
+                <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">11-15 pontos</span>
               </div>
               <div className="bg-white rounded-lg p-4 space-y-4">
                 <div className="bg-green-50 p-3 rounded-lg">
@@ -188,7 +188,7 @@ export default function QuizGanhosProsperidadePreview({ etapa, onEtapaChange }: 
             <div className="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
               <div className="flex items-center justify-between mb-4">
                 <h5 className="text-lg font-bold text-yellow-900">💰 {diagnosticos.potencialModerado.titulo ?? 'Potencial Moderado para Crescimento'}</h5>
-                <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">6-8 pontos</span>
+                <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">8-10 pontos</span>
               </div>
               <div className="bg-white rounded-lg p-4 space-y-4">
                 <div className="bg-yellow-50 p-3 rounded-lg">
@@ -219,7 +219,7 @@ export default function QuizGanhosProsperidadePreview({ etapa, onEtapaChange }: 
             <div className="bg-blue-50 rounded-lg p-6 border-2 border-blue-200">
               <div className="flex items-center justify-between mb-4">
                 <h5 className="text-lg font-bold text-blue-900">💰 {diagnosticos.bomPotencial.titulo ?? 'Bom Potencial para Expansão'}</h5>
-                <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">0-5 pontos</span>
+                <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">0-7 pontos</span>
               </div>
               <div className="bg-white rounded-lg p-4 space-y-4">
                 <div className="bg-blue-50 p-3 rounded-lg">

@@ -250,7 +250,7 @@ export function wellnessFluxoToYladaConfigJson(
   }
 
   /**
-   * Recrutamento Pro Líderes: questionário unificado (MCQ Ganhos) — mesmo modelo do Wellness `ganhos/page.tsx`;
+   * Recrutamento Pro Líderes: questionário unificado (MCQs do template Ganhos, 5 perguntas) — mesmo modelo do Wellness `ganhos/page.tsx`;
    * índices invertidos no normalize para mapear arquétipo RISK (ver `diagnosis-normalize`).
    */
   const invertRecruitmentMcq = kind === 'recruitment'

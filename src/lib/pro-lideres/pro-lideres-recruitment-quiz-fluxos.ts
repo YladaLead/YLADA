@@ -1,6 +1,6 @@
 /**
  * Quizzes de recrutamento Pro Líderes (entradas temáticas). As **perguntas** são as do quiz Ganhos
- * no Wellness — ver `pro-lideres-recruitment-unified-perguntas.ts` (unificado para toda a biblioteca).
+ * no Wellness (5 MCQs) — ver `pro-lideres-recruitment-unified-perguntas.ts` (unificado para toda a biblioteca).
  *
  * O motor YLADA soma índices 0..n das MCQs; no Wellness o índice maior costuma ser “melhor”.
  * No Pro Líderes, `meta.invert_risk_mcq_score` alinha o arquétipo RISK (ver `wellnessFluxoToYladaConfigJson`).
