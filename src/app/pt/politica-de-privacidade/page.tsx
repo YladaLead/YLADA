@@ -75,23 +75,24 @@ export default function PoliticaPrivacidadePage() {
               </ul>
 
               <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">
-                2.3. Dados Profissionais
+                2.3. Dados do Negócio
               </h3>
               <ul className="list-disc pl-6 space-y-2">
-                <li>CRN (para nutricionistas)</li>
-                <li>Especialidades</li>
-                <li>Certificações</li>
-                <li>Nível Herbalife (quando aplicável)</li>
+                <li>Segmento de atuação</li>
+                <li>Faturamento aproximado</li>
+                <li>Número de funcionários</li>
+                <li>Principais desafios e objetivos do negócio</li>
               </ul>
 
               <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">
-                2.4. Dados de Uso
+                2.4. Dados de Uso e Conversas
               </h3>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Histórico de navegação</li>
                 <li>Interações com a plataforma</li>
                 <li>Preferências e configurações</li>
                 <li>Logs de acesso</li>
+                <li>Conversas via WhatsApp com o agente de atendimento Carol (armazenadas para fins de diagnóstico e qualidade de serviço)</li>
               </ul>
 
               <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">
@@ -158,9 +159,11 @@ export default function PoliticaPrivacidadePage() {
               </h3>
               <ul className="list-disc pl-6 space-y-2">
                 <li><strong>Supabase:</strong> Hospedagem de banco de dados e autenticação</li>
-                <li><strong>Stripe/Mercado Pago:</strong> Processamento de pagamentos</li>
                 <li><strong>Vercel:</strong> Hospedagem da aplicação</li>
-                <li><strong>OpenAI:</strong> Processamento de IA (dados anonimizados)</li>
+                <li><strong>OpenAI:</strong> Processamento de linguagem natural pelo agente Carol</li>
+                <li><strong>Meta (WhatsApp Business API):</strong> Canal de atendimento via WhatsApp</li>
+                <li><strong>HubSpot:</strong> Gestão de relacionamento com clientes (CRM)</li>
+                <li><strong>MailerLite:</strong> Envio de comunicações por e-mail</li>
               </ul>
 
               <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">
@@ -239,7 +242,7 @@ export default function PoliticaPrivacidadePage() {
               </div>
 
               <p className="mt-6">
-                Para exercer seus direitos, entre em contato através de: <strong>privacidade@ylada.com</strong>
+                Para exercer seus direitos, entre em contato através de: <strong>ylada.app@gmail.com</strong>
               </p>
             </section>
 
@@ -300,7 +303,7 @@ export default function PoliticaPrivacidadePage() {
                 de Dados:
               </p>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p><strong>Email:</strong> privacidade@ylada.com</p>
+                <p><strong>Email:</strong> ylada.app@gmail.com</p>
                 <p className="mt-2"><strong>Empresa:</strong> Portal Solutions Tech & Innovation LTDA</p>
                 <p><strong>CNPJ:</strong> 63.447.492/0001-88</p>
               </div>
