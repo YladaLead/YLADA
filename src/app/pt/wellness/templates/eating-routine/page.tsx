@@ -46,56 +46,56 @@ export default function VoceAlimentandoConformeRotina({ config }: TemplateBasePr
     },
     {
       id: 2,
-      pergunta: 'Você sente que precisa de ajuda profissional para adequar sua alimentação à sua rotina?',
+      pergunta: 'Horário de trabalho ou estudos — como encaixa refeições completas?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, preciso muito de orientação especializada',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo adequar sozinho(a)'
+        'Muito difícil: como o que der na mão ou pular é comum',
+        'Frequentemente fora de horário ou muito rápido',
+        'Consigo organizar em parte dos dias',
+        'Na maior parte do tempo encaixo refeições com calma'
       ]
     },
     {
       id: 3,
-      pergunta: 'Você valoriza ter um plano alimentar personalizado para sua rotina?',
+      pergunta: 'Quando a rotina aperta, o que mais costuma “quebrar” primeiro?',
       tipo: 'multipla',
       opcoes: [
-        'Muito, é essencial para minha saúde',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, prefiro seguir padrões gerais'
+        'Tudo: café da manhã, almoço e jantar no improviso',
+        'Principalmente almoço ou jantar',
+        'Só um dos horários costuma falhar',
+        'Consigo manter base mesmo em semana cheia'
       ]
     },
     {
       id: 4,
-      pergunta: 'Você acredita que produtos e estratégias específicas podem ajudar você a se alimentar melhor conforme sua rotina?',
+      pergunta: 'Água, fruta e comida minimamente preparada — na prática da semana:',
       tipo: 'multipla',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Bem abaixo do que eu mesma(o) gostaria',
+        'Falha em mais de um desses na maior parte dos dias',
+        'Tem dias bons e ruins',
+        'Consigo hidratar e variar plantas com frequência'
       ]
     },
     {
       id: 5,
-      pergunta: 'Você está aberto(a) para ter um acompanhamento especializado em alimentação conforme rotina?',
+      pergunta: 'Que apoio faria mais sentido para encaixar alimentação na sua rotina real?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro fazer sozinho(a)'
+        'Conversa para montar próximos passos com quem entende agenda corrida',
+        'Plano simples de horários e lanches por algumas semanas',
+        'Lista de compras e ideias para testar sozinha(o)',
+        'Só curiosidade e informação por enquanto'
       ]
     }
   ]
 
   const pontosPorOpcao = [
     [3, 2, 1, 0], // Pergunta 1: menos adequado = mais pontos
-    [3, 2, 1, 0], // Pergunta 2: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais valorização = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais crença = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais abertura = mais pontos
+    [3, 2, 1, 0], // Pergunta 2: mais desalinhamento refeição/trabalho = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: mais quebra sob pressão = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: mais distância do ideal hidratação/variedade = mais pontos
+    [3, 2, 1, 0], // Pergunta 5: mais busca de apoio estruturado = mais pontos
   ]
 
   const iniciarQuiz = () => {
