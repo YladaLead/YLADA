@@ -36,46 +36,46 @@ export default function QuizAvaliacaoInicialPreview({ etapa, onEtapaChange }: Qu
     },
     {
       numero: 2,
-      texto: 'Você sente que precisa de ajuda profissional para alcançar seus objetivos?',
+      texto: 'Sobre tentativas de mudar hábitos ou corpo — o que mais descreve você?',
       cor: 'emerald',
       opcoes: [
-        'Sim, preciso muito de orientação especializada',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo fazer sozinho(a)'
+        'Já rodei muitas tentativas sem manter — cansa',
+        'Algumas tentativas sem consistência',
+        'Retomada com mais consciência agora',
+        'Início recente ou primeira vez estruturada'
       ]
     },
     {
       numero: 3,
-      texto: 'Você valoriza ter um plano personalizado baseado no seu perfil e objetivos?',
+      texto: 'Sono, estresse e rotina (refeições e movimento) — como estão sustentando você?',
       cor: 'green',
       opcoes: [
-        'Muito, é essencial para ter resultados',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, prefiro seguir padrões gerais'
+        'Muito desalinhados na maior parte das semanas',
+        'Um ou dois pilares falham com frequência',
+        'Oscilam, mas não é o tempo todo',
+        'Na maior parte do tempo ajudam mais do que atrapalham'
       ]
     },
     {
       numero: 4,
-      texto: 'Você acredita que produtos de qualidade e acompanhamento podem acelerar seus resultados?',
+      texto: 'Clareza do próximo passo — o que mais combina?',
       cor: 'emerald',
       opcoes: [
-        'Sim, absolutamente! É o que estou procurando',
-        'Sim, acredito que pode fazer diferença',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Zero clareza: muita informação solta e pouca ação',
+        'Sei o que “deveria” fazer, mas não encaixo no dia',
+        'Tenho uma ou duas hipóteses para testar',
+        'Tenho prioridade clara nas próximas semanas'
       ]
     },
     {
       numero: 5,
-      texto: 'Você está aberto(a) para ter um mentor que te guie em sua jornada de transformação?',
+      texto: 'Que tipo de apoio faria mais sentido neste momento?',
       cor: 'green',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um mentor',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro seguir sozinho(a)'
+        'Conversa para montar prioridades com quem entende meu caso',
+        'Plano simples de hábitos por algumas semanas',
+        'Material ou desafio para testar sozinho(a)',
+        'Só explorando informação, sem compromisso ainda'
       ]
     }
   ]
@@ -92,14 +92,14 @@ export default function QuizAvaliacaoInicialPreview({ etapa, onEtapaChange }: Qu
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border-2 border-green-200">
             <h4 className="text-xl font-bold text-gray-900 mb-2">🌟 Avaliação Inicial</h4>
             <p className="text-gray-700 mb-3">Descubra como podemos ajudar na sua transformação</p>
-            <p className="text-green-600 font-semibold">🚀 Uma avaliação rápida para entender seu perfil e criar um plano personalizado.</p>
+            <p className="text-green-600 font-semibold">🚀 Uma avaliação rápida para enxergar prontidão, rotina e próximo passo com clareza.</p>
             <div className="bg-white rounded-lg p-4 mt-4 border border-green-200">
               <p className="text-sm text-gray-700 mb-2"><strong>💡 O que você vai descobrir:</strong></p>
               <div className="space-y-2 text-sm text-gray-600">
                 <p>✓ Seu perfil e necessidades</p>
-                <p>✓ Como podemos te ajudar</p>
-                <p>✓ Recomendações personalizadas</p>
-                <p>✓ Produtos adequados ao seu perfil</p>
+                <p>✓ Onde sono, estresse e rotina sustentam ou atrapalham</p>
+                <p>✓ Que tipo de apoio combina com você agora</p>
+                <p>✓ Orientações alinhadas ao seu perfil</p>
               </div>
             </div>
           </div>

@@ -58,24 +58,24 @@ export default function QuizEmocionalPreview({ etapa, onEtapaChange }: QuizEmoci
     },
     {
       numero: 4,
-      texto: 'Você sente que tem o suporte necessário para alcançar seus objetivos de bem-estar?',
+      texto: 'Corpo, descanso e mente — o que mais pesa quando você quer se sentir melhor?',
       cor: 'fuchsia',
       opcoes: [
-        'Não, sinto que estou sozinho(a) nessa jornada',
-        'Parcialmente, mas preciso de mais orientação',
-        'Sim, tenho algum suporte, mas poderia ser melhor',
-        'Sim, tenho um excelente suporte e acompanhamento'
+        'Sono curto ou irregular na maior parte da semana',
+        'Cabeça acelerada, dificuldade de pausar ou desligar',
+        'Rotina corrida, pouco tempo para autocuidado básico',
+        'Na maior parte do tempo consigo equilibrar com hábitos simples'
       ]
     },
     {
       numero: 5,
-      texto: 'O quanto você valoriza ter um acompanhamento personalizado para sua transformação?',
+      texto: 'Qual seu principal objetivo neste momento?',
       cor: 'pink',
       opcoes: [
-        'Não valorizo muito, prefiro fazer sozinho(a)',
-        'Valorizo um pouco, mas não é essencial',
-        'Valorizo bastante, faria toda diferença',
-        'Valorizo muito, é essencial para meu sucesso'
+        'Entender melhor o que está acontecendo',
+        'Saber por onde começar',
+        'Falar com alguém que entende',
+        'Só quero me informar'
       ]
     }
   ]
@@ -92,7 +92,7 @@ export default function QuizEmocionalPreview({ etapa, onEtapaChange }: QuizEmoci
           <div className="bg-gradient-to-r from-pink-50 to-purple-50 p-6 rounded-lg border-2 border-pink-200">
             <h4 className="text-xl font-bold text-gray-900 mb-2">💖 Avaliação de Forma Emocional</h4>
             <p className="text-gray-700 mb-3">Descubra como suas emoções influenciam sua jornada de transformação</p>
-            <p className="text-pink-600 font-semibold">🚀 Uma avaliação personalizada que pode transformar sua relação com o bem-estar e autoestima.</p>
+            <p className="text-pink-600 font-semibold">🚀 Uma avaliação para mapear autoestima, motivação e o que sustenta ou pesa no dia a dia.</p>
             <div className="bg-white rounded-lg p-4 mt-4 border border-pink-200">
               <p className="text-sm text-gray-700 mb-2"><strong>💡 O que você vai descobrir:</strong></p>
               <div className="space-y-2 text-sm text-gray-600">

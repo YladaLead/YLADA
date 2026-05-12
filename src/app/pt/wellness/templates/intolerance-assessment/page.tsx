@@ -57,35 +57,35 @@ export default function AvaliacaoIntolerancia({ config }: TemplateBaseProps) {
     },
     {
       id: 3,
-      pergunta: 'Você sente que precisa de ajuda para identificar alimentos que te fazem mal?',
+      pergunta: 'Consegue anotar ou lembrar o que comeu nas horas antes do desconforto?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, preciso muito de orientação profissional',
-        'Sim, seria útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo identificar sozinho(a)'
+        'Não: vem do nada ou mistura tudo na cabeça',
+        'Às vezes lembro, mas não é confiável',
+        'Na maior parte das vezes consigo listar suspeitos',
+        'Sim, já tenho padrão claro em vários alimentos'
       ]
     },
     {
       id: 4,
-      pergunta: 'Você valoriza produtos alimentares que sejam seguros e adequados para seu organismo?',
+      pergunta: 'Leitura de rótulos e ingredientes — na prática de compra:',
       tipo: 'multipla',
       opcoes: [
-        'Muito, é essencial para minha saúde',
-        'Bastante, procuro opções adequadas',
-        'Moderadamente, mas não priorizo',
-        'Pouco, não me preocupo muito'
+        'Quase nunca paro para ler',
+        'Olho só quando “estranho” algo',
+        'Leio em parte dos produtos',
+        'Leio com frequência e comparo marcas'
       ]
     },
     {
       id: 5,
-      pergunta: 'Você sente que ter um plano alimentar personalizado faria diferença na sua qualidade de vida?',
+      pergunta: 'Próximo passo que faria mais sentido para mapear intolerância ou sensibilidade?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo prático e eficaz',
-        'Não, não vejo necessidade'
+        'Diário de comida e sintomas por 10–14 dias',
+        'Conversa para montar teste de exclusão com segurança',
+        'Pedir exames com profissional de saúde',
+        'Só informação por agora'
       ]
     }
   ]
@@ -93,9 +93,9 @@ export default function AvaliacaoIntolerancia({ config }: TemplateBaseProps) {
   const pontosPorOpcao = [
     [3, 2, 1, 0], // Pergunta 1: mais sintomas = mais pontos
     [3, 2, 1, 0], // Pergunta 2: mais sintomas = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais valorização = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais valorização = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: menos clareza de registro = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: menos leitura de rótulos = mais pontos
+    [3, 2, 1, 0], // Pergunta 5: mais estrutura desejada = mais pontos
   ]
 
   const iniciarQuiz = () => {

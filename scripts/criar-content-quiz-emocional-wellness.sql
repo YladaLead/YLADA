@@ -51,24 +51,24 @@ SET
       },
       {
         "id": 4,
-        "question": "Você sente que tem o suporte necessário para alcançar seus objetivos de bem-estar?",
+        "question": "Corpo, descanso e mente — o que mais pesa quando você quer se sentir melhor?",
         "type": "multiple_choice",
         "options": [
-          {"id": "a", "label": "Não, sinto que estou sozinho(a) nessa jornada"},
-          {"id": "b", "label": "Parcialmente, mas preciso de mais orientação"},
-          {"id": "c", "label": "Sim, tenho algum suporte, mas poderia ser melhor"},
-          {"id": "d", "label": "Sim, tenho um excelente suporte e acompanhamento"}
+          {"id": "a", "label": "Sono curto ou irregular na maior parte da semana"},
+          {"id": "b", "label": "Cabeça acelerada, dificuldade de pausar ou desligar"},
+          {"id": "c", "label": "Rotina corrida, pouco tempo para autocuidado básico"},
+          {"id": "d", "label": "Na maior parte do tempo consigo equilibrar com hábitos simples"}
         ]
       },
       {
         "id": 5,
-        "question": "O quanto você valoriza ter um acompanhamento personalizado para sua transformação?",
+        "question": "Qual seu principal objetivo neste momento?",
         "type": "multiple_choice",
         "options": [
-          {"id": "a", "label": "Não valorizo muito, prefiro fazer sozinho(a)"},
-          {"id": "b", "label": "Valorizo um pouco, mas não é essencial"},
-          {"id": "c", "label": "Valorizo bastante, faria toda diferença"},
-          {"id": "d", "label": "Valorizo muito, é essencial para meu sucesso"}
+          {"id": "a", "label": "Entender melhor o que está acontecendo"},
+          {"id": "b", "label": "Saber por onde começar"},
+          {"id": "c", "label": "Falar com alguém que entende"},
+          {"id": "d", "label": "Só quero me informar"}
         ]
       }
     ]

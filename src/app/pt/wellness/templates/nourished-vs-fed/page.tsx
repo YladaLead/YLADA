@@ -46,56 +46,56 @@ export default function VoceNutridoOuApenasAlimentado({ config }: TemplateBasePr
     },
     {
       id: 2,
-      pergunta: 'Você sente que precisa de ajuda profissional para entender a diferença entre se alimentar e se nutrir?',
+      pergunta: 'Proteína, legumes e fruta — na sua semana real, como entram?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, preciso muito de orientação especializada',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo entender sozinho(a)'
+        'Pouco: quase só calorias “vazias” ou repetitivas',
+        'Irregular: alguns dias bem, outros só o básico',
+        'Razoável na maior parte do tempo',
+        'Consigo variedade e cor no prato com frequência'
       ]
     },
     {
       id: 3,
-      pergunta: 'Você valoriza ter um plano personalizado para garantir nutrição adequada?',
+      pergunta: 'Depois de refeições, como costuma ser sua energia e digestão?',
       tipo: 'multipla',
       opcoes: [
-        'Muito, é essencial para minha saúde',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, prefiro seguir padrões gerais'
+        'Pesado(a), com sonolência ou desconforto frequente',
+        'Oscila: algumas refeições “seguram”, outras não',
+        'Na maior parte do tempo digestão ok',
+        'Sinto leveza e energia estável na maior parte dos dias'
       ]
     },
     {
       id: 4,
-      pergunta: 'Você acredita que produtos e estratégias específicas podem ajudar você a estar nutrido e não apenas alimentado?',
+      pergunta: 'Ultraprocessados e doces — frequência sem julgar, só observando:',
       tipo: 'multipla',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Muito altos na semana',
+        'Frequentes em dias corridos',
+        'Pontuais',
+        'Baixos: base é comida minimamente preparada'
       ]
     },
     {
       id: 5,
-      pergunta: 'Você está aberto(a) para ter um acompanhamento especializado em nutrição adequada?',
+      pergunta: 'Próximo passo que faria mais sentido para nutrir melhor no seu ritmo?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro fazer sozinho(a)'
+        'Conversa para montar prioridades com quem entende rotina real',
+        'Lista simples de pratos e compras por 2 semanas',
+        'Testar um hábito (ex.: proteína no almoço) sozinho(a)',
+        'Só informação por agora'
       ]
     }
   ]
 
   const pontosPorOpcao = [
     [3, 2, 1, 0], // Pergunta 1: menos nutrido = mais pontos
-    [3, 2, 1, 0], // Pergunta 2: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais valorização = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais crença = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais abertura = mais pontos
+    [3, 2, 1, 0], // Pergunta 2: menos qualidade no prato = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: mais desconforto pós-refeição = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: mais ultraprocessados = mais pontos
+    [3, 2, 1, 0], // Pergunta 5: mais busca de apoio estruturado = mais pontos
   ]
 
   const iniciarQuiz = () => {

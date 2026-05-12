@@ -36,46 +36,46 @@ export default function QuizProntoEmagrecerPreview({ etapa, onEtapaChange }: Qui
     },
     {
       numero: 2,
-      texto: 'Você sente que precisa de ajuda profissional para emagrecer com saúde?',
+      texto: 'Sobre tentativas de mudar peso ou hábito — o que mais descreve você?',
       cor: 'pink',
       opcoes: [
-        'Sim, preciso muito de orientação especializada',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo fazer sozinho(a)'
+        'Histórico de ir e voltar ou frustração forte com balança/espelho',
+        'Algumas tentativas sem manter consistência',
+        'Retomada agora com mais consciência do que antes',
+        'Início recente ou primeira vez encarando com método'
       ]
     },
     {
       numero: 3,
-      texto: 'Você valoriza ter um plano personalizado para emagrecimento saudável?',
+      texto: 'Rotina de refeições (horários e regularidade) — como está hoje?',
       cor: 'purple',
       opcoes: [
-        'Muito, é essencial para ter resultados duradouros',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, prefiro seguir padrões gerais'
+        'Muito irregular: improviso ou pular refeições é comum',
+        'Falha em mais de um dia da semana',
+        'Oscila, mas tem dias bem organizados',
+        'Tenho base de horários na maior parte do tempo'
       ]
     },
     {
       numero: 4,
-      texto: 'Você acredita que produtos de qualidade e acompanhamento podem acelerar seu emagrecimento?',
+      texto: 'Sono, estresse e comer “por nervoso” — o que mais combina?',
       cor: 'pink',
       opcoes: [
-        'Sim, absolutamente! É o que estou procurando',
-        'Sim, acredito que pode fazer diferença',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Quase sempre: noites ruins ou dias em que como fora de fome real',
+        'Frequentemente em semanas mais carregadas',
+        'Às vezes; já percebo alguns gatilhos',
+        'Raramente: comida segue fome e descanso razoável'
       ]
     },
     {
       numero: 5,
-      texto: 'Você está aberto(a) para ter um mentor que te guie em sua jornada de emagrecimento?',
+      texto: 'Que tipo de apoio faria mais sentido para você neste momento?',
       cor: 'purple',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um mentor',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro seguir sozinho(a)'
+        'Conversa para montar próximos passos realistas com quem entende o caso',
+        'Clareza de etapas com acompanhamento em algumas semanas',
+        'Material ou desafio para testar sozinho(a) com calma',
+        'Só explorando informação, sem compromisso ainda'
       ]
     }
   ]
@@ -92,14 +92,14 @@ export default function QuizProntoEmagrecerPreview({ etapa, onEtapaChange }: Qui
           <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg border-2 border-purple-200">
             <h4 className="text-xl font-bold text-gray-900 mb-2">🎯 Pronto para Emagrecer com Saúde</h4>
             <p className="text-gray-700 mb-3">Descubra se você está pronto para começar sua jornada de emagrecimento</p>
-            <p className="text-purple-600 font-semibold">🚀 Uma avaliação rápida para entender seu perfil e criar um plano personalizado.</p>
+            <p className="text-purple-600 font-semibold">🚀 Uma avaliação rápida para ver prontidão, rotina e sono/estresse na mesma foto.</p>
             <div className="bg-white rounded-lg p-4 mt-4 border border-purple-200">
               <p className="text-sm text-gray-700 mb-2"><strong>💡 O que você vai descobrir:</strong></p>
               <div className="space-y-2 text-sm text-gray-600">
                 <p>✓ Sua prontidão para emagrecer</p>
-                <p>✓ Como podemos te ajudar</p>
-                <p>✓ Recomendações personalizadas</p>
-                <p>✓ Produtos adequados ao seu perfil</p>
+                <p>✓ Onde refeições e gatilhos emocionais entram na semana</p>
+                <p>✓ Que tipo de apoio combina com você agora</p>
+                <p>✓ Orientações alinhadas ao seu perfil</p>
               </div>
             </div>
           </div>

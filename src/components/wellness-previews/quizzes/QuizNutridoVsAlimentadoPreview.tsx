@@ -36,46 +36,46 @@ export default function QuizNutridoVsAlimentadoPreview({ etapa, onEtapaChange }:
     },
     {
       numero: 2,
-      texto: 'Você sente que precisa de ajuda profissional para entender a diferença entre se alimentar e se nutrir?',
+      texto: 'Proteína, legumes e fruta — na sua semana real, como entram?',
       cor: 'amber',
       opcoes: [
-        'Sim, preciso muito de orientação especializada',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo entender sozinho(a)'
+        'Pouco: quase só calorias “vazias” ou repetitivas',
+        'Irregular: alguns dias bem, outros só o básico',
+        'Razoável na maior parte do tempo',
+        'Consigo variedade e cor no prato com frequência'
       ]
     },
     {
       numero: 3,
-      texto: 'Você valoriza ter um plano personalizado para garantir nutrição adequada?',
+      texto: 'Depois de refeições, como costuma ser sua energia e digestão?',
       cor: 'orange',
       opcoes: [
-        'Muito, é essencial para minha saúde',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, prefiro seguir padrões gerais'
+        'Pesado(a), com sonolência ou desconforto frequente',
+        'Oscila: algumas refeições “seguram”, outras não',
+        'Na maior parte do tempo digestão ok',
+        'Sinto leveza e energia estável na maior parte dos dias'
       ]
     },
     {
       numero: 4,
-      texto: 'Você acredita que produtos e estratégias específicas podem ajudar você a estar nutrido e não apenas alimentado?',
+      texto: 'Ultraprocessados e doces — frequência sem julgar, só observando:',
       cor: 'amber',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Muito altos na semana',
+        'Frequentes em dias corridos',
+        'Pontuais',
+        'Baixos: base é comida minimamente preparada'
       ]
     },
     {
       numero: 5,
-      texto: 'Você está aberto(a) para ter um acompanhamento especializado em nutrição adequada?',
+      texto: 'Próximo passo que faria mais sentido para nutrir melhor no seu ritmo?',
       cor: 'orange',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro fazer sozinho(a)'
+        'Conversa para montar prioridades com quem entende rotina real',
+        'Lista simples de pratos e compras por 2 semanas',
+        'Testar um hábito (ex.: proteína no almoço) sozinho(a)',
+        'Só informação por agora'
       ]
     }
   ]
@@ -92,14 +92,14 @@ export default function QuizNutridoVsAlimentadoPreview({ etapa, onEtapaChange }:
           <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-lg border-2 border-orange-200">
             <h4 className="text-xl font-bold text-gray-900 mb-2">🍎 Você está Nutrido ou Apenas Alimentado?</h4>
             <p className="text-gray-700 mb-3">Descubra se você está realmente nutrido</p>
-            <p className="text-orange-600 font-semibold">🚀 Uma avaliação personalizada para entender nutrição adequada.</p>
+            <p className="text-orange-600 font-semibold">🚀 Uma avaliação para enxergar nutrição de verdade no seu dia a dia.</p>
             <div className="bg-white rounded-lg p-4 mt-4 border border-orange-200">
               <p className="text-sm text-gray-700 mb-2"><strong>💡 O que você vai descobrir:</strong></p>
               <div className="space-y-2 text-sm text-gray-600">
                 <p>✓ Se você está nutrido ou apenas alimentado</p>
-                <p>✓ Como transformar alimentação em nutrição</p>
-                <p>✓ Recomendações personalizadas</p>
-                <p>✓ Produtos para nutrição completa</p>
+                <p>✓ Onde prato, digestão e ultraprocessados entram na sua semana</p>
+                <p>✓ Um próximo passo que combina com o seu ritmo</p>
+                <p>✓ Orientações alinhadas ao seu perfil</p>
               </div>
             </div>
           </div>

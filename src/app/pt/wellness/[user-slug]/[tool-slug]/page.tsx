@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
+import { getQuizByTema } from '@/config/ylada-quiz-temas'
 import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
 import DynamicTemplatePreview from '@/components/shared/DynamicTemplatePreview'
 import { FluxoCliente } from '@/types/wellness-system'
@@ -499,19 +500,53 @@ export default function FerramentaPersonalizadaPage() {
       // Sono e Energia (Quadro parceria) — usa DynamicTemplatePreview; se content vazio (link built-in), injeta perguntas padrão
       case 'avaliacao-sono-energia':
       case 'quiz-sono-energia': {
+        const quizSonoFallback = getQuizByTema('sono', 'diagnostico_risco')
         const contentSonoEnergia =
           tool.content?.questions?.length || tool.content?.items?.length
             ? tool.content
-            : {
-                template_type: 'quiz' as const,
-                questions: [
-                  { question: 'Como você avalia a qualidade do seu sono?', options: ['Muito ruim, acordo cansado(a)', 'Ruim, tenho dificuldade para dormir', 'Regular, poderia ser melhor', 'Boa, durmo bem na maioria das noites'] },
-                  { question: 'Você sente que precisa de ajuda para melhorar seu sono?', options: ['Sim, preciso muito de orientação', 'Sim, seria útil ter um acompanhamento', 'Talvez, se for algo prático', 'Não, consigo resolver sozinho(a)'] },
-                  { question: 'Como a qualidade do sono impacta seu dia?', options: ['Muito, afeta energia e concentração', 'Moderado, às vezes me atrapalha', 'Pouco, mas gostaria de melhorar', 'Quase não impacta'] },
-                  { question: 'Você valoriza ter um plano personalizado para dormir melhor?', options: ['Muito, é essencial para meu bem-estar', 'Bastante, acredito que faria diferença', 'Moderadamente, se for algo eficaz', 'Pouco, prefiro seguir padrões gerais'] },
-                  { question: 'Qual seu principal objetivo em relação ao sono?', options: ['Entender melhor o que está acontecendo', 'Saber por onde começar', 'Falar com alguém que entende', 'Só quero me informar'] },
-                ],
-              }
+            : quizSonoFallback && quizSonoFallback.length > 0
+              ? {
+                  template_type: 'quiz' as const,
+                  questions: quizSonoFallback.map((q) => ({
+                    question: q.label,
+                    options: [...(q.options ?? [])],
+                  })),
+                }
+              : {
+                  template_type: 'quiz' as const,
+                  questions: [
+                    {
+                      question: 'Como você avalia a qualidade do seu sono?',
+                      options: ['Muito ruim, acordo cansado(a)', 'Ruim, tenho dificuldade para dormir', 'Regular, poderia ser melhor', 'Boa, durmo bem na maioria das noites'],
+                    },
+                    {
+                      question: 'Noite e rotina antes de dormir — como tem sido?',
+                      options: [
+                        'Horários muito soltos, telas até tarde e cabeça acelerada',
+                        'Demoro a pegar no sono ou acordo no meio da noite várias vezes',
+                        'Alguns deslizes, mas em parte dos dias consigo ritual mínimo',
+                        'Tenho janela de sono mais estável e ritual que ajuda a fechar o dia',
+                      ],
+                    },
+                    {
+                      question: 'Como a qualidade do sono impacta seu dia?',
+                      options: ['Muito, afeta energia e concentração', 'Moderado, às vezes me atrapalha', 'Pouco, mas gostaria de melhorar', 'Quase não impacta'],
+                    },
+                    {
+                      question: 'E no dia seguinte — como o sono paga na energia e no humor?',
+                      options: [
+                        'Muito mal: arrasto, irritação ou sonolência até de noite',
+                        'Impacto claro em foco ou humor em vários dias da semana',
+                        'Sinto em alguns dias, mas recupero em parte',
+                        'Na maior parte do tempo o dia segue aceitável quando durmo ok',
+                      ],
+                    },
+                    {
+                      question: 'Qual seu principal objetivo em relação ao sono?',
+                      options: ['Entender melhor o que está acontecendo', 'Saber por onde começar', 'Falar com alguém que entende', 'Só quero me informar'],
+                    },
+                  ],
+                }
         return (
           <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">

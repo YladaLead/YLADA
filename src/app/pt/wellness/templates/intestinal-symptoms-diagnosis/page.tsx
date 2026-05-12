@@ -46,56 +46,56 @@ export default function DiagnosticoSintomasIntestinais({ config }: TemplateBaseP
     },
     {
       id: 2,
-      pergunta: 'Você sente que precisa de ajuda para melhorar sua saúde intestinal?',
+      pergunta: 'Depois de comer, o abdômen costuma reagir como?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, preciso muito de orientação profissional',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e eficaz',
-        'Não, consigo resolver sozinho(a)'
+        'Muito: desconforto, gases ou “peso” quase sempre',
+        'Frequentemente incomoda, depende do que como',
+        'Às vezes, em dias ou refeições específicas',
+        'Raramente incomoda de forma relevante'
       ]
     },
     {
       id: 3,
-      pergunta: 'Você valoriza produtos que ajudam a melhorar a saúde digestiva e intestinal?',
+      pergunta: 'Evacuar — regularidade e sensação de “esvaziar bem” na semana:',
       tipo: 'multipla',
       opcoes: [
-        'Muito, é essencial para meu bem-estar',
-        'Bastante, procuro opções adequadas',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, não me preocupo muito'
+        'Muito irregular ou desconfortável na maior parte do tempo',
+        'Instável várias vezes por semana',
+        'Oscila, mas tem períodos ok',
+        'Aceitável e previsível na maior parte do tempo'
       ]
     },
     {
       id: 4,
-      pergunta: 'Você acredita que um plano personalizado pode transformar sua saúde intestinal?',
+      pergunta: 'Estresse ou correria — isso piora digestão ou intestino em você?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Muito: semanas corridas desorganizam quase tudo',
+        'Frequentemente sinto o eixo intestino–nervoso',
+        'Às vezes, já noto o padrão',
+        'Pouco ou consigo compensar com pausa/sono'
       ]
     },
     {
       id: 5,
-      pergunta: 'Você está aberto(a) para ter um acompanhamento especializado em saúde digestiva?',
+      pergunta: 'Próximo passo que faria mais sentido para cuidar do intestino?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro fazer sozinho(a)'
+        'Conversa para juntar sintomas e rotina com método',
+        'Diário simples (comida, sono, evacuação) por 10 dias',
+        'Testar um ajuste de refeição ou horário sozinho(a)',
+        'Só informação por agora'
       ]
     }
   ]
 
   const pontosPorOpcao = [
     [3, 2, 1, 0], // Pergunta 1: mais sintomas = mais pontos
-    [3, 2, 1, 0], // Pergunta 2: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais valorização = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais crença = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais abertura = mais pontos
+    [3, 2, 1, 0], // Pergunta 2: mais desconforto pós-prandial = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: mais irregularidade evacuação = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: mais impacto do estresse = mais pontos
+    [3, 2, 1, 0], // Pergunta 5: mais busca de apoio estruturado = mais pontos
   ]
 
   const iniciarQuiz = () => {

@@ -46,56 +46,56 @@ export default function DiagnosticoEletrolitos({ config }: TemplateBaseProps) {
     },
     {
       id: 2,
-      pergunta: 'Você sente que precisa de ajuda para equilibrar seus eletrólitos?',
+      pergunta: 'Treino, calor ou dia de muito suor — você sente cãibra, tontura ou “bater” do coração depois?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, preciso muito de orientação profissional',
-        'Sim, seria útil ter um acompanhamento',
-        'Talvez, se for algo prático e eficaz',
-        'Não, consigo equilibrar sozinho(a)'
+        'Com frequência, mesmo tentando hidratar',
+        'Às vezes, em dias mais intensos',
+        'Raro; quando acontece percebo falta de água ou sal',
+        'Quase nunca'
       ]
     },
     {
       id: 3,
-      pergunta: 'Você valoriza produtos que ajudam a manter o equilíbrio eletrolítico?',
+      pergunta: 'Água ao longo do dia (e reposição em treinos longos) — na prática:',
       tipo: 'multipla',
       opcoes: [
-        'Muito, é essencial para meu bem-estar',
-        'Bastante, procuro opções adequadas',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, não me preocupo muito'
+        'Pouco: esqueço ou só bebo quando a sede aperta forte',
+        'Irregular: dias muito secos e dias ok',
+        'Razoável na maior parte do tempo',
+        'Distribuo bem e ajusto em calor ou suor'
       ]
     },
     {
       id: 4,
-      pergunta: 'Você acredita que um plano personalizado pode melhorar seu equilíbrio eletrolítico?',
+      pergunta: 'Café em excesso ou pouca comida antes de suar — isso pesa em você?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Sim, combina com sintomas (cabeça leve, formigamento, irritação)',
+        'Às vezes, quando a agenda aperta',
+        'Raro; já percebo o padrão',
+        'Não costuma ser meu caso'
       ]
     },
     {
       id: 5,
-      pergunta: 'Você está aberto(a) para ter um acompanhamento especializado em hidratação e eletrólitos?',
+      pergunta: 'Próximo passo que faria mais sentido para organizar hidratação e minerais?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro fazer sozinho(a)'
+        'Conversa para entender se é hábito, calor ou outra causa',
+        'Plano simples de copos/horários por algumas semanas',
+        'Testar com checklist por conta própria',
+        'Só informação por agora'
       ]
     }
   ]
 
   const pontosPorOpcao = [
     [3, 2, 1, 0], // Pergunta 1: mais sintomas = mais pontos
-    [3, 2, 1, 0], // Pergunta 2: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais valorização = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais crença = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais abertura = mais pontos
+    [3, 2, 1, 0], // Pergunta 2: mais sintomas pós-esforço = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: pior hidratação = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: mais descompasso cafeína/comida = mais pontos
+    [3, 2, 1, 0], // Pergunta 5: mais busca de apoio estruturado = mais pontos
   ]
 
   const iniciarQuiz = () => {

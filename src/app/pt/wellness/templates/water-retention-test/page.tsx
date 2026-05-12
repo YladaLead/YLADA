@@ -46,56 +46,56 @@ export default function TesteRetencaoLiquidos({ config }: TemplateBaseProps) {
     },
     {
       id: 2,
-      pergunta: 'Você sente que precisa de ajuda profissional para identificar e tratar retenção de líquidos?',
+      pergunta: 'Quando incha, isso costuma coincidir com quê?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, preciso muito de orientação especializada',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo resolver sozinho(a)'
+        'Com quase tudo: sal, final do dia, hormônios ou viagem — difícil prever',
+        'Com refeições mais pesadas ou pouca água no dia',
+        'Só em alguns contextos que já identifiquei',
+        'É raro ou tenho padrão bem claro e controlável'
       ]
     },
     {
       id: 3,
-      pergunta: 'Você valoriza ter um plano personalizado para reduzir retenção de líquidos?',
+      pergunta: 'Movimento e pernas no fim do dia — o que mais combina?',
       tipo: 'multipla',
       opcoes: [
-        'Muito, é essencial para meu bem-estar',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, prefiro seguir padrões gerais'
+        'Muitas horas parado(a) e pernas/pés pesados quase sempre',
+        'Pouco movimento e final do dia costuma piorar',
+        'Depende do dia; quando me movimento melhora',
+        'Movimento e hidratação já ajudam bastante a evitar o pior'
       ]
     },
     {
       id: 4,
-      pergunta: 'Você acredita que produtos e estratégias específicas podem ajudar na retenção de líquidos?',
+      pergunta: 'Sal em excesso, álcool ou noites muito curtas — isso pesa no inchaço para você?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Muito: semanas em que um ou mais disso aparece forte',
+        'Frequentemente em dias corridos',
+        'Às vezes, já noto o padrão',
+        'Pouco ou consigo compensar com hábito'
       ]
     },
     {
       id: 5,
-      pergunta: 'Você está aberto(a) para ter um acompanhamento especializado em redução de retenção de líquidos?',
+      pergunta: 'Próximo passo que faria mais sentido para entender essa retenção?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro fazer sozinho(a)'
+        'Conversa para juntar sintomas e rotina com método',
+        'Diário simples (água, sal, sono, inchaço) por 10 dias',
+        'Testar ajuste de passos ou horário de refeição sozinho(a)',
+        'Só informação por agora'
       ]
     }
   ]
 
   const pontosPorOpcao = [
     [3, 2, 1, 0], // Pergunta 1: mais retenção = mais pontos
-    [3, 2, 1, 0], // Pergunta 2: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais valorização = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais crença = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais abertura = mais pontos
+    [3, 2, 1, 0], // Pergunta 2: mais padrão difuso / difícil = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: mais sedentarismo / peso nas pernas = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: mais gatilhos externos = mais pontos
+    [3, 2, 1, 0], // Pergunta 5: mais busca de apoio estruturado = mais pontos
   ]
 
   const iniciarQuiz = () => {

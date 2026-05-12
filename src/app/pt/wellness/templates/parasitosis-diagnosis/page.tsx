@@ -57,35 +57,35 @@ export default function DiagnosticoParasitose({ config }: TemplateBaseProps) {
     },
     {
       id: 3,
-      pergunta: 'Você sente que precisa de ajuda para identificar e tratar possíveis parasitoses?',
+      pergunta: 'Há quanto tempo esses sintomas persistem ou voltam em ciclos?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, preciso muito de orientação profissional',
-        'Sim, seria muito útil ter um diagnóstico',
-        'Talvez, se for algo prático e eficaz',
-        'Não, consigo resolver sozinho(a)'
+        'Há semanas ou meses sem melhora clara',
+        'Várias semanas com altos e baixos',
+        'Episódios curtos que somem e voltam',
+        'Foi pontual ou já melhorou bastante'
       ]
     },
     {
       id: 4,
-      pergunta: 'Você valoriza um protocolo direcionado para tratar parasitoses de forma segura?',
+      pergunta: 'Você já fez exame parasitológico ou tratamento prescrito para isso?',
       tipo: 'multipla',
       opcoes: [
-        'Muito, é essencial para minha saúde',
-        'Bastante, procuro opções adequadas',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, não me preocupo muito'
+        'Não, nunca investiguei com exame',
+        'Fiz exame mas não segui tratamento ou não repetiu',
+        'Já tratei no passado; sintomas voltaram',
+        'Sim, com exame e tratamento recente sob orientação'
       ]
     },
     {
       id: 5,
-      pergunta: 'Você está aberto(a) para ter um acompanhamento especializado em diagnóstico de parasitose?',
+      pergunta: 'Próximo passo que faria mais sentido para você agora?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro fazer sozinho(a)'
+        'Marcar avaliação com profissional de saúde e exames',
+        'Registrar sintomas e refeições por 7 dias antes de decidir',
+        'Buscar informação confiável sem automedicação',
+        'Só observar por enquanto — sintomas leves e raros'
       ]
     }
   ]
@@ -93,9 +93,9 @@ export default function DiagnosticoParasitose({ config }: TemplateBaseProps) {
   const pontosPorOpcao = [
     [3, 2, 1, 0], // Pergunta 1: mais sintomas = mais pontos
     [3, 2, 1, 0], // Pergunta 2: mais exposição = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais valorização = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais abertura = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: mais tempo/cronicidade = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: menos investigação adequada = mais pontos
+    [3, 2, 1, 0], // Pergunta 5: mais busca de encaminhamento clínico = mais pontos
   ]
 
   const iniciarQuiz = () => {

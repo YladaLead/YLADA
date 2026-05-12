@@ -46,56 +46,56 @@ export default function AvaliacaoInicial({ config }: TemplateBaseProps) {
     },
     {
       id: 2,
-      pergunta: 'Você sente que precisa de ajuda profissional para alcançar seus objetivos?',
+      pergunta: 'Sobre tentativas de mudar hábitos ou corpo — o que mais descreve você?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, preciso muito de orientação especializada',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo fazer sozinho(a)'
+        'Já rodei muitas tentativas sem manter — cansa',
+        'Algumas tentativas sem consistência',
+        'Retomada com mais consciência agora',
+        'Início recente ou primeira vez estruturada'
       ]
     },
     {
       id: 3,
-      pergunta: 'Você valoriza ter um plano personalizado baseado no seu perfil e objetivos?',
+      pergunta: 'Sono, estresse e rotina (refeições e movimento) — como estão sustentando você?',
       tipo: 'multipla',
       opcoes: [
-        'Muito, é essencial para ter resultados',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, prefiro seguir padrões gerais'
+        'Muito desalinhados na maior parte das semanas',
+        'Um ou dois pilares falham com frequência',
+        'Oscilam, mas não é o tempo todo',
+        'Na maior parte do tempo ajudam mais do que atrapalham'
       ]
     },
     {
       id: 4,
-      pergunta: 'Você acredita que produtos de qualidade e acompanhamento podem acelerar seus resultados?',
+      pergunta: 'Clareza do próximo passo — o que mais combina?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, absolutamente! É o que estou procurando',
-        'Sim, acredito que pode fazer diferença',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Zero clareza: muita informação solta e pouca ação',
+        'Sei o que “deveria” fazer, mas não encaixo no dia',
+        'Tenho uma ou duas hipóteses para testar',
+        'Tenho prioridade clara nas próximas semanas'
       ]
     },
     {
       id: 5,
-      pergunta: 'Você está aberto(a) para ter um mentor que te guie em sua jornada de transformação?',
+      pergunta: 'Que tipo de apoio faria mais sentido neste momento?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um mentor',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro seguir sozinho(a)'
+        'Conversa para montar prioridades com quem entende meu caso',
+        'Plano simples de hábitos por algumas semanas',
+        'Material ou desafio para testar sozinho(a)',
+        'Só explorando informação, sem compromisso ainda'
       ]
     }
   ]
 
   const pontosPorOpcao = [
     [3, 2, 1, 0], // Pergunta 1: mais motivação = mais pontos
-    [3, 2, 1, 0], // Pergunta 2: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais valorização = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais crença = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais abertura = mais pontos
+    [3, 2, 1, 0], // Pergunta 2: mais fricção com tentativas = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: mais desalinhamento sono/estresse/rotina = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: menos clareza = mais pontos
+    [3, 2, 1, 0], // Pergunta 5: mais busca de apoio estruturado = mais pontos
   ]
 
   const iniciarQuiz = () => {

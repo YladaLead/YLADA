@@ -46,56 +46,56 @@ export default function QuizAlimentacaoSaudavel({ config }: TemplateBaseProps) {
     },
     {
       id: 2,
-      pergunta: 'Você sente que precisa de ajuda profissional para criar uma alimentação saudável?',
+      pergunta: 'Refeições no horário — como está na sua semana real?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, preciso muito de orientação especializada',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo fazer sozinho(a)'
+        'Muito soltas: como o que der ou pular é comum',
+        'Frequentemente fora de horário ou muito rápido',
+        'Consigo organizar em parte dos dias',
+        'Na maior parte do tempo encaixo refeições com calma'
       ]
     },
     {
       id: 3,
-      pergunta: 'Você valoriza ter um plano alimentar personalizado e saudável?',
+      pergunta: 'Ultraprocessados, doces e fritura — frequência sem julgar:',
       tipo: 'multipla',
       opcoes: [
-        'Muito, é essencial para minha saúde',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, prefiro seguir padrões gerais'
+        'Muito altos na semana',
+        'Frequentes em dias corridos',
+        'Pontuais',
+        'Baixos: base é comida minimamente preparada'
       ]
     },
     {
       id: 4,
-      pergunta: 'Você acredita que produtos de qualidade podem ajudar na sua alimentação saudável?',
+      pergunta: 'Água, fruta e vegetais — na prática:',
       tipo: 'multipla',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Bem abaixo do que eu mesma(o) gostaria',
+        'Falha em mais de um desses na maior parte dos dias',
+        'Tem dias bons e ruins',
+        'Consigo hidratar e variar plantas com frequência'
       ]
     },
     {
       id: 5,
-      pergunta: 'Você está aberto(a) para ter um acompanhamento especializado em alimentação saudável?',
+      pergunta: 'Que apoio faria mais sentido para encaixar hábitos melhores?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro fazer sozinho(a)'
+        'Conversa para montar próximos passos com quem entende rotina real',
+        'Plano simples de horários e lanches por algumas semanas',
+        'Lista de compras e ideias para testar sozinha(o)',
+        'Só curiosidade e informação por enquanto'
       ]
     }
   ]
 
   const pontosPorOpcao = [
     [3, 2, 1, 0], // Pergunta 1: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 2: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais valorização = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais crença = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais abertura = mais pontos
+    [3, 2, 1, 0], // Pergunta 2: mais desalinhamento = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: mais ultraprocessados = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: mais distância do ideal = mais pontos
+    [3, 2, 1, 0], // Pergunta 5: mais busca de apoio estruturado = mais pontos
   ]
 
   const iniciarQuiz = () => {

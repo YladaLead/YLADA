@@ -46,56 +46,56 @@ export default function TipoFome({ config }: TemplateBaseProps) {
     },
     {
       id: 2,
-      pergunta: 'Você sente que precisa de ajuda para identificar se sua fome é física ou emocional?',
+      pergunta: 'Quando a fome bate, o corpo pede comida ou a cabeça pede “distração”?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, preciso muito de orientação profissional',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo identificar sozinho(a)'
+        'Quase sempre cabeça: tédio, estresse ou cansaço',
+        'Mistura os dois com frequência',
+        'Às vezes consigo notar fome de barriga de verdade',
+        'Na maior parte do tempo distingo bem os dois'
       ]
     },
     {
       id: 3,
-      pergunta: 'Você valoriza ter estratégias personalizadas baseadas no seu tipo de fome?',
+      pergunta: 'Lanches fora do horário — o que mais acontece?',
       tipo: 'multipla',
       opcoes: [
-        'Muito, é essencial para controlar minha alimentação',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, prefiro seguir padrões gerais'
+        'Vários por dia, sem perceber fome física',
+        'Quase todo dia em um horário “vazio”',
+        'Alguns dias na semana',
+        'Raro ou alinhado à fome'
       ]
     },
     {
       id: 4,
-      pergunta: 'Você acredita que produtos e estratégias específicas para seu tipo de fome podem ajudar?',
+      pergunta: 'Refeições principais — você costuma sentir saciedade que segura por algumas horas?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Não: como e logo sinto vazio de novo',
+        'Às vezes segura, às vezes não',
+        'Na maior parte do tempo segura razoavelmente',
+        'Sim, quando incluo proteína e volume real'
       ]
     },
     {
       id: 5,
-      pergunta: 'Você está aberto(a) para ter um acompanhamento especializado em controle de fome?',
+      pergunta: 'Próximo passo para entender seu tipo de fome com mais clareza?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro fazer sozinho(a)'
+        'Diário rápido (hora, humor, o que comeu) por 7 dias',
+        'Conversa para montar estratégia sem culpa',
+        'Testar pausa de 10 min antes do lanche sozinho(a)',
+        'Só informação por agora'
       ]
     }
   ]
 
   const pontosPorOpcao = [
-    [3, 2, 1, 0], // Pergunta 1: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 2: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais valorização = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais crença = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais abertura = mais pontos
+    [3, 2, 1, 0], // Pergunta 1: mais necessidade de clareza = mais pontos
+    [3, 2, 1, 0], // Pergunta 2: mais fome emocional/borrada = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: mais lanches desalinhados = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: menos saciedade = mais pontos
+    [3, 2, 1, 0], // Pergunta 5: mais estrutura desejada = mais pontos
   ]
 
   const iniciarQuiz = () => {

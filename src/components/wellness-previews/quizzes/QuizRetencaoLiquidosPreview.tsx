@@ -36,46 +36,46 @@ export default function QuizRetencaoLiquidosPreview({ etapa, onEtapaChange }: Qu
     },
     {
       numero: 2,
-      texto: 'Você sente que precisa de ajuda profissional para identificar e tratar retenção de líquidos?',
+      texto: 'Quando incha, isso costuma coincidir com quê?',
       cor: 'cyan',
       opcoes: [
-        'Sim, preciso muito de orientação especializada',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo resolver sozinho(a)'
+        'Com quase tudo: sal, final do dia, hormônios ou viagem — difícil prever',
+        'Com refeições mais pesadas ou pouca água no dia',
+        'Só em alguns contextos que já identifiquei',
+        'É raro ou tenho padrão bem claro e controlável'
       ]
     },
     {
       numero: 3,
-      texto: 'Você valoriza ter um plano personalizado para reduzir retenção de líquidos?',
+      texto: 'Movimento e pernas no fim do dia — o que mais combina?',
       cor: 'blue',
       opcoes: [
-        'Muito, é essencial para meu bem-estar',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, prefiro seguir padrões gerais'
+        'Muitas horas parado(a) e pernas/pés pesados quase sempre',
+        'Pouco movimento e final do dia costuma piorar',
+        'Depende do dia; quando me movimento melhora',
+        'Movimento e hidratação já ajudam bastante a evitar o pior'
       ]
     },
     {
       numero: 4,
-      texto: 'Você acredita que produtos e estratégias específicas podem ajudar na retenção de líquidos?',
+      texto: 'Sal em excesso, álcool ou noites muito curtas — isso pesa no inchaço para você?',
       cor: 'cyan',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Muito: semanas em que um ou mais disso aparece forte',
+        'Frequentemente em dias corridos',
+        'Às vezes, já noto o padrão',
+        'Pouco ou consigo compensar com hábito'
       ]
     },
     {
       numero: 5,
-      texto: 'Você está aberto(a) para ter um acompanhamento especializado em redução de retenção de líquidos?',
+      texto: 'Próximo passo que faria mais sentido para entender essa retenção?',
       cor: 'blue',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro fazer sozinho(a)'
+        'Conversa para juntar sintomas e rotina com método',
+        'Diário simples (água, sal, sono, inchaço) por 10 dias',
+        'Testar ajuste de passos ou horário de refeição sozinho(a)',
+        'Só informação por agora'
       ]
     }
   ]
@@ -92,14 +92,14 @@ export default function QuizRetencaoLiquidosPreview({ etapa, onEtapaChange }: Qu
           <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border-2 border-blue-200">
             <h4 className="text-xl font-bold text-gray-900 mb-2">💧 Teste de Retenção de Líquidos</h4>
             <p className="text-gray-700 mb-3">Descubra seu nível de retenção e como reduzir</p>
-            <p className="text-blue-600 font-semibold">🚀 Uma avaliação personalizada para identificar retenção de líquidos.</p>
+            <p className="text-blue-600 font-semibold">🚀 Uma avaliação para mapear padrões de inchaço e o que costuma piorar ou aliviar.</p>
             <div className="bg-white rounded-lg p-4 mt-4 border border-blue-200">
               <p className="text-sm text-gray-700 mb-2"><strong>💡 O que você vai descobrir:</strong></p>
               <div className="space-y-2 text-sm text-gray-600">
                 <p>✓ Seu nível de retenção de líquidos</p>
-                <p>✓ Como reduzir inchaço e desconforto</p>
-                <p>✓ Recomendações personalizadas</p>
-                <p>✓ Produtos específicos adequados</p>
+                <p>✓ Gatilhos comuns (sal, sono, movimento) no seu caso</p>
+                <p>✓ Um próximo passo que combina com o seu ritmo</p>
+                <p>✓ Orientações alinhadas ao seu perfil</p>
               </div>
             </div>
           </div>

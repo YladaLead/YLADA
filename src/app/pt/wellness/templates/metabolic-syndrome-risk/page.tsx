@@ -46,56 +46,56 @@ export default function RiscoSindromeMetabolica({ config }: TemplateBaseProps) {
     },
     {
       id: 2,
-      pergunta: 'Você sente que precisa de ajuda profissional para prevenir síndrome metabólica?',
+      pergunta: 'Sono, estresse e pouco movimento — quanto isso aparece na sua semana típica?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, preciso muito de orientação especializada',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for algo prático e personalizado',
-        'Não, consigo prevenir sozinho(a)'
+        'Quase todos os dias: noite curta ou mal dormida e muito sedentário(a)',
+        'Na maior parte dos dias um desses fatores pesa',
+        'Oscila; em semanas melhores equilibro um pouco',
+        'Na maior parte do tempo durmo e me movo o suficiente'
       ]
     },
     {
       id: 3,
-      pergunta: 'Você valoriza ter um plano preventivo personalizado para reduzir riscos?',
+      pergunta: 'Doces, refrigerantes e ultraprocessados — frequência na semana:',
       tipo: 'multipla',
       opcoes: [
-        'Muito, é essencial para minha saúde',
-        'Bastante, acredito que faria diferença',
-        'Moderadamente, se for algo eficaz',
-        'Pouco, prefiro seguir padrões gerais'
+        'Muito altos: entram em quase toda refeição ou lanche',
+        'Frequentes, sobretudo em dias corridos',
+        'Pontuais; já tento reduzir',
+        'Baixos: base é comida minimamente preparada na maior parte do tempo'
       ]
     },
     {
       id: 4,
-      pergunta: 'Você acredita que produtos e estratégias preventivas podem reduzir seu risco?',
+      pergunta: 'Caminhada ou atividade leve — como está encaixada na rotina?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, faria toda diferença e melhoraria muito',
-        'Sim, acredito que seria muito útil',
-        'Talvez, se for algo comprovado e eficaz',
-        'Não, não vejo necessidade'
+        'Quase nada além do necessário no trabalho/casa',
+        'Pouco: menos de 2 dias por semana com movimento intencional',
+        'Alguns dias por semana, irregular',
+        'Na maior parte dos dias pelo menos 20–30 min em movimento'
       ]
     },
     {
       id: 5,
-      pergunta: 'Você está aberto(a) para ter um acompanhamento especializado em prevenção metabólica?',
+      pergunta: 'Que apoio faria mais sentido para cuidar de risco metabólico no seu ritmo?',
       tipo: 'multipla',
       opcoes: [
-        'Sim, é exatamente o que preciso!',
-        'Sim, seria muito útil ter um acompanhamento',
-        'Talvez, se for alguém experiente e confiável',
-        'Não, prefiro fazer sozinho(a)'
+        'Conversa para priorizar 1–2 mudanças com quem entende o meu caso',
+        'Plano simples de hábitos por algumas semanas com check-in',
+        'Material ou desafio para testar sozinho(a)',
+        'Só informação por agora'
       ]
     }
   ]
 
   const pontosPorOpcao = [
     [3, 2, 1, 0], // Pergunta 1: mais preocupação = mais pontos
-    [3, 2, 1, 0], // Pergunta 2: mais necessidade = mais pontos
-    [3, 2, 1, 0], // Pergunta 3: mais valorização = mais pontos
-    [3, 2, 1, 0], // Pergunta 4: mais crença = mais pontos
-    [3, 2, 1, 0]  // Pergunta 5: mais abertura = mais pontos
+    [3, 2, 1, 0], // Pergunta 2: mais carga sono/estresse/sedentário = mais pontos
+    [3, 2, 1, 0], // Pergunta 3: mais ultraprocessados = mais pontos
+    [3, 2, 1, 0], // Pergunta 4: menos movimento = mais pontos
+    [3, 2, 1, 0], // Pergunta 5: mais busca de apoio estruturado = mais pontos
   ]
 
   const iniciarQuiz = () => {
