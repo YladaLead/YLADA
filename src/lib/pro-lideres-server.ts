@@ -433,6 +433,7 @@ function devStubLeaderTenant(userId: string): LeaderTenantRow {
     daily_tasks_full_day_bonus_points: 10,
     team_bank_payment_url: null,
     team_bank_pix_payment_url: null,
+    opportunity_video_url: null,
     noel_member_offer_enabled: false,
     noel_member_offer_scope: 'all_members',
     created_at: now,
@@ -443,6 +444,11 @@ function devStubLeaderTenant(userId: string): LeaderTenantRow {
 /** Cria tenant na primeira entrada para qualquer utilizador em dev/auto OU para contas bootstrap. */
 export function shouldProvisionProLideresTenant(user: User): boolean {
   return proLideresAutoProvisionEnabled() || isProLideresBootstrapLeader(user)
+}
+
+/** Tenant da rede Pro Líderes (H-líder), com landing e catálogo próprios — não confundir com Pro Estética. */
+export function isProLideresRedeTenant(tenant: Pick<LeaderTenantRow, 'vertical_code'>): boolean {
+  return (tenant.vertical_code ?? 'h-lider').trim() === 'h-lider'
 }
 
 export function defaultDisplayNameFromUser(user: User): string {

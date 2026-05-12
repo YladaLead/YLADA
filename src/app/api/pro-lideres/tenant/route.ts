@@ -13,6 +13,7 @@ import {
 } from '@/lib/pro-lideres-subscription-access'
 import type { LeaderTenantRow, ProLideresNoelMemberOfferScope } from '@/types/leader-tenant'
 import { parseTeamBankPaymentUrlField } from '@/lib/pro-lideres-team-bank-payment-url'
+import { parseOpportunityVideoUrlForPatch } from '@/lib/pro-lideres-opportunity-video'
 
 const MAX_LEN = 500
 
@@ -178,6 +179,17 @@ export async function PATCH(request: NextRequest) {
     } else if (parsed.action === 'set') {
       payload.team_bank_pix_payment_url = parsed.url
     }
+  }
+
+  const oppVideo = parseOpportunityVideoUrlForPatch(body)
+  if (oppVideo.action === 'error') {
+    return NextResponse.json({ error: oppVideo.message }, { status: 400 })
+  }
+  if (oppVideo.action === 'set') {
+    payload.opportunity_video_url = oppVideo.url
+  }
+  if (oppVideo.action === 'clear') {
+    payload.opportunity_video_url = null
   }
 
   if (Object.keys(payload).length === 0) {

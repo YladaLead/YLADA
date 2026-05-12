@@ -9,6 +9,7 @@ import {
   isEsteticaMessageToneId,
   type EsteticaMessageToneId,
 } from '@/config/estetica-message-tone'
+import { ProLideresOpportunityPublicShareBlock } from '@/components/pro-lideres/ProLideresOpportunityPublicShareBlock'
 
 export type ProLideresPerfilCopyProfile = 'pro_lideres' | 'estetica_clinica'
 
@@ -77,6 +78,7 @@ export function ProLideresPerfilForm({
   const [messageToneNotes, setMessageToneNotes] = useState('')
   const [teamBankPaymentUrl, setTeamBankPaymentUrl] = useState('')
   const [teamBankPixPaymentUrl, setTeamBankPixPaymentUrl] = useState('')
+  const [opportunityVideoUrl, setOpportunityVideoUrl] = useState('')
   const [canEditTenantProfile, setCanEditTenantProfile] = useState(true)
   const [memberShareSlug, setMemberShareSlug] = useState('')
 
@@ -120,6 +122,11 @@ export function ProLideresPerfilForm({
       setTeamBankPixPaymentUrl(
         copyProfile === 'pro_lideres' && typeof t.team_bank_pix_payment_url === 'string'
           ? t.team_bank_pix_payment_url.trim()
+          : ''
+      )
+      setOpportunityVideoUrl(
+        copyProfile === 'pro_lideres' && typeof t.opportunity_video_url === 'string'
+          ? t.opportunity_video_url.trim()
           : ''
       )
       setMemberShareSlug(typeof d.memberShareSlug === 'string' ? d.memberShareSlug.trim() : '')
@@ -193,6 +200,7 @@ export function ProLideresPerfilForm({
             ? {
                 team_bank_payment_url: teamBankPaymentUrl.trim() === '' ? null : teamBankPaymentUrl.trim(),
                 team_bank_pix_payment_url: teamBankPixPaymentUrl.trim() === '' ? null : teamBankPixPaymentUrl.trim(),
+                opportunity_video_url: opportunityVideoUrl.trim() === '' ? null : opportunityVideoUrl.trim(),
               }
             : {}),
         }),
@@ -221,6 +229,9 @@ export function ProLideresPerfilForm({
         )
         setTeamBankPixPaymentUrl(
           typeof t.team_bank_pix_payment_url === 'string' ? t.team_bank_pix_payment_url.trim() : ''
+        )
+        setOpportunityVideoUrl(
+          typeof t.opportunity_video_url === 'string' ? t.opportunity_video_url.trim() : ''
         )
       }
       setSavedAt(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }))
@@ -422,6 +433,33 @@ export function ProLideresPerfilForm({
                 autoComplete="off"
               />
             </label>
+            <label className="block sm:col-span-2">
+              <span className="mb-1 block text-sm font-medium text-gray-700">
+                Vídeo da oportunidade — URL (opcional)
+              </span>
+              <span className="mb-1.5 block text-xs text-gray-500">
+                Link do YouTube, Vimeo ou de um ficheiro .mp4 em HTTPS. Aparece na página pública abaixo depois de
+                guardares.
+              </span>
+              <input
+                type="url"
+                disabled={!canEditTenantProfile}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
+                value={opportunityVideoUrl}
+                onChange={(e) => setOpportunityVideoUrl(e.target.value)}
+                placeholder="https://www.youtube.com/watch?v=… ou https://youtu.be/…"
+                maxLength={500}
+                autoComplete="off"
+              />
+            </label>
+            {tenant?.slug && canEditTenantProfile ? (
+              <div className="sm:col-span-2">
+                <ProLideresOpportunityPublicShareBlock
+                  slug={tenant.slug}
+                  hasVideoUrl={Boolean(opportunityVideoUrl.trim())}
+                />
+              </div>
+            ) : null}
           </>
         ) : null}
 

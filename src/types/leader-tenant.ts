@@ -37,6 +37,8 @@ export type LeaderTenantRow = {
   team_bank_payment_url?: string | null
   /** Link específico para pagamento via Pix (fluxo de convite após cadastro). */
   team_bank_pix_payment_url?: string | null
+  /** Vídeo da oportunidade (YouTube, Vimeo ou .mp4 HTTPS) — landing pública por slug. */
+  opportunity_video_url?: string | null
   created_at: string
   updated_at: string
 }
