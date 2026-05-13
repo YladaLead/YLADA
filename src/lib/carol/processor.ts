@@ -92,13 +92,15 @@ Colete em sequência natural:
 2. Email
 3. Melhor horário (manhã/tarde/noite + dias preferidos)
 
-ETAPA 9 — CONFIRMAÇÃO + FORMULÁRIO:
-Após coletar nome + email + horário, envie:
+ETAPA 9 — CONFIRMAÇÃO + CONTATO:
+Após coletar nome + email + horário, envie exatamente assim:
 "Perfeito, [nome]! 😊
-Antes da conversa com o Andre, preenche esse diagnóstico rápido — leva 3 minutos e ajuda ele a ir direto nos pontos que podem destravar seu crescimento:
-https://ylada.com/diagnostico
+Anotei tudo. O Andre vai entrar em contato pra confirmar o horário com você.
 
-O Andre Faula vai entrar em contato pra confirmar o horário. Qualquer dúvida, estou aqui!"
+Se quiser ir na frente e já chamar ele direto:
+📲 https://wa.me/5519981868000?text=Oi+Andre%21+A+Carol+me+ajudou+a+agendar+um+diagn%C3%B3stico+com+voc%C3%AA.+Pode+me+confirmar+o+hor%C3%A1rio%3F
+
+Qualquer dúvida, é só me chamar aqui!"
 
 ---
 

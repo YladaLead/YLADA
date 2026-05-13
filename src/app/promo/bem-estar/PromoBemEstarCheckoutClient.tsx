@@ -6,6 +6,8 @@ import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import { PROMO_BEM_ESTAR_BR, PROMO_BEM_ESTAR_SLUG } from '@/lib/promo-bem-estar'
 
+const WELLNESS_LOGIN_WITH_RETURN = `/pt/wellness/login?redirect=${encodeURIComponent('/promo/bem-estar')}`
+
 type CheckResponse = {
   accountFound: boolean
   hasActiveWellnessSubscription: boolean
@@ -40,6 +42,12 @@ export default function PromoBemEstarCheckoutClient() {
   const sessionEmail = (user?.email || '').trim().toLowerCase()
   const typedEmail = email.trim().toLowerCase()
   const sameEmailAsSession = Boolean(sessionEmail && typedEmail && sessionEmail === typedEmail)
+
+  /** Se já estiver logado e o campo estiver vazio, preenche com o e-mail da sessão (volta do login para migrar). */
+  useEffect(() => {
+    if (authLoading || !user?.email) return
+    setEmail((prev) => (prev.trim() ? prev : user.email ?? prev))
+  }, [authLoading, user?.email])
 
   useEffect(() => {
     setCheckResult(null)
@@ -86,8 +94,10 @@ export default function PromoBemEstarCheckoutClient() {
       return
     }
 
-    if (checkResult?.hasActiveWellnessSubscription) {
-      setError('Este e-mail já tem assinatura wellness ativa. Use a opção de atualizar perfil ou entre com outro e-mail para nova assinatura.')
+    if (checkResult?.hasActiveWellnessSubscription && !checkResult?.canOfferProfileConversion) {
+      setError(
+        'Este e-mail já tem assinatura wellness ativa. Se for conta wellness, use a opção de migrar para Coach do bem-estar acima; caso contrário, fale com o suporte ou use outro e-mail.'
+      )
       return
     }
 
@@ -190,7 +200,7 @@ export default function PromoBemEstarCheckoutClient() {
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
           <Link
-            href="/pt/wellness/login"
+            href={WELLNESS_LOGIN_WITH_RETURN}
             className="text-xs font-medium text-blue-700 underline-offset-2 hover:underline"
           >
             Entrar
@@ -276,29 +286,47 @@ export default function PromoBemEstarCheckoutClient() {
 
           {showConvertOffer && (
             <div className="mt-5 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-left text-sm text-slate-800">
-              <p className="font-semibold text-slate-900">Assinatura wellness ativa</p>
-              <p className="mt-1 text-[13px] leading-relaxed text-slate-700">
-                Este e-mail já tem assinatura na área wellness. Coach do bem-estar usa a mesma assinatura — você pode
-                apenas <strong className="font-semibold">atualizar o perfil</strong> para entrar pela área Coach do
-                bem-estar, sem pagar de novo.
+              <p className="font-semibold text-slate-900">Conta Wellness (Herbalife) encontrada</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-slate-700">
+                Este e-mail já tem assinatura ativa na área <strong className="font-semibold">Wellness</strong>. O Coach
+                de bem-estar usa a <strong className="font-semibold">mesma assinatura</strong> — não é preciso pagar
+                de novo.
+              </p>
+              <p className="mt-3 text-[13px] font-medium text-slate-900">
+                Deseja mudar seu perfil para <strong className="font-semibold">Coach de bem-estar</strong> e acessar
+                pela nova área?
               </p>
               {!authLoading && sameEmailAsSession && (
-                <button
-                  type="button"
-                  disabled={convertLoading}
-                  onClick={handleConvert}
-                  className="mt-3 w-full rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
-                >
-                  {convertLoading ? 'Atualizando…' : 'Sim, atualizar meu perfil para Coach do bem-estar'}
-                </button>
+                <>
+                  <button
+                    type="button"
+                    disabled={convertLoading}
+                    onClick={handleConvert}
+                    className="mt-3 w-full rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+                  >
+                    {convertLoading ? 'Migrando…' : 'Sim, migrar para Coach de bem-estar'}
+                  </button>
+                  <p className="mt-2 text-center text-[12px] text-slate-600">
+                    <Link
+                      href="/pt/wellness/home"
+                      className="font-medium text-slate-700 underline underline-offset-2 hover:text-slate-900"
+                    >
+                      Não, continuar na área Wellness
+                    </Link>
+                  </p>
+                </>
               )}
               {!authLoading && !sameEmailAsSession && (
                 <p className="mt-3 text-[12px] text-slate-600">
-                  Para confirmar,{' '}
-                  <Link href="/pt/wellness/login" className="font-medium text-blue-700 underline underline-offset-2">
+                  Para confirmar a migração,{' '}
+                  <Link
+                    href={WELLNESS_LOGIN_WITH_RETURN}
+                    className="font-medium text-blue-700 underline underline-offset-2"
+                  >
                     entre com este e-mail
                   </Link>{' '}
-                  e volte a esta página — o botão de confirmação aparece quando o e-mail for o mesmo da sessão.
+                  — você volta para esta página e o botão &quot;Sim, migrar&quot; aparece quando o e-mail for o mesmo da
+                  sessão.
                 </p>
               )}
             </div>
@@ -354,7 +382,7 @@ export default function PromoBemEstarCheckoutClient() {
           <p className="mt-5 text-center text-[11px] leading-relaxed text-slate-600">
             Depois do pagamento aprovado, entre com o <span className="font-medium text-slate-800">mesmo e-mail</span>.
             Se for o primeiro acesso, complete o cadastro em{' '}
-            <Link href="/pt/wellness/login" className="font-medium text-blue-700 underline underline-offset-2">
+            <Link href={WELLNESS_LOGIN_WITH_RETURN} className="font-medium text-blue-700 underline underline-offset-2">
               bem-estar
             </Link>
             .

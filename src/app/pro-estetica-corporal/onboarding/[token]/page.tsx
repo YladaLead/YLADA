@@ -117,40 +117,45 @@ export default function ProEsteticaCorporalOnboardingPage() {
         </div>
 
         {loading ? (
-          <p className="text-center text-gray-600">A carregar...</p>
+          <p className="text-center text-gray-600">Carregando...</p>
         ) : invalidMessage ? (
           <p className="rounded-lg bg-red-50 px-3 py-2 text-center text-sm text-red-700">{invalidMessage}</p>
         ) : saved ? (
           <div className="space-y-3 text-center">
-            <h1 className="text-xl font-bold text-gray-900">Recebido — obrigada</h1>
+            <h1 className="text-xl font-bold text-gray-900">Recebido — obrigada! 😊</h1>
             <p className="text-sm text-gray-600">
-              O teu micro-diagnóstico inicial já está connosco. Quando entrares no YLADA Pro — Estética corporal com este
-              e-mail,
-              aplicamos estes dados ao teu espaço e o Noel pode usar este contexto desde o primeiro contacto.
+              Seu micro-diagnóstico inicial já está conosco. Quando você entrar no YLADA Pro — Estética Corporal com esse
+              e-mail, aplicamos essas informações no seu espaço e o Noel já começa a conversa com contexto real do seu negócio.
             </p>
           </div>
         ) : validData ? (
           <div className="space-y-4">
             <div className="space-y-2 text-center">
-              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Estética corporal</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Estética Corporal</p>
               <h1 className="text-xl font-bold text-gray-900">Micro-diagnóstico inicial</h1>
               <p className="text-sm text-gray-600">
-                Em poucos minutos clarificamos o teu contexto — não é um formulário anónimo: é a{' '}
-                <strong className="font-semibold text-gray-800">entrada para o mentor inteligente</strong> (Noel) e para o
-                teu painel. Respostas honestas geram sugestões mais certeiras.
+                Em poucos minutos a gente entende o seu contexto — não é um formulário genérico: é a{' '}
+                <strong className="font-semibold text-gray-800">entrada para o seu mentor inteligente</strong> (Noel) e para o
+                seu painel. Respostas honestas geram sugestões muito mais precisas.
               </p>
             </div>
             <p className="text-center text-sm text-gray-600">
               E-mail: <strong>{validData.invitedEmail}</strong>
             </p>
             <p className="text-center text-xs text-gray-500">
-              Este link vale até{' '}
+              Este link é válido até{' '}
               {new Date(validData.expiresAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
             </p>
 
             {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
-            <ProEsteticaCorporalOnboardingForm values={form} onChange={onFormChange} onSubmit={onSubmit} saving={saving} />
+            <ProEsteticaCorporalOnboardingForm
+              values={form}
+              onChange={onFormChange}
+              onSubmit={onSubmit}
+              saving={saving}
+              submitLabel="Concluir e preparar meu espaço"
+            />
           </div>
         ) : null}
       </div>
