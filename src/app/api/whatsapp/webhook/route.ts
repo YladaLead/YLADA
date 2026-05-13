@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { processMessage } from '@/lib/carol/processor'
 import { sendWhatsAppMessage } from '@/lib/carol/sender'
+import { transcribeWhatsAppAudio } from '@/lib/carol/transcriber'
 
 // Verificação do webhook pelo Meta
 export async function GET(request: NextRequest) {
@@ -57,11 +58,24 @@ export async function POST(request: NextRequest) {
                 })
 
               } else if (message.type === 'audio') {
-                console.log(`[Carol] Áudio recebido de ${from}`)
-                await sendWhatsAppMessage(
-                  from,
-                  'Por aqui funciono melhor com texto 😊\nPode escrever o que queria me contar?'
-                )
+                console.log(`[Carol] Áudio recebido de ${from} — transcrevendo com Whisper...`)
+                try {
+                  const mediaId = message.audio.id
+                  const transcribed = await transcribeWhatsAppAudio(mediaId)
+                  console.log(`[Carol] Áudio transcrito de ${from}: ${transcribed}`)
+                  await processMessage({
+                    from,
+                    text: transcribed,
+                    messageId: message.id,
+                    timestamp: message.timestamp,
+                  })
+                } catch (transcribeError) {
+                  console.error(`[Carol] Erro ao transcrever áudio de ${from}:`, transcribeError)
+                  await sendWhatsAppMessage(
+                    from,
+                    'Recebi seu áudio, mas tive dificuldade de processar 😊\nPode digitar o que queria me dizer?'
+                  )
+                }
 
               } else if (['image', 'video', 'document'].includes(message.type)) {
                 console.log(`[Carol] Arquivo (${message.type}) recebido de ${from}`)
