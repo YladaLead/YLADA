@@ -122,6 +122,20 @@ export async function POST(request: NextRequest) {
                   )
                 }
 
+              } else if (message.type === 'interactive' && message.interactive?.type === 'nfm_reply') {
+                // Resposta de WhatsApp Flow (diagnóstico de 4 perguntas)
+                console.log(`[Carol] Flow completado por ${from}`)
+                const responseJson = message.interactive.nfm_reply?.response_json || '{}'
+                const flowSummary = parseFlowResponse(responseJson)
+                console.log(`[Carol] Flow data de ${from}:`, flowSummary)
+                await processMessage({
+                  from,
+                  text: flowSummary,
+                  messageId: message.id,
+                  timestamp: message.timestamp,
+                  isFlowResponse: true,
+                })
+
               } else if (['image', 'video', 'document'].includes(message.type)) {
                 console.log(`[Carol] Arquivo (${message.type}) recebido de ${from}`)
                 await sendWhatsAppMessage(

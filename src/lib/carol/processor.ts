@@ -135,16 +135,32 @@ Inclua ao final da resposta, nesta ordem exata (sem mais nada depois):
 [LEAD_DATA: nome={nome completo} | email={email} | horario={horario preferido} | segmento={tipo de negócio} | faturamento={faturamento mencionado ou "não informado"} | equipe={sozinha ou tem equipe} | dor_principal={principal problema mencionado}]
 [AGENDAMENTO_CONFIRMADO]`
 
+// Instrução extra injetada no sistema quando a mensagem vem de um Flow completado
+const FLOW_CONTEXT_PROMPT = `
+---
+CONTEXTO ESPECIAL — LEAD VIA FLOW:
+A mensagem abaixo com prefixo [FLOW_DIAGNÓSTICO_COMPLETO] contém as respostas que a pessoa deu num questionário de diagnóstico antes de iniciar essa conversa.
+
+Você já tem o diagnóstico inicial. Por isso:
+1. NÃO faça as perguntas de diagnóstico que estão no roteiro padrão (resultado, desafio, tempo) — elas já foram respondidas.
+2. Comece perguntando o nome: "Oi! Recebi suas respostas do diagnóstico 😊\nCom quem eu tô falando?"
+3. Depois aprofunde naturalmente nas respostas que ela deu — mostre que você leu e entendeu.
+4. Vá mais fundo nas dores reveladas antes de propor o diagnóstico de 45 minutos.
+5. Trate as respostas com discrição — não leia em voz alta como se fosse uma lista. Incorpore naturalmente na conversa.
+`
+
 export async function processMessage({
   from,
   text,
   messageId,
   timestamp,
+  isFlowResponse = false,
 }: {
   from: string
   text: string
   messageId: string
   timestamp: string
+  isFlowResponse?: boolean
 }): Promise<void> {
   try {
     // Busca ou cria conversa
@@ -162,17 +178,30 @@ export async function processMessage({
     const userMsgCount = history.filter((m) => m.role === 'user').length
     if (userMsgCount === 1) {
       console.log(`[Carol] 🆕 Novo lead: ${from}`)
-      await sendWhatsAppMessage(
-        ANDRE_NUMBER,
-        `🆕 *Novo lead na Carol!*\n📱 +${from}\n\n_Acompanhe em: ylada.com/admin/whatsapp/carol/conversas_`
-      )
+      if (isFlowResponse) {
+        // Notificação enriquecida com respostas do Flow
+        await sendWhatsAppMessage(
+          ANDRE_NUMBER,
+          `🆕 *Novo lead via Flow de Diagnóstico!*\n📱 +${from}\n\n${text}\n\n_Acompanhe em: ylada.com/admin/whatsapp/carol/conversas_`
+        )
+      } else {
+        await sendWhatsAppMessage(
+          ANDRE_NUMBER,
+          `🆕 *Novo lead na Carol!*\n📱 +${from}\n\n_Acompanhe em: ylada.com/admin/whatsapp/carol/conversas_`
+        )
+      }
     }
+
+    // Monta prompt de sistema — adiciona contexto extra se vier de Flow
+    const systemContent = isFlowResponse
+      ? CAROL_SYSTEM_PROMPT + FLOW_CONTEXT_PROMPT
+      : CAROL_SYSTEM_PROMPT
 
     // Processa com OpenAI
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: CAROL_SYSTEM_PROMPT },
+        { role: 'system', content: systemContent },
         ...history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
       ],
       temperature: 0.7,
