@@ -151,6 +151,17 @@ export async function createPreference(
   }
   const categoryId = categoryMap[request.area] || 'other'
 
+  const maxInstallments =
+    request.maxInstallments ?? (request.planType === 'annual' ? 12 : 1)
+  // Destaca até 12× no checkout (cliente pode reduzir parcelas). Parcelas “sem juros” dependem do painel MP (parcelado vendedor).
+  const prefersInstallmentDefault =
+    maxInstallments > 1 &&
+    (request.planType === 'annual' || request.productType === 'platform_monthly_12x')
+  const payment_methods = {
+    installments: maxInstallments,
+    default_installments: prefersInstallmentDefault ? Math.min(maxInstallments, 12) : 1,
+  }
+
   // Configurar itens da preferência com informações completas
   const preferenceData = {
     items: [
@@ -182,21 +193,8 @@ export async function createPreference(
       pending: request.pendingUrl,
     },
     auto_return: 'approved' as const, // Redireciona automaticamente quando aprovado
-    payment_methods: {
-      // Não excluir nenhum tipo de pagamento para habilitar PIX, Boleto, etc.
-      excluded_payment_types: [],
-      excluded_payment_methods: [],
-      // Habilitar PIX explicitamente
-      // PIX é habilitado automaticamente se não excluirmos 'account_money'
-      // IMPORTANTE: Para PIX funcionar, a conta do Mercado Pago precisa ter uma chave PIX cadastrada
-      // Ver: docs/TROUBLESHOOTING-PIX-NAO-CRIA-PAGAMENTO.md
-      // Parcelamento: Configurar installments como número (não objeto)
-      // Formato correto segundo documentação: installments: número máximo de parcelas
-      // Plano mensal: 1x (sem parcelamento)
-      // Plano anual: 12x (com parcelamento)
-      installments: request.maxInstallments || (request.planType === 'annual' ? 12 : 1),
-      default_installments: 1, // Parcela padrão (1x = à vista)
-    },
+    // Não enviar excluded_* como []: em alguns fluxos isso confunde o checkout; omitir = nada excluído (PIX, boleto, cartão).
+    payment_methods,
     statement_descriptor: 'YLADA', // Nome que aparece na fatura
     // Referência externa: area_planType_userId (máx 256 chars - limite MP). Obrigatória para o webhook identificar o pagamento.
     external_reference: buildExternalReference(request.area, request.planType, request.userId),
@@ -217,9 +215,8 @@ export async function createPreference(
       itemUnitPrice: preferenceData.items[0].unit_price,
       hasPayer: !!preferenceData.payer.email,
       paymentMethods: {
-        excluded_types: preferenceData.payment_methods.excluded_payment_types,
-        excluded_methods: preferenceData.payment_methods.excluded_payment_methods,
-        installments: preferenceData.payment_methods.installments || 'N/A',
+        installments: payment_methods.installments,
+        default_installments: payment_methods.default_installments,
       },
       back_urls: {
         success: preferenceData.back_urls.success,

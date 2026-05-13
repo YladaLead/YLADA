@@ -324,9 +324,13 @@ async function createMercadoPagoCheckout(
     }
   } else {
     // Plano anual:
-    // - paymentMethod === 'auto' → Preapproval (cobrança recorrente a cada 12 meses, mesmo contrato que o mensal)
+    // - paymentMethod === 'auto' → Preapproval (cobrança recorrente a cada 12 meses) — coach/nutra
+    // - Wellness anual: nunca Preapproval no MP (sem parcelas no cartão); sempre Preference parcelável.
     // - caso contrário → Preference (pagamento único: PIX, Boleto, cartão parcelado)
-    if (paymentMethod === 'auto') {
+    const useAnnualPreapproval =
+      paymentMethod === 'auto' && request.area !== 'wellness'
+
+    if (useAnnualPreapproval) {
       console.log('🔄 Criando assinatura recorrente (Preapproval) para plano anual — renovação a cada 12 meses')
 
       const subscriptionRequest: CreateSubscriptionRequest = {
