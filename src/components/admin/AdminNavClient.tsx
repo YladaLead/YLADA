@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -48,24 +48,46 @@ const NAV_GROUPS: { title: string; items: { href: string; label: string; emoji: 
   },
 ]
 
+const CAROL_LINKS = [
+  { href: '/admin/whatsapp/carol/chat', label: 'Chat WhatsApp (Meta)', sub: 'Responder e testar', emoji: '💬' },
+  { href: '/admin/whatsapp/carol/conversas', label: 'Lista de conversas', sub: 'Histórico e telefones', emoji: '📋' },
+] as const
+
 export function AdminNavClient() {
   const [open, setOpen] = useState(false)
+  const [carolMenuOpen, setCarolMenuOpen] = useState(false)
+  const carolWrapRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
 
   const close = useCallback(() => setOpen(false), [])
 
   useEffect(() => {
     close()
+    setCarolMenuOpen(false)
   }, [pathname, close])
 
   useEffect(() => {
-    if (!open) return
+    if (!open && !carolMenuOpen) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key === 'Escape') {
+        setOpen(false)
+        setCarolMenuOpen(false)
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open])
+  }, [open, carolMenuOpen])
+
+  useEffect(() => {
+    if (!carolMenuOpen) return
+    const onDown = (e: MouseEvent) => {
+      if (carolWrapRef.current && !carolWrapRef.current.contains(e.target as Node)) {
+        setCarolMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [carolMenuOpen])
 
   return (
     <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
@@ -87,19 +109,55 @@ export function AdminNavClient() {
             <span aria-hidden>👥</span>
             Usuários
           </Link>
-          <Link
-            href="/admin/whatsapp/carol/chat"
-            className="text-xs sm:text-sm font-semibold text-white bg-emerald-600 px-2.5 py-1.5 rounded-lg border border-emerald-700 shadow-sm hover:bg-emerald-700 shrink-0 min-h-[40px] inline-flex items-center gap-1"
-            title="Chat com a Carol — WhatsApp (API Meta)"
-            aria-label="Abrir chat da Carol — WhatsApp (API Meta)"
-          >
-            <span aria-hidden>💬</span>
-            Carol
-          </Link>
+          <div className="relative shrink-0" ref={carolWrapRef}>
+            <button
+              type="button"
+              onClick={() => setCarolMenuOpen((v) => !v)}
+              className="text-xs sm:text-sm font-semibold text-white bg-emerald-600 px-2.5 py-1.5 rounded-lg border border-emerald-700 shadow-sm hover:bg-emerald-700 min-h-[40px] inline-flex items-center gap-1"
+              aria-expanded={carolMenuOpen}
+              aria-haspopup="menu"
+              aria-controls="carol-admin-shortcuts"
+              title="Carol (Meta): escolher chat ou lista de conversas"
+            >
+              <span aria-hidden>💬</span>
+              Carol
+              <span className="text-[10px] opacity-90" aria-hidden>
+                {carolMenuOpen ? '▲' : '▼'}
+              </span>
+            </button>
+            {carolMenuOpen && (
+              <div
+                id="carol-admin-shortcuts"
+                role="menu"
+                className="absolute left-0 top-[calc(100%+6px)] z-[60] w-[min(100vw-2rem,18rem)] rounded-xl border border-emerald-800/20 bg-white py-1.5 shadow-lg ring-1 ring-black/5"
+              >
+                {CAROL_LINKS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    role="menuitem"
+                    onClick={() => setCarolMenuOpen(false)}
+                    className="flex items-start gap-3 px-3 py-2.5 text-left hover:bg-emerald-50 active:bg-emerald-100/80"
+                  >
+                    <span className="text-lg leading-none pt-0.5" aria-hidden>
+                      {item.emoji}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-gray-900">{item.label}</span>
+                      <span className="block text-xs text-gray-500 mt-0.5">{item.sub}</span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => {
+            setCarolMenuOpen(false)
+            setOpen((v) => !v)
+          }}
           className="min-h-[44px] min-w-[44px] sm:min-w-0 sm:px-4 rounded-xl bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800 active:bg-gray-950 flex items-center justify-center gap-2 shrink-0"
           aria-expanded={open}
           aria-controls="admin-menu-panel"

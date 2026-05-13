@@ -65,6 +65,8 @@ export interface AdminUsuariosTranslations {
     perfumaria: string
     ylada: string
     seller: string
+    /** Mesma stack de assinatura wellness; rota /pt/coach-bem-estar */
+    'coach-bem-estar': string
     /** Produtos YLADA Pro (vertical em leader_tenants) — coluna Área na listagem admin */
     pro_terapia_capilar: string
     pro_estetica_corporal: string
@@ -297,6 +299,7 @@ const pt: AdminUsuariosTranslations = {
     perfumaria: 'Perfumaria',
     ylada: 'YLADA',
     seller: 'Vendas',
+    'coach-bem-estar': 'Coach de bem-estar',
     pro_terapia_capilar: 'Pro Estética capilar',
     pro_estetica_corporal: 'Pro Estética corporal',
     pro_lideres: 'Pro Líderes',
@@ -523,6 +526,7 @@ const es: AdminUsuariosTranslations = {
     perfumaria: 'Perfumaria',
     ylada: 'YLADA',
     seller: 'Ventas',
+    'coach-bem-estar': 'Coach de bienestar',
     pro_terapia_capilar: 'Pro Estética capilar',
     pro_estetica_corporal: 'Pro Estética corporal',
     pro_lideres: 'Pro Líderes',
@@ -749,6 +753,7 @@ const en: AdminUsuariosTranslations = {
     perfumaria: 'Perfumaria',
     ylada: 'YLADA',
     seller: 'Sales',
+    'coach-bem-estar': 'Wellness coach',
     pro_terapia_capilar: 'Pro Hair aesthetics',
     pro_estetica_corporal: 'Pro Body aesthetics',
     pro_lideres: 'Pro Leaders',

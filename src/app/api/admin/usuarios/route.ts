@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
     if (blocoFiltro === 'ylada') {
       profilesQuery = profilesQuery.in('perfil', [...PERFIS_MATRIZ_YLADA])
     } else if (blocoFiltro === 'wellness') {
-      profilesQuery = profilesQuery.eq('perfil', 'wellness')
+      profilesQuery = profilesQuery.in('perfil', ['wellness', 'coach-bem-estar'])
     }
 
     // Segmento exato (coluna Área) — não usar `area=ylada` aqui (esse valor é legado = matriz inteira)

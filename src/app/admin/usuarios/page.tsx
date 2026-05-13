@@ -138,6 +138,7 @@ export default function AdminUsuarios() {
     { value: 'wellness', label: t.areas.wellness },
     { value: 'nutri', label: t.areas.nutri },
     { value: 'coach', label: t.areas.coach },
+    { value: 'coach-bem-estar', label: t.areas['coach-bem-estar'] },
     { value: 'nutra', label: t.areas.nutra },
     { value: 'med', label: t.areas.med },
     { value: 'psi', label: t.areas.psi },
@@ -158,7 +159,11 @@ export default function AdminUsuarios() {
       return k in t.areas ? t.areas[k] : value
     }
     if (filtroBloco === 'wellness') {
-      return [todosOpt, { value: 'wellness', label: t.areas.wellness }]
+      return [
+        todosOpt,
+        { value: 'wellness', label: t.areas.wellness },
+        { value: 'coach-bem-estar', label: t.areas['coach-bem-estar'] },
+      ]
     }
     if (filtroBloco === 'ylada') {
       return [todosOpt, ...PERFIS_MATRIZ_YLADA.map((p) => ({ value: p, label: labelFor(p) }))]
@@ -700,6 +705,7 @@ export default function AdminUsuarios() {
       case 'coach': return '💜'
       case 'nutra': return '🔬'
       case 'wellness': return '💖'
+      case 'coach-bem-estar': return '🌿'
       case 'ylada': return '🔷'
       case 'seller': return '🛒'
       case 'pro_terapia_capilar': return '💇'
@@ -715,6 +721,7 @@ export default function AdminUsuarios() {
       case 'coach': return 'bg-purple-100 text-purple-800'
       case 'nutra': return 'bg-blue-100 text-blue-800'
       case 'wellness': return 'bg-teal-100 text-teal-800'
+      case 'coach-bem-estar': return 'bg-emerald-100 text-emerald-900'
       case 'ylada': return 'bg-sky-100 text-sky-800'
       case 'seller': return 'bg-amber-100 text-amber-900'
       case 'pro_terapia_capilar': return 'bg-cyan-100 text-cyan-900'
