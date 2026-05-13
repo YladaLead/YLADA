@@ -117,6 +117,10 @@ Se não for o momento certo: "Por sinal, você conhece alguma colega que trabalh
 
 ---
 
+QUANDO SOUBER O NOME DA PESSOA (primeira vez que ela informa):
+Inclua discretamente ao final da resposta:
+[NOME_DETECTADO: nome={nome informado}]
+
 QUANDO DETECTAR AGENDAMENTO CONFIRMADO:
 Você coletou nome completo + email + horário E enviou o link do formulário.
 Inclua ao final da resposta, nesta ordem exata (sem mais nada depois):
@@ -139,11 +143,23 @@ export async function processMessage({
     // Busca ou cria conversa
     const conversation = await getOrCreateConversation(from)
 
+    const ANDRE_NUMBER = '5519981868000'
+
     // Salva mensagem recebida
     await saveMessage(conversation.id, 'user', text)
 
-    // Busca histórico
+    // Busca histórico (já inclui a mensagem que acabou de salvar)
     const history = await getConversationHistory(conversation.id)
+
+    // ── NOTIFICAÇÃO 1: Lead novo (primeira mensagem de sempre) ──────────────
+    const userMsgCount = history.filter((m) => m.role === 'user').length
+    if (userMsgCount === 1) {
+      console.log(`[Carol] 🆕 Novo lead: ${from}`)
+      await sendWhatsAppMessage(
+        ANDRE_NUMBER,
+        `🆕 *Novo lead na Carol!*\n📱 +${from}\n\n_Acompanhe em: ylada.com/admin/whatsapp/carol/conversas_`
+      )
+    }
 
     // Processa com OpenAI
     const response = await openai.chat.completions.create({
@@ -158,8 +174,12 @@ export async function processMessage({
 
     const reply = response.choices[0].message.content!
 
-    // Verifica agendamento confirmado
+    // Verifica tags internas
     const isAgendamento = reply.includes('[AGENDAMENTO_CONFIRMADO]')
+
+    // Extrai NOME_DETECTADO se existir
+    const nomeDetectadoMatch = reply.match(/\[NOME_DETECTADO:\s*nome=([^\]]+)\]/)
+    const nomeDetectado = nomeDetectadoMatch ? nomeDetectadoMatch[1].trim() : null
 
     // Extrai LEAD_DATA se existir
     const leadDataMatch = reply.match(/\[LEAD_DATA:(.*?)\]/s)
@@ -170,8 +190,9 @@ export async function processMessage({
       return match ? match[1].trim() : 'Não informado'
     }
 
-    // Limpa a resposta removendo as tags internas
+    // Limpa a resposta removendo todas as tags internas
     const replyLimpo = reply
+      .replace(/\[NOME_DETECTADO:[^\]]*\]/g, '')
       .replace(/\[LEAD_DATA:.*?\]/s, '')
       .replace('[AGENDAMENTO_CONFIRMADO]', '')
       .trim()
@@ -182,7 +203,17 @@ export async function processMessage({
     // Envia resposta para o usuário
     await sendWhatsAppMessage(from, replyLimpo)
 
-    // Processa agendamento
+    // ── NOTIFICAÇÃO 2: Nome capturado ────────────────────────────────────────
+    if (nomeDetectado && !conversation.nome) {
+      await updateConversationStatus(conversation.id, 'em_andamento', { nome: nomeDetectado })
+      console.log(`[Carol] 👤 Nome capturado: ${nomeDetectado} (${from})`)
+      await sendWhatsAppMessage(
+        ANDRE_NUMBER,
+        `👤 *${nomeDetectado}* entrou em contato com a Carol\n📱 +${from}\n\n_Acompanhe em: ylada.com/admin/whatsapp/carol/conversas_`
+      )
+    }
+
+    // ── NOTIFICAÇÃO 3: Diagnóstico agendado ──────────────────────────────────
     if (isAgendamento) {
       await updateConversationStatus(conversation.id, 'diagnostico_agendado')
 
@@ -194,13 +225,11 @@ export async function processMessage({
       const leadEquipe      = parseField('equipe')
       const leadDor         = parseField('dor_principal')
 
-      console.log(`[Carol] Diagnóstico agendado — Lead: ${leadNome} | ${leadEmail} | ${from}`)
+      console.log(`[Carol] 🗓️ Diagnóstico agendado — ${leadNome} | ${leadEmail} | ${from}`)
 
-      // Notificação rica para o Andre Faula
-      const ANDRE_NUMBER = '5519981868000'
       await sendWhatsAppMessage(
         ANDRE_NUMBER,
-        `🗓️ *Diagnóstico agendado pela Carol!*\n\n` +
+        `🗓️ *Diagnóstico agendado!*\n\n` +
         `👤 *Nome:* ${leadNome}\n` +
         `📧 *Email:* ${leadEmail}\n` +
         `📱 *WhatsApp:* +${from}\n` +
@@ -209,8 +238,7 @@ export async function processMessage({
         `💰 *Faturamento:* ${leadFaturamento}\n` +
         `👥 *Equipe:* ${leadEquipe}\n` +
         `💬 *Dor principal:* ${leadDor}\n\n` +
-        `📋 Formulário enviado para a pessoa.\n` +
-        `🔗 Conversa completa: Supabase → carol_conversations`
+        `🔗 _Conversa completa: ylada.com/admin/whatsapp/carol/conversas_`
       )
     }
 

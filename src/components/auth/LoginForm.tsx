@@ -746,8 +746,9 @@ export default function LoginForm({
                 : yladaHorizontalLogo)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center px-4 py-8 sm:py-12">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100 p-8 sm:p-10">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center px-4 py-8 sm:py-12 touch-manipulation">
+      {/* relative + z-10: formulário acima de overlays fixos empilhados de forma estranha em alguns mobile browsers */}
+      <div className="relative z-10 max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100 p-8 sm:p-10 isolate">
         {/* Logo */}
         <div className="text-center mb-8 sm:mb-10">
           <div className="flex justify-center mb-6 sm:mb-8">
@@ -804,10 +805,13 @@ export default function LoginForm({
               </label>
               <input
                 id="name"
+                name="name"
                 type="text"
                 value={name}
                 onChange={handleInputChange(setName)}
                 required={isSignUp}
+                autoComplete="name"
+                spellCheck={false}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg transition-all focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 placeholder-gray-400"
                 placeholder="Seu nome"
               />
@@ -820,7 +824,15 @@ export default function LoginForm({
             </label>
             <input
               id="email"
-              type="email"
+              name="email"
+              type="text"
+              inputMode="email"
+              autoComplete={isSignUp ? 'email' : 'username'}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+              title="Digite um e-mail válido"
               value={email}
               onChange={handleInputChange(setEmail)}
               required
@@ -852,11 +864,14 @@ export default function LoginForm({
             <div className="relative">
               <input
                 id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={handleInputChange(setPassword)}
                 required
                 minLength={6}
+                autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                spellCheck={false}
                 className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg transition-all focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 placeholder-gray-400"
                 placeholder="••••••••"
               />
@@ -892,11 +907,14 @@ export default function LoginForm({
               <div className="relative">
                 <input
                   id="confirmPassword"
+                  name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={handleInputChange(setConfirmPassword)}
                   required={isSignUp}
                   minLength={6}
+                  autoComplete="new-password"
+                  spellCheck={false}
                   className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg transition-all focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 placeholder-gray-400"
                   placeholder="Repita a senha"
                 />

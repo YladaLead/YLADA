@@ -835,6 +835,9 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
       const { data: updatedSubscription, error: updateError } = await supabaseAdmin
         .from('subscriptions')
         .update({
+          // Pagamento anual/mensal após trial (ou upgrade): antes só estendia o fim do período e deixava plan_type=trial
+          plan_type: planType,
+          stripe_subscription_id: subscriptionId,
           current_period_start: new Date().toISOString(), // Novo período começa agora
           current_period_end: expiresAt.toISOString(), // Estender vencimento
           amount: Math.round(amount * 100),
