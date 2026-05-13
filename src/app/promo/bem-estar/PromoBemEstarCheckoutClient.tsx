@@ -108,7 +108,7 @@ export default function PromoBemEstarCheckoutClient() {
           language: 'pt',
           email: userEmail.trim().toLowerCase(),
           countryCode: 'BR',
-          paymentMethod: planType === 'annual' ? 'auto' : undefined,
+          // Sem 'auto' no anual: no MP, 'auto' usa Preapproval (sem parcelas). Omitir usa Preference com até 12×.
           promoSlug: PROMO_BEM_ESTAR_SLUG,
         }),
       })
@@ -231,8 +231,10 @@ export default function PromoBemEstarCheckoutClient() {
                 Promo
               </span>
               <span className="text-xs text-slate-500">Anual</span>
-              <p className="mt-1 text-lg font-bold text-slate-900">R$ {PROMO_BEM_ESTAR_BR.annualMonthlyLabel}/mês</p>
-              <span className="text-xs text-slate-600">Total R$ {PROMO_BEM_ESTAR_BR.annualTotal}</span>
+              <p className="mt-1 text-lg font-bold text-slate-900">
+                12× de R$ {PROMO_BEM_ESTAR_BR.annualMonthlyLabel}
+              </p>
+              <span className="text-xs text-slate-600">Total R$ {PROMO_BEM_ESTAR_BR.annualTotal} no cartão</span>
             </button>
           </div>
 
