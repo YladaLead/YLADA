@@ -3,6 +3,51 @@ import { processMessage } from '@/lib/carol/processor'
 import { sendWhatsAppMessage } from '@/lib/carol/sender'
 import { transcribeWhatsAppAudio } from '@/lib/carol/transcriber'
 
+// Interpreta as respostas do WhatsApp Flow e retorna texto legível para a Carol
+function parseFlowResponse(responseJson: string): string {
+  try {
+    const data = JSON.parse(responseJson)
+
+    // Mapeia IDs internos para texto legível
+    const labels: Record<string, string> = {
+      // Q1 — resultado vs esforço
+      raramente: 'Raramente',
+      as_vezes: 'Às vezes',
+      sempre: 'Sempre',
+      // Q2 — principal desafio
+      agenda_oscila: 'Agenda oscila entre cheia e vazia',
+      faz_tudo_sozinha: 'Faz tudo sozinha e não consegue crescer',
+      cobra_bem: 'Cobra bem mas no fim do mês não sobra nada',
+      crescendo: 'Está crescendo mas quer acelerar',
+      // Q3 — tempo no problema
+      mais_2anos: 'Mais de 2 anos',
+      seis_a_2anos: 'Entre 6 meses e 2 anos',
+      menos_6meses: 'Menos de 6 meses',
+      // Q4 — clareza de direção
+      nao_sei: 'Não tem ideia por onde começar',
+      tem_ideias: 'Tem ideias mas não sabe executar',
+      sabe_mas_nao: 'Sabe o que precisa mudar mas não consegue colocar em prática',
+      tem_plano: 'Tem um plano claro e está executando',
+    }
+
+    const fmt = (v: string) => labels[v] || v
+
+    const lines: string[] = ['[FLOW_DIAGNÓSTICO_COMPLETO]']
+    if (data.resultado_esforco)
+      lines.push(`Resultado reflete esforço: ${fmt(data.resultado_esforco)}`)
+    if (data.desafio_principal)
+      lines.push(`Principal desafio: ${fmt(data.desafio_principal)}`)
+    if (data.tempo_problema)
+      lines.push(`Tempo enfrentando o problema: ${fmt(data.tempo_problema)}`)
+    if (data.clareza_direcao)
+      lines.push(`Clareza de direção: ${fmt(data.clareza_direcao)}`)
+
+    return lines.join('\n')
+  } catch {
+    return '[FLOW_DIAGNÓSTICO_COMPLETO]\nDados recebidos mas não foi possível interpretar.'
+  }
+}
+
 // Verificação do webhook pelo Meta
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
