@@ -24,6 +24,13 @@ type Message = {
   created_at: string
 }
 
+type Template = {
+  name: string
+  label: string
+  description: string
+  variables: string[]
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function formatPhone(phone: string) {
@@ -71,6 +78,128 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
+// ─── Modal: Enviar Template ───────────────────────────────────────────────────
+
+function SendTemplateModal({ onClose }: { onClose: () => void }) {
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [phone, setPhone] = useState('')
+  const [nome, setNome] = useState('')
+  const [selectedTemplate, setSelectedTemplate] = useState('')
+  const [sending, setSending] = useState(false)
+  const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null)
+
+  useEffect(() => {
+    fetch('/api/admin/carol/send-template', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((d) => {
+        setTemplates(d.templates ?? [])
+        if (d.templates?.length > 0) setSelectedTemplate(d.templates[0].name)
+      })
+      .catch(() => {})
+  }, [])
+
+  async function handleSend() {
+    if (!phone || !nome || !selectedTemplate) return
+    setSending(true)
+    setResult(null)
+    try {
+      const res = await fetch('/api/admin/carol/send-template', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, template: selectedTemplate, nome }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setResult({ ok: true, msg: data.message })
+        setPhone('')
+        setNome('')
+      } else {
+        setResult({ ok: false, msg: data.error ?? 'Erro ao enviar' })
+      }
+    } catch {
+      setResult({ ok: false, msg: 'Erro de conexão' })
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const selected = templates.find((t) => t.name === selectedTemplate)
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-0 pb-0 sm:items-center sm:px-4">
+      <div className="w-full max-w-md rounded-t-2xl bg-white p-5 shadow-xl sm:rounded-2xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-bold text-gray-900">Iniciar conversa</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+        </div>
+
+        <p className="mb-4 text-xs text-gray-500">
+          Envia um template aprovado pela Meta para iniciar uma conversa.
+          A Carol assume automaticamente quando a pessoa responder.
+        </p>
+
+        {/* Número */}
+        <label className="mb-1 block text-xs font-semibold text-gray-700">
+          WhatsApp da pessoa
+        </label>
+        <input
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="5519999990000 (com DDI e DDD)"
+          className="mb-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+        />
+
+        {/* Nome */}
+        <label className="mb-1 block text-xs font-semibold text-gray-700">
+          Nome da pessoa
+        </label>
+        <input
+          type="text"
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
+          placeholder="Ex: Juliana"
+          className="mb-3 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+        />
+
+        {/* Template */}
+        <label className="mb-1 block text-xs font-semibold text-gray-700">
+          Template
+        </label>
+        <select
+          value={selectedTemplate}
+          onChange={(e) => setSelectedTemplate(e.target.value)}
+          className="mb-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+        >
+          {templates.map((t) => (
+            <option key={t.name} value={t.name}>{t.label}</option>
+          ))}
+        </select>
+
+        {selected && (
+          <p className="mb-4 text-xs text-gray-400 italic">{selected.description}</p>
+        )}
+
+        {/* Resultado */}
+        {result && (
+          <div className={`mb-3 rounded-lg px-3 py-2 text-sm ${result.ok ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+            {result.ok ? '✓ ' : '✗ '}{result.msg}
+          </div>
+        )}
+
+        <button
+          onClick={() => void handleSend()}
+          disabled={sending || !phone || !nome || !selectedTemplate}
+          className="w-full rounded-xl bg-[#075e54] py-3 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          {sending ? 'Enviando...' : 'Enviar template'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Painel de lista ──────────────────────────────────────────────────────────
 
 function ConversationList({
@@ -84,6 +213,8 @@ function ConversationList({
   onSelect: (c: Conversation) => void
   onRefresh: () => void
 }) {
+  const [showModal, setShowModal] = useState(false)
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       {/* Header */}
@@ -93,14 +224,21 @@ function ConversationList({
             <h1 className="text-lg font-bold text-gray-900">Conversas da Carol</h1>
             <p className="text-xs text-gray-500">{conversations.length} lead{conversations.length !== 1 ? 's' : ''}</p>
           </div>
-          <button
-            onClick={onRefresh}
-            disabled={loading}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50"
-          >
-            <span className={loading ? 'animate-spin' : ''}>↻</span>
-            Atualizar
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-1.5 rounded-lg bg-[#075e54] px-3 py-2 text-sm font-medium text-white hover:bg-[#064f48]"
+            >
+              + Iniciar
+            </button>
+            <button
+              onClick={onRefresh}
+              disabled={loading}
+              className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+            >
+              <span className={loading ? 'animate-spin' : ''}>↻</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -115,6 +253,12 @@ function ConversationList({
             <p className="text-4xl mb-2">💬</p>
             <p className="font-medium">Nenhuma conversa ainda</p>
             <p className="text-sm mt-1">Quando alguém falar com a Carol aparece aqui</p>
+            <button
+              onClick={() => setShowModal(true)}
+              className="mt-4 rounded-xl bg-[#075e54] px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              Iniciar primeira conversa
+            </button>
           </div>
         ) : (
           conversations.map((c) => (
@@ -155,6 +299,8 @@ function ConversationList({
           ))
         )}
       </div>
+
+      {showModal && <SendTemplateModal onClose={() => setShowModal(false)} />}
     </div>
   )
 }
@@ -170,6 +316,7 @@ function ConversationDetail({
 }) {
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async () => {
@@ -231,14 +378,22 @@ function ConversationDetail({
               {conversation.email ? ` · ${conversation.email}` : ''}
             </p>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <StatusBadge status={conversation.status} />
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => void load()}
-              className="text-xs text-white/60 hover:text-white"
+              onClick={() => setShowModal(true)}
+              className="rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold text-white hover:bg-white/30"
             >
-              ↻
+              Template
             </button>
+            <div className="flex flex-col items-end gap-1">
+              <StatusBadge status={conversation.status} />
+              <button
+                onClick={() => void load()}
+                className="text-xs text-white/60 hover:text-white"
+              >
+                ↻
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -259,28 +414,35 @@ function ConversationDetail({
                 </span>
               </div>
 
-              {dayMsgs.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`mb-1.5 flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'}`}
-                >
+              {dayMsgs.map((msg) => {
+                const isTemplate = msg.content.startsWith('[TEMPLATE OUTBOUND:')
+                return (
                   <div
-                    className={`relative max-w-[78%] rounded-2xl px-3 py-2 shadow-sm ${
-                      msg.role === 'user'
-                        ? 'rounded-tl-sm bg-white text-gray-900'
-                        : 'rounded-tr-sm bg-[#dcf8c6] text-gray-900'
-                    }`}
+                    key={msg.id}
+                    className={`mb-1.5 flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'}`}
                   >
-                    {msg.role === 'assistant' && (
-                      <p className="mb-0.5 text-[10px] font-semibold text-[#075e54]">Carol</p>
-                    )}
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
-                    <p className="mt-0.5 text-right text-[10px] text-gray-400">
-                      {formatTime(msg.created_at)}
-                    </p>
+                    <div
+                      className={`relative max-w-[78%] rounded-2xl px-3 py-2 shadow-sm ${
+                        msg.role === 'user'
+                          ? 'rounded-tl-sm bg-white text-gray-900'
+                          : isTemplate
+                            ? 'rounded-tr-sm bg-amber-50 text-gray-700 border border-amber-200'
+                            : 'rounded-tr-sm bg-[#dcf8c6] text-gray-900'
+                      }`}
+                    >
+                      {msg.role === 'assistant' && (
+                        <p className={`mb-0.5 text-[10px] font-semibold ${isTemplate ? 'text-amber-600' : 'text-[#075e54]'}`}>
+                          {isTemplate ? '📤 Template enviado' : 'Carol'}
+                        </p>
+                      )}
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
+                      <p className="mt-0.5 text-right text-[10px] text-gray-400">
+                        {formatTime(msg.created_at)}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ))
         )}
@@ -296,6 +458,8 @@ function ConversationDetail({
           )}
         </div>
       )}
+
+      {showModal && <SendTemplateModal onClose={() => setShowModal(false)} />}
     </div>
   )
 }

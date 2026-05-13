@@ -30,7 +30,9 @@ const NAV_GROUPS: { title: string; items: { href: string; label: string; emoji: 
       },
       { href: '/admin/whatsapp/cadastros-workshop', label: 'Workshop — inscrições (WhatsApp)', emoji: '📋' },
       { href: '/admin/whatsapp/workshop', label: 'Workshop — agenda & sessões', emoji: '📅' },
-      { href: '/admin/whatsapp', label: 'WhatsApp — conversas (Carol)', emoji: '💬' },
+      { href: '/admin/whatsapp/carol/chat', label: 'Carol — chat WhatsApp (API Meta)', emoji: '🤖' },
+      { href: '/admin/whatsapp/carol/conversas', label: 'Carol — lista de conversas (Meta)', emoji: '📋' },
+      { href: '/admin/whatsapp', label: 'WhatsApp — conversas (Z-API / legado)', emoji: '💬' },
       { href: '/admin/suporte', label: 'Suporte', emoji: '🛟' },
       { href: '/admin/motor-crescimento', label: 'Motor crescimento', emoji: '📚' },
       { href: '/admin/minhas-acoes', label: 'Minhas ações', emoji: '✅' },
@@ -84,6 +86,15 @@ export function AdminNavClient() {
           >
             <span aria-hidden>👥</span>
             Usuários
+          </Link>
+          <Link
+            href="/admin/whatsapp/carol/chat"
+            className="text-xs sm:text-sm font-semibold text-white bg-emerald-600 px-2.5 py-1.5 rounded-lg border border-emerald-700 shadow-sm hover:bg-emerald-700 shrink-0 min-h-[40px] inline-flex items-center gap-1"
+            title="Chat com a Carol — WhatsApp (API Meta)"
+            aria-label="Abrir chat da Carol — WhatsApp (API Meta)"
+          >
+            <span aria-hidden>💬</span>
+            Carol
           </Link>
         </div>
         <button

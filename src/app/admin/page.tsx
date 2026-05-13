@@ -159,6 +159,15 @@ function AdminDashboardContent() {
 
   const acoesOperacaoFoco: QuickAction[] = [
     {
+      id: 'carol-chat-meta',
+      title: 'Carol — chat WhatsApp',
+      description: 'Conversa com a Carol (API Meta) — respostas e testes',
+      icon: '💬',
+      link: '/admin/whatsapp/carol/chat',
+      color: 'bg-emerald-600',
+      destaque: true,
+    },
+    {
       id: 'consultorias-hub',
       title: 'Consultorias',
       description: 'Pró Líderes, estética corporal e estética capilar',
