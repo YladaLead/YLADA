@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { processMessage } from '@/lib/carol/processor'
+import { sendWhatsAppMessage } from '@/lib/carol/sender'
 
 // Verificação do webhook pelo Meta
 export async function GET(request: NextRequest) {
@@ -35,14 +36,42 @@ export async function POST(request: NextRequest) {
             }
 
             for (const message of messages) {
+              const from = message.from
+
               if (message.type === 'text') {
-                console.log(`[Carol] Mensagem recebida de ${message.from}: ${message.text.body}`)
+                console.log(`[Carol] Texto recebido de ${from}: ${message.text.body}`)
                 await processMessage({
-                  from: message.from,
+                  from,
                   text: message.text.body,
                   messageId: message.id,
                   timestamp: message.timestamp,
                 })
+
+              } else if (message.type === 'sticker') {
+                console.log(`[Carol] Figurinha recebida de ${from}`)
+                await processMessage({
+                  from,
+                  text: '[a pessoa enviou uma figurinha]',
+                  messageId: message.id,
+                  timestamp: message.timestamp,
+                })
+
+              } else if (message.type === 'audio') {
+                console.log(`[Carol] Áudio recebido de ${from}`)
+                await sendWhatsAppMessage(
+                  from,
+                  'Por aqui funciono melhor com texto 😊\nPode escrever o que queria me contar?'
+                )
+
+              } else if (['image', 'video', 'document'].includes(message.type)) {
+                console.log(`[Carol] Arquivo (${message.type}) recebido de ${from}`)
+                await sendWhatsAppMessage(
+                  from,
+                  'Recebi! Mas ainda não consigo visualizar arquivos por aqui 😊\nPode me descrever o que queria mostrar?'
+                )
+
+              } else {
+                console.log(`[Carol] Tipo não tratado (${message.type}) de ${from} — ignorando`)
               }
             }
           }
