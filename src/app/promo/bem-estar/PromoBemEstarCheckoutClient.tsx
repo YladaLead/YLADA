@@ -238,6 +238,24 @@ export default function PromoBemEstarCheckoutClient() {
             </button>
           </div>
 
+          {planType === 'annual' && (
+            <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50/90 px-4 py-3 text-left text-[13px] leading-snug text-slate-800 shadow-sm">
+              <p className="font-semibold text-slate-900">Como funciona o anual na prática</p>
+              <p className="mt-1.5 text-slate-700">
+                Ao clicar em pagar, você vai para o <strong className="font-semibold text-slate-900">Mercado Pago</strong>.
+                Escolha <strong className="font-semibold text-slate-900">cartão de crédito</strong> e, na hora de
+                confirmar, aparece o parcelamento em{' '}
+                <strong className="font-semibold text-slate-900">
+                  até 12× de R$ {PROMO_BEM_ESTAR_BR.annualMonthlyLabel}
+                </strong>{' '}
+                (total R$ {PROMO_BEM_ESTAR_BR.annualTotal}) — pode escolher menos parcelas se quiser.
+              </p>
+              <p className="mt-1.5 text-[12px] text-slate-600">
+                PIX e boleto no Mercado Pago são só à vista; parcelas são no cartão.
+              </p>
+            </div>
+          )}
+
           <label className="mt-8 block">
             <span className="text-xs font-medium text-slate-600">
               E-mail <span className="text-red-600">*</span>
@@ -326,7 +344,11 @@ export default function PromoBemEstarCheckoutClient() {
             }
             className="mt-6 w-full rounded-xl bg-blue-600 py-4 text-base font-semibold text-white shadow-md transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? 'Abrindo…' : 'Pagar'}
+            {loading
+              ? 'Abrindo Mercado Pago…'
+              : planType === 'annual'
+                ? 'Continuar — pagar no Mercado Pago (até 12× no cartão)'
+                : 'Pagar'}
           </button>
 
           <p className="mt-5 text-center text-[11px] leading-relaxed text-slate-600">

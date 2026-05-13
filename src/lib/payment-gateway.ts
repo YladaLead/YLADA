@@ -386,7 +386,7 @@ async function createMercadoPagoCheckout(
       amount,
       description: request.productType === 'formation_only'
         ? `YLADA ${request.area.toUpperCase()} - Formação Empresarial Nutri`
-        : `YLADA ${request.area.toUpperCase()} - Plano Anual`,
+        : `YLADA ${request.area.toUpperCase()} - Plano Anual (até 12x no cartão)`,
       successUrl,
       failureUrl,
       pendingUrl,

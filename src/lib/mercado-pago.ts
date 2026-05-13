@@ -168,7 +168,12 @@ export async function createPreference(
       {
         id: `${request.area}-${request.planType}`, // Código do item (OBRIGATÓRIO)
         title: request.description, // Nome do item (RECOMENDADO)
-        description: `Assinatura ${request.planType === 'monthly' ? 'Mensal' : 'Anual'} - YLADA ${request.area.toUpperCase()}`, // Descrição do item (RECOMENDADO)
+        description:
+          request.planType === 'monthly'
+            ? `Assinatura Mensal - YLADA ${request.area.toUpperCase()}`
+            : maxInstallments > 1
+              ? `Assinatura Anual - YLADA ${request.area.toUpperCase()} — até ${maxInstallments}x no cartão de crédito`
+              : `Assinatura Anual - YLADA ${request.area.toUpperCase()}`, // Descrição do item (RECOMENDADO)
         category_id: categoryId, // Categoria do item (RECOMENDADO)
         quantity: 1, // Quantidade (RECOMENDADO)
         unit_price: unitPrice, // Preço do item (RECOMENDADO) - Valor em reais (ex: 59.90)
