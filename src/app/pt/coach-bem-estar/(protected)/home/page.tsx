@@ -1,10 +1,15 @@
-import { redirect } from 'next/navigation'
+import YladaAreaShell from '@/components/ylada/YladaAreaShell'
+import NoelHomeContent from '@/components/ylada/NoelHomeContent'
 
-/**
- * Home Coach de bem-estar.
- * Redireciona para a plataforma wellness (base compartilhada).
- * Usuários com perfil coach-bem-estar acessam a mesma plataforma que wellness.
- */
 export default function CoachBemEstarHomePage() {
-  redirect('/pt/wellness/home')
+  return (
+    <YladaAreaShell areaCodigo="coach-bem-estar" areaLabel="Coach de bem-estar" suppressSidebarUntilRevealed>
+      <NoelHomeContent
+        areaCodigo="coach-bem-estar"
+        areaLabel="Coach de bem-estar"
+        area="coach-bem-estar"
+        subtitle="Organize rotina, links e conversas no WhatsApp — o mesmo mentor YLADA que médicos e psicólogos usam, no seu contexto de bem-estar."
+      />
+    </YladaAreaShell>
+  )
 }

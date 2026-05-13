@@ -49,8 +49,12 @@ interface YladaActivationJourneyCardProps {
 
 export default function YladaActivationJourneyCard({ areaCodigo }: YladaActivationJourneyCardProps) {
   const prefix = getYladaAreaPathPrefix(areaCodigo)
-  const linksHref = `${prefix}/links`
-  const novoLinkHref = `${prefix}/links/novo`
+  const linksHref =
+    areaCodigo === 'coach-bem-estar' ? '/pt/wellness/links' : `${prefix}/links`
+  const novoLinkHref =
+    areaCodigo === 'coach-bem-estar'
+      ? '/pt/wellness/ferramentas/templates'
+      : `${prefix}/links/novo`
 
   const [links, setLinks] = useState<LinkRow[] | null>(null)
   const [dismissed, setDismissed] = useState(false)

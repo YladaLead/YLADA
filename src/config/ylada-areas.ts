@@ -16,6 +16,7 @@ export type YladaSegmentCode =
   | 'nutra'
   | 'nutri'
   | 'coach'
+  | 'coach-bem-estar'
   | 'seller'
   | 'perfumaria'
   | 'estetica'
@@ -58,6 +59,13 @@ export const YLADA_AREAS: YladaAreaConfig[] = [
   { codigo: 'odonto', segment_code: 'odonto', label: 'Odontologia', pathPrefix: '/pt/odonto', publicEntry: 'standard' },
   { codigo: 'nutra', segment_code: 'nutra', label: 'Nutra', pathPrefix: '/pt/nutra', publicEntry: 'standard' },
   { codigo: 'coach', segment_code: 'coach', label: 'Coach', pathPrefix: '/pt/coach', publicEntry: 'standard' },
+  {
+    codigo: 'coach-bem-estar',
+    segment_code: 'coach-bem-estar',
+    label: 'Coach de bem-estar',
+    pathPrefix: '/pt/coach-bem-estar',
+    publicEntry: 'none',
+  },
   {
     codigo: 'perfumaria',
     segment_code: 'perfumaria',
@@ -189,6 +197,7 @@ export const YLADA_SEGMENT_CODES: YladaSegmentCode[] = [
   'nutra',
   'nutri',
   'coach',
+  'coach-bem-estar',
   'seller',
   'perfumaria',
   'estetica',
@@ -196,7 +205,7 @@ export const YLADA_SEGMENT_CODES: YladaSegmentCode[] = [
   'joias',
 ]
 
-/** Perfis permitidos nas APIs YLADA (Links, Templates, Biblioteca, etc.). Wellness/coach-bem-estar ficam só em /api/wellness/*. */
+/** Perfis permitidos nas APIs YLADA (Links, Templates, Biblioteca, etc.). Wellness (Herbalife) segue em /api/wellness/*. */
 export const YLADA_API_ALLOWED_PROFILES = [
   'ylada',
   'med',
@@ -205,6 +214,7 @@ export const YLADA_API_ALLOWED_PROFILES = [
   'odonto',
   'nutra',
   'coach',
+  'coach-bem-estar',
   'seller',
   'perfumaria',
   'estetica',

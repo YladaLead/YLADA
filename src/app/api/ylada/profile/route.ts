@@ -25,6 +25,7 @@ const VALID_SEGMENTS = [
   'estetica',
   'fitness',
   'joias',
+  'coach-bem-estar',
 ] as const
 
 type ProfilePayload = {

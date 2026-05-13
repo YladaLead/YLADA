@@ -317,7 +317,7 @@ export async function validateProtectedAccess(
     const profileMatchesArea =
       profile.perfil === area ||
       canAccessYladaMatrix ||
-      (area === 'coach-bem-estar' && (profile.perfil === 'coach-bem-estar' || profile.perfil === 'wellness')) || // legado: rotas /pt/coach-bem-estar/* ainda redirecionam para coach
+      (area === 'coach-bem-estar' && profile.perfil === 'coach-bem-estar') ||
       (area === 'wellness' && profile.perfil === 'coach-bem-estar') ||
       (isMatrixArea(area) && (profile.perfil === 'ylada' || profile.perfil === 'med' || profile.perfil === area))
 

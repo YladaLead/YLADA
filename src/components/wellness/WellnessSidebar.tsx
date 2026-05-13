@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
@@ -33,7 +33,6 @@ interface WellnessSidebarProps {
 
 export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }: WellnessSidebarProps) {
   const pathname = usePathname()
-  const router = useRouter()
   const { signOut } = useAuth()
   const [hoveredSection, setHoveredSection] = useState<string | null>(null)
   const [expandedSections, setExpandedSections] = useState<string[]>([])

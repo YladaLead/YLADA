@@ -150,6 +150,26 @@ export default function YladaSidebar({
             </div>
           ))}
 
+          {areaCodigo === 'coach-bem-estar' && (
+            <div className="px-3 pt-1">
+              <p className="mb-1 px-3 text-[10px] font-medium uppercase tracking-wide text-gray-400">Extra</p>
+              <Link
+                href={`${prefix}/recrutamento`}
+                onClick={onMobileClose}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors ${
+                  pathname?.startsWith(`${prefix}/recrutamento`)
+                    ? 'bg-slate-100 font-medium text-slate-800'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                }`}
+              >
+                <span className="text-base opacity-80" aria-hidden>
+                  👥
+                </span>
+                <span className="flex-1 leading-snug">Equipe · recrutamento</span>
+              </Link>
+            </div>
+          )}
+
           <div className="pt-3 mt-1 border-t border-gray-100">
             <a
               href={buildYladaReferralWhatsappHref(areaCodigo, areaLabel)}

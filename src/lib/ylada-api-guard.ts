@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 import { proLideresContextUnlocksYladaMatrixApis } from '@/lib/pro-lideres-server'
 import { supabaseAdmin } from '@/lib/supabase'
 
-/** Perfis do produto Wellness (Herbalife / coach bem-estar) — não usam /api/ylada/*. */
-const WELLNESS_PRODUCT_PROFILES = new Set(['wellness', 'coach-bem-estar'])
+/** Perfil Herbalife (Wellness) — não usa /api/ylada/*. Coach de bem-estar usa matriz YLADA em /pt/coach-bem-estar. */
+const WELLNESS_PRODUCT_PROFILES = new Set(['wellness'])
 
 /**
  * Retorna 403 se o usuário for só Wellness/coach-bem-estar (produto separado da matriz YLADA).

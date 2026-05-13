@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 // REMOVIDO: ProtectedRoute e RequireSubscription - layout server-side cuida disso
 import ConditionalWellnessSidebar from '@/components/wellness/ConditionalWellnessSidebar'
 
@@ -79,7 +79,16 @@ const categorias = ['Todos', 'Ação Diária', 'Recrutamento', 'Objeções']
 
 export default function FluxosPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [categoriaFiltro, setCategoriaFiltro] = useState('Todos')
+
+  useEffect(() => {
+    const raw = searchParams.get('categoria') || ''
+    const norm = raw.trim().toLowerCase()
+    if (norm === 'recrutamento') setCategoriaFiltro('Recrutamento')
+    else if (norm === 'ação diária' || norm === 'acao diaria') setCategoriaFiltro('Ação Diária')
+    else if (norm === 'objeções' || norm === 'objecoes') setCategoriaFiltro('Objeções')
+  }, [searchParams])
 
   const fluxosFiltrados = categoriaFiltro === 'Todos' 
     ? fluxos 

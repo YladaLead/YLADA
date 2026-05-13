@@ -15,6 +15,7 @@ export type NoelArea =
   | 'nutra'
   | 'nutri'
   | 'coach'
+  | 'coach-bem-estar'
   | 'seller'
   | 'perfumaria'
   | 'estetica'
@@ -300,6 +301,11 @@ const NOEL_UX_BY_AREA: Record<NoelArea, NoelUxContentWithoutWelcome> = {
     suggestions: COACH_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Como conseguir mais leads',
+  },
+  'coach-bem-estar': {
+    suggestions: COACH_SUGGESTIONS,
+    placeholder: 'Pergunte algo ao Noel...',
+    placeholderExample: 'Ex: Como organizar meu dia e meus links',
   },
   seller: {
     suggestions: SELLER_SUGGESTIONS,

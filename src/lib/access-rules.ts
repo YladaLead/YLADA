@@ -7,7 +7,7 @@
 
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 
-export type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'c'
+export type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'c' | 'coach-bem-estar'
 
 export interface AccessRule {
   /** Padrão de URL que corresponde a esta regra (regex ou string) */
@@ -180,7 +180,7 @@ export function requiresSubscription(pathname: string): boolean {
   
   // Por padrão, se não é pública e não é auth-only, requer assinatura
   // (páginas protegidas dentro de /pt/[area]/)
-  if (/^\/pt\/(wellness|nutri|coach|nutra|c)\//.test(pathname)) {
+  if (/^\/pt\/(wellness|nutri|coach-bem-estar|coach|nutra|c)\//.test(pathname)) {
     return true
   }
   
@@ -204,14 +204,18 @@ export function requiresAuth(pathname: string): boolean {
  * Obtém a área (wellness, nutri, coach, nutra, c) de uma URL
  */
 export function getAreaFromPath(pathname: string): Area | null {
+  if (/^\/pt\/coach-bem-estar(\/|$)/.test(pathname)) {
+    return 'coach-bem-estar'
+  }
   const match = pathname.match(/^\/pt\/(wellness|nutri|coach|nutra|c)\//)
   if (match) {
     return match[1] as Area
   }
-  
+
   // Tentar detectar área de outras formas
   if (pathname.includes('/wellness')) return 'wellness'
   if (pathname.includes('/nutri')) return 'nutri'
+  if (pathname.includes('/coach-bem-estar')) return 'coach-bem-estar'
   if (pathname.includes('/coach') || pathname.includes('/c/')) return 'coach'
   if (pathname.includes('/nutra')) return 'nutra'
   
@@ -223,6 +227,7 @@ export function getAreaFromPath(pathname: string): Area | null {
  */
 export function getLoginPath(area: Area | null): string {
   if (!area) return '/pt/wellness/login'
+  if (area === 'coach-bem-estar') return '/pt/coach-bem-estar/login'
   return `/pt/${area}/login`
 }
 
@@ -239,7 +244,7 @@ export function getCheckoutPath(area: Area | null): string {
  * Wellness: página de renovação (amigável para ex-trial). Outras áreas: checkout.
  */
 export function getRenewOrCheckoutPath(area: Area | null): string {
-  if (area === 'wellness') return '/pt/wellness/renovar'
+  if (area === 'wellness' || area === 'coach-bem-estar') return '/pt/wellness/renovar'
   return getCheckoutPath(area)
 }
 
@@ -248,6 +253,7 @@ export function getRenewOrCheckoutPath(area: Area | null): string {
  */
 export function getHomePath(area: Area | null): string {
   if (!area) return '/pt/wellness/home'
+  if (area === 'coach-bem-estar') return '/pt/coach-bem-estar/home'
   return `/pt/${area}/home`
 }
 

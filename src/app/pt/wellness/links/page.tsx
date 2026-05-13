@@ -79,6 +79,15 @@ function LinksUnificadosPageContent() {
       setModoRanking(true)
     }
   }, [searchParams])
+
+  /** Deep link: /links?tipo=recrutamento|vendas|hype|todos */
+  useEffect(() => {
+    const tipo = (searchParams.get('tipo') || '').toLowerCase()
+    if (tipo === 'recrutamento') setFiltroTipo('recrutamento')
+    else if (tipo === 'vendas') setFiltroTipo('vendas')
+    else if (tipo === 'hype') setFiltroTipo('hype')
+    else if (tipo === 'todos') setFiltroTipo('todos')
+  }, [searchParams])
   const [previewAberto, setPreviewAberto] = useState<string | null>(null)
   const [linkCopiado, setLinkCopiado] = useState<string | null>(null)
   const [qrCopiado, setQrCopiado] = useState<string | null>(null)
