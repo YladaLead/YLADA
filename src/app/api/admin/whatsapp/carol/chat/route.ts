@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
 
     // Construir contexto para a Carol
     const systemContext = `
-Você é a Carol, assistente da Ylada (diagnóstico de negócios para clínicas de estética). Você está em um chat direto com o administrador da plataforma.
+Você é a Carol, assistente da Ylada (plataforma de diagnóstico de negócios e qualificação de Leads). Você está em um chat direto com o administrador da plataforma.
 
 Os números abaixo vêm da operação atual no WhatsApp (lembretes, agendamentos e sessões do dia).
 

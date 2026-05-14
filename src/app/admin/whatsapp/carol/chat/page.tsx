@@ -16,7 +16,7 @@ function CarolChatContent() {
     {
       id: '1',
       role: 'assistant',
-      content: 'Oi! Eu sou a Carol, assistente da Ylada. 😊\n\nA Ylada hoje é a plataforma de diagnóstico de negócios para donas de clínica de estética — e eu te ajudo aqui no que está rolando na operação (WhatsApp, lembretes e agendamentos).\n\nComo posso te ajudar hoje? Você pode me perguntar sobre:\n\n• Status dos lembretes enviados\n• Agendamentos e confirmações de hoje\n• Quem ainda não escolheu horário\n• Comandos como disparar lembretes ou remarketing para alguém específico\n• E o que mais precisar — é só perguntar!',
+      content: 'Oi! Eu sou a Carol, assistente da Ylada. 😊\n\nA Ylada é a plataforma de diagnóstico de negócios e qualificação de Leads — e eu te ajudo aqui no que está rolando na operação (WhatsApp, lembretes e agendamentos).\n\nComo posso te ajudar hoje? Você pode me perguntar sobre:\n\n• Status dos lembretes enviados\n• Agendamentos e confirmações de hoje\n• Quem ainda não escolheu horário\n• Comandos como disparar lembretes ou remarketing para alguém específico\n• E o que mais precisar — é só perguntar!',
       timestamp: new Date(),
     },
   ])
