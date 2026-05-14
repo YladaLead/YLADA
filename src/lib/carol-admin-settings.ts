@@ -1,6 +1,6 @@
 /**
  * Controle da Carol pelo admin (banco de dados).
- * Permite ligar/desligar a Carol em /admin/whatsapp sem mexer em .env ou Vercel.
+ * Permite ligar/desligar a Carol (painel admin / APIs) sem mexer em .env ou Vercel.
  */
 import { supabaseAdmin } from '@/lib/supabase'
 

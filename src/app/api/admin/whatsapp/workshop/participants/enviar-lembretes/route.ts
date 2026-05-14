@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     if (await getCarolAutomationDisabled()) {
       return NextResponse.json(
-        { success: false, error: 'Carol desligada. Ligue em /admin/whatsapp (botão no topo).' },
+        { success: false, error: 'Carol desligada. Ative nas configurações do admin (Carol / Meta).' },
         { status: 503 }
       )
     }

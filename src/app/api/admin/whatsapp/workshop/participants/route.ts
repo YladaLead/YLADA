@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
         console.error('[Workshop Participants] ❌ Erro ao disparar flow:', error)
       }
     } else if (isAddingParticipatedTag && carolDisabled) {
-      linkError = 'Carol desligada no admin. Ligue em /admin/whatsapp e envie manualmente.'
+      linkError = 'Carol desligada no admin. Ative nas configurações ou consulte /admin/whatsapp/carol/chat.'
       messageForManual = `Oi [NOME]! 💚
 
 Que bom que você participou da aula.

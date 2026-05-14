@@ -168,6 +168,15 @@ function AdminDashboardContent() {
       destaque: true,
     },
     {
+      id: 'carol-conversas-meta',
+      title: 'Carol — conversas (Meta)',
+      description: 'Histórico, telefones e respostas no WhatsApp Business',
+      icon: '📋',
+      link: '/admin/whatsapp/carol/conversas',
+      color: 'bg-emerald-700',
+      destaque: true,
+    },
+    {
       id: 'consultorias-hub',
       title: 'Consultorias',
       description: 'Pró Líderes, estética corporal e estética capilar',
@@ -312,14 +321,6 @@ function AdminDashboardContent() {
       icon: '📋',
       link: '/admin/minha-orientacao',
       color: 'bg-gray-500',
-    },
-    {
-      id: 'whatsapp-workshop-inscricoes',
-      title: 'Workshop — inscrições (WhatsApp)',
-      description: 'Landings e fila de mensagens — se precisares ver histórico',
-      icon: '📱',
-      link: '/admin/whatsapp/cadastros-workshop',
-      color: 'bg-purple-600',
     },
     {
       id: 'ylada-uso-wellness-v1',

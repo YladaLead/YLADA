@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           disabled: true,
-          message: 'Boas-vindas automáticas estão desativadas (WHATSAPP_AUTO_WELCOME!=true). Use o disparo manual em /admin/whatsapp/cadastros-workshop.',
+          message:
+            'Boas-vindas automáticas estão desativadas (WHATSAPP_AUTO_WELCOME!=true). O painel manual de workshop foi descontinuado no admin.',
         },
         { status: 200 }
       )
