@@ -65,10 +65,20 @@ function formatDate(iso: string) {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  novo:                   { label: 'Novo',       color: 'bg-gray-100 text-gray-600' },
-  em_andamento:           { label: 'Ativo',       color: 'bg-blue-100 text-blue-700' },
-  diagnostico_agendado:   { label: 'Agendado ✓', color: 'bg-green-100 text-green-700' },
+  novo:                   { label: 'Novo',          color: 'bg-gray-100 text-gray-600' },
+  em_andamento:           { label: 'Ativo',          color: 'bg-blue-100 text-blue-700' },
+  diagnostico_agendado:   { label: 'Agendado ✓',    color: 'bg-green-100 text-green-700' },
+  diagnostico_feito:      { label: 'Diagnóstico ✓', color: 'bg-purple-100 text-purple-700' },
+  proposta:               { label: 'Proposta',       color: 'bg-yellow-100 text-yellow-700' },
 }
+
+const STATUS_OPTIONS = [
+  { value: 'novo',                label: 'Novo' },
+  { value: 'em_andamento',        label: 'Ativo' },
+  { value: 'diagnostico_agendado', label: '📅 Agendado' },
+  { value: 'diagnostico_feito',   label: '✅ Diagnóstico feito' },
+  { value: 'proposta',            label: '💰 Proposta enviada' },
+]
 
 function StatusBadge({ status }: { status: string }) {
   const cfg = STATUS_CONFIG[status] ?? { label: status, color: 'bg-gray-100 text-gray-600' }
@@ -322,6 +332,9 @@ function ConversationDetail({
   const [togglingPause, setTogglingPause] = useState(false)
   const [replyText, setReplyText] = useState('')
   const [sending, setSending] = useState(false)
+  const [currentStatus, setCurrentStatus] = useState(conversation.status)
+  const [showStatusMenu, setShowStatusMenu] = useState(false)
+  const [updatingStatus, setUpdatingStatus] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -400,6 +413,24 @@ function ConversationDetail({
     }
   }
 
+  async function handleUpdateStatus(newStatus: string) {
+    setUpdatingStatus(true)
+    try {
+      const res = await fetch('/api/admin/carol/update-status', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId: conversation.id, status: newStatus }),
+      })
+      if (res.ok) {
+        setCurrentStatus(newStatus)
+      }
+    } finally {
+      setUpdatingStatus(false)
+      setShowStatusMenu(false)
+    }
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>): void {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -450,14 +481,41 @@ function ConversationDetail({
             >
               Template
             </button>
-            <div className="flex flex-col items-end gap-1">
-              <StatusBadge status={conversation.status} />
+            <div className="relative flex flex-col items-end gap-1">
+              <button
+                onClick={() => setShowStatusMenu((v) => !v)}
+                disabled={updatingStatus}
+                title="Alterar status"
+                className="cursor-pointer"
+              >
+                <StatusBadge status={currentStatus} />
+              </button>
               <button
                 onClick={() => void load()}
                 className="text-xs text-white/60 hover:text-white"
               >
                 ↻
               </button>
+              {/* Menu de status */}
+              {showStatusMenu && (
+                <div className="absolute right-0 top-7 z-50 min-w-[180px] rounded-xl bg-white py-1 shadow-xl ring-1 ring-black/10">
+                  <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                    Alterar status
+                  </p>
+                  {STATUS_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => void handleUpdateStatus(opt.value)}
+                      className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                        currentStatus === opt.value ? 'font-semibold text-[#075e54]' : 'text-gray-700'
+                      }`}
+                    >
+                      {currentStatus === opt.value && <span className="text-[#075e54]">✓</span>}
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -533,7 +591,7 @@ function ConversationDetail({
       </div>
 
       {/* Info do lead (se agendado) */}
-      {conversation.status === 'diagnostico_agendado' && (
+      {currentStatus === 'diagnostico_agendado' && (
         <div className="border-t border-gray-200 bg-green-50 px-4 py-3">
           <p className="text-xs font-semibold text-green-700">✓ Diagnóstico agendado</p>
           {conversation.email && (
@@ -581,6 +639,14 @@ function ConversationDetail({
       </div>
 
       {showModal && <SendTemplateModal onClose={() => setShowModal(false)} />}
+
+      {/* Overlay invisível para fechar menu de status ao clicar fora */}
+      {showStatusMenu && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowStatusMenu(false)}
+        />
+      )}
     </div>
   )
 }
