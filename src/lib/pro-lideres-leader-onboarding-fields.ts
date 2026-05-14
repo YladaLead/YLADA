@@ -43,7 +43,9 @@ export type LeaderOnboardingBottleneckId = (typeof LEADER_ONBOARDING_BOTTLENECK_
 export const LEADER_ONBOARDING_TOOL_OPTIONS = [
   { id: 'evs', label: 'Espaço Vida Saudável' },
   { id: 'functional_drinks', label: 'Bebidas funcionais' },
+  { id: 'challenge_15', label: 'Desafio 15 dias' },
   { id: 'challenge_21', label: 'Desafio 21 dias' },
+  { id: 'reset_seis', label: 'Reset Seis (6 dias)' },
   { id: 'plan_90', label: 'Plano 90 dias' },
   { id: 'direct_sales', label: 'Vendas diretas' },
   { id: 'none_consistent', label: 'Não uso nenhuma com consistência' },

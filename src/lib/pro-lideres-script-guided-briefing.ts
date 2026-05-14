@@ -61,7 +61,9 @@ export type PlScriptGuidedObjectiveId = (typeof PL_SCRIPT_GUIDED_OBJECTIVES)[num
 /** Ordem: campo consumo / ferramentas comuns (vendas e recrutamento). */
 export const PL_SCRIPT_GUIDED_TOOLS_CORE = [
   { id: 'espaco_saudavel', label: 'Espaço saudável' },
+  { id: 'desafio_15', label: 'Desafio 15 dias (acompanhamento)' },
   { id: 'desafio_21', label: 'Desafio 21 dias' },
+  { id: 'reset_seis', label: 'Reset Seis (6 dias, bebidas funcionais)' },
   { id: 'plano_90_dias', label: 'Plano 90 dias (acompanhamento)' },
   { id: 'bebida_funcional', label: 'Bebidas funcionais' },
   { id: 'avaliacao_bemestar', label: 'Avaliação do bem-estar' },

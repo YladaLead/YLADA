@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
@@ -12,6 +12,7 @@ type Conversation = {
   email: string | null
   status: string
   hipotese: string | null
+  paused: boolean
   created_at: string
   updated_at: string
   last_message: { content: string; role: string; created_at: string } | null
@@ -317,7 +318,12 @@ function ConversationDetail({
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
+  const [paused, setPaused] = useState(conversation.paused ?? false)
+  const [togglingPause, setTogglingPause] = useState(false)
+  const [replyText, setReplyText] = useState('')
+  const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -334,10 +340,13 @@ function ConversationDetail({
 
   useEffect(() => {
     void load()
+    // Auto-refresh a cada 15s quando o painel está aberto
+    const interval = setInterval(() => void load(), 15_000)
+    return () => clearInterval(interval)
   }, [load])
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView()
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   // Agrupa mensagens por data
@@ -353,6 +362,49 @@ function ConversationDetail({
       }
     }
     return groups
+  }
+
+  async function handleTogglePause() {
+    setTogglingPause(true)
+    try {
+      const res = await fetch('/api/admin/carol/toggle-pause', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId: conversation.id, paused: !paused }),
+      })
+      if (res.ok) {
+        setPaused(!paused)
+      }
+    } finally {
+      setTogglingPause(false)
+    }
+  }
+
+  async function handleSendReply() {
+    if (!replyText.trim() || sending) return
+    setSending(true)
+    try {
+      const res = await fetch('/api/admin/carol/send-message', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId: conversation.id, text: replyText.trim() }),
+      })
+      if (res.ok) {
+        setReplyText('')
+        await load()
+      }
+    } finally {
+      setSending(false)
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>): void {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      void handleSendReply()
+    }
   }
 
   return (
@@ -379,6 +431,19 @@ function ConversationDetail({
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {/* Toggle Pausar Carol */}
+            <button
+              onClick={() => void handleTogglePause()}
+              disabled={togglingPause}
+              title={paused ? 'Carol pausada — clique para reativar' : 'Pausar Carol e assumir conversa'}
+              className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                paused
+                  ? 'bg-orange-400 text-white hover:bg-orange-500'
+                  : 'bg-white/20 text-white hover:bg-white/30'
+              }`}
+            >
+              {paused ? '⏸ Pausada' : '🤖 Carol ativa'}
+            </button>
             <button
               onClick={() => setShowModal(true)}
               className="rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold text-white hover:bg-white/30"
@@ -398,9 +463,18 @@ function ConversationDetail({
         </div>
       </div>
 
+      {/* Aviso de pausa */}
+      {paused && (
+        <div className="border-b border-orange-200 bg-orange-50 px-4 py-2">
+          <p className="text-xs font-semibold text-orange-700">
+            ⏸ Carol pausada — você está no controle desta conversa. A Carol não vai responder automaticamente.
+          </p>
+        </div>
+      )}
+
       {/* Mensagens */}
       <div className="flex-1 overflow-y-auto px-3 py-4">
-        {loading ? (
+        {loading && messages.length === 0 ? (
           <div className="flex justify-center py-10 text-gray-500">Carregando...</div>
         ) : messages.length === 0 ? (
           <div className="flex justify-center py-10 text-gray-500">Sem mensagens</div>
@@ -416,6 +490,11 @@ function ConversationDetail({
 
               {dayMsgs.map((msg) => {
                 const isTemplate = msg.content.startsWith('[TEMPLATE OUTBOUND:')
+                const isAndre = msg.content.startsWith('[ANDRE]')
+                const displayContent = isAndre
+                  ? msg.content.replace(/^\[ANDRE\]\s*/, '')
+                  : msg.content
+
                 return (
                   <div
                     key={msg.id}
@@ -427,15 +506,19 @@ function ConversationDetail({
                           ? 'rounded-tl-sm bg-white text-gray-900'
                           : isTemplate
                             ? 'rounded-tr-sm bg-amber-50 text-gray-700 border border-amber-200'
-                            : 'rounded-tr-sm bg-[#dcf8c6] text-gray-900'
+                            : isAndre
+                              ? 'rounded-tr-sm bg-blue-100 text-gray-900 border border-blue-200'
+                              : 'rounded-tr-sm bg-[#dcf8c6] text-gray-900'
                       }`}
                     >
                       {msg.role === 'assistant' && (
-                        <p className={`mb-0.5 text-[10px] font-semibold ${isTemplate ? 'text-amber-600' : 'text-[#075e54]'}`}>
-                          {isTemplate ? '📤 Template enviado' : 'Carol'}
+                        <p className={`mb-0.5 text-[10px] font-semibold ${
+                          isTemplate ? 'text-amber-600' : isAndre ? 'text-blue-600' : 'text-[#075e54]'
+                        }`}>
+                          {isTemplate ? '📤 Template enviado' : isAndre ? '👤 Andre' : 'Carol'}
                         </p>
                       )}
-                      <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed">{displayContent}</p>
                       <p className="mt-0.5 text-right text-[10px] text-gray-400">
                         {formatTime(msg.created_at)}
                       </p>
@@ -458,6 +541,44 @@ function ConversationDetail({
           )}
         </div>
       )}
+
+      {/* Campo de resposta manual */}
+      <div className="border-t border-gray-200 bg-white px-3 py-2">
+        {!paused && (
+          <p className="mb-1 text-center text-[10px] text-gray-400">
+            Pause a Carol para responder manualmente
+          </p>
+        )}
+        <div className="flex items-end gap-2">
+          <textarea
+            ref={textareaRef}
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={!paused}
+            placeholder={paused ? 'Responder como Andre... (Enter para enviar)' : 'Pause a Carol para digitar aqui'}
+            rows={2}
+            className={`flex-1 resize-none rounded-2xl border px-3 py-2 text-sm outline-none transition-colors ${
+              paused
+                ? 'border-blue-300 bg-white focus:border-blue-500 placeholder-gray-400'
+                : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+            }`}
+          />
+          <button
+            onClick={() => void handleSendReply()}
+            disabled={!paused || !replyText.trim() || sending}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#075e54] text-white disabled:opacity-40"
+          >
+            {sending ? (
+              <span className="text-xs">...</span>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+              </svg>
+            )}
+          </button>
+        </div>
+      </div>
 
       {showModal && <SendTemplateModal onClose={() => setShowModal(false)} />}
     </div>

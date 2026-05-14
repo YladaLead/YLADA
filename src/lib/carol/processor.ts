@@ -208,6 +208,18 @@ export async function processMessage({
     // Salva mensagem recebida
     await saveMessage(conversation.id, 'user', text)
 
+    // ── PAUSA: Se Andre assumiu a conversa, Carol não responde ──────────────
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((conversation as any).paused === true) {
+      console.log(`[Carol] ⏸️ Conversa pausada para ${from} — Andre está respondendo manualmente`)
+      // Notifica Andre que chegou nova mensagem enquanto estava pausado
+      await sendWhatsAppMessage(
+        ANDRE_NUMBER,
+        `📩 *Nova mensagem de ${conversation.nome ?? from}* (conversa pausada)\n"${text.slice(0, 200)}"\n\n_Responda pelo painel: ylada.com/admin/whatsapp/carol/conversas_`
+      )
+      return
+    }
+
     // Busca histórico (já inclui a mensagem que acabou de salvar)
     const history = await getConversationHistory(conversation.id)
 
