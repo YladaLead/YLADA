@@ -254,7 +254,9 @@ export async function POST(request: NextRequest) {
 
     // Construir contexto para a Carol
     const systemContext = `
-Você é a Carol, secretária da YLADA Nutri. Você está em um chat direto com o administrador do sistema.
+Você é a Carol, assistente da Ylada (diagnóstico de negócios para clínicas de estética). Você está em um chat direto com o administrador da plataforma.
+
+Os números abaixo vêm da operação atual no WhatsApp (lembretes, agendamentos e sessões do dia).
 
 DADOS DO SISTEMA (HOJE - ${hoje.toLocaleDateString('pt-BR')}):
 
@@ -277,7 +279,7 @@ COMANDOS DISPONÍVEIS:
 
 INSTRUÇÕES:
 - Seja natural e conversacional
-- Responda perguntas sobre status, lembretes, agendamentos
+- Responda perguntas sobre status, lembretes, agendamentos e sessões do dia
 - Use os dados acima para responder perguntas específicas
 - Se o administrador pedir para executar uma ação, confirme que executou
 - Se não souber algo, seja honesta
@@ -306,8 +308,8 @@ INSTRUÇÕES:
       historyForCarol,
       {
         tags: [],
-        leadName: 'Administrador',
-        isFirstMessage: historyForCarol.length === 0,
+        adminInternalChat: true,
+        isFirstMessage: false,
       }
     )
     

@@ -16,7 +16,7 @@ function CarolChatContent() {
     {
       id: '1',
       role: 'assistant',
-      content: 'Oi! Eu sou a Carol, secretária da YLADA Nutri. 😊\n\nComo posso te ajudar hoje? Você pode me perguntar sobre:\n\n• Status dos lembretes enviados\n• Quantas pessoas agendaram hoje\n• Quem ainda não escolheu horário\n• E muito mais!',
+      content: 'Oi! Eu sou a Carol, assistente da Ylada. 😊\n\nA Ylada hoje é a plataforma de diagnóstico de negócios para donas de clínica de estética — e eu te ajudo aqui no que está rolando na operação (WhatsApp, lembretes e agendamentos).\n\nComo posso te ajudar hoje? Você pode me perguntar sobre:\n\n• Status dos lembretes enviados\n• Agendamentos e confirmações de hoje\n• Quem ainda não escolheu horário\n• Comandos como disparar lembretes ou remarketing para alguém específico\n• E o que mais precisar — é só perguntar!',
       timestamp: new Date(),
     },
   ])
@@ -101,7 +101,7 @@ function CarolChatContent() {
           </Link>
           <div className="text-center">
             <h1 className="text-lg font-bold text-gray-900">💬 Chat com a Carol</h1>
-            <p className="text-xs text-gray-500">Pergunte sobre status, lembretes e muito mais</p>
+            <p className="text-xs text-gray-500">WhatsApp, lembretes, agendamentos e resumo do dia</p>
           </div>
           <div className="w-12" />
         </div>
@@ -152,7 +152,7 @@ function CarolChatContent() {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                placeholder="Pergunte à Carol sobre status, lembretes, agendamentos..."
+                placeholder="Pergunte sobre lembretes, agendamentos, sessões de hoje ou comandos (ex.: disparar lembretes)..."
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={loading}
               />
@@ -165,7 +165,9 @@ function CarolChatContent() {
               </button>
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              💡 Exemplos: "Você enviou lembretes hoje?", "Quantas pessoas agendaram?", "Quem ainda não escolheu horário?"
+              {
+                '💡 Exemplos: "Quantos lembretes saíram hoje?", "Teve quantos agendamentos?", "Quem ainda não escolheu horário?", "disparar lembretes"'
+              }
             </p>
           </div>
         </div>

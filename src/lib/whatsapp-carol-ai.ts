@@ -731,6 +731,15 @@ Quando detectar necessidade de atendimento humano, você DEVE:
 IMPORTANTE: Se você detectar necessidade de atendimento humano, inclua na sua resposta uma indicação clara, mas continue sendo acolhedora.`
 
 /**
+ * Chat interno do admin — sem persona de vendas/aula para nutricionistas.
+ */
+const CAROL_ADMIN_INTERNAL_SYSTEM_PROMPT = `Você é a Carol, assistente da Ylada (diagnóstico de negócios para clínicas de estética). Neste canal você fala apenas com a equipe administrativa.
+
+Seu papel: interpretar números e status da operação no WhatsApp (lembretes, agendamentos, sessões do dia) e orientar sobre comandos (disparar lembretes, remarketing, desagendar). Seja direta e objetiva. Não use fluxo de vendas nem discurso de "aula prática" com este interlocutor.
+
+Tom: profissional, cordial, respostas curtas quando fizer sentido.`
+
+/**
  * Gera resposta da Carol usando OpenAI
  * Exportada para uso em testes e simulações
  */
@@ -748,6 +757,8 @@ export async function generateCarolResponse(
     carolInstruction?: string
     /** Situação definida pelo admin (remarketing pessoa por pessoa). Persiste até ser alterada. */
     adminSituacao?: string
+    /** true = chat interno em /admin/whatsapp/carol/chat (sem branding Nutri nem fluxo de cliente) */
+    adminInternalChat?: boolean
   }
 ): Promise<string> {
   if (CAROL_AI_DISABLED) {
@@ -755,8 +766,12 @@ export async function generateCarolResponse(
   }
 
   if (!process.env.OPENAI_API_KEY) {
-    return 'Olá! Sou a Carol, secretária da YLADA Nutri. Como posso te ajudar? 😊'
+    return context?.adminInternalChat
+      ? 'Olá! Sou a Carol, assistente da Ylada. Como posso te ajudar? 😊'
+      : 'Olá! Sou a Carol, secretária da YLADA Nutri. Como posso te ajudar? 😊'
   }
+
+  const isAdminInternal = Boolean(context?.adminInternalChat)
 
   // Respostas objetivas (evita a IA cair em "objeção" errada, ex.: parcelamento ≠ "está caro")
   // Importante: manter curto, humano e com 1 pergunta no final.
@@ -767,7 +782,7 @@ export async function generateCarolResponse(
     msgLower.includes('dividir') ||
     msgLower.includes('12x')
 
-  if (askedAboutInstallments) {
+  if (!isAdminInternal && askedAboutInstallments) {
     const mentionsMonthly = msgLower.includes('mensal')
     const mentionsAnnual = msgLower.includes('anual')
 
@@ -823,10 +838,15 @@ export async function generateCarolResponse(
 
   // Construir contexto adicional
   let contextText = ''
+  if (isAdminInternal) {
+    contextText +=
+      '\n\n⚠️ CHAT INTERNO: interlocutor = equipe administrativa da Ylada (não é lead). Responda com dados operacionais e comandos; não conduza venda nem use fluxo de aula com cliente.\n'
+  }
+
   let formattedSessionsText = ''
   let shouldSendOptions = false
   
-  if (context) {
+  if (context && !isAdminInternal) {
     // Situação desta pessoa (remarketing pessoa por pessoa – definida pelo admin, persiste)
     if (context.adminSituacao && context.adminSituacao.trim()) {
       contextText += `\n\n📋 SITUAÇÃO DESTA PESSOA (definida por você para remarketing):\n${context.adminSituacao.trim()}\n\nUse isso para dar continuidade. Esta situação SOBREESCREVE qualquer regra genérica de remarketing: se aqui disser que a pessoa PARTICIPOU (ex.: "participou da aula", "ficou de pensar"), NUNCA diga que ela "não conseguiu participar da aula anterior". Só use essa frase quando a situação disser explicitamente que NÃO participou.\n\n⚠️ Este campo é NOTA INTERNA. NUNCA use nenhuma palavra dele (ex.: Nutri, Inge, remarketing, nomes de equipe) como nome da pessoa. O nome da pessoa é EXCLUSIVAMENTE o indicado no campo "NOME DA PESSOA" abaixo (vem do cadastro).\n`
@@ -932,10 +952,11 @@ export async function generateCarolResponse(
 
     // Incluir histórico completo (últimas 15 mensagens para melhor contexto)
     // Aumentado de 10 para 15 para Carol ter mais contexto da conversa
+    const systemPrompt = isAdminInternal ? CAROL_ADMIN_INTERNAL_SYSTEM_PROMPT : CAROL_SYSTEM_PROMPT
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       {
         role: 'system',
-        content: CAROL_SYSTEM_PROMPT + contextText,
+        content: systemPrompt + contextText,
       },
       ...conversationHistory.slice(-15), // Últimas 15 mensagens para melhor contexto
       {
@@ -1017,7 +1038,9 @@ export async function generateCarolResponse(
     return response
   } catch (error: any) {
     console.error('[Carol AI] Erro ao gerar resposta:', error)
-    return 'Olá! Sou a Carol, secretária da YLADA Nutri. Como posso te ajudar? 😊'
+    return context?.adminInternalChat
+      ? 'Olá! Sou a Carol, assistente da Ylada. Como posso te ajudar? 😊'
+      : 'Olá! Sou a Carol, secretária da YLADA Nutri. Como posso te ajudar? 😊'
   }
 }
 
