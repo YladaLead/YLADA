@@ -13,8 +13,35 @@ import {
 import type { FluxoCliente } from '@/types/wellness-system'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
 
+/** FluxoCliente para a Calculadora de IMC (template `calc-imc`). */
+function fluxoCalculadoraIMC(): FluxoCliente {
+  return {
+    id: 'calc-imc',
+    nome: 'Calculadora de IMC',
+    objetivo:
+      'Calcula o Índice de Massa Corporal a partir de peso, altura, idade e gênero — abre conversa sobre saúde e bem-estar no WhatsApp.',
+    perguntas: [
+      { id: 'p1', texto: 'Idade *', tipo: 'numero', placeholder: 'Ex: 30', min: 1, max: 120, step: 1 },
+      { id: 'p2', texto: 'Gênero *', tipo: 'multipla_escolha', opcoes: ['Masculino', 'Feminino'] },
+      { id: 'p3', texto: 'Peso (kg) *', tipo: 'numero', placeholder: 'Ex: 70.5', min: 1, max: 300, step: 0.1 },
+      { id: 'p4', texto: 'Altura (cm) *', tipo: 'numero', placeholder: 'Ex: 175', min: 50, max: 250, step: 0.5 },
+    ],
+    diagnostico: {
+      titulo: 'Seu IMC',
+      descricao: 'Com peso e altura calculamos o IMC e abrimos uma conversa personalizada sobre saúde.',
+      sintomas: ['Dúvida sobre peso saudável', 'Interesse em medir progresso'],
+      beneficios: ['Resultado imediato', 'Conversa direta no WhatsApp'],
+      mensagemPositiva: 'Pequenas mudanças diárias fazem grande diferença no bem-estar.',
+    },
+    kitRecomendado: 'energia',
+    cta: 'Quero falar no WhatsApp',
+    tags: ['wellness', 'calculadora', 'imc'],
+  }
+}
+
 export function getCoachBemEstarCalculadorasEspelhoProLideres(): FluxoCliente[] {
   return [
+    fluxoCalculadoraIMC(),
     ...getProLideresWellnessCalculadorasBasicasPresetFluxos(),
     ...getProLideresHypeCalculadoraPresetFluxos(),
   ]
@@ -37,6 +64,7 @@ export function coachBemEstarCatalogUrlParaFluxoProLideres(fluxoId: string, base
   }
 
   const wellnessTemplatePath: Record<string, string> = {
+    'calc-imc': '/pt/wellness/templates/imc',
     'calc-hidratacao': '/pt/wellness/templates/hidratacao',
     'calc-calorias': '/pt/wellness/templates/calorias',
     'calc-proteina': '/pt/wellness/templates/proteina',

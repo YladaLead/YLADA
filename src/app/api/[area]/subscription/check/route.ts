@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
+import { hasActiveSubscription, canBypassSubscription, wellnessAreaSubscriptionOrProLideresAccess } from '@/lib/subscription-helpers'
 
 /**
  * GET /api/[area]/subscription/check
@@ -43,8 +43,11 @@ export async function GET(
       })
     }
 
-    // Verificar assinatura ativa
-    const hasSubscription = await hasActiveSubscription(user.id, normalizedArea)
+    // Wellness: mesma regra que /api/wellness/subscription/check (inclui Pró Líderes)
+    const hasSubscription =
+      normalizedArea === 'wellness'
+        ? await wellnessAreaSubscriptionOrProLideresAccess(user.id)
+        : await hasActiveSubscription(user.id, normalizedArea)
 
     return NextResponse.json({
       hasActiveSubscription: hasSubscription,

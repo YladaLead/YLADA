@@ -1294,17 +1294,15 @@ Você vai adorar! 😊`
           </div>
         ) : null}
 
-        {/* Cabeçalho */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            {coachBemEstarEmbed ? 'Ferramentas Coach de bem-estar' : 'Meus Links'}
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            {coachBemEstarEmbed
-              ? 'Calculadoras, quizzes de venda e fluxos de recrutamento — biblioteca completa do Coach de bem-estar. Copie o link ou compartilhe via QR.'
-              : 'Todos os seus templates e fluxos prontos para copiar e compartilhar'}
-          </p>
-        </div>
+        {/* Cabeçalho — oculto no embed Coach de bem-estar */}
+        {!coachBemEstarEmbed && (
+          <div className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Meus Links</h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Todos os seus templates e fluxos prontos para copiar e compartilhar
+            </p>
+          </div>
+        )}
 
         {/* Filtros */}
         <div className="max-w-4xl mx-auto mb-8">
@@ -1366,35 +1364,29 @@ Você vai adorar! 😊`
           </div>
         </div>
 
-        {/* Grid de Itens */}
-        {itensFiltrados.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">
-              Nenhum item encontrado com os filtros selecionados.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto">
-            {itensFiltrados.map((item) =>
-              coachBemEstarEmbed && item.metadata?.coachBemEstarProLideresCalc ? (
-                <article
-                  key={item.id}
-                  className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
-                >
+        {/* Grid de Itens — Coach de bem-estar: seções separadas */}
+        {coachBemEstarEmbed ? (
+          (() => {
+            const calcItems    = itensFiltrados.filter(i => i.categoria === 'Calculadora')
+            const vendasItems  = itensFiltrados.filter(i => i.categoria === 'Vendas')
+            const recrutItems  = itensFiltrados.filter(i => i.categoria === 'Recrutamento')
+
+            const renderCoachCard = (item: ItemUnificado) => (
+              <article
+                key={item.id}
+                className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+              >
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-semibold text-gray-900 leading-snug">{item.nome}</h3>
                         <span className="shrink-0 rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-600">
-                          Calculadora
+                          {item.categoria}
                         </span>
                       </div>
                       {item.descricao ? (
                         <p className="mt-1 text-sm text-gray-500 line-clamp-2">{item.descricao}</p>
                       ) : null}
-                      <p className="mt-1.5 text-xs text-gray-500">
-                        Catálogo Pro Líderes · modelo público ou link na sua conta
-                      </p>
                       {item.descricao ? (
                         <details className="mt-2 group/details">
                           <summary className="flex cursor-pointer list-none items-center gap-1 text-xs font-medium text-indigo-700 hover:text-indigo-800 [&::-webkit-details-marker]:hidden">
@@ -1463,7 +1455,46 @@ Você vai adorar! 😊`
                     </div>
                   </div>
                 </article>
-              ) : (
+            )
+
+            const renderSection = (titulo: string, icone: string, items: ItemUnificado[]) =>
+              items.length === 0 ? null : (
+                <div className="mb-10">
+                  <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
+                    <span>{icone}</span>
+                    <span>{titulo}</span>
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {items.map(renderCoachCard)}
+                  </div>
+                </div>
+              )
+
+            if (itensFiltrados.length === 0) {
+              return (
+                <div className="text-center py-12">
+                  <p className="text-gray-600">Nenhum item encontrado.</p>
+                </div>
+              )
+            }
+
+            return (
+              <div className="max-w-7xl mx-auto">
+                {renderSection('Calculadoras', '🧮', calcItems)}
+                {renderSection('Ferramentas de venda', '💚', vendasItems)}
+                {renderSection('Recrutamento', '👥', recrutItems)}
+              </div>
+            )
+          })()
+        ) : (
+          /* ── Wellness padrão: grade única ───────────────────────────────── */
+          itensFiltrados.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">Nenhum item encontrado com os filtros selecionados.</p>
+            </div>
+          ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto">
+            {itensFiltrados.map((item) =>
               <div
                 key={item.id}
                 className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300"
@@ -1603,9 +1634,9 @@ Você vai adorar! 😊`
                   </p>
                 ) : null}
               </div>
-              )
             )}
           </div>
+          )
         )}
 
 

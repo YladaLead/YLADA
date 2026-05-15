@@ -165,7 +165,7 @@ export default function YladaSidebar({
                 <span className="text-base opacity-80" aria-hidden>
                   👥
                 </span>
-                <span className="flex-1 leading-snug">Equipe · recrutamento</span>
+                <span className="flex-1 leading-snug">Recrutamento</span>
               </Link>
             </div>
           )}

@@ -1,7 +1,7 @@
 import { cookies, headers } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { redirect } from 'next/navigation'
-import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
+import { hasActiveSubscription, canBypassSubscription, wellnessAreaSubscriptionOrProLideresAccess } from '@/lib/subscription-helpers'
 import { supabaseAdmin } from '@/lib/supabase'
 import { PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 
@@ -453,10 +453,13 @@ export async function validateProtectedAccess(
       canBypass = await canBypassSubscription(user.id)
       
       if (!canBypass) {
-        // Coach-bem-estar usa assinatura wellness (mesma plataforma)
-        const subscriptionArea = area === 'coach-bem-estar' ? 'wellness' : area
-        hasSubscription = await hasActiveSubscription(user.id, subscriptionArea as any)
-        
+        // Coach-bem-estar e wellness: assinatura wellness OU equipa Pró Líderes ativa (painel).
+        if (area === 'coach-bem-estar' || area === 'wellness') {
+          hasSubscription = await wellnessAreaSubscriptionOrProLideresAccess(user.id)
+        } else {
+          hasSubscription = await hasActiveSubscription(user.id, area as any)
+        }
+
         if (!hasSubscription) {
           // Sem assinatura: redirecionar para renovação (página amigável para ex-trial) ou checkout
           const renewPath =

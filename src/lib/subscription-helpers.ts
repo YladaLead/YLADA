@@ -3,6 +3,7 @@ import { parseYladaFreeGrantKind } from '@/lib/admin-ylada-free-matriz'
 import { isPerfilMatrizYlada } from '@/lib/admin-matriz-constants'
 import { isProEsteticaCorporalBootstrapLeaderEmail } from '@/lib/pro-estetica-corporal-server'
 import { isProEsteticaCapilarBootstrapLeaderEmail } from '@/lib/pro-estetica-capilar-server'
+import { proLideresContextUnlocksYladaMatrixApis } from '@/lib/pro-lideres-server'
 
 /**
  * Verifica se usuário tem assinatura ativa para uma área específica
@@ -44,6 +45,16 @@ function activeYladaRowIsUnlimited(sub: {
     return parseYladaFreeGrantKind(sub.stripe_subscription_id) === 'courtesy'
   }
   return false
+}
+
+/**
+ * Wellness e Coach Bem-estar compartilham a assinatura `wellness`.
+ * Membros ativos da equipa Pró Líderes (estado no painel / `leader_tenant_members`) não devem
+ * ficar bloqueados por uma linha antiga de assinatura wellness pessoal vencida.
+ */
+export async function wellnessAreaSubscriptionOrProLideresAccess(userId: string): Promise<boolean> {
+  if (await hasActiveSubscription(userId, 'wellness')) return true
+  return proLideresContextUnlocksYladaMatrixApis(userId)
 }
 
 export async function hasActiveSubscription(
