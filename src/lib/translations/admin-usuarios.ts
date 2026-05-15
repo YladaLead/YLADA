@@ -77,6 +77,9 @@ export interface AdminUsuariosTranslations {
     total: string
     active: string
     inactive: string
+    /** Tooltip: o que conta como “com acesso” (incl. Pro Líderes) */
+    activeHint: string
+    inactiveHint: string
     showing: string
     /** Contagem de e-mails em domínios de teste (excluídos do Total/Ativos acima) */
     testAccounts: string
@@ -95,6 +98,9 @@ export interface AdminUsuariosTranslations {
     president: string
     status: string
     subscription: string
+    /** Coluna Assinatura — utilizador wellness/coach só com acesso Pro Líderes */
+    proLideresAccessBadge: string
+    proLideresAccessSub: string
     enrollment: string
     /** Subtítulo no cabeçalho da coluna — evita confundir com vencimento do plano */
     enrollmentSub: string
@@ -163,6 +169,8 @@ export interface AdminUsuariosTranslations {
     /** Trial Wellness (convite presidente etc.) */
     trial: string
     none: string
+    /** Wellness/coach: sem mensalidade YLADA — acesso pela equipa Pro Líderes */
+    proLideresTeam: string
   }
   modal: {
     editUser: string
@@ -262,8 +270,8 @@ const pt: AdminUsuariosTranslations = {
       'Refina pela coluna Área (perfil no cadastro). As opções respeitam a Base: em YLADA, só segmentos da matriz.',
     hideTestAccounts: 'Ocultar contas de teste (lista e CSV)',
     all: 'Todos',
-    active: 'Com acesso (pago ou Freedom vigente)',
-    inactive: 'Vencido ou sem plano pago ativo',
+    active: 'Com acesso (plano, Freedom ou equipa Pro Líderes)',
+    inactive: 'Sem acesso (ex.: plano vencido sem equipa PL)',
     free: 'Freedom (todos)',
     freeNeverPaid: 'Freedom — nunca pagou',
     freeFormerPaid: 'Freedom — ex-pagante',
@@ -309,6 +317,10 @@ const pt: AdminUsuariosTranslations = {
     total: 'Total',
     active: 'Com acesso',
     inactive: 'Sem acesso / vencido',
+    activeHint:
+      'Conta com uso permitido na app: assinatura ou Freedom vigente; em Wellness/Coach, também quem entra só pela equipa Pro Líderes (sem mensalidade YLADA própria).',
+    inactiveHint:
+      'Sem entrada válida na app neste modelo (ex. wellness vencido e sem vínculo ativo em equipa Pro Líderes).',
     showing: 'Na lista',
     testAccounts: 'Contas teste',
     testDomainsHint:
@@ -326,6 +338,8 @@ const pt: AdminUsuariosTranslations = {
     president: 'Presidente',
     status: 'Status',
     subscription: 'Assinatura',
+    proLideresAccessBadge: 'Equipa Pro Líderes',
+    proLideresAccessSub: 'Sem mensalidade wellness YLADA (acesso pelo líder)',
     enrollment: 'Cadastro',
     enrollmentSub:
       'Criação da conta no sistema (signup). Não é fim do plano nem “perfil todo preenchido”.',
@@ -383,6 +397,7 @@ const pt: AdminUsuariosTranslations = {
     noPlanEnd: 'Sem vencimento no registro',
     trial: 'Trial',
     none: 'Sem assinatura',
+    proLideresTeam: 'Equipa Pro Líderes (sem mensalidade YLADA)',
   },
   modal: {
     editUser: 'Editar Usuário',
@@ -489,8 +504,8 @@ const es: AdminUsuariosTranslations = {
       'Filtra por la columna Área (perfil). Las opciones dependen de la Base: en YLADA, solo la matriz.',
     hideTestAccounts: 'Ocultar cuentas de prueba (lista y CSV)',
     all: 'Todos',
-    active: 'Con acceso (pago o Free vigente)',
-    inactive: 'Vencido o sin plan pagado activo',
+    active: 'Con acceso (plan, Free o equipo Pro Líderes)',
+    inactive: 'Sin acceso (p. ej. vencido sin equipo PL)',
     free: 'Freedom (todos)',
     freeNeverPaid: 'Freedom — nunca pagó',
     freeFormerPaid: 'Freedom — ex pagador',
@@ -536,6 +551,10 @@ const es: AdminUsuariosTranslations = {
     total: 'Total',
     active: 'Con acceso',
     inactive: 'Sin acceso / vencido',
+    activeHint:
+      'Cuenta con acceso permitido a la app: suscripción o Freedom vigente; en Wellness/Coach también quien entra solo por el equipo Pro Líderes (sin mensualidad YLADA propia).',
+    inactiveHint:
+      'Sin acceso válido a la app (ej. wellness vencido y sin vínculo activo en equipo Pro Líderes).',
     showing: 'En la lista',
     testAccounts: 'Cuentas de prueba',
     testDomainsHint:
@@ -553,6 +572,8 @@ const es: AdminUsuariosTranslations = {
     president: 'Presidente',
     status: 'Estado',
     subscription: 'Suscripción',
+    proLideresAccessBadge: 'Equipo Pro Líderes',
+    proLideresAccessSub: 'Sin mensualidad wellness YLADA (acceso vía líder)',
     enrollment: 'Registro',
     enrollmentSub:
       'Creación de la cuenta en el sistema (registro). No es fin del plan ni “perfil completo”.',
@@ -610,6 +631,7 @@ const es: AdminUsuariosTranslations = {
     noPlanEnd: 'Sin vencimiento en el registro',
     trial: 'Trial',
     none: 'Sin suscripción',
+    proLideresTeam: 'Equipo Pro Líderes (sin mensualidad YLADA)',
   },
   modal: {
     editUser: 'Editar Usuario',
@@ -716,8 +738,8 @@ const en: AdminUsuariosTranslations = {
       'Filter by the Area column (profile). Options follow Base: under YLADA, matrix segments only.',
     hideTestAccounts: 'Hide test accounts (list and CSV)',
     all: 'All',
-    active: 'With access (paid or active Freedom)',
-    inactive: 'Expired or no active paid plan',
+    active: 'With access (plan, Freedom, or Pro Leaders team)',
+    inactive: 'No access (e.g. expired without PL team)',
     free: 'Freedom (all)',
     freeNeverPaid: 'Freedom — never paid',
     freeFormerPaid: 'Freedom — former payer',
@@ -763,6 +785,10 @@ const en: AdminUsuariosTranslations = {
     total: 'Total',
     active: 'With access',
     inactive: 'No access / expired',
+    activeHint:
+      'Account may use the app: active subscription or Freedom; on Wellness/Coach, also those who access only via the Pro Leaders team (no direct YLADA wellness plan).',
+    inactiveHint:
+      'No valid app access (e.g. expired wellness and no active Pro Leaders team link).',
     showing: 'In list',
     testAccounts: 'Test accounts',
     testDomainsHint:
@@ -780,6 +806,8 @@ const en: AdminUsuariosTranslations = {
     president: 'President',
     status: 'Status',
     subscription: 'Subscription',
+    proLideresAccessBadge: 'Pro Leaders team',
+    proLideresAccessSub: 'No YLADA wellness subscription (access via leader)',
     enrollment: 'Signed up',
     enrollmentSub:
       'Account created in the system (signup). Not plan end nor “fully completed profile”.',
@@ -837,6 +865,7 @@ const en: AdminUsuariosTranslations = {
     noPlanEnd: 'No end date on record',
     trial: 'Trial',
     none: 'No subscription',
+    proLideresTeam: 'Pro Leaders team (no YLADA wellness plan)',
   },
   modal: {
     editUser: 'Edit User',

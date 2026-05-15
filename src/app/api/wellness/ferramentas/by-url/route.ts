@@ -53,18 +53,24 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // area param: 'coach-bem-estar' usa assinatura própria; padrão é 'wellness'
+    const area = searchParams.get('area')?.trim() || 'wellness'
+
     const ensureActiveSubscription = async (ownerId: string | null) => {
       if (!ownerId) return true
-      
+
       // Verificar se é admin ou suporte (bypass)
       const bypass = await canBypassSubscription(ownerId)
       if (bypass) {
         console.log(`✅ Usuário ${ownerId} pode bypassar (admin/suporte)`)
         return true
       }
-      
-      // Verificar assinatura ativa
-      return await hasActiveSubscription(ownerId, 'wellness')
+
+      // Verificar assinatura ativa — aceitar wellness OU coach-bem-estar
+      const wellnessOk = await hasActiveSubscription(ownerId, 'wellness')
+      if (wellnessOk) return true
+      const coachOk = await hasActiveSubscription(ownerId, 'coach-bem-estar')
+      return coachOk
     }
 
     // Log inicial para diagnóstico

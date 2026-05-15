@@ -6,6 +6,7 @@ import { isPerfilMatrizYlada, PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-con
 import { parseYladaFreeGrantKind } from '@/lib/admin-ylada-free-matriz'
 import { isAdminTestAccountEmail } from '@/lib/admin-test-accounts'
 import { fetchAdminProProductBadgesByUserId } from '@/lib/admin-usuarios-pro-product-badge'
+import { batchProLideresContextUnlocksYladaMatrixApis } from '@/lib/pro-lideres-server'
 import { fetchProEsteticaConsultoriaAccessUntilByUserId } from '@/lib/admin-usuarios-pro-estetica-consultoria-access'
 import { toYmdInTimeZone } from '@/lib/date-utils'
 
@@ -254,6 +255,8 @@ export async function GET(request: NextRequest) {
       .select('id, user_id, area, plan_type, status, current_period_end, is_migrated, stripe_subscription_id')
       .in('user_id', userIds)
       .order('current_period_end', { ascending: false })
+
+    const proLideresUnlockUserIds = await batchProLideresContextUnlocksYladaMatrixApis(userIds)
 
     /** Leads (Admin): cta_click | share_click | full_analysis_expand — bloco ylada_links */
     const whatsappLeadsPorUsuario: Record<string, number> = {}
@@ -521,6 +524,7 @@ export async function GET(request: NextRequest) {
         | 'free_nunca_pago'
         | 'free_ex_pagante'
         | 'free_migracao'
+        | 'pro_lideres_equipa'
       if (implicitMatrizFree) {
         assinaturaCategoria = everHadPaid ? 'free_ex_pagante' : 'free_nunca_pago'
       } else if (assinaturaTipo === 'mensal') {
@@ -537,6 +541,21 @@ export async function GET(request: NextRequest) {
         else assinaturaCategoria = 'free_nunca_pago'
       } else {
         assinaturaCategoria = 'sem'
+      }
+
+      /** Wellness / Coach Bem-estar: acesso real pela equipa Pro Líderes (sem renovação wellness YLADA). */
+      const perfilWellnessBlock = userArea === 'wellness' || userArea === 'coach-bem-estar'
+      const vigenteWellnessSub = todasSubsUsuario.some(
+        (s) => s.area === 'wellness' && isSubVigente(s)
+      )
+      let acessoWellnessViaProLideres = false
+      if (perfilWellnessBlock && !implicitMatrizFree && !vigenteWellnessSub && proLideresUnlockUserIds.has(profile.user_id)) {
+        acessoWellnessViaProLideres = true
+        isAtivo = true
+        status = 'ativo'
+        assinaturaSituacao = 'ativa'
+        assinaturaDiasVencida = null
+        assinaturaCategoria = 'pro_lideres_equipa'
       }
 
       // Aplicar filtro de status
@@ -584,7 +603,11 @@ export async function GET(request: NextRequest) {
         status,
         assinatura: assinaturaTipo,
         assinaturaId: subscriptionToEdit?.id || null,
-        assinaturaVencimento: assinaturaVencimento ? toYmdInTimeZone(assinaturaVencimento) : null,
+        assinaturaVencimento: acessoWellnessViaProLideres
+          ? null
+          : assinaturaVencimento
+            ? toYmdInTimeZone(assinaturaVencimento)
+            : null,
         dataCadastro: profile.created_at ? toYmdInTimeZone(profile.created_at) : null,
         proEsteticaConsultoriaAccessUntil: proConsultoria?.until ?? null,
         proEsteticaConsultoriaSegment: proConsultoria?.segment ?? null,
@@ -615,6 +638,8 @@ export async function GET(request: NextRequest) {
               )
             : null,
         assinaturaCategoria,
+        /** Acesso à app wellness/coach apenas via tenant Pro Líderes (sem subscription wellness YLADA vigente). */
+        acessoWellnessViaProLideres,
         /** Já existiu registro mensal ou anual (qualquer área); ver query `historico` */
         everHadPaid,
         isContaTeste: isAdminTestAccountEmail(emailExibicao),

@@ -545,6 +545,77 @@ export async function proLideresContextUnlocksYladaMatrixApis(userId: string): P
 }
 
 /**
+ * Mesma regra que `proLideresContextUnlocksYladaMatrixApis`, em lote (admin, relatórios).
+ * Dono de tenant, linha `leader` ativa ou `member` ativo noutra equipa.
+ */
+export async function batchProLideresContextUnlocksYladaMatrixApis(userIds: string[]): Promise<Set<string>> {
+  const out = new Set<string>()
+  if (userIds.length === 0) return out
+  const admin = getSupabaseAdmin()
+  if (!admin) return out
+
+  const { data: owned } = await admin.from('leader_tenants').select('owner_user_id').in('owner_user_id', userIds)
+  for (const r of owned || []) {
+    const uid = (r as { owner_user_id?: string }).owner_user_id
+    if (uid) out.add(uid)
+  }
+
+  const remaining = userIds.filter((id) => !out.has(id))
+  if (remaining.length === 0) return out
+
+  const { data: leaderRows } = await admin
+    .from('leader_tenant_members')
+    .select('user_id, team_access_state')
+    .in('user_id', remaining)
+    .eq('role', 'leader')
+
+  for (const r of leaderRows || []) {
+    const st = (r as { team_access_state?: string }).team_access_state
+    const uid = (r as { user_id?: string }).user_id
+    const ok = (st ?? 'active') === 'active'
+    if (ok && uid) out.add(uid)
+  }
+
+  const remaining2 = userIds.filter((id) => !out.has(id))
+  if (remaining2.length === 0) return out
+
+  const { data: memRows } = await admin
+    .from('leader_tenant_members')
+    .select('leader_tenant_id, user_id, team_access_state, team_access_expires_at')
+    .in('user_id', remaining2)
+    .eq('role', 'member')
+
+  if (!memRows?.length) return out
+
+  const tenantIds = [...new Set(memRows.map((r) => String((r as { leader_tenant_id?: string }).leader_tenant_id)))]
+  const { data: tenantRows } = await admin.from('leader_tenants').select('id, owner_user_id').in('id', tenantIds)
+  const ownerByTenantId = new Map<string, string>()
+  for (const t of tenantRows ?? []) {
+    const id = (t as { id?: string }).id
+    const ou = (t as { owner_user_id?: string }).owner_user_id
+    if (id && ou) ownerByTenantId.set(id, ou)
+  }
+
+  for (const m of memRows) {
+    const row = m as {
+      user_id?: string
+      leader_tenant_id?: string
+      team_access_state?: string
+      team_access_expires_at?: string | null
+    }
+    const uid = row.user_id
+    if (!uid) continue
+    const st = (row.team_access_state as string | undefined) ?? 'active'
+    if (st !== 'active') continue
+    if (!membershipExpiryStillValid(row.team_access_expires_at)) continue
+    const owner = ownerByTenantId.get(String(row.leader_tenant_id))
+    if (owner && owner !== uid) out.add(uid)
+  }
+
+  return out
+}
+
+/**
  * Resolve tenant + papel (dono = líder na consultoria; user_id em leader_tenant_members = equipe ou líder registado).
  *
  * - Memberships ativas têm prioridade sobre `leader_tenants.owner_user_id` (evita membro com tenant pessoal em dev).

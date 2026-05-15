@@ -54,6 +54,9 @@ interface Usuario {
     | 'free_nunca_pago'
     | 'free_ex_pagante'
     | 'free_migracao'
+    | 'pro_lideres_equipa'
+  /** Acesso wellness/coach coberto pelo tenant Pro Líderes (sem mensalidade YLADA) — ver API */
+  acessoWellnessViaProLideres?: boolean
   /** E-mail em domínio de teste (@ylada.com etc.) — stats de produção excluem */
   isContaTeste?: boolean
   /** Já existiu assinatura mensal ou anual (qualquer área), ver API `everHadPaid` */
@@ -743,6 +746,7 @@ export default function AdminUsuarios() {
 
   const getAssinaturaListLabel = (u: Usuario) => {
     const c = u.assinaturaCategoria
+    if (c === 'pro_lideres_equipa') return t.subscriptionType.proLideresTeam
     if (c === 'free_nunca_pago') {
       if (isAssinaturaCourtesy(u)) return t.subscriptionType.courtesy
       return t.subscriptionType.freeNeverPaid
@@ -765,6 +769,7 @@ export default function AdminUsuarios() {
   /** Uma linha na tabela — detalhes longos ficam no title (tooltip). */
   const getAssinaturaCompactLabel = (u: Usuario): string => {
     const c = u.assinaturaCategoria
+    if (c === 'pro_lideres_equipa') return t.subscriptionType.proLideresTeam
     if (c === 'free_nunca_pago') return isAssinaturaCourtesy(u) ? 'Cortesia' : 'Freedom'
     if (c === 'free_ex_pagante') return 'Freedom'
     if (c === 'free_migracao') return 'Freedom'
@@ -1110,13 +1115,13 @@ export default function AdminUsuarios() {
             <span className="text-gray-300 hidden sm:inline" aria-hidden>
               |
             </span>
-            <span className="text-gray-600">
+            <span className="text-gray-600" title={t.stats.activeHint}>
               {t.stats.active}: <strong className="text-green-600 tabular-nums">{stats.ativos}</strong>
             </span>
             <span className="text-gray-300 hidden sm:inline" aria-hidden>
               |
             </span>
-            <span className="text-gray-600">
+            <span className="text-gray-600" title={t.stats.inactiveHint}>
               {t.stats.inactive}: <strong className="text-gray-700 tabular-nums">{stats.inativos}</strong>
             </span>
             <span className="text-gray-300 hidden sm:inline" aria-hidden>
@@ -1269,7 +1274,20 @@ export default function AdminUsuarios() {
                           </>
                         )}
                         <td className="px-2 py-2 align-top w-[6.5rem] sm:w-24 max-w-[7rem]">
-                          {(() => {
+                          {usuario.acessoWellnessViaProLideres ? (
+                            <div
+                              className="space-y-0.5"
+                              title={`${t.table.proLideresAccessBadge}\n${t.table.proLideresAccessSub}`}
+                            >
+                              <span className="inline-flex px-1 py-0 rounded text-[9px] font-semibold bg-violet-100 text-violet-900 shrink-0">
+                                {t.table.proLideresAccessBadge}
+                              </span>
+                              <p className="text-[10px] text-gray-500 leading-tight">
+                                {t.table.proLideresAccessSub}
+                              </p>
+                            </div>
+                          ) : (
+                          (() => {
                             const dataVencStr =
                               usuario.assinaturaVencimento ||
                               (usuario.yladaFreePeriodEnd
@@ -1315,7 +1333,8 @@ export default function AdminUsuarios() {
                                 </div>
                               </div>
                             )
-                          })()}
+                          })()
+                          )}
                         </td>
                         <td
                           className="px-2 py-2 align-top text-xs text-gray-600 min-w-[6.25rem] max-w-[8.5rem]"

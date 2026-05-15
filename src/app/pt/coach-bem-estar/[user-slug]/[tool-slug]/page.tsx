@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
+import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
 
 interface Tool {
   id: string
@@ -18,13 +19,17 @@ interface Tool {
   custom_whatsapp_message?: string
   show_whatsapp_button?: boolean
   template_slug: string
+  is_fluxo?: boolean
+  fluxo_tipo?: string
   content?: {
     leader_data_collection?: {
       enabled?: boolean
       fields?: { name?: boolean; email?: boolean; phone?: boolean }
     }
+    fluxo?: import('@/types/wellness-system').FluxoCliente
+    tipo?: string
   }
-  user_profiles?: { user_slug: string }
+  user_profiles?: { user_slug: string; country_code?: string }
   users?: { name: string }
 }
 
@@ -78,7 +83,7 @@ export default function FerramentaCoachBemEstarPage() {
       setLoading(true)
       // Coach-bem-estar compartilha infraestrutura de ferramentas com wellness
       const response = await fetch(
-        `/api/wellness/ferramentas/by-url?user_slug=${userSlug}&tool_slug=${toolSlug}`
+        `/api/wellness/ferramentas/by-url?user_slug=${userSlug}&tool_slug=${toolSlug}&area=coach-bem-estar`
       )
       if (!response.ok) throw new Error('Ferramenta não encontrada')
       const data = await response.json()
@@ -158,6 +163,27 @@ export default function FerramentaCoachBemEstarPage() {
           },
         }
       : undefined,
+  }
+
+  // Fluxos de vendas e recrutamento (não têm template_slug estático — renderizados pelo FluxoDiagnostico)
+  if (tool.is_fluxo && tool.content?.fluxo) {
+    const fluxo = tool.content.fluxo
+    const tipo = tool.content.tipo || tool.fluxo_tipo || 'vendas'
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{fluxo.nome}</h1>
+          </div>
+          <FluxoDiagnostico
+            fluxo={fluxo}
+            whatsappNumber={tool.whatsapp_number || ''}
+            countryCode={tool.user_profiles?.country_code || 'BR'}
+            mostrarProdutos={tipo === 'vendas'}
+          />
+        </main>
+      </div>
+    )
   }
 
   const normalizedSlug = normalizeTemplateSlug(tool.template_slug)
