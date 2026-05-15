@@ -2,7 +2,8 @@
 
 /**
  * Script para criar contas demo para vídeos de demonstração da plataforma.
- * Cria: demo.med, demo.psi, demo.vendedor (vendas em gerais), demo.nutra, demo.nutri, demo.coach, demo.estetica, demo.capilar, demo.perfumaria, demo.joias
+ * Cria: demo.med, demo.psi, demo.vendedor (vendas em gerais), demo.nutra, demo.nutri, demo.coach, demo.coach-bem-estar,
+ * demo.estetica, demo.capilar, demo.perfumaria, demo.joias
  * Para cada conta: perfil + Noel + assinatura **trial** na área do segmento (evita limite freemium de 1 link ativo nas demos).
  * Senha: Demo@2025!
  *
@@ -282,6 +283,36 @@ const DEMO_ACCOUNTS = [
     }
   },
   {
+    email: 'demo.coach-bem-estar@ylada.app',
+    nome: 'Demo Coach de bem-estar',
+    perfil: 'coach-bem-estar',
+    noelProfile: {
+      segment: 'coach',
+      profile_type: 'liberal',
+      profession: 'coach',
+      category: 'coaching',
+      tempo_atuacao_anos: 4,
+      dor_principal: 'sem_indicacao',
+      prioridade_atual: 'Organizar captação e conversas no WhatsApp com clareza',
+      fase_negocio: 'em_crescimento',
+      metas_principais: 'Links e diagnósticos para qualificar interesse em bem-estar',
+      objetivos_curto_prazo: 'Quiz e fluxos alinhados ao público de hábitos e energia',
+      modelo_atuacao: ['online', 'consultorio'],
+      capacidade_semana: 15,
+      ticket_medio: 380,
+      modelo_pagamento: 'recorrencia',
+      canais_principais: ['instagram', 'whatsapp'],
+      rotina_atual_resumo: 'Atuo com bem-estar e hábitos; quero padronizar o primeiro contato',
+      area_specific: {
+        nome: 'Demo Coach de bem-estar',
+        whatsapp: '19997230912',
+        countryCode: 'BR',
+        modelo_entrega_coach: 'programa_online',
+        temas_atuacao: ['bem_estar', 'habitos', 'energia', 'sono']
+      }
+    }
+  },
+  {
     email: 'demo.perfumaria@ylada.app',
     nome: 'Demo Vendedor Perfumaria',
     perfil: 'perfumaria',
@@ -549,6 +580,79 @@ async function ensureDemoMatrixTrialSubscription(userId, perfil) {
   console.log(`   ✅ Assinatura trial criada (demo vídeos) — área ${area}`)
 }
 
+/**
+ * Coach de bem-estar (e Wellness Herbalife) usam `subscriptions.area = 'wellness'`.
+ * Idempotente com a mesma lógica do trial matriz.
+ */
+async function ensureDemoWellnessTrialSubscription(userId) {
+  const area = 'wellness'
+  const now = new Date()
+  const periodStart = now.toISOString()
+  const periodEnd = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString()
+
+  const { data: row, error: fetchErr } = await supabaseAdmin
+    .from('subscriptions')
+    .select('id, plan_type, stripe_subscription_id')
+    .eq('user_id', userId)
+    .eq('area', area)
+    .eq('status', 'active')
+    .gt('current_period_end', now.toISOString())
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (fetchErr && fetchErr.code !== 'PGRST116') {
+    console.error(`   ⚠️ Erro ao ler assinatura (${area}):`, fetchErr.message)
+    return
+  }
+
+  const rowUnlimited = (sub) => {
+    if (!sub) return false
+    const pt = String(sub.plan_type || '').toLowerCase()
+    if (pt === 'monthly' || pt === 'annual' || pt === 'trial') return true
+    if (pt === 'free' && String(sub.stripe_subscription_id || '').startsWith('free_cor_')) return true
+    return false
+  }
+
+  if (row && rowUnlimited(row)) {
+    console.log(`   ✅ Assinatura já cobre acesso na área ${area}`)
+    return
+  }
+
+  const trialFields = {
+    plan_type: 'trial',
+    stripe_account: 'br',
+    stripe_subscription_id: `demo_videos_trial_${userId}_${area}_${Date.now()}`,
+    stripe_customer_id: `demo_videos_${userId}`,
+    stripe_price_id: 'demo_videos',
+    amount: 0,
+    currency: 'brl',
+    status: 'active',
+    current_period_start: periodStart,
+    current_period_end: periodEnd,
+    cancel_at_period_end: false,
+  }
+
+  if (row) {
+    const { error: upErr } = await supabaseAdmin.from('subscriptions').update(trialFields).eq('id', row.id)
+    if (upErr) {
+      console.error(`   ❌ Erro ao atualizar assinatura (${area}):`, upErr.message)
+      return
+    }
+    console.log(`   ✅ Assinatura atualizada para trial (demo vídeos) — área ${area}`)
+    return
+  }
+
+  const { error: insErr } = await supabaseAdmin
+    .from('subscriptions')
+    .insert({ user_id: userId, area, ...trialFields })
+  if (insErr) {
+    console.error(`   ❌ Erro ao criar assinatura (${area}):`, insErr.message)
+    return
+  }
+  console.log(`   ✅ Assinatura trial criada (demo vídeos) — área ${area}`)
+}
+
 async function main() {
   console.log('\n🎬 Criando contas demo para vídeos...\n')
 
@@ -588,6 +692,9 @@ async function main() {
     await createOrUpdateUserProfile(userId, account.email, account.nome, account.perfil)
     await createOrUpdateNoelProfile(userId, account.noelProfile)
     await ensureDemoMatrixTrialSubscription(userId, account.perfil)
+    if (account.perfil === 'coach-bem-estar') {
+      await ensureDemoWellnessTrialSubscription(userId)
+    }
   }
 
   console.log('\n✅ Concluído!\n')
@@ -602,6 +709,7 @@ async function main() {
   console.log('   demo.joias@ylada.app      → Joias e bijuterias')
   console.log('   demo.nutri@ylada.app      → Nutricionista')
   console.log('   demo.coach@ylada.app      → Coach')
+  console.log('   demo.coach-bem-estar@ylada.app → Coach de bem-estar (login /pt/coach-bem-estar/login)')
   console.log('\n🔐 Senha para todas: Demo@2025!\n')
 }
 

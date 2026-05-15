@@ -26,6 +26,7 @@ import {
   type BibliotecaSegmentCode,
   type SituacaoBiblioteca,
 } from '@/config/ylada-biblioteca'
+import { COACH_BEM_ESTAR_BIBLIOTECA_SUBSCOPE } from '@/config/coach-bem-estar-biblioteca'
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
 import { DiagnosticoLinkQrPanel } from '@/components/shared/DiagnosticoLinkQrPanel'
 import { useAuth } from '@/hooks/useAuth'
@@ -1012,6 +1013,8 @@ interface BibliotecaPageContentProps {
   esteticaCorporalScope?: boolean
   /** Pro Estética Capilar: API `subscope=estetica_capilar`, quizzes capilares (migração 284). */
   esteticaCapilarScope?: boolean
+  /** Coach de bem-estar: biblioteca fechada (`subscope=coach_bem_estar`), sem segmento/situação/tema na UI. */
+  coachBemEstarScope?: boolean
 }
 
 function BibliotecaPageContentInner({
@@ -1020,8 +1023,10 @@ function BibliotecaPageContentInner({
   embedded = false,
   esteticaCorporalScope = false,
   esteticaCapilarScope = false,
+  coachBemEstarScope = false,
 }: BibliotecaPageContentProps) {
   const proEsteticaNarrow = esteticaCorporalScope || esteticaCapilarScope
+  const hubBuscaEstreita = proEsteticaNarrow || coachBemEstarScope
   const diagnosisVerticalForGenerate = esteticaCapilarScope
     ? 'capilar'
     : esteticaCorporalScope
@@ -1122,7 +1127,7 @@ function BibliotecaPageContentInner({
   /** Só faz sentido escolher segmento se não há um fixo pelo perfil/URL ou se é admin/suporte. */
   const isPrivilegedBiblioteca = !!(userProfile?.is_admin || userProfile?.is_support)
   const mostrarFiltroSegmento =
-    !proEsteticaNarrow && (isPrivilegedBiblioteca || !segmentoSugerido)
+    !hubBuscaEstreita && (isPrivilegedBiblioteca || !segmentoSugerido)
 
   const terapiaLinhaAtual = parseEsteticaTerapiaLinhaParam(linhaBibliotecaQueryRaw)
   const setTerapiaLinhaUrl = (linha: EsteticaTerapiaLinha) => {
@@ -1136,7 +1141,7 @@ function BibliotecaPageContentInner({
   }
 
   useEffect(() => {
-    if (proEsteticaNarrow) {
+    if (hubBuscaEstreita) {
       setLinksCreatedToday(null)
       return
     }
@@ -1148,7 +1153,7 @@ function BibliotecaPageContentInner({
       })
       .catch(() => {})
     return () => { cancelled = true }
-  }, [proEsteticaNarrow])
+  }, [hubBuscaEstreita])
 
   useEffect(() => {
     let cancelled = false
@@ -1190,7 +1195,10 @@ function BibliotecaPageContentInner({
       ? SUGESTAO_NOEL_TEMAS_ESTETICA_CAPILAR
       : getSugestaoNoelTemas(segmentoFiltro || null)
 
-  const segParaTituloBiblioteca = (proEsteticaNarrow ? 'aesthetics' : segmentoFiltro || null) as BibliotecaSegmentCode | null
+  /** Coach de bem-estar: títulos adaptados como na Nutri (hábitos/metabolismo), não o pack “só treino”. */
+  const segParaTituloBiblioteca = (
+    coachBemEstarScope ? 'nutrition' : proEsteticaNarrow ? 'aesthetics' : segmentoFiltro || null
+  ) as BibliotecaSegmentCode | null
 
   const itemsLista = useMemo(() => {
     if (esteticaCorporalScope) {
@@ -1213,7 +1221,7 @@ function BibliotecaPageContentInner({
 
   const itemsListaComBusca = useMemo(() => {
     const q = buscaNome.trim().toLowerCase()
-    if (!proEsteticaNarrow || !q) return itemsLista
+    if (!hubBuscaEstreita || !q) return itemsLista
     const seg = segParaTituloBiblioteca
     return itemsLista.filter((i) => {
       const tituloBase = (i.titulo || '').toLowerCase()
@@ -1225,7 +1233,7 @@ function BibliotecaPageContentInner({
       const haystack = [tituloBase, tituloAdapt, desc, dor, obj, temaLab].join('\n')
       return haystack.includes(q)
     })
-  }, [buscaNome, proEsteticaNarrow, itemsLista, segParaTituloBiblioteca])
+  }, [buscaNome, hubBuscaEstreita, itemsLista, segParaTituloBiblioteca])
 
   const temasOpcoesBiblioteca = useMemo(() => {
     if (proEsteticaNarrow) {
@@ -1280,10 +1288,10 @@ function BibliotecaPageContentInner({
     linhaBibliotecaQueryRaw,
   ])
 
-  const baseLista = proEsteticaNarrow ? itemsListaComBusca : isEsteticaLinksBiblioteca ? itemsListaParaEsteticaTerapia : itemsLista
+  const baseLista = hubBuscaEstreita ? itemsListaComBusca : isEsteticaLinksBiblioteca ? itemsListaParaEsteticaTerapia : itemsLista
 
   const listaAposBuscaNome = useMemo(() => {
-    if (proEsteticaNarrow) return baseLista
+    if (hubBuscaEstreita) return baseLista
     const q = buscaNome.trim().toLowerCase()
     if (!q) return baseLista
     const seg = segParaTituloBiblioteca
@@ -1294,7 +1302,7 @@ function BibliotecaPageContentInner({
       const tipoLab = labelTipoBibliotecaItem(i.tipo).toLowerCase()
       return titulo.includes(q) || desc.includes(q) || temaLab.includes(q) || tipoLab.includes(q)
     })
-  }, [proEsteticaNarrow, baseLista, buscaNome, segParaTituloBiblioteca])
+  }, [hubBuscaEstreita, baseLista, buscaNome, segParaTituloBiblioteca])
 
   const itemsComecePorAquiVisiveis = useMemo(() => {
     if (!buscaNome.trim()) return itemsComecePorAqui
@@ -1315,11 +1323,18 @@ function BibliotecaPageContentInner({
   }, [segmentoSugerido, segmentoFiltro, isEsteticaLinksBiblioteca, terapiaLinhaAtual])
 
   const idsEmSugestoesTopo = new Set(itemsComecePorAquiVisiveis.slice(0, 3).map((i) => i.id))
-  const itemsListaCorporalSemRepetirSugestao = proEsteticaNarrow
+  const itemsListaCorporalSemRepetirSugestao = hubBuscaEstreita
     ? itemsFiltered
     : itemsFiltered.filter((i) => !idsEmSugestoesTopo.has(i.id))
 
   useEffect(() => {
+    if (coachBemEstarScope) {
+      setSegmentoSugerido('nutrition')
+      setSegmentoFiltro('nutrition')
+      setTemaFiltro('')
+      setSituacaoFiltro('')
+      return
+    }
     if (proEsteticaNarrow) {
       setSegmentoSugerido('aesthetics')
       setSegmentoFiltro('aesthetics')
@@ -1349,7 +1364,7 @@ function BibliotecaPageContentInner({
         setSegmentoFiltro(seg)
       }
     }
-  }, [areaCodigo, userProfile?.perfil, proEsteticaNarrow])
+  }, [areaCodigo, userProfile?.perfil, proEsteticaNarrow, coachBemEstarScope])
 
   // Buscar perfil (area_specific) para personalizar Sugestão do Noel quando segmento = aesthetics
   useEffect(() => {
@@ -1368,13 +1383,13 @@ function BibliotecaPageContentInner({
   }, [segmentoFiltro])
 
   useEffect(() => {
-    if (proEsteticaNarrow) return
+    if (hubBuscaEstreita) return
     if (segmentoFiltro && temaFiltro) {
       const temasDoSegmento = getTemasParaBiblioteca(segmentoFiltro)
       const temaExiste = temasDoSegmento.some((t) => t.value === temaFiltro)
       if (!temaExiste) setTemaFiltro('')
     }
-  }, [segmentoFiltro, proEsteticaNarrow, temaFiltro, items, loading])
+  }, [segmentoFiltro, hubBuscaEstreita, temaFiltro, items, loading])
 
   useEffect(() => {
     let cancelled = false
@@ -1384,6 +1399,8 @@ function BibliotecaPageContentInner({
       params.set('subscope', 'estetica_corporal')
     } else if (esteticaCapilarScope) {
       params.set('subscope', 'estetica_capilar')
+    } else if (coachBemEstarScope) {
+      params.set('subscope', COACH_BEM_ESTAR_BIBLIOTECA_SUBSCOPE)
     } else {
       const areaNorm = (areaCodigo || '').toLowerCase().trim()
       const implicitFromArea =
@@ -1391,7 +1408,7 @@ function BibliotecaPageContentInner({
       const segForApi = (segmentoFiltro || implicitFromArea || '') as string
       if (segForApi) params.set('segmento', segForApi)
     }
-    if (!esteticaCorporalScope && !esteticaCapilarScope && temaFiltro) params.set('tema', temaFiltro)
+    if (!esteticaCorporalScope && !esteticaCapilarScope && !coachBemEstarScope && temaFiltro) params.set('tema', temaFiltro)
     fetch(`/api/ylada/biblioteca?${params}`, { credentials: 'include', cache: 'no-store' })
       .then(async (r) => {
         const data = (await r.json()) as { items?: unknown }
@@ -1406,7 +1423,7 @@ function BibliotecaPageContentInner({
         if (!cancelled) setLoading(false)
       })
     return () => { cancelled = true }
-  }, [segmentoFiltro, temaFiltro, esteticaCorporalScope, esteticaCapilarScope, areaCodigo])
+  }, [segmentoFiltro, temaFiltro, esteticaCorporalScope, esteticaCapilarScope, coachBemEstarScope, areaCodigo])
 
   const renderNoelSugestao = () => {
     const ideiaDoDia = esteticaCorporalScope
@@ -1639,7 +1656,7 @@ function BibliotecaPageContentInner({
 
   const temaSelect = (
     <label className="flex items-center gap-2 text-xs text-gray-600">
-      <span className="shrink-0">{proEsteticaNarrow ? 'Tópicos' : 'Tema'}</span>
+      <span className="shrink-0">{hubBuscaEstreita ? 'Tópicos' : 'Tema'}</span>
       <select
         value={temaFiltro}
         onChange={(e) => setTemaFiltro(e.target.value)}
@@ -1710,7 +1727,7 @@ function BibliotecaPageContentInner({
                   💡
                 </span>
               ) : null}
-              {(segmentoFiltro && !proEsteticaNarrow
+              {(segmentoFiltro && !hubBuscaEstreita
                 ? temasOpcoesBiblioteca
                 : (TEMAS_MAIS_USADOS as readonly string[]).map((value) => ({ value, label: getTemaLabel(value) }))
               )
@@ -1767,12 +1784,12 @@ function BibliotecaPageContentInner({
               <span aria-hidden>📚</span> Todos os diagnósticos
             </h2>
             <div className="flex flex-wrap items-center gap-3">
-              {!proEsteticaNarrow ? situacaoSelect : null}
-              {temaSelect}
+              {!hubBuscaEstreita ? situacaoSelect : null}
+              {!hubBuscaEstreita || proEsteticaNarrow ? temaSelect : null}
             </div>
           </div>
 
-          {!proEsteticaNarrow && (
+          {!hubBuscaEstreita && (
             <div className="pt-2">
               <label htmlFor="busca-biblioteca-nome-full" className="sr-only">
                 Buscar por nome ou palavra-chave
@@ -1792,17 +1809,17 @@ function BibliotecaPageContentInner({
       )}
 
       {embedded &&
-        (proEsteticaNarrow ? (
+        (hubBuscaEstreita ? (
           <div className="rounded-lg border border-gray-200 bg-white p-2 sm:p-3">
-            <label htmlFor="busca-biblioteca-pro-estetica" className="sr-only">
-              Buscar por nome
+            <label htmlFor="busca-biblioteca-hub-estreita" className="sr-only">
+              Buscar na biblioteca
             </label>
             <input
-              id="busca-biblioteca-pro-estetica"
+              id="busca-biblioteca-hub-estreita"
               type="search"
               value={buscaNome}
               onChange={(e) => setBuscaNome(e.target.value)}
-              placeholder="Buscar por nome…"
+              placeholder={coachBemEstarScope ? 'Buscar por nome, tema ou tipo…' : 'Buscar por nome…'}
               autoComplete="off"
               className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
             />
@@ -1876,7 +1893,7 @@ function BibliotecaPageContentInner({
           </div>
         ))}
 
-        {embedded && !proEsteticaNarrow && (
+        {embedded && !hubBuscaEstreita && (
           <div className="rounded-lg border border-gray-200 bg-white p-2 sm:p-3">
             <label htmlFor="busca-biblioteca-nome-embedded" className="sr-only">
               Buscar por nome ou palavra-chave
@@ -2123,7 +2140,7 @@ function BibliotecaPageContentInner({
           </div>
         )}
 
-        {embedded && !proEsteticaNarrow && (
+        {embedded && !hubBuscaEstreita && (
           <details className="rounded-xl border border-dashed border-gray-200 bg-gray-50/40">
             <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-gray-700 list-none [&::-webkit-details-marker]:hidden">
               Sugestão do Noel e guia rápido{' '}

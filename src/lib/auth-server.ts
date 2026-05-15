@@ -288,9 +288,9 @@ export async function validateProtectedAccess(
       }
     }
 
-    // Coach unificado: usuários com perfil coach-bem-estar (legado) acessam a plataforma wellness
+    // Coach unificado: coach-bem-estar usa shell /pt/coach-bem-estar (mesma assinatura wellness)
     if (area === 'coach' && profile.perfil === 'coach-bem-estar') {
-      redirect('/pt/wellness/home')
+      redirect('/pt/coach-bem-estar/home')
     }
 
     // 4. Verificar se perfil corresponde (admin/suporte pode bypassar)
@@ -328,6 +328,17 @@ export async function validateProtectedAccess(
       allowAnyPerfilForPaths.some(
         (p) => actualPath.endsWith(p) || actualPath.includes(p)
       )
+
+    // Coach de bem-estar não tem acesso ao board /pt/home (matriz); evita loop login ↔ home.
+    if (
+      area === 'ylada' &&
+      profile.perfil === 'coach-bem-estar' &&
+      !canBypassProfile &&
+      !isAllowAnyPerfilPath
+    ) {
+      console.log('ℹ️ ProtectedLayout [ylada]: perfil coach-bem-estar — redirecionando para /pt/coach-bem-estar/home')
+      redirect('/pt/coach-bem-estar/home')
+    }
 
     if (!profileMatchesArea && !canBypassProfile && !isAllowAnyPerfilPath) {
       console.log(`❌ ProtectedLayout [${area}]: Perfil incorreto (${profile.perfil}), redirecionando para login`)
@@ -448,10 +459,14 @@ export async function validateProtectedAccess(
         
         if (!hasSubscription) {
           // Sem assinatura: redirecionar para renovação (página amigável para ex-trial) ou checkout
-          // Wellness e coach-bem-estar: usa /wellness/renovar (compartilham plataforma)
-          const renewPath = area === 'wellness' || area === 'coach-bem-estar'
-            ? `/pt/wellness/renovar`
-            : (area === 'ylada' ? '/pt/checkout' : `/pt/${area}/checkout`)
+          const renewPath =
+            area === 'coach-bem-estar'
+              ? `/pt/coach-bem-estar/renovar`
+              : area === 'wellness'
+                ? `/pt/wellness/renovar`
+                : area === 'ylada'
+                  ? '/pt/checkout'
+                  : `/pt/${area}/checkout`
           console.log(`❌ ProtectedLayout [${area}]: Sem assinatura ativa, redirecionando para renovação/checkout`, {
             area,
             actualPath,

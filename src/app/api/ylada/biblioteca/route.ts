@@ -1,6 +1,6 @@
 /**
  * GET /api/ylada/biblioteca — lista itens da biblioteca com filtros.
- * Query: tipo?, segmento?, tema?, subscope=estetica_corporal | estetica_capilar (listas fechadas por `template_id` nas configs Pro).
+ * Query: tipo?, segmento?, tema?, subscope=estetica_corporal | estetica_capilar | coach_bem_estar (catálogo coach: nutrition/medicine/psychology + fitness compartilhado, sem bloco só-treino).
  *
  * Sem login: quando `subscope=estetica_corporal` ou `estetica_capilar` e a pré-visualização pública
  * correspondente estiver ligada (env / dev) — catálogo é leitura pública da BD, sem dado de conta.
@@ -19,6 +19,11 @@ import {
 } from '@/config/pro-estetica-capilar-biblioteca'
 import { proEsteticaCorporalPublicPreviewNoAuthEnabled } from '@/lib/pro-estetica-corporal-server'
 import { proEsteticaCapilarPublicPreviewNoAuthEnabled } from '@/lib/pro-estetica-capilar-server'
+import {
+  COACH_BEM_ESTAR_BIBLIOTECA_SUBSCOPE,
+  COACH_BEM_ESTAR_BIBLIOTECA_SEGMENT_OVERLAP,
+  filtrarBibliotecaItensCoachBemEstar,
+} from '@/config/coach-bem-estar-biblioteca'
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,6 +34,7 @@ export async function GET(request: NextRequest) {
     const subscope = searchParams.get('subscope')?.trim() || ''
     const esteticaCorporal = subscope === 'estetica_corporal'
     const esteticaCapilar = subscope === 'estetica_capilar'
+    const coachBemEstar = subscope === COACH_BEM_ESTAR_BIBLIOTECA_SUBSCOPE
     const allowPublicEsteticaCorporalCatalog =
       esteticaCorporal && proEsteticaCorporalPublicPreviewNoAuthEnabled()
     const allowPublicEsteticaCapilarCatalog =
@@ -61,6 +67,8 @@ export async function GET(request: NextRequest) {
     } else if (esteticaCapilar) {
       // Lista fechada por template_id: não depender só de `segment_codes` (evita catálogo vazio se a coluna divergir).
       query = query.in('template_id', [...TEMPLATE_IDS_BIBLIOTECA_ESTETICA_CAPILAR_PERMITIDOS])
+    } else if (coachBemEstar) {
+      query = query.overlaps('segment_codes', [...COACH_BEM_ESTAR_BIBLIOTECA_SEGMENT_OVERLAP])
     } else if (segmento) {
       // Overlap: segment_codes do item intersecta o array. Psicanálise ainda pode reutilizar itens marcados só como psychology até migrar no admin.
       const codes = segmento === 'psychoanalysis' ? ['psychoanalysis', 'psychology'] : [segmento]
@@ -79,6 +87,8 @@ export async function GET(request: NextRequest) {
       items = filtrarBibliotecaItensEsteticaCorporal(items)
     } else if (esteticaCapilar) {
       items = filtrarBibliotecaItensEsteticaCapilar(items)
+    } else if (coachBemEstar) {
+      items = filtrarBibliotecaItensCoachBemEstar(items)
     }
     return NextResponse.json({ items })
   } catch (err: unknown) {

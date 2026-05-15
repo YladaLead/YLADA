@@ -26,10 +26,7 @@ export default function PosOnboardingHomePanel({ areaCodigo, variantOverride }: 
   const [variant, setVariant] = useState<BannerVariant>('hidden')
   const [linkCount, setLinkCount] = useState<number | null>(null)
   const prefix = getYladaAreaPathPrefix(areaCodigo)
-  const novoLinkHref =
-    areaCodigo === 'coach-bem-estar'
-      ? '/pt/wellness/ferramentas/templates'
-      : `${prefix}/links/novo`
+  const novoLinkHref = `${prefix}/links/novo`
   const c = yladaPosOnboardingCopy
   const compact = yladaHomeActivationCompactCopy
 

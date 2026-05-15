@@ -29,6 +29,7 @@ export type OnboardingAreaCodigo =
   | 'nutra'
   | 'nutri'
   | 'coach'
+  | 'coach-bem-estar'
   | 'psicanalise'
   | 'perfumaria'
   | 'seller'
@@ -43,6 +44,7 @@ const AREA_SEGMENT_YLADA: OnboardingAreaCodigo[] = [
   'odonto',
   'nutra',
   'coach',
+  'coach-bem-estar',
   'psicanalise',
   'perfumaria',
   'seller',

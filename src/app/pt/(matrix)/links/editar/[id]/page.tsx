@@ -40,7 +40,7 @@ function useAreaFromPath() {
   const pathname = usePathname()
   if (!pathname) return { areaCodigo: 'ylada' as const, areaLabel: 'YLADA' }
   const m = pathname.match(
-    /^\/pt\/(med|psi|odonto|nutra|nutri|coach|psicanalise|perfumaria|seller|estetica|fitness|joias)\//
+    /^\/pt\/(med|psi|odonto|nutra|nutri|coach|coach-bem-estar|psicanalise|perfumaria|seller|estetica|fitness|joias)\//
   )
   const area = m?.[1] ?? 'ylada'
   const labels: Record<string, string> = {
@@ -50,6 +50,7 @@ function useAreaFromPath() {
     nutra: 'Nutra',
     nutri: 'Nutri',
     coach: 'Coach',
+    'coach-bem-estar': 'Coach de bem-estar',
     psicanalise: 'Psicanálise',
     perfumaria: 'Perfumaria',
     seller: 'Vendedores',
@@ -66,6 +67,7 @@ function useAreaFromPath() {
       | 'nutra'
       | 'nutri'
       | 'coach'
+      | 'coach-bem-estar'
       | 'psicanalise'
       | 'perfumaria'
       | 'seller'

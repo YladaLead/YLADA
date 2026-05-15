@@ -69,6 +69,7 @@ export type AreaCodigo =
   | 'nutra'
   | 'nutri'
   | 'coach'
+  | 'coach-bem-estar'
   | 'psicanalise'
   | 'perfumaria'
   | 'seller'

@@ -6,6 +6,8 @@ import { useAuth } from '@/contexts/AuthContext'
 interface ProtectedRouteProps {
   children: React.ReactNode
   perfil?: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'coach-bem-estar'
+  /** Aceita qualquer um destes perfis. Use sem `perfil` (ex.: wellness + coach-bem-estar). */
+  perfisPermitidos?: Array<'nutri' | 'wellness' | 'coach' | 'nutra' | 'coach-bem-estar'>
   redirectTo?: string
   allowAdmin?: boolean // Se true, admin pode acessar qualquer área
   allowSupport?: boolean // Se true, suporte pode acessar qualquer área
@@ -28,6 +30,7 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ 
   children, 
   perfil,
+  perfisPermitidos,
   redirectTo, // Mantido para compatibilidade, mas não usado
   allowAdmin = false,
   allowSupport = true // Por padrão, suporte pode acessar todas as áreas
@@ -115,43 +118,43 @@ export default function ProtectedRoute({
     return null
   }
 
-  // Verificar perfil se especificado
-  if (perfil) {
-    if (perfil === 'admin') {
-      if (!userProfile?.is_admin && !hasTimedOut) {
-        return (
-          <div className="min-h-screen bg-white flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Verificando permissões...</p>
-            </div>
+  // Verificar perfil / lista de perfis (UI)
+  if (perfil === 'admin') {
+    if (!userProfile?.is_admin && !hasTimedOut) {
+      return (
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Verificando permissões...</p>
           </div>
-        )
-      }
-      
-      if (!userProfile?.is_admin) {
-        return null
-      }
+        </div>
+      )
     }
 
-    // Verificar override de admin/suporte
-    if (allowAdmin && userProfile?.is_admin) {
-      return <>{children}</>
-    }
-
-    if (allowSupport && userProfile?.is_support) {
-      return <>{children}</>
-    }
-
-    // Verificar se perfil corresponde
-    // Se server permitiu chegar aqui, provavelmente está OK (admin/suporte pode bypassar)
-    // Mas ainda verificamos para UI (mostrar/esconder conteúdo específico)
-    if (userProfile?.perfil !== perfil) {
-      // Se é admin/suporte e allowAdmin/allowSupport está true, já foi verificado acima
-      // Se não, server já deveria ter redirecionado
-      // Por segurança, não renderizar se perfil não corresponde
+    if (!userProfile?.is_admin) {
       return null
     }
+    return <>{children}</>
+  }
+
+  if (allowAdmin && userProfile?.is_admin) {
+    return <>{children}</>
+  }
+
+  if (allowSupport && userProfile?.is_support) {
+    return <>{children}</>
+  }
+
+  if (perfisPermitidos?.length) {
+    const p = userProfile?.perfil
+    if (!p || !perfisPermitidos.includes(p as 'nutri' | 'wellness' | 'coach' | 'nutra' | 'coach-bem-estar')) {
+      return null
+    }
+    return <>{children}</>
+  }
+
+  if (perfil && userProfile?.perfil !== perfil) {
+    return null
   }
 
   return <>{children}</>

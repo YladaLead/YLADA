@@ -16,6 +16,7 @@ import YladaAreaShell from './YladaAreaShell'
 import BibliotecaPageContent from './BibliotecaPageContent'
 import { LinksPageContent } from '@/app/pt/(matrix)/links/page'
 import type { OnboardingAreaCodigo } from '@/components/ylada/OnboardingPageContent'
+import { WellnessLinksUnificadosContent } from '@/components/wellness/WellnessLinksUnificadosContent'
 
 type TabId = 'prontos' | 'meus'
 
@@ -37,6 +38,10 @@ interface LinksHubContentProps {
   bibliotecaEsteticaCorporalScope?: boolean
   /** Pro Estética Capilar: lista fechada capilar (subscope `estetica_capilar`). */
   bibliotecaEsteticaCapilarScope?: boolean
+  /** Coach de bem-estar: biblioteca fechada + UI sem segmento/situação/tema (subscope `coach_bem_estar`). */
+  bibliotecaCoachBemEstarScope?: boolean
+  /** Coach de bem-estar: inclui na mesma página de Links a lista de quizzes/fluxos (dados Wellness, sem segunda rota). */
+  embedCoachBemEstarWellness?: boolean
 }
 
 function LinksHubContentInner({
@@ -45,6 +50,8 @@ function LinksHubContentInner({
   noAreaShell,
   bibliotecaEsteticaCorporalScope,
   bibliotecaEsteticaCapilarScope,
+  bibliotecaCoachBemEstarScope,
+  embedCoachBemEstarWellness,
 }: LinksHubContentProps) {
   const proEsteticaProBiblioteca =
     Boolean(bibliotecaEsteticaCorporalScope) || Boolean(bibliotecaEsteticaCapilarScope)
@@ -70,7 +77,8 @@ function LinksHubContentInner({
   }
 
   const core = (
-    <div className="space-y-3">
+    <>
+      <div className="space-y-3">
         {/* Dois blocos lado a lado desde o mobile — menos altura, sugestões aparecem antes no scroll */}
         <div className="space-y-2">
           {!proEsteticaProBiblioteca ? (
@@ -174,6 +182,7 @@ function LinksHubContentInner({
             embedded={true}
             esteticaCorporalScope={bibliotecaEsteticaCorporalScope}
             esteticaCapilarScope={bibliotecaEsteticaCapilarScope}
+            coachBemEstarScope={Boolean(bibliotecaCoachBemEstarScope)}
           />
         )}
         {tab === 'meus' && (
@@ -184,7 +193,31 @@ function LinksHubContentInner({
             proEsteticaCorporalEmbedded={proEsteticaProBiblioteca}
           />
         )}
-    </div>
+      </div>
+
+      {embedCoachBemEstarWellness ? (
+        <section
+          id="ferramentas"
+          className="mt-8 border-t border-gray-200 pt-8 scroll-mt-24"
+          aria-label="Quizzes e fluxos da jornada"
+        >
+          <Suspense
+            fallback={
+              <div className="flex min-h-[30vh] items-center justify-center rounded-lg border border-gray-100 bg-gray-50/50 px-4 py-10">
+                <p className="text-sm text-gray-500">Carregando…</p>
+              </div>
+            }
+          >
+            <WellnessLinksUnificadosContent
+              showWellnessNav={false}
+              settingsHref="/pt/coach-bem-estar/configuracao"
+              navTitle="Links"
+              coachBemEstarEmbed
+            />
+          </Suspense>
+        </section>
+      ) : null}
+    </>
   )
 
   if (noAreaShell) return core

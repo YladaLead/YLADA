@@ -628,6 +628,8 @@ export function useAuth() {
         redirectPath = '/admin/login'
       } else if (currentPath.includes('/wellness/')) {
         redirectPath = '/pt/wellness/login'
+      } else if (currentPath.includes('/coach-bem-estar/')) {
+        redirectPath = '/pt/coach-bem-estar/login'
       }
       // nutri, coach, nutra: já usa /pt/login (redirectPath padrão)
     }

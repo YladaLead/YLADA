@@ -126,6 +126,7 @@ const PROFESSION_TO_BIBLIOTECA: Record<string, BibliotecaSegmentCode> = {
  * Biblioteca usa segmentos em inglês (aesthetics, psychology, dentistry, fitness, medicine).
  */
 const AREA_TO_BIBLIOTECA: Partial<Record<string, BibliotecaSegmentCode>> = {
+  'coach-bem-estar': 'nutrition',
   estetica: 'aesthetics',
   med: 'medicine',
   psi: 'psychology',
@@ -159,7 +160,7 @@ const USER_PERFIL_TO_BIBLIOTECA: Partial<Record<string, BibliotecaSegmentCode>> 
   joias: 'joias',
   seller: 'nutrition_vendedor',
   wellness: 'nutrition',
-  'coach-bem-estar': 'fitness',
+  'coach-bem-estar': 'nutrition',
 }
 
 /** Deriva segmento da biblioteca a partir de user_profiles.perfil (matriz YLADA). */

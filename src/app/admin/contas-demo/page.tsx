@@ -33,6 +33,14 @@ function ContasDemoContent() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         <p className="text-sm text-gray-600 mb-4">
           Credenciais internas para gravar demonstrações (perfis já configurados). Não compartilhe publicamente.
+          <span className="block mt-2 text-gray-700">
+            <strong>Coach de bem-estar (demo):</strong>{' '}
+            <code className="bg-gray-100 px-1 rounded text-xs">demo.coach-bem-estar@ylada.app</code> · senha{' '}
+            <code className="bg-gray-100 px-1 rounded text-xs">Demo@2025!</code> · login{' '}
+            <code className="bg-gray-100 px-1 rounded text-xs">/pt/coach-bem-estar/login</code>
+            {' '}(criar/atualizar com{' '}
+            <code className="bg-gray-100 px-1 rounded text-xs">node scripts/criar-contas-demo-videos.js</code>).
+          </span>
         </p>
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
@@ -53,6 +61,7 @@ function ContasDemoContent() {
                   ['Nutra', 'demo.nutra@ylada.app', '/pt/nutra/login'],
                   ['Nutricionista', 'demo.nutri@ylada.app', '/pt/nutri/login'],
                   ['Coach', 'demo.coach@ylada.app', '/pt/coach/login'],
+                  ['Coach de bem-estar', 'demo.coach-bem-estar@ylada.app', '/pt/coach-bem-estar/login', 'Demo@2025!'],
                   ['Esteticista (segmento YLADA /pt)', 'demo.estetica@ylada.app', '/pt/estetica/login'],
                   ['Pro Estética capilar', 'demo.capilar@ylada.app', '/pro-estetica-capilar/entrar'],
                   ['Pro Estética corporal', 'demo@proesteticacorporal.com', '/pro-estetica-corporal/entrar', '123456'],

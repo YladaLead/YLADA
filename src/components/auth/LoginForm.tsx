@@ -55,7 +55,8 @@ interface LoginFormProps {
 
 function forgotPasswordHref(perfil: LoginFormPerfil): string {
   if (perfil === 'ylada') return '/pt/recuperar-senha'
-  if (perfil === 'wellness' || perfil === 'coach-bem-estar') return '/pt/wellness/recuperar-senha'
+  if (perfil === 'wellness') return '/pt/wellness/recuperar-senha'
+  if (perfil === 'coach-bem-estar') return '/pt/coach-bem-estar/recuperar-senha'
   if (perfil === 'nutri') return '/pt/nutri/recuperar-senha'
   if (perfil === 'coach') return '/pt/coach/recuperar-senha'
   return '/pt/recuperar-senha'
@@ -578,6 +579,9 @@ export default function LoginForm({
           if (skipYladaMatrixRedirect) {
             // Não aplicar regras de ylada_noel_profile / onboarding matriz
           } else {
+          // Coach de bem-estar não acessa o board /pt/home (matriz); enviar para o shell da área.
+          const yladaMatrizBoardPath =
+            profileCheck?.perfil === 'coach-bem-estar' ? '/pt/coach-bem-estar/home' : '/pt/home'
           baseRedirectPath = '/pt/onboarding'
           try {
             const { data: yladaProfile } = await supabase
@@ -593,23 +597,23 @@ export default function LoginForm({
             if (!temNome || !temWhatsapp) {
               // Se não tem perfil ylada mas tem perfil de área (nutri, coach, etc.), ir para board
               if (!yladaProfile && profileCheck?.perfil && profileCheck.perfil !== 'ylada') {
-                baseRedirectPath = '/pt/home'
+                baseRedirectPath = yladaMatrizBoardPath
                 console.log('🔄 Login YLADA: usuária de área (ex. Nutri) sem perfil ylada, redirecionando para board')
               } else {
                 console.log('🔄 Login YLADA: perfil incompleto (nome/whatsapp), redirecionando para onboarding')
               }
             } else if (!temPerfilEmpresarial) {
-              baseRedirectPath = '/pt/home'
+              baseRedirectPath = yladaMatrizBoardPath
               console.log('🔄 Login YLADA: nome+whatsapp ok, falta perfil empresarial, redirecionando para board (preencher pelo menu)')
             } else {
-              baseRedirectPath = '/pt/home'
+              baseRedirectPath = yladaMatrizBoardPath
               console.log('🔄 Login YLADA: perfil completo, redirecionando para home')
             }
           } catch (e) {
             console.warn('⚠️ Erro ao verificar perfil YLADA:', e)
             // Em erro: se tem perfil de área (nutri, coach), ir para board
             if (profileCheck?.perfil && profileCheck.perfil !== 'ylada') {
-              baseRedirectPath = '/pt/home'
+              baseRedirectPath = yladaMatrizBoardPath
             }
           }
           }
@@ -733,9 +737,11 @@ export default function LoginForm({
     logoPath ||
     (useYladaBrandingOnSignUp && isSignUp
       ? yladaHorizontalLogo
-        : perfil === 'wellness' || perfil === 'coach-bem-estar'
+        : perfil === 'wellness'
         ? '/images/logo/wellness-horizontal.png'
-        : perfil === 'nutri'
+        : perfil === 'coach-bem-estar'
+          ? yladaHorizontalLogo
+          : perfil === 'nutri'
           ? yladaHorizontalLogo
           : perfil === 'coach'
             ? '/images/logo/coach-horizontal.png'
@@ -757,9 +763,11 @@ export default function LoginForm({
               alt={
                 useYladaBrandingOnSignUp && isSignUp
                   ? 'YLADA'
-                  : perfil === 'wellness' || perfil === 'coach-bem-estar'
-                    ? 'YLADA - Coach de bem-estar'
-                    : perfil === 'nutri'
+                  : perfil === 'wellness'
+                    ? 'WELLNESS by YLADA'
+                    : perfil === 'coach-bem-estar'
+                      ? 'YLADA — Coach de bem-estar'
+                      : perfil === 'nutri'
                       ? 'YLADA'
                       : perfil === 'coach'
                         ? 'Coach by YLADA'
@@ -767,8 +775,8 @@ export default function LoginForm({
                           ? 'YLADA'
                           : 'YLADA Logo'
               }
-              width={perfil === 'wellness' || perfil === 'coach-bem-estar' ? 572 : 280}
-              height={perfil === 'wellness' || perfil === 'coach-bem-estar' ? 150 : 84}
+              width={perfil === 'wellness' ? 572 : 280}
+              height={perfil === 'wellness' ? 150 : 84}
               className="bg-transparent object-contain h-16 sm:h-20 w-auto"
               priority
             />
@@ -836,10 +844,14 @@ export default function LoginForm({
               value={email}
               onChange={handleInputChange(setEmail)}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg transition-all focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-gray-900 placeholder-gray-400"
+              className={`w-full px-4 py-3 border border-gray-300 rounded-lg transition-all outline-none text-gray-900 placeholder-gray-400 ${
+                perfil === 'wellness'
+                  ? 'focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500'
+                  : 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+              }`}
               placeholder="seu@email.com"
             />
-            {(perfil === 'wellness' || perfil === 'coach-bem-estar') && hadTrialEmail && !isSignUp && (
+            {perfil === 'wellness' && hadTrialEmail && !isSignUp && (
               <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                 <p className="text-sm font-medium text-green-800 mb-2">
                   Esse e-mail fez o trial de 3 dias.
@@ -852,6 +864,22 @@ export default function LoginForm({
                   className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors"
                 >
                   Assinar Agora
+                </Link>
+              </div>
+            )}
+            {perfil === 'coach-bem-estar' && hadTrialEmail && !isSignUp && (
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm font-medium text-blue-900 mb-2">
+                  Esse e-mail já usou o período de teste no Coach de bem-estar (YLADA).
+                </p>
+                <p className="text-sm text-blue-800 mb-2">
+                  Para assinar e voltar a ter acesso, use o fluxo do segmento — não precisa fazer login antes.
+                </p>
+                <Link
+                  href="/pt/coach-bem-estar/renovar"
+                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                >
+                  Assinar agora
                 </Link>
               </div>
             )}
@@ -959,7 +987,7 @@ export default function LoginForm({
             type="submit"
             disabled={loading}
             className={`w-full py-3.5 rounded-lg font-semibold text-white transition-all duration-200 ${
-              (perfil === 'wellness' || perfil === 'coach-bem-estar')
+              perfil === 'wellness'
                 ? 'bg-green-600 hover:bg-green-700 active:bg-green-800'
                 : perfil === 'coach'
                 ? 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800'

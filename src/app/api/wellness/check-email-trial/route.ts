@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
 /**
- * Verifica se um e-mail já fez trial de Wellness (ativo ou expirado)
- * Usado para mostrar mensagem contextual no login e checkout
+ * Indica se vale mostrar CTA de assinatura no login: já existiu trial na área wellness **e** não há
+ * assinatura ativa (trial/mensal/anual) — Coach de bem-estar compartilha `subscriptions.area = wellness`.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -34,23 +34,42 @@ export async function POST(request: NextRequest) {
 
     const userId = profiles[0].user_id
 
-    // Verificar se tem/houve subscription de trial para wellness
-    // Trial: plan_type='trial' OU stripe_subscription_id começa com 'trial_'
-    const { data: trialSubs, error: subError } = await supabaseAdmin
+    // Trial “de verdade” na stack wellness (Herbalife + Coach de bem-estar compartilham area=wellness)
+    const { data: wellnessSubs, error: subError } = await supabaseAdmin
       .from('subscriptions')
-      .select('id')
+      .select('plan_type, status, current_period_end, stripe_subscription_id')
       .eq('user_id', userId)
       .eq('area', 'wellness')
-      .or('plan_type.eq.trial,stripe_subscription_id.like.trial_%')
-      .limit(1)
 
     if (subError) {
       console.warn('check-email-trial: Erro ao buscar subscription:', subError.message)
       return NextResponse.json({ hadTrial: false })
     }
 
+    const rows = wellnessSubs ?? []
+
+    const isTrialLike = (r: {
+      plan_type?: string | null
+      stripe_subscription_id?: string | null
+    }) =>
+      String(r.plan_type || '').toLowerCase() === 'trial' ||
+      String(r.stripe_subscription_id || '').toLowerCase().includes('trial')
+
+    const now = Date.now()
+
+    const hadWellnessTrialEver = rows.some(isTrialLike)
+
+    /** Acesso atual à stack wellness (Herbalife + Coach de bem-estar): não pedir “assinar” se ainda está coberto. */
+    const hasActiveWellnessAccess = rows.some((r) => {
+      if (String(r.status || '').toLowerCase() !== 'active') return false
+      if (!r.current_period_end) return false
+      if (new Date(r.current_period_end).getTime() <= now) return false
+      const pt = String(r.plan_type || '').toLowerCase()
+      return pt === 'trial' || pt === 'monthly' || pt === 'annual'
+    })
+
     return NextResponse.json({
-      hadTrial: (trialSubs?.length ?? 0) > 0,
+      hadTrial: hadWellnessTrialEver && !hasActiveWellnessAccess,
     })
   } catch (error) {
     console.error('check-email-trial:', error)

@@ -1,10 +1,6 @@
 import { redirect } from 'next/navigation'
 
-/**
- * Coach bem-estar unificado com Coach.
- * Redirecionamento permanente: única porta de entrada é /pt/coach.
- * A diferenciação (bem-estar, carreira, vida) ocorre no perfil/onboarding da área Coach.
- */
+/** Raiz do segmento: porta de entrada pública do app (não misturar com /pt/coach nem /pt/wellness). */
 export default function CoachBemEstarLandingPage() {
-  redirect('/pt/coach')
+  redirect('/pt/coach-bem-estar/login')
 }

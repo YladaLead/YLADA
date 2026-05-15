@@ -78,21 +78,27 @@ export async function GET(request: NextRequest) {
     // Se tem nome+whatsapp mas falta profile_type/profession → perfil-empresarial (ex.: Nutri/Coach migrados).
     let redirectPath = '/pt/onboarding'
 
-    const { data: yladaProfile } = await supabaseAdmin
-      .from('ylada_noel_profile')
-      .select('area_specific, profile_type, profession')
-      .eq('user_id', data.session.user.id)
-      .eq('segment', 'ylada')
-      .maybeSingle()
+    const [yladaRes, areaProfileRes] = await Promise.all([
+      supabaseAdmin
+        .from('ylada_noel_profile')
+        .select('area_specific, profile_type, profession')
+        .eq('user_id', data.session.user.id)
+        .eq('segment', 'ylada')
+        .maybeSingle(),
+      supabaseAdmin.from('user_profiles').select('perfil').eq('user_id', data.session.user.id).maybeSingle(),
+    ])
+    const yladaProfile = yladaRes.data
+    const areaPerfil = areaProfileRes.data?.perfil as string | undefined
 
     const as = (yladaProfile?.area_specific || {}) as Record<string, unknown>
     const temNome = as?.nome && String(as.nome).trim().length >= 2
     const temWhatsapp = as?.whatsapp && String(as.whatsapp).replace(/\D/g, '').length >= 10
     const temPerfilEmpresarial = yladaProfile?.profile_type && yladaProfile?.profession
+    const matrizBoardPath = areaPerfil === 'coach-bem-estar' ? '/pt/coach-bem-estar/home' : '/pt/home'
     if (temNome && temWhatsapp && temPerfilEmpresarial) {
-      redirectPath = '/pt/home'
+      redirectPath = matrizBoardPath
     } else if (temNome && temWhatsapp) {
-      redirectPath = '/pt/home'
+      redirectPath = matrizBoardPath
     }
 
     // Se tem 'next' na URL, usar ele (tem prioridade)

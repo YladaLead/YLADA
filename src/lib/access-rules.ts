@@ -29,7 +29,7 @@ export interface AccessRule {
  */
 const PUBLIC_PAGES: (string | RegExp)[] = [
   // Landing pages
-  /^\/pt\/(wellness|nutri|coach|nutra|c)\/?$/,
+  /^\/pt\/(wellness|nutri|coach|nutra|c|coach-bem-estar)\/?$/,
   
   // Páginas de login
   /\/login$/,
@@ -39,6 +39,9 @@ const PUBLIC_PAGES: (string | RegExp)[] = [
   /\/assinar$/,
   /\/renovar$/,
   
+  // Recuperação de senha (público em qualquer segmento, ex.: /pt/coach-bem-estar/recuperar-senha)
+  /\/recuperar-senha$/,
+  
   // Páginas de pagamento
   /\/pagamento-sucesso$/,
   
@@ -46,13 +49,13 @@ const PUBLIC_PAGES: (string | RegExp)[] = [
   /^\/pt\/wellness\/[^/]+\/hom$/,
   
   // Ferramentas públicas: /pt/[area]/[user-slug]/[tool-slug]
-  /^\/pt\/(wellness|nutri|coach|nutra|c)\/[^/]+\/[^/]+$/,
+  /^\/pt\/(wellness|nutri|coach-bem-estar|coach|nutra|c)\/[^/]+\/[^/]+$/,
   
   // Portais públicos: /pt/[area]/[user-slug]/portal/[slug]
-  /^\/pt\/(wellness|nutri|coach|nutra|c)\/[^/]+\/portal\/[^/]+$/,
+  /^\/pt\/(wellness|nutri|coach-bem-estar|coach|nutra|c)\/[^/]+\/portal\/[^/]+$/,
   
   // Quizzes públicos: /pt/[area]/[user-slug]/quiz/[slug]
-  /^\/pt\/(wellness|nutri|coach|nutra|c)\/[^/]+\/quiz\/[^/]+$/,
+  /^\/pt\/(wellness|nutri|coach-bem-estar|coach|nutra|c)\/[^/]+\/quiz\/[^/]+$/,
   
   // Formulários públicos: /f/[formId]
   /^\/f\/[^/]+$/,
@@ -244,7 +247,8 @@ export function getCheckoutPath(area: Area | null): string {
  * Wellness: página de renovação (amigável para ex-trial). Outras áreas: checkout.
  */
 export function getRenewOrCheckoutPath(area: Area | null): string {
-  if (area === 'wellness' || area === 'coach-bem-estar') return '/pt/wellness/renovar'
+  if (area === 'coach-bem-estar') return '/pt/coach-bem-estar/renovar'
+  if (area === 'wellness') return '/pt/wellness/renovar'
   return getCheckoutPath(area)
 }
 
