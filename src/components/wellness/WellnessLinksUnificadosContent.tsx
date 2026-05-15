@@ -16,6 +16,11 @@ import {
   coachBemEstarCatalogUrlParaFluxoProLideres,
   isHypeCalculadoraFluxoProLideres,
 } from '@/config/coach-bem-estar-pro-lideres-calculadoras-catalog'
+import {
+  getCoachBemEstarSalesFluxos,
+  getCoachBemEstarRecruitmentFluxos,
+} from '@/lib/coach-bem-estar/coach-bem-estar-fluxos'
+import { buildCoachBemEstarToolUrl } from '@/lib/url-utils'
 import { WELLNESS_HYPE_MEUS_LINKS } from '@/lib/wellness/wellness-hype-meus-links'
 import dynamic from 'next/dynamic'
 import QRCode from '@/components/QRCode'
@@ -682,8 +687,9 @@ export function WellnessLinksUnificadosContent({
       return dedupeItensUnificadosPorSlug(list)
     }
 
+    // ── Calculadoras (IMC, água, calorias, proteína, hype) ──────────────────
     const fluxosCalc = getCoachBemEstarCalculadorasEspelhoProLideres()
-    return fluxosCalc.map((f) => {
+    const itensCalc = fluxosCalc.map((f) => {
       const slugN = normalizeTemplateSlug(f.id) || f.id
       const templateMatch = templates.find((t) => normalizeTemplateSlug(t.slug) === slugN)
       const isHypeCalc = isHypeCalculadoraFluxoProLideres(f.id)
@@ -693,9 +699,9 @@ export function WellnessLinksUnificadosContent({
         if (templateMatch?.slug) {
           const toolSlug =
             ferramentasUsuario[templateMatch.slug] || ferramentasUsuario[slugN] || templateMatch.slug
-          link = buildWellnessToolUrl(profile.userSlug, toolSlug)
+          link = buildCoachBemEstarToolUrl(profile.userSlug, toolSlug)
         } else if (isHypeCalc) {
-          link = buildWellnessToolUrl(profile.userSlug, slugN)
+          link = buildCoachBemEstarToolUrl(profile.userSlug, slugN)
         } else {
           link = coachBemEstarCatalogUrlParaFluxoProLideres(f.id, baseUrl)
         }
@@ -707,11 +713,7 @@ export function WellnessLinksUnificadosContent({
         templateMatch && profile?.userSlug
           ? ferramentasUsuario[templateMatch.slug] || templateMatch.slug
           : slugN
-      const stats = estatisticasFerramentas[toolSlugStats] || {
-        views: 0,
-        leads: 0,
-        conversions: 0,
-      }
+      const stats = estatisticasFerramentas[toolSlugStats] || { views: 0, leads: 0, conversions: 0 }
 
       const templateMeta =
         templateMatch ||
@@ -736,14 +738,7 @@ export function WellnessLinksUnificadosContent({
           isHype: isHypeCalc,
           isTemplate: !isHypeCalc,
           template: isHypeCalc
-            ? {
-                id: f.id,
-                slug: slugN,
-                nome: f.nome,
-                name: f.nome,
-                type: 'calculadora',
-                description: f.objetivo,
-              }
+            ? { id: f.id, slug: slugN, nome: f.nome, name: f.nome, type: 'calculadora', description: f.objetivo }
             : { ...templateMeta, content: templateMatch?.content },
           coachBemEstarProLideresCalc: true,
         },
@@ -752,6 +747,55 @@ export function WellnessLinksUnificadosContent({
         conversions: stats.conversions,
       }
     })
+
+    // ── Fluxos de Vendas (21 fluxos: energia, digestão, mente, rotina) ──────
+    const salesFluxos = getCoachBemEstarSalesFluxos()
+    const itensVendas = salesFluxos
+      // Calculadoras já mapeadas acima — evitar duplicatas
+      .filter((f) => !fluxosCalc.some((c) => c.id === f.id))
+      .map((f) => {
+        const slug = gerarSlugFluxo(f.nome)
+        const link = profile?.userSlug
+          ? buildCoachBemEstarToolUrl(profile.userSlug, slug)
+          : ''
+        return {
+          id: `coach-vendas-${f.id}`,
+          nome: f.nome,
+          tipo: 'fluxo-vendas' as const,
+          categoria: 'Vendas',
+          link,
+          descricao: f.objetivo,
+          icon: '💚',
+          metadata: { fluxo: f, coachBemEstarProLideresCalc: true },
+          views: 0,
+          leads: 0,
+          conversions: 0,
+        }
+      })
+
+    // ── Fluxos de Recrutamento (15 fluxos — sem os 2 Herbalife) ─────────────
+    const recruitmentFluxos = getCoachBemEstarRecruitmentFluxos()
+    const itensRecrutamento = recruitmentFluxos.map((f) => {
+      const slug = gerarSlugFluxo(f.nome)
+      const link = profile?.userSlug
+        ? buildCoachBemEstarToolUrl(profile.userSlug, slug)
+        : ''
+      return {
+        id: `coach-recrut-${f.id}`,
+        nome: f.nome,
+        tipo: 'fluxo-recrutamento' as const,
+        categoria: 'Recrutamento',
+        link,
+        descricao: f.objetivo,
+        icon: '👥',
+        metadata: { fluxo: f, coachBemEstarProLideresCalc: true },
+        views: 0,
+        leads: 0,
+        conversions: 0,
+      }
+    })
+
+    return [...itensCalc, ...itensVendas, ...itensRecrutamento]
   }, [
     coachBemEstarEmbed,
     itensUnificados,
@@ -1253,11 +1297,11 @@ Você vai adorar! 😊`
         {/* Cabeçalho */}
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            {coachBemEstarEmbed ? 'Calculadoras (catálogo Pro Líderes)' : 'Meus Links'}
+            {coachBemEstarEmbed ? 'Ferramentas Coach de bem-estar' : 'Meus Links'}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             {coachBemEstarEmbed
-              ? 'Mesmas calculadoras preset do catálogo Pro Líderes (hidratação, calorias, proteína, cafeína, custo de energia). Copie o link público do modelo ou crie a ferramenta na sua conta; com slug no perfil, use o seu link personalizado.'
+              ? 'Calculadoras, quizzes de venda e fluxos de recrutamento — biblioteca completa do Coach de bem-estar. Copie o link ou compartilhe via QR.'
               : 'Todos os seus templates e fluxos prontos para copiar e compartilhar'}
           </p>
         </div>

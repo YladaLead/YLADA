@@ -72,6 +72,15 @@ export function buildCoachToolUrlFallback(toolId: string): string {
 }
 
 /**
+ * Constrói URL completa para uma ferramenta Coach de bem-estar
+ * (branding independente — /pt/coach-bem-estar/{userSlug}/{toolSlug})
+ */
+export function buildCoachBemEstarToolUrl(userSlug: string, toolSlug: string): string {
+  const baseUrl = getAppUrl()
+  return `${baseUrl}/pt/coach-bem-estar/${userSlug}/${toolSlug}`
+}
+
+/**
  * Constrói URL completa para um quiz nutri (mesmo padrão da área Captar / rota [user-slug]/quiz/[slug])
  */
 export function buildNutriQuizUrl(userSlug: string, quizSlug: string, baseUrl?: string): string {
