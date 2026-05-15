@@ -1560,7 +1560,7 @@ Você vai adorar! 😊`
                 ) : null}
               </div>
               )
-            ))}
+            )}
           </div>
         )}
 
