@@ -1,15 +1,19 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useCallback, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+
+type MpNotice = 'ok' | 'pending' | 'fail' | null
 
 function ProLideresAssinaturaEquipeContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [mpNotice, setMpNotice] = useState<MpNotice>(null)
   const [accessOk, setAccessOk] = useState(false)
   const [isLeaderOwner, setIsLeaderOwner] = useState(true)
 
@@ -20,7 +24,8 @@ function ProLideresAssinaturaEquipeContent() {
       const res = await fetch('/api/pro-lideres/subscription', { credentials: 'include' })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError((data as { error?: string }).error || 'Tenta atualizar a página.')
+        const msg = (data as { error?: string }).error
+        if (msg) setError(msg)
         setAccessOk(false)
         return
       }
@@ -36,7 +41,7 @@ function ProLideresAssinaturaEquipeContent() {
         router.replace('/pro-lideres/painel')
       }
     } catch {
-      setError('Erro de rede.')
+      setError('Erro de rede. Verifique a ligação e tente de novo.')
       setAccessOk(false)
     } finally {
       setLoading(false)
@@ -47,9 +52,25 @@ function ProLideresAssinaturaEquipeContent() {
     void load()
   }, [load])
 
+  useEffect(() => {
+    const mp = searchParams.get('mp')
+    if (mp !== 'ok' && mp !== 'pending' && mp !== 'fail') return
+
+    setMpNotice(mp)
+    const next = new URLSearchParams(searchParams.toString())
+    next.delete('mp')
+    const qs = next.toString()
+    router.replace(`/pro-lideres/painel/assinatura-equipe${qs ? `?${qs}` : ''}`, { scroll: false })
+
+    if (mp === 'ok' || mp === 'pending') {
+      void load()
+    }
+  }, [searchParams, router, load])
+
   async function startCheckout() {
     setCheckoutLoading(true)
     setError(null)
+    setMpNotice(null)
     try {
       const res = await fetch('/api/pro-lideres/subscription/checkout', {
         method: 'POST',
@@ -57,45 +78,70 @@ function ProLideresAssinaturaEquipeContent() {
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError((data as { error?: string }).error || 'Tenta de novo.')
+        setError((data as { error?: string }).error || 'Não foi possível abrir o pagamento. Tente de novo.')
         return
       }
       const url = (data as { checkoutUrl?: string }).checkoutUrl
       if (url) {
         window.location.href = url
       } else {
-        setError('Tenta de novo.')
+        setError('Não foi possível abrir o pagamento. Tente de novo.')
       }
     } catch {
-      setError('Erro de rede.')
+      setError('Erro de rede. Verifique a ligação e tente de novo.')
     } finally {
       setCheckoutLoading(false)
     }
   }
 
-  return (
-    <div className="mx-auto w-full max-w-lg px-4 py-10 md:py-16">
-      <div className="mx-auto flex w-full max-w-md flex-col items-center space-y-8 text-center">
-        <h1 className="text-xl font-semibold text-gray-900">Ativar convites</h1>
+  const mpNoticeCopy =
+    mpNotice === 'ok'
+      ? 'Pagamento recebido. A ativação dos convites entra em breve — se o painel ainda não abrir, aguarde um instante e atualize.'
+      : mpNotice === 'pending'
+        ? 'Pagamento pendente. Quando for confirmado, os convites da equipe ativam automaticamente.'
+        : mpNotice === 'fail'
+          ? 'O pagamento não foi concluído. Pode tentar de novo quando quiser.'
+          : null
 
-        {error && (
-          <div className="w-full rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-left text-sm text-amber-950 sm:text-center">
+  return (
+    <div className="mx-auto w-full max-w-lg px-4 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:py-12 md:py-16">
+      <div className="mx-auto flex w-full max-w-md flex-col items-stretch gap-6 text-center sm:items-center sm:gap-8">
+        <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Ativar convites</h1>
+
+        {mpNoticeCopy ? (
+          <div
+            className={`w-full rounded-lg border px-3 py-2.5 text-left text-sm leading-relaxed sm:text-center ${
+              mpNotice === 'fail'
+                ? 'border-amber-200 bg-amber-50 text-amber-950'
+                : 'border-emerald-200 bg-emerald-50 text-emerald-950'
+            }`}
+            role="status"
+          >
+            {mpNoticeCopy}
+          </div>
+        ) : null}
+
+        {error ? (
+          <div
+            className="w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-left text-sm text-red-900 sm:text-center"
+            role="alert"
+          >
             {error}
           </div>
-        )}
+        ) : null}
 
         {loading ? (
           <p className="text-sm text-gray-500">A carregar…</p>
         ) : accessOk ? (
           <p className="text-sm text-gray-600">A redirecionar…</p>
         ) : !isLeaderOwner ? (
-          <p className="w-full max-w-sm text-sm leading-relaxed text-gray-600">
-            Seu acesso está bloqueado no momento. Há uma pendência de assinatura na YLADA para este espaço; quando estiver
-            regularizada, você volta a entrar normalmente. Pode atualizar a página daqui a pouco.
+          <p className="w-full text-left text-sm leading-relaxed text-gray-600 sm:text-center">
+            Seu acesso está bloqueado no momento. Há uma pendência de assinatura na YLADA para este espaço; quando
+            estiver regularizada, você volta a entrar normalmente.
           </p>
         ) : (
-          <div className="flex w-full flex-col items-center space-y-6">
-            <p className="w-full text-sm leading-relaxed text-gray-700">
+          <div className="flex w-full flex-col items-stretch gap-6 sm:items-center">
+            <p className="w-full text-left text-sm leading-relaxed text-gray-700 sm:text-center">
               Comece a convidar sua equipe e construa um{' '}
               <strong className="text-gray-900">crescimento organizado e previsível</strong> com clareza para orientar.
             </p>
@@ -103,7 +149,7 @@ function ProLideresAssinaturaEquipeContent() {
               type="button"
               onClick={() => void startCheckout()}
               disabled={checkoutLoading}
-              className="inline-flex min-h-[48px] w-full max-w-[13.5rem] items-center justify-center rounded-xl bg-blue-600 px-8 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-60"
+              className="touch-manipulation inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-8 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-60 sm:max-w-[13.5rem]"
             >
               {checkoutLoading ? 'A abrir…' : 'Ativar'}
             </button>
@@ -114,4 +160,10 @@ function ProLideresAssinaturaEquipeContent() {
   )
 }
 
-export default ProLideresAssinaturaEquipeContent
+export default function ProLideresAssinaturaEquipePage() {
+  return (
+    <Suspense fallback={<p className="px-4 py-10 text-center text-sm text-gray-500">A carregar…</p>}>
+      <ProLideresAssinaturaEquipeContent />
+    </Suspense>
+  )
+}

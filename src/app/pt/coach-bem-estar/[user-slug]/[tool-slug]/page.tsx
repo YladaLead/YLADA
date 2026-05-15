@@ -84,11 +84,17 @@ export default function FerramentaCoachBemEstarPage() {
       const data = await response.json()
       setTool(data.tool)
 
+      // Rastrear visualização no sistema unificado (link_events)
       if (data.tool?.id) {
-        fetch('/api/wellness/ferramentas/track-view', {
+        fetch('/api/link-events', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tool_id: data.tool.id }),
+          body: JSON.stringify({
+            event_type: 'view',
+            link_source: 'user_template',
+            link_id: data.tool.id,
+            area: 'coach-bem-estar',
+          }),
         }).catch(() => {})
       }
     } catch (err: unknown) {

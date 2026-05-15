@@ -445,9 +445,9 @@ function ConversationDetail({
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="text-white/80 hover:text-white text-xl leading-none"
+            className="flex items-center gap-1.5 rounded-lg bg-white/20 px-3 py-1.5 text-sm font-semibold text-white hover:bg-white/30 active:bg-white/40"
           >
-            ‹
+            ← Voltar
           </button>
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-base font-bold text-white">
             {(conversation.nome ?? conversation.phone).charAt(0).toUpperCase()}

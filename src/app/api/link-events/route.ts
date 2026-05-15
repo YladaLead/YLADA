@@ -10,7 +10,7 @@ import { withRateLimit } from '@/lib/rate-limit'
 
 const EVENT_TYPES = ['view', 'whatsapp_click', 'lead_capture'] as const
 const LINK_SOURCES = ['user_template', 'quiz', 'form', 'ylada_link', 'generated_link'] as const
-const AREAS = ['nutri', 'wellness', 'coach', 'ylada'] as const
+const AREAS = ['nutri', 'wellness', 'coach', 'coach-bem-estar', 'ylada'] as const
 
 export async function POST(request: NextRequest) {
   return withRateLimit(request, 'link-events-post', async () => {
@@ -37,9 +37,9 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
-      if (!AREA.includes(area as (typeof AREAS)[number])) {
+      if (!AREAS.includes(area as (typeof AREAS)[number])) {
         return NextResponse.json(
-          { success: false, error: 'area inválida. Use: nutri, wellness, coach, ylada' },
+          { success: false, error: 'area inválida. Use: nutri, wellness, coach, coach-bem-estar, ylada' },
           { status: 400 }
         )
       }

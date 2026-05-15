@@ -8,7 +8,7 @@ import { proLideresTeamSubscriptionAllowsAccess } from '@/lib/pro-lideres-subscr
 const DEFAULT_PENDING_QUOTA = 50
 
 /** Estado da assinatura Mercado Pago (equipe) para o tenant atual. */
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   const auth = await requireApiAuth(request)
   if (auth instanceof NextResponse) return auth
   const { user } = auth

@@ -18,8 +18,8 @@ interface WellnessCTAButtonProps {
   className?: string
   template_id?: string // ID do template para rastrear conversões
   lead_id?: string // ID do lead (opcional)
-  /** Se não informado, detecta pela URL: /pt/wellness/ e /pt/nutri/ → coleta desativada */
-  area?: 'nutri' | 'wellness' | 'coach'
+  /** Se não informado, detecta pela URL */
+  area?: 'nutri' | 'wellness' | 'coach' | 'coach-bem-estar'
 }
 
 export default function WellnessCTAButton({
@@ -40,10 +40,20 @@ export default function WellnessCTAButton({
   const toolSlug = params?.['tool-slug'] as string | undefined
   const userSlug = params?.['user-slug'] as string | undefined
 
-  // Área: prop tem prioridade; senão detectar pela URL. Nutri e Wellness: não exibir coleta de nome/telefone (por enquanto).
+  // Detectar área pela prop ou pela URL
   const isWellnessArea = areaProp === 'wellness' || (pathname != null && pathname.includes('/pt/wellness/'))
   const isNutriArea = areaProp === 'nutri' || (pathname != null && pathname.includes('/pt/nutri/'))
-  const ocultarColetaNutriWellness = isWellnessArea || isNutriArea
+  const isCoachBemEstarArea = areaProp === 'coach-bem-estar' || (pathname != null && pathname.includes('/pt/coach-bem-estar/'))
+
+  // Área efetiva para rastreio — usada no evento de conversão
+  const areaEfetiva = isCoachBemEstarArea ? 'coach-bem-estar'
+    : isNutriArea ? 'nutri'
+    : isWellnessArea ? 'wellness'
+    : areaProp || 'wellness'
+
+  // Coleta de formulário (nome/email/telefone antes do WhatsApp): desativada para wellness, nutri e coach-bem-estar.
+  // Nesses verticals a filosofia é: cliente chama, não coletamos dados — apenas rastreamos cliques.
+  const ocultarColetaNutriWellness = isWellnessArea || isNutriArea || isCoachBemEstarArea
 
   const [dadosColeta, setDadosColeta] = useState({
     nome: '',
@@ -122,27 +132,25 @@ export default function WellnessCTAButton({
     }
   }
 
-  // Função para rastrear conversão quando botão é clicado
+  // Função para rastrear clique no WhatsApp — sempre ativa, independente de qualquer configuração
   const rastrearConversao = async () => {
     try {
-      // Só rastrear se tiver template_id ou slug
       if (!template_id && !toolSlug) return
 
+      // Rastrear via sistema unificado (link_events) com área correta
       await fetch('/api/wellness/conversions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           template_id: template_id || undefined,
           slug: toolSlug || undefined,
-          lead_id: lead_id || undefined
+          lead_id: lead_id || undefined,
+          area: areaEfetiva,
         }),
       })
-      // Silencioso - não interrompe o fluxo se falhar
     } catch (error) {
-      console.error('Erro ao rastrear conversão:', error)
-      // Não mostrar erro para o usuário
+      // Silencioso — rastreio nunca interrompe o fluxo do cliente
+      console.error('Erro ao rastrear clique WhatsApp:', error)
     }
   }
 
