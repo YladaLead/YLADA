@@ -10,6 +10,7 @@ import YladaAreaShell from './YladaAreaShell'
 interface ComoUsarContentProps {
   areaCodigo: string
   areaLabel: string
+  noShell?: boolean
 }
 
 type BlocoVariant = 'blue' | 'white' | 'yellow' | 'red' | 'neutral'
@@ -130,12 +131,11 @@ function GuiaNavegacaoRapida() {
   )
 }
 
-export default function ComoUsarContent({ areaCodigo, areaLabel }: ComoUsarContentProps) {
+export default function ComoUsarContent({ areaCodigo, areaLabel, noShell = false }: ComoUsarContentProps) {
   const noelChatHref = `${getYladaDiagnosticoBuilderHref(areaCodigo)}?chat=1`
 
-  return (
-    <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
-      <div className="max-w-2xl mx-auto space-y-6 pb-12">
+  const inner = (
+    <div className="max-w-2xl mx-auto space-y-6 pb-12">
         <header className="space-y-4">
           <div>
             <p className="text-sm font-medium text-sky-800 mb-1">Guia prático</p>
@@ -373,6 +373,8 @@ export default function ComoUsarContent({ areaCodigo, areaLabel }: ComoUsarConte
           </Link>
         </footer>
       </div>
-    </YladaAreaShell>
   )
+
+  if (noShell) return inner
+  return <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>{inner}</YladaAreaShell>
 }
