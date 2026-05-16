@@ -58,6 +58,7 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
         icon: '⚙️',
         leaderOnly: true,
       },
+      { key: 'como-usar', label: 'Como usar', path: 'como-usar', icon: '📖' },
     ],
   },
 ]
