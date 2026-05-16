@@ -1,6 +1,18 @@
 import type { NextConfig } from "next";
 
+const isVercel = process.env.VERCEL === "1";
+
 const nextConfig: NextConfig = {
+  /** Menos workers em paralelo no container 8 GB da Vercel (evita OOM no compile + SSG). */
+  ...(isVercel
+    ? {
+        staticGenerationMaxConcurrency: 2,
+        experimental: {
+          cpus: 1,
+          workerThreads: false,
+        },
+      }
+    : {}),
   /**
    * Predefinição 60s: em Vercel (2 vCPU) a fase "Generating static pages" com ~1300+ rotas
    * faz várias páginas falharem por timeout em paralelo. 180s reduz falhas espúrias no build.
@@ -49,10 +61,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     if (isServer) {
       // Configurações para Tesseract.js no servidor
       config.externals = [...(config.externals || []), 'canvas', 'jsdom']
+    }
+    if (!dev && isVercel) {
+      config.parallelism = 1
     }
     return config
   },

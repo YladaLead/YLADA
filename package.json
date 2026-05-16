@@ -10,7 +10,7 @@
     "dev:port": "next dev -p 3001 -H 0.0.0.0",
     "dev:webpack": "next dev --webpack",
     "dev:mobile": "next dev -H 0.0.0.0",
-    "build": "NODE_OPTIONS='--max-old-space-size=8192' next build",
+    "build": "node scripts/next-build.mjs",
     "start": "next start",
     "lint": "eslint",
     "create-stripe-products": "node scripts/create-stripe-products.js",
