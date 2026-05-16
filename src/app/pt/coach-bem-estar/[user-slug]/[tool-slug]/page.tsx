@@ -20,6 +20,7 @@ interface Tool {
   show_whatsapp_button?: boolean
   template_slug: string
   is_fluxo?: boolean
+  is_template_base?: boolean
   fluxo_tipo?: string
   content?: {
     leader_data_collection?: {

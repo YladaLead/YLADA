@@ -795,7 +795,8 @@ export function WellnessLinksUnificadosContent({
       }
     })
 
-    return [...itensCalc, ...itensVendas, ...itensRecrutamento]
+    // Recrutamento fica exclusivamente na aba EXTRA — não aparece na página de Links
+    return [...itensCalc, ...itensVendas]
   }, [
     coachBemEstarEmbed,
     itensUnificados,
@@ -1505,7 +1506,7 @@ Você vai adorar! 😊`
               <div className="max-w-7xl mx-auto">
                 {renderSection('Calculadoras', '🧮', calcItems, false)}
                 {renderSection('Ferramentas de venda', '💚', vendasItems, true)}
-                {renderSection('Recrutamento', '👥', recrutItems, true)}
+                {/* Recrutamento foi movido para a aba EXTRA → /pt/coach-bem-estar/recrutamento */}
               </div>
             )
           })()

@@ -4,6 +4,11 @@ import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription
 import { fluxosRecrutamento } from '@/lib/wellness-system/fluxos-recrutamento'
 import { fluxosClientes } from '@/lib/wellness-system/fluxos-clientes'
 import { FluxoCliente } from '@/types/wellness-system'
+import { getCoachBemEstarSalesFluxos, getCoachBemEstarRecruitmentFluxos } from '@/lib/coach-bem-estar/coach-bem-estar-fluxos'
+
+// Fluxos do coach-bem-estar — incluem quiz fluxos Pro Líderes que não estão no wellness-system
+const coachBemEstarSalesFluxos = getCoachBemEstarSalesFluxos()
+const coachBemEstarRecruitmentFluxos = getCoachBemEstarRecruitmentFluxos()
 
 // Função para normalizar slug (igual à usada no frontend)
 function normalizarSlug(texto: string): string {
@@ -19,23 +24,27 @@ function normalizarSlug(texto: string): string {
 // Função para encontrar fluxo pelo slug normalizado
 function encontrarFluxoPorSlug(slug: string): { fluxo: FluxoCliente; tipo: 'recrutamento' | 'vendas' } | null {
   const slugNormalizado = normalizarSlug(slug)
-  
-  // Buscar em fluxos de recrutamento
+
+  // Buscar em fluxos de recrutamento do coach-bem-estar (inclui quiz Pro Líderes ausentes no wellness-system)
+  for (const fluxo of coachBemEstarRecruitmentFluxos) {
+    if (normalizarSlug(fluxo.nome) === slugNormalizado) return { fluxo, tipo: 'recrutamento' }
+  }
+
+  // Buscar em fluxos de vendas do coach-bem-estar
+  for (const fluxo of coachBemEstarSalesFluxos) {
+    if (normalizarSlug(fluxo.nome) === slugNormalizado) return { fluxo, tipo: 'vendas' }
+  }
+
+  // Buscar em fluxos de recrutamento wellness (padrão)
   for (const fluxo of fluxosRecrutamento) {
-    const fluxoSlug = normalizarSlug(fluxo.nome)
-    if (fluxoSlug === slugNormalizado) {
-      return { fluxo, tipo: 'recrutamento' }
-    }
+    if (normalizarSlug(fluxo.nome) === slugNormalizado) return { fluxo, tipo: 'recrutamento' }
   }
-  
-  // Buscar em fluxos de vendas
+
+  // Buscar em fluxos de vendas wellness (padrão)
   for (const fluxo of fluxosClientes) {
-    const fluxoSlug = normalizarSlug(fluxo.nome)
-    if (fluxoSlug === slugNormalizado) {
-      return { fluxo, tipo: 'vendas' }
-    }
+    if (normalizarSlug(fluxo.nome) === slugNormalizado) return { fluxo, tipo: 'vendas' }
   }
-  
+
   return null
 }
 
@@ -72,6 +81,11 @@ export async function GET(request: NextRequest) {
       const coachOk = await hasActiveSubscription(ownerId, 'coach-bem-estar')
       return coachOk
     }
+
+    // Cores padrão por vertical — coach-bem-estar usa azul profissional; wellness usa verde
+    const defaultColors = area === 'coach-bem-estar'
+      ? { principal: '#2563EB', secundaria: '#1D4ED8' }
+      : { principal: '#10B981', secundaria: '#059669' }
 
     // Log inicial para diagnóstico
     console.log('🔍 [Wellness API] Buscando ferramenta:', {
@@ -118,16 +132,24 @@ export async function GET(request: NextRequest) {
       'agua': ['calc-hidratacao', 'calculadora-agua', 'calc-agua'],
       'calc-hidratacao': ['calculadora-agua', 'calc-agua', 'agua'],
       'calculadora-hidratacao': ['calc-hidratacao', 'calculadora-agua'],
+      // Calculadoras coach-bem-estar: URL usa nome longo, banco usa slug curto
+      'calculadora-imc': ['calc-imc'],
+      'calc-imc': ['calculadora-imc'],
+      'calculadora-calorias': ['calc-calorias'],
+      'calc-calorias': ['calculadora-calorias'],
+      'calculadora-proteina': ['calc-proteina'],
+      'calc-proteina': ['calculadora-proteina'],
     }
     const slugsToTryUser = [toolSlug, ...(slugAliasesForUserTemplates[toolSlug] || [])]
 
     // Buscar a ferramenta pelo user_id (slug ou alias)
+    // Aceita profession 'wellness' OU 'coach-bem-estar' — mesma infraestrutura de templates
     const { data, error } = await supabaseAdmin
       .from('user_templates')
       .select('*')
       .eq('user_id', userProfile.user_id)
       .in('slug', slugsToTryUser)
-      .eq('profession', 'wellness')
+      .in('profession', ['wellness', 'coach-bem-estar'])
       .eq('status', 'active')
       .maybeSingle()
 
@@ -228,7 +250,7 @@ export async function GET(request: NextRequest) {
           .select('*')
           .eq('user_id', userProfile.user_id)
           .in('template_slug', slugsForTemplateSlug)
-          .eq('profession', 'wellness')
+          .in('profession', ['wellness', 'coach-bem-estar'])
           .eq('status', 'active')
           .maybeSingle()
         
@@ -331,6 +353,13 @@ export async function GET(request: NextRequest) {
           agua: ['calc-hidratacao', 'calculadora-agua', 'calc-agua'],
           'calc-hidratacao': ['calculadora-agua', 'calc-agua', 'agua'],
           'calculadora-hidratacao': ['calc-hidratacao', 'calculadora-agua'],
+          // Calculadoras coach-bem-estar
+          'calculadora-imc': ['calc-imc'],
+          'calc-imc': ['calculadora-imc'],
+          'calculadora-calorias': ['calc-calorias'],
+          'calc-calorias': ['calculadora-calorias'],
+          'calculadora-proteina': ['calc-proteina'],
+          'calc-proteina': ['calculadora-proteina'],
         }
         const slugsToTry = [toolSlug, ...(slugAliases[toolSlug] || [])]
 
@@ -403,7 +432,7 @@ export async function GET(request: NextRequest) {
               template_id: templateBase.id,
               description: templateBase.description || templateBase.title || '',
               emoji: templateBase.icon || '📋',
-              custom_colors: { principal: '#10B981', secundaria: '#059669' },
+              custom_colors: defaultColors,
               cta_type: 'whatsapp',
               whatsapp_number: userProfile.whatsapp || null,
               cta_button_text: 'Conversar com Especialista',
@@ -469,7 +498,48 @@ export async function GET(request: NextRequest) {
             title: 'Quiz Perfil Nutricional',
             description: 'Identifique como seu corpo absorve nutrientes e receba orientações personalizadas',
             emoji: '🥗'
-          }
+          },
+          // Calculadoras coach-bem-estar
+          'calculadora-imc': {
+            title: 'Calculadora de IMC',
+            description: 'Calcule seu Índice de Massa Corporal e entenda o que ele significa para sua saúde',
+            emoji: '⚖️'
+          },
+          'calc-imc': {
+            title: 'Calculadora de IMC',
+            description: 'Calcule seu Índice de Massa Corporal e entenda o que ele significa para sua saúde',
+            emoji: '⚖️'
+          },
+          'calculadora-calorias': {
+            title: 'Calculadora de Calorias',
+            description: 'Descubra sua necessidade calórica diária com base no seu perfil e estilo de vida',
+            emoji: '🔥'
+          },
+          'calc-calorias': {
+            title: 'Calculadora de Calorias',
+            description: 'Descubra sua necessidade calórica diária com base no seu perfil e estilo de vida',
+            emoji: '🔥'
+          },
+          'calculadora-proteina': {
+            title: 'Calculadora de Proteína',
+            description: 'Calcule a quantidade ideal de proteína para seus objetivos de saúde e composição corporal',
+            emoji: '💪'
+          },
+          'calc-proteina': {
+            title: 'Calculadora de Proteína',
+            description: 'Calcule a quantidade ideal de proteína para seus objetivos de saúde e composição corporal',
+            emoji: '💪'
+          },
+          'calculadora-hidratacao': {
+            title: 'Calculadora de Hidratação',
+            description: 'Descubra a quantidade ideal de água que você deve beber por dia',
+            emoji: '💧'
+          },
+          'calculadora-agua': {
+            title: 'Calculadora de Hidratação',
+            description: 'Descubra a quantidade ideal de água que você deve beber por dia',
+            emoji: '💧'
+          },
         }
         const builtIn = builtInTemplates[toolSlug]
         if (builtIn) {
@@ -489,7 +559,7 @@ export async function GET(request: NextRequest) {
               template_slug: toolSlug,
               description: builtIn.description,
               emoji: builtIn.emoji,
-              custom_colors: { principal: '#10B981', secundaria: '#059669' },
+              custom_colors: defaultColors,
               cta_type: 'whatsapp',
               whatsapp_number: userProfile.whatsapp || null,
               cta_button_text: 'Conversar com Especialista',

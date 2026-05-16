@@ -4,6 +4,7 @@ import { BadgeCheck, Eye, MessageCircle, MousePointerClick } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
+import { copyTextToClipboard } from '@/lib/clipboard'
 import type { ProLideresMemberListItem } from '@/lib/pro-lideres-members-enriched'
 import type { ProLideresTenantRole } from '@/types/leader-tenant'
 
@@ -344,6 +345,8 @@ export function ProLideresEquipeMembersCollapsible({
   const [activateDays, setActivateDays] = useState('30')
   const [activateNoEnd, setActivateNoEnd] = useState(false)
   const [copyMessage, setCopyMessage] = useState<string | null>(null)
+  const [copyCopied, setCopyCopied] = useState(false)
+  const [copyError, setCopyError] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -409,6 +412,8 @@ export function ProLideresEquipeMembersCollapsible({
         return
       }
       if (activateFlow === 'pending') {
+        setCopyCopied(false)
+        setCopyError(null)
         setCopyMessage(typeof data.copyMessage === 'string' ? data.copyMessage : null)
       }
       setActivateUserId(null)
@@ -423,12 +428,21 @@ export function ProLideresEquipeMembersCollapsible({
     }
   }
 
-  async function copyToClipboard(text: string) {
-    try {
-      await navigator.clipboard.writeText(text)
-    } catch {
-      setActionError('Não foi possível copiar. Seleciona o texto manualmente.')
+  async function copyMemberMessage(text: string) {
+    setCopyError(null)
+    const ok = await copyTextToClipboard(text)
+    if (ok) {
+      setCopyCopied(true)
+      setTimeout(() => setCopyCopied(false), 2500)
+      return
     }
+    setCopyError('Não foi possível copiar. Seleciona o texto na caixa acima e copia manualmente.')
+  }
+
+  function closeCopyModal() {
+    setCopyMessage(null)
+    setCopyCopied(false)
+    setCopyError(null)
   }
 
   return (
@@ -543,18 +557,23 @@ export function ProLideresEquipeMembersCollapsible({
               rows={8}
               className="mt-3 w-full resize-y rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 font-sans text-sm text-gray-900"
             />
+            {copyError ? (
+              <p className="mt-3 text-sm font-medium text-red-600" role="alert">
+                {copyError}
+              </p>
+            ) : null}
             <div className="mt-4 flex flex-wrap justify-end gap-2">
               <button
                 type="button"
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                onClick={() => void copyToClipboard(copyMessage)}
+                onClick={() => void copyMemberMessage(copyMessage)}
               >
-                Copiar texto
+                {copyCopied ? 'Copiado!' : 'Copiar texto'}
               </button>
               <button
                 type="button"
                 className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
-                onClick={() => setCopyMessage(null)}
+                onClick={closeCopyModal}
               >
                 Fechar
               </button>
