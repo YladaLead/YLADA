@@ -3,33 +3,65 @@
 import { useState, useCallback } from 'react'
 import type { FluxoCliente, PerguntaFluxoCliente } from '@/types/wellness-system'
 
-// ─── Sanitizer — remove referências a Herbalife / MLM do conteúdo ──────────
+// ─── Sanitizer — remove referências a Herbalife / MLM / Wellness / Noel ─────
 
-const TERMOS_BANIDOS = [
-  'herbalife',
-  'bebida funcional',
-  'bebidas funcionais',
-  'shake herbalife',
-  'nrg energia',
-  'kit energia',
-  'kit acelera',
-  'kit ambos',
-  'suplemento herbalife',
-  'produto herbalife',
-  'linha herbalife',
-  'distribuidor herbalife',
-  'distribuidora herbalife',
-  'oportunidade de negócio',
-  'oportunidade herbalife',
-  'membro herbalife',
+/** Substituições diretas — aplicadas em ordem, case-insensitive */
+const SUBSTITUICOES: Array<[RegExp, string]> = [
+  // Referências ao agente Noel
+  [/a análise noel/gi, 'o acompanhamento'],
+  [/análise noel/gi, 'acompanhamento personalizado'],
+  [/inteligência noel/gi, 'inteligência do coach'],
+  [/o noel/gi, 'o coach'],
+  [/\bnoel\b/gi, 'o coach'],
+  // Referências ao vertical Wellness
+  [/no wellness\b/gi, 'neste diagnóstico'],
+  [/do wellness\b/gi, 'deste diagnóstico'],
+  [/no (quiz|sistema|programa) wellness/gi, 'neste diagnóstico'],
+  [/as mesmas leituras do quiz de ganhos no wellness\s*[—–-]?\s*/gi, ''],
+  [/\bwellness\b/gi, 'bem-estar'],
+  // Referências a Pro Líderes / recrutamento MLM
+  [/pro.?líderes/gi, ''],
+  [/oportunidade de negócio/gi, 'próximo passo'],
+  [/oportunidade herbalife/gi, 'oportunidade'],
+  [/quero conhecer novas oportunidades/gi, 'Quero dar o próximo passo'],
+  // Produtos Herbalife
+  [/herbalife/gi, ''],
+  [/bebidas? funcionais?/gi, 'hábitos saudáveis'],
+  [/shake herbalife/gi, ''],
+  [/\bnrg\b/gi, ''],
+  [/kit energia/gi, ''],
+  [/kit acelera/gi, ''],
+  [/suplemento herbalife/gi, 'suplemento'],
+  [/produtos? herbalife/gi, ''],
+  [/linha herbalife/gi, ''],
+  [/distribuidor[a]? herbalife/gi, ''],
+  [/membro herbalife/gi, ''],
 ]
 
+/** Termos que, se ainda restarem após substituições, descartam o item inteiro */
+const TERMOS_RESIDUAIS = ['herbalife', 'nrg energia', 'kit energia', 'kit acelera']
+
 function sanitizarTexto(texto: string): string {
-  const lower = texto.toLowerCase()
-  const contaminado = TERMOS_BANIDOS.some((t) => lower.includes(t))
-  if (!contaminado) return texto
-  // Substitui por mensagem genérica de bem-estar
-  return 'Com os ajustes certos na sua rotina e o suporte adequado, você pode transformar sua saúde e bem-estar de forma sustentável.'
+  if (!texto) return texto
+
+  let resultado = texto
+  for (const [regex, substituto] of SUBSTITUICOES) {
+    resultado = resultado.replace(regex, substituto)
+  }
+
+  // Limpa espaços duplos ou início de frase estranha após remoções
+  resultado = resultado
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^[\s,—–\-–]+/, '')
+    .replace(/[\s,—–\-–]+$/, '')
+    .trim()
+
+  // Se ficou muito curto ou vazio após limpeza, retorna mensagem neutra
+  if (resultado.length < 15) {
+    return 'Com o suporte certo, você pode transformar sua saúde e bem-estar de forma sustentável.'
+  }
+
+  return resultado
 }
 
 function sanitizarLista(lista: string[]): string[] {
@@ -37,7 +69,7 @@ function sanitizarLista(lista: string[]): string[] {
     .map(sanitizarTexto)
     .filter((item) => {
       const lower = item.toLowerCase()
-      return !TERMOS_BANIDOS.some((t) => lower.includes(t))
+      return !TERMOS_RESIDUAIS.some((t) => lower.includes(t)) && item.length >= 10
     })
 }
 
@@ -83,9 +115,15 @@ export default function FluxoDiagnosticoCoach({
   const total = perguntas.length
   const perguntaAtual: PerguntaFluxoCliente | undefined = perguntas[indiceAtual]
 
-  // Diagnóstico sanitizado (sem Herbalife)
+  // Conteúdo sanitizado (sem Herbalife / Wellness / Noel / MLM)
+  const nomeFluxo = sanitizarTexto(fluxo.nome)
+  const objetivoFluxo = sanitizarTexto(fluxo.objetivo || '')
+  const ctaFluxo = sanitizarTexto(fluxo.cta || '')
+
   const diag = {
     ...fluxo.diagnostico,
+    titulo: sanitizarTexto(fluxo.diagnostico.titulo),
+    descricao: sanitizarTexto(fluxo.diagnostico.descricao),
     mensagemPositiva: sanitizarTexto(fluxo.diagnostico.mensagemPositiva),
     sintomas: sanitizarLista(fluxo.diagnostico.sintomas),
     beneficios: sanitizarLista(fluxo.diagnostico.beneficios),
@@ -93,7 +131,7 @@ export default function FluxoDiagnosticoCoach({
 
   const whatsappUrl = buildWhatsAppUrl(
     whatsappNumber,
-    fluxo.cta || `Olá! Fiz o diagnóstico "${fluxo.nome}" e quero saber mais.`,
+    ctaFluxo || `Olá! Fiz o diagnóstico "${nomeFluxo}" e quero saber mais.`,
     countryCode,
   )
 
@@ -129,7 +167,7 @@ export default function FluxoDiagnosticoCoach({
   }
 
   const compartilhar = async () => {
-    const texto = buildShareText(fluxo.nome, diag.titulo)
+    const texto = buildShareText(nomeFluxo, diag.titulo)
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({ text: texto, url: window.location.href })
@@ -158,12 +196,12 @@ export default function FluxoDiagnosticoCoach({
 
           {/* Título */}
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 leading-tight">
-            {fluxo.nome}
+            {nomeFluxo}
           </h1>
 
           {/* Subtítulo */}
-          {fluxo.objetivo && (
-            <p className="text-gray-600 text-sm leading-relaxed mb-4">{fluxo.objetivo}</p>
+          {objetivoFluxo && (
+            <p className="text-gray-600 text-sm leading-relaxed mb-4">{objetivoFluxo}</p>
           )}
 
           {/* Tempo estimado */}
@@ -367,7 +405,7 @@ export default function FluxoDiagnosticoCoach({
             </span>
           </div>
 
-          <p className="text-xs text-gray-500 mb-1">{fluxo.nome}</p>
+          <p className="text-xs text-gray-500 mb-1">{nomeFluxo}</p>
 
           {/* Card principal — diagnóstico */}
           <div className="relative mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-sky-50 to-white border border-sky-100/80 shadow-sm">
@@ -472,7 +510,7 @@ export default function FluxoDiagnosticoCoach({
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                 </svg>
-                {fluxo.cta || 'Falar com especialista'}
+                {ctaFluxo || 'Falar com especialista'}
               </a>
 
               {/* Botão compartilhar */}
