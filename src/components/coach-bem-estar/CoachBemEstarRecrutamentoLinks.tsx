@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useWellnessProfile } from '@/hooks/useWellnessProfile'
 import { getCoachBemEstarRecruitmentFluxos } from '@/lib/coach-bem-estar/coach-bem-estar-fluxos'
 import { buildCoachBemEstarToolUrl } from '@/lib/url-utils'
-import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
+import FluxoDiagnosticoCoach from '@/components/wellness-system/FluxoDiagnosticoCoach'
 import type { FluxoCliente } from '@/types/wellness-system'
 
 /**
@@ -155,11 +155,10 @@ export default function CoachBemEstarRecrutamentoLinks() {
             </div>
             {/* Conteúdo do fluxo */}
             <div className="p-4">
-              <FluxoDiagnostico
+              <FluxoDiagnosticoCoach
                 fluxo={preview}
                 whatsappNumber={profile?.whatsapp || ''}
                 countryCode="BR"
-                mostrarProdutos={false}
               />
             </div>
           </div>

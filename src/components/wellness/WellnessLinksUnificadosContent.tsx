@@ -25,6 +25,7 @@ import { WELLNESS_HYPE_MEUS_LINKS } from '@/lib/wellness/wellness-hype-meus-link
 import dynamic from 'next/dynamic'
 import QRCode from '@/components/QRCode'
 import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
+import FluxoDiagnosticoCoach from '@/components/wellness-system/FluxoDiagnosticoCoach'
 import ScriptsModal from '@/components/wellness/ScriptsModal'
 import { getScriptsPorSlug, getScriptsPorTipo } from '@/lib/wellness-system/scripts-por-ferramenta'
 import { useToast } from '@/hooks/useToast'
@@ -2019,12 +2020,20 @@ Você vai adorar! 😊`
                     })()
                   ) : item.metadata?.fluxo ? (
                     <div>
-                      <FluxoDiagnostico
-                        fluxo={item.metadata.fluxo}
-                        whatsappNumber={profile?.whatsapp || ''}
-                        countryCode={profile?.countryCode || 'BR'}
-                        mostrarProdutos={item.tipo === 'fluxo-vendas'} // Vendas mostra produtos, recrutamento não
-                      />
+                      {coachBemEstarEmbed ? (
+                        <FluxoDiagnosticoCoach
+                          fluxo={item.metadata.fluxo}
+                          whatsappNumber={profile?.whatsapp || ''}
+                          countryCode={profile?.countryCode || 'BR'}
+                        />
+                      ) : (
+                        <FluxoDiagnostico
+                          fluxo={item.metadata.fluxo}
+                          whatsappNumber={profile?.whatsapp || ''}
+                          countryCode={profile?.countryCode || 'BR'}
+                          mostrarProdutos={item.tipo === 'fluxo-vendas'}
+                        />
+                      )}
                     </div>
                   ) : (
                     <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
