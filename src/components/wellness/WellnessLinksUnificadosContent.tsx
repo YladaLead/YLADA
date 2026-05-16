@@ -1457,13 +1457,36 @@ Você vai adorar! 😊`
                 </article>
             )
 
-            const renderSection = (titulo: string, icone: string, items: ItemUnificado[]) =>
+            // Banner para seções que precisam de user_slug (vendas e recrutamento)
+            const needsSlugBanner = !profile?.userSlug
+            const renderSlugBanner = () => (
+              <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-center gap-3">
+                <span className="text-xl">🔗</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-amber-900">
+                    Configure seu link personalizado para ativar estas ferramentas
+                  </p>
+                  <p className="text-xs text-amber-700 mt-0.5">
+                    Sem o link, não é possível gerar URLs com seus dados de contato.
+                  </p>
+                </div>
+                <a
+                  href={settingsHref}
+                  className="shrink-0 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700 transition-colors"
+                >
+                  Configurar →
+                </a>
+              </div>
+            )
+
+            const renderSection = (titulo: string, icone: string, items: ItemUnificado[], requiresSlug = false) =>
               items.length === 0 ? null : (
                 <div className="mb-10">
                   <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
                     <span>{icone}</span>
                     <span>{titulo}</span>
                   </h2>
+                  {requiresSlug && needsSlugBanner ? renderSlugBanner() : null}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {items.map(renderCoachCard)}
                   </div>
@@ -1480,9 +1503,9 @@ Você vai adorar! 😊`
 
             return (
               <div className="max-w-7xl mx-auto">
-                {renderSection('Calculadoras', '🧮', calcItems)}
-                {renderSection('Ferramentas de venda', '💚', vendasItems)}
-                {renderSection('Recrutamento', '👥', recrutItems)}
+                {renderSection('Calculadoras', '🧮', calcItems, false)}
+                {renderSection('Ferramentas de venda', '💚', vendasItems, true)}
+                {renderSection('Recrutamento', '👥', recrutItems, true)}
               </div>
             )
           })()
