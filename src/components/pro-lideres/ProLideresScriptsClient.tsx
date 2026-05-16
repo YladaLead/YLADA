@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
+import { ProLideresFerramentasTab, MoverParaFerramentaModal } from '@/components/pro-lideres/ProLideresFerramentasTab'
 import { ProLideresCatalogToolPicker } from '@/components/pro-lideres/ProLideresCatalogToolPicker'
 import { ProLideresScriptsLibraryFilters } from '@/components/pro-lideres/ProLideresScriptsLibraryFilters'
 import { ProLideresScriptsNoelGenerator } from '@/components/pro-lideres/ProLideresScriptsNoelGenerator'
@@ -93,6 +94,10 @@ function ScriptsEmptyStateLeader() {
 
 export function ProLideresScriptsClient() {
   const { teamViewPreview, devStubPanel } = useProLideresPainel()
+
+  // ── Aba ativa ──────────────────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState<'ferramentas' | 'noel'>('ferramentas')
+
   const [sections, setSections] = useState<ProLideresScriptSectionWithEntries[]>([])
   const [catalog, setCatalog] = useState<ProLideresCatalogItem[]>([])
   const [canEdit, setCanEdit] = useState(false)
@@ -278,8 +283,39 @@ export function ProLideresScriptsClient() {
   const teamExperience = !canEditUi
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
+    <div className="mx-auto max-w-4xl space-y-6">
       <h1 className="sr-only">{teamExperience ? 'Scripts — biblioteca da equipe' : 'Scripts'}</h1>
+
+      {/* ── Seletor de aba ── */}
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+        <button
+          onClick={() => setActiveTab('ferramentas')}
+          className={`px-4 py-2 text-sm font-semibold rounded-lg transition ${
+            activeTab === 'ferramentas'
+              ? 'bg-white text-indigo-700 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          🔧 Ferramentas
+        </button>
+        <button
+          onClick={() => setActiveTab('noel')}
+          className={`px-4 py-2 text-sm font-semibold rounded-lg transition ${
+            activeTab === 'noel'
+              ? 'bg-white text-indigo-700 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          ✨ Criar com Noel
+        </button>
+      </div>
+
+      {/* ── Aba Ferramentas ── */}
+      {activeTab === 'ferramentas' && <ProLideresFerramentasTab />}
+
+      {/* ── Aba Noel (conteúdo original) ── */}
+      {activeTab === 'noel' && (
+      <div className="space-y-8">
 
       {devStubPanel && (
         <p className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-950">
@@ -461,6 +497,8 @@ export function ProLideresScriptsClient() {
         </Link>
         .
       </p>
+      </div>
+      )}
     </div>
   )
 }
@@ -1347,6 +1385,7 @@ function EntryCard({
   const [subtitle, setSubtitle] = useState(entry.subtitle ?? '')
   const [body, setBody] = useState(entry.body)
   const [how, setHow] = useState(entry.how_to_use ?? '')
+  const [showMover, setShowMover] = useState(false)
 
   useEffect(() => {
     setTitle(entry.title)
@@ -1503,6 +1542,14 @@ function EntryCard({
                   </button>
                   <button
                     type="button"
+                    onClick={() => setShowMover(true)}
+                    className="min-h-[44px] rounded-lg border border-indigo-200 bg-indigo-50 px-3 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+                    title="Mover para uma ferramenta"
+                  >
+                    → Ferramenta
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setEditing(true)}
                     className="min-h-[44px] rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
                   >
@@ -1515,6 +1562,14 @@ function EntryCard({
                   >
                     Apagar
                   </button>
+                  {showMover && (
+                    <MoverParaFerramentaModal
+                      entryId={entry.id}
+                      entryTitle={entry.title}
+                      onClose={() => setShowMover(false)}
+                      onMoved={() => { setShowMover(false); void onReload() }}
+                    />
+                  )}
                 </>
               )}
             </div>
