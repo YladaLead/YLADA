@@ -82,10 +82,10 @@ export default function AdminUsuarios() {
   const t = useMemo(() => getAdminUsuariosTranslations('pt'), [])
 
   /** Base da listagem: Todos (YLADA+Wellness) | só YLADA (todos os segmentos) | só Wellness. API: query `bloco`. */
-  const [filtroBloco, setFiltroBloco] = useState<'todos' | 'ylada' | 'wellness'>('ylada')
+  const [filtroBloco, setFiltroBloco] = useState<'todos' | 'ylada' | 'wellness'>('todos')
   /** Coluna Área — API: query `perfil` (slug exato; não confundir com area=ylada legado). */
   const [filtroSegmento, setFiltroSegmento] = useState('todos')
-  const [ocultarContasTeste, setOcultarContasTeste] = useState(true)
+  const [ocultarContasTeste, setOcultarContasTeste] = useState(false)
 
   const mostrarColunasPresidente = false
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'ativo' | 'inativo'>('todos')
@@ -101,8 +101,8 @@ export default function AdminUsuarios() {
     | 'sem'
   >('todos')
   const [filtroHistorico, setFiltroHistorico] = useState<'todos' | 'nunca_pagou' | 'ja_pagou'>('todos')
-  /** Ordenação por `user_profiles.created_at` (coluna Cadastro); API: `ordenacao_cadastro`. Padrão: mais recentes primeiro. */
-  const [filtroOrdenacaoCadastro, setFiltroOrdenacaoCadastro] = useState<'padrao' | 'recente' | 'antigo'>('recente')
+  /** Ordenação por `user_profiles.created_at` (coluna Cadastro); API: `ordenacao_cadastro`. Padrão: ordem do banco (Todos). */
+  const [filtroOrdenacaoCadastro, setFiltroOrdenacaoCadastro] = useState<'padrao' | 'recente' | 'antigo'>('padrao')
   const [filtroPresidente, setFiltroPresidente] = useState<string>('todos')
   const [busca, setBusca] = useState('')
   /** Painel de filtros recolhido por padrão — mais espaço para a lista. */
@@ -176,7 +176,7 @@ export default function AdminUsuarios() {
 
   const filtrosAtivosCount = useMemo(() => {
     let n = 0
-    if (filtroBloco !== 'ylada') n++
+    if (filtroBloco !== 'todos') n++
     if (filtroSegmento !== 'todos') n++
     if (busca.trim()) n++
     if (filtroStatus !== 'todos') n++
