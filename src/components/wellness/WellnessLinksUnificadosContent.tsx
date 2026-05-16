@@ -679,13 +679,7 @@ export function WellnessLinksUnificadosContent({
 
   const itensListaFinal = useMemo((): ItemUnificado[] => {
     if (!coachBemEstarEmbed) {
-      const list = itensUnificados.filter((i) => {
-        if (i.id === 'hom-gravada') return false
-        if (i.id.startsWith('recrutamento-') && !i.id.startsWith('recrutamento-quiz-')) return false
-        if (i.id.startsWith('vendas-')) return false
-        return true
-      })
-      return dedupeItensUnificadosPorSlug(list)
+      return dedupeItensUnificadosPorSlug(itensUnificados)
     }
 
     // ── Calculadoras (IMC, água, calorias, proteína, hype) ──────────────────
