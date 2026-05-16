@@ -8,7 +8,8 @@ import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
-import { calculadoraAguaDiagnosticos } from '@/lib/diagnostics/wellness/calculadora-agua'
+import { calculadoraAguaDiagnosticos as wellnessAguaDiag } from '@/lib/diagnostics/wellness/calculadora-agua'
+import { calculadoraAguaDiagnosticos as coachAguaDiag } from '@/lib/diagnostics/coach/calculadora-agua'
 
 interface ResultadoHidratacao {
   aguaDiaria: number
@@ -16,10 +17,20 @@ interface ResultadoHidratacao {
   interpretacao: string
   cor: string
   recomendacoes: string[]
-  diagnostico?: typeof calculadoraAguaDiagnosticos.wellness.baixaHidratacao
+  diagnostico?: {
+    diagnostico: string
+    causaRaiz: string
+    acaoImediata: string
+    plano7Dias?: string
+    suplementacao?: string
+    alimentacao?: string
+    proximoPasso?: string
+  }
 }
 
 export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
+  const isCoach = config?.vertical === 'coach-bem-estar' || config?.vertical === 'coach'
+
   const [etapa, setEtapa] = useState<'landing' | 'formulario' | 'resultado'>('landing')
   const [peso, setPeso] = useState('')
   const [atividade, setAtividade] = useState('')
@@ -63,6 +74,8 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
     const aguaL = Math.round(aguaDiaria / 1000)
     const copos = Math.round(aguaDiaria / 250)
 
+    const aguaDiag = isCoach ? coachAguaDiag.coach : wellnessAguaDiag.wellness
+
     let interpretacao = ''
     let cor = ''
     let recomendacoes: string[] = []
@@ -77,7 +90,7 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
         'Beber água a cada hora',
         'Criar lembretes para beber água'
       ]
-      diagnosticoSelecionado = calculadoraAguaDiagnosticos.wellness.baixaHidratacao
+      diagnosticoSelecionado = aguaDiag.baixaHidratacao
     } else if (aguaL >= 2 && aguaL < 3) {
       interpretacao = 'Sua necessidade diária de hidratação está adequada.'
       cor = 'green'
@@ -87,7 +100,7 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
         'Hidratar antes e após atividades físicas',
         'Incluir alimentos ricos em água'
       ]
-      diagnosticoSelecionado = calculadoraAguaDiagnosticos.wellness.hidratacaoModerada
+      diagnosticoSelecionado = aguaDiag.hidratacaoModerada
     } else {
       interpretacao = 'Sua necessidade diária de hidratação é alta!'
       cor = 'blue'
@@ -97,7 +110,7 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
         'Aumentar ingestão nos momentos de treino',
         'Monitorar sinais de desidratação'
       ]
-      diagnosticoSelecionado = calculadoraAguaDiagnosticos.wellness.altaHidratacao
+      diagnosticoSelecionado = aguaDiag.altaHidratacao
     }
 
     setResultado({
@@ -319,10 +332,12 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
               {/* Título convidativo */}
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  💧 Quer um plano completo de hidratação personalizado?
+                  {isCoach ? '💧 Quer transformar sua hidratação em saúde real?' : '💧 Quer um plano completo de hidratação personalizado?'}
                 </h3>
                 <p className="text-gray-600">
-                  Te ajudo a alcançar seus objetivos de forma personalizada!
+                  {isCoach
+                    ? 'Hidratação adequada é um dos pilares do seu bem-estar. Posso te ajudar!'
+                    : 'Te ajudo a alcançar seus objetivos de forma personalizada!'}
                 </p>
               </div>
 
@@ -332,24 +347,45 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
                   <span className="text-2xl mr-2">✨</span>
                   O que você vai receber:
                 </h4>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Cronograma de hidratação adaptado à sua rotina</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Dicas para criar lembretes personalizados</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Ajustes conforme treino e clima</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Melhorar pele, energia e desempenho físico</span>
-                  </li>
-                </ul>
+                {isCoach ? (
+                  <ul className="space-y-2">
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Estratégia de hidratação adaptada ao seu dia</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Acompanhamento de bem-estar e disposição</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Hábitos simples que se encaixam na sua rotina</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Mais energia, foco e leveza no dia a dia</span>
+                    </li>
+                  </ul>
+                ) : (
+                  <ul className="space-y-2">
+                    <li className="flex items-start">
+                      <span className="text-green-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Cronograma de hidratação adaptado à sua rotina</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Dicas para criar lembretes personalizados</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Ajustes conforme treino e clima</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Melhorar pele, energia e desempenho físico</span>
+                    </li>
+                  </ul>
+                )}
               </div>
 
               {/* CTA Button - Botão do WhatsApp sem coleta de dados */}

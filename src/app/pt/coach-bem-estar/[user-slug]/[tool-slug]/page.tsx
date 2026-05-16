@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
-import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
+import FluxoDiagnosticoCoach from '@/components/wellness-system/FluxoDiagnosticoCoach'
 
 interface Tool {
   id: string
@@ -154,6 +154,7 @@ export default function FerramentaCoachBemEstarPage() {
     cta_button_text: tool.cta_button_text,
     custom_whatsapp_message: tool.custom_whatsapp_message,
     show_whatsapp_button: tool.show_whatsapp_button !== false,
+    vertical: 'coach-bem-estar',
     leader_data_collection: leaderDataCollection?.enabled
       ? {
           coletar_dados: true,
@@ -166,24 +167,15 @@ export default function FerramentaCoachBemEstarPage() {
       : undefined,
   }
 
-  // Fluxos de vendas e recrutamento (não têm template_slug estático — renderizados pelo FluxoDiagnostico)
+  // Fluxos de vendas e recrutamento (renderizados pelo FluxoDiagnosticoCoach — formato Pro Líderes)
   if (tool.is_fluxo && tool.content?.fluxo) {
     const fluxo = tool.content.fluxo
-    const tipo = tool.content.tipo || tool.fluxo_tipo || 'vendas'
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{fluxo.nome}</h1>
-          </div>
-          <FluxoDiagnostico
-            fluxo={fluxo}
-            whatsappNumber={tool.whatsapp_number || ''}
-            countryCode={tool.user_profiles?.country_code || 'BR'}
-            mostrarProdutos={tipo === 'vendas'}
-          />
-        </main>
-      </div>
+      <FluxoDiagnosticoCoach
+        fluxo={fluxo}
+        whatsappNumber={tool.whatsapp_number || ''}
+        countryCode={tool.user_profiles?.country_code || 'BR'}
+      />
     )
   }
 

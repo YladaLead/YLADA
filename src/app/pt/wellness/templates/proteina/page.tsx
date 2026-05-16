@@ -26,7 +26,8 @@ interface ResultadoProteina {
 export default function CalculadoraProteina({ config }: TemplateBaseProps) {
   const pathname = usePathname()
   const params = useParams()
-  const isCoach = pathname?.includes('/coach/') || pathname?.includes('/c/')
+  const isCoach = config?.vertical === 'coach-bem-estar' || config?.vertical === 'coach'
+    || pathname?.includes('/coach/') || pathname?.includes('/c/') || pathname?.includes('/coach-bem-estar/')
   const toolSlug = params?.['tool-slug'] as string | undefined
   const userSlug = params?.['user-slug'] as string | undefined
   

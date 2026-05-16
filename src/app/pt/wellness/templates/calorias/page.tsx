@@ -7,7 +7,8 @@ import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
-import { calculadoraCaloriasDiagnosticos } from '@/lib/diagnostics/wellness/calculadora-calorias'
+import { calculadoraCaloriasDiagnosticos as wellnessCaloriasDiag } from '@/lib/diagnostics/wellness/calculadora-calorias'
+import { calculadoraCaloriasDiagnosticos as coachCaloriasDiag } from '@/lib/diagnostics/coach/calculadora-calorias'
 
 interface ResultadoCalorias {
   tmb: number // Taxa Metabólica Basal
@@ -17,10 +18,20 @@ interface ResultadoCalorias {
   cor: string
   descricao: string
   recomendacoes: string[]
-  diagnostico?: typeof calculadoraCaloriasDiagnosticos.wellness.deficitCalorico
+  diagnostico?: {
+    diagnostico: string
+    causaRaiz: string
+    acaoImediata: string
+    plano7Dias?: string
+    suplementacao?: string
+    alimentacao?: string
+    proximoPasso?: string
+  }
 }
 
 export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
+  const isCoach = config?.vertical === 'coach-bem-estar' || config?.vertical === 'coach'
+
   const [etapa, setEtapa] = useState<'landing' | 'formulario' | 'resultado'>('landing')
   const [idade, setIdade] = useState('')
   const [genero, setGenero] = useState('')
@@ -69,6 +80,8 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
 
     // Ajustar por objetivo
     let calorias = tdee
+    const caloriasDiag = isCoach ? coachCaloriasDiag.coach : wellnessCaloriasDiag.wellness
+
     let descricao = ''
     let cor = 'green'
     let recomendacoes: string[] = []
@@ -84,7 +97,7 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
         'Praticar exercícios regulares combinando cardio e força',
         'Acompanhamento profissional para garantir perda saudável'
       ]
-      diagnosticoSelecionado = calculadoraCaloriasDiagnosticos.wellness.deficitCalorico
+      diagnosticoSelecionado = caloriasDiag.deficitCalorico
     } else if (objetivo === 'manter') {
       calorias = Math.round(tdee)
       descricao = 'Para manter seu peso atual, você precisa consumir a mesma quantidade de calorias que gasta.'
@@ -95,7 +108,7 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
         'Monitorar peso periodicamente',
         'Manter hábitos saudáveis de sono e hidratação'
       ]
-      diagnosticoSelecionado = calculadoraCaloriasDiagnosticos.wellness.manutencaoCalorica
+      diagnosticoSelecionado = caloriasDiag.manutencaoCalorica
     } else if (objetivo === 'ganhar') {
       calorias = Math.round(tdee * 1.15) // Superávit de 15%
       descricao = 'Para ganhar peso de forma saudável, você precisa de um superávit calórico moderado.'
@@ -106,7 +119,7 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
         'Praticar exercícios de força regularmente',
         'Acompanhamento profissional para garantir ganho saudável'
       ]
-      diagnosticoSelecionado = calculadoraCaloriasDiagnosticos.wellness.superavitCalorico
+      diagnosticoSelecionado = caloriasDiag.superavitCalorico
     }
 
     setResultado({
@@ -442,10 +455,12 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
               {/* Título convidativo */}
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  🎯 Quer um plano alimentar completo?
+                  {isCoach ? '🎯 Quer equilibrar sua energia e bem-estar?' : '🎯 Quer um plano alimentar completo?'}
                 </h3>
                 <p className="text-gray-600">
-                  Te ajudo a alcançar seus objetivos de forma personalizada!
+                  {isCoach
+                    ? 'Te ajudo a usar suas calorias a favor da sua saúde e disposição!'
+                    : 'Te ajudo a alcançar seus objetivos de forma personalizada!'}
                 </p>
               </div>
 
@@ -455,24 +470,45 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
                   <span className="text-2xl mr-2">✨</span>
                   O que você vai receber:
                 </h4>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Cardápio personalizado com as calorias certas</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Distribuição ideal de macronutrientes</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Receitas práticas e saborosas</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Alcançar seu objetivo de forma sustentável</span>
-                  </li>
-                </ul>
+                {isCoach ? (
+                  <ul className="space-y-2">
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Estratégia calórica personalizada para seu objetivo</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Acompanhamento de bem-estar energético</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Hábitos sustentáveis que respeitam sua rotina</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Resultados reais com apoio especializado</span>
+                    </li>
+                  </ul>
+                ) : (
+                  <ul className="space-y-2">
+                    <li className="flex items-start">
+                      <span className="text-green-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Cardápio personalizado com as calorias certas</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Distribuição ideal de macronutrientes</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Receitas práticas e saborosas</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Alcançar seu objetivo de forma sustentável</span>
+                    </li>
+                  </ul>
+                )}
               </div>
 
               {/* CTA Button - Botão do WhatsApp sem coleta de dados */}

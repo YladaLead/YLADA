@@ -8,7 +8,8 @@ import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
-import { calculadoraImcDiagnosticos } from '@/lib/diagnostics/wellness/calculadora-imc'
+import { calculadoraImcDiagnosticos as wellnessDiagnosticos } from '@/lib/diagnostics/wellness/calculadora-imc'
+import { calculadoraImcDiagnosticos as coachDiagnosticos } from '@/lib/diagnostics/coach/calculadora-imc'
 
 interface ResultadoIMC {
   imc: number
@@ -16,7 +17,15 @@ interface ResultadoIMC {
   cor: string
   descricao: string
   recomendacoes: string[]
-  diagnostico?: typeof calculadoraImcDiagnosticos.wellness.baixoPeso
+  diagnostico?: {
+    diagnostico: string
+    causaRaiz: string
+    acaoImediata: string
+    plano7Dias?: string
+    suplementacao?: string
+    alimentacao?: string
+    proximoPasso?: string
+  }
 }
 
 export default function CalculadoraIMC({ config }: TemplateBaseProps) {
@@ -30,6 +39,9 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
   const iniciarCalculo = () => {
     setEtapa('formulario')
   }
+
+  const isCoach = config?.vertical === 'coach-bem-estar' || config?.vertical === 'coach'
+  const diagnosticos = isCoach ? coachDiagnosticos.coach : wellnessDiagnosticos.wellness
 
   const calcularIMC = () => {
     // 🚀 CORREÇÃO: Validar todos os campos obrigatórios antes de calcular
@@ -66,7 +78,7 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
         'Considerar exercícios de fortalecimento',
         'Acompanhar crescimento gradual'
       ]
-      diagnosticoSelecionado = calculadoraImcDiagnosticos.wellness.baixoPeso
+      diagnosticoSelecionado = diagnosticos.baixoPeso
     } else if (imc >= 18.5 && imc < 25) {
       categoria = 'Peso Normal'
       cor = 'green'
@@ -77,7 +89,7 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
         'Alimentação balanceada',
         'Acompanhamento preventivo'
       ]
-      diagnosticoSelecionado = calculadoraImcDiagnosticos.wellness.pesoNormal
+      diagnosticoSelecionado = diagnosticos.pesoNormal
     } else if (imc >= 25 && imc < 30) {
       categoria = 'Sobrepeso'
       cor = 'orange'
@@ -88,7 +100,7 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
         'Estabelecer metas realistas',
         'Acompanhamento profissional'
       ]
-      diagnosticoSelecionado = calculadoraImcDiagnosticos.wellness.sobrepeso
+      diagnosticoSelecionado = diagnosticos.sobrepeso
     } else {
       // IMC >= 30 (Obesidade Grau I, II ou III)
       categoria = imc >= 35 ? 'Obesidade Grau II ou III' : 'Obesidade Grau I'
@@ -109,7 +121,7 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
             'Atividade física acompanhada',
             'Suporte profissional contínuo'
           ]
-      diagnosticoSelecionado = calculadoraImcDiagnosticos.wellness.obesidade
+      diagnosticoSelecionado = diagnosticos.obesidade
     }
 
     setResultado({
@@ -361,10 +373,12 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
               {/* Título convidativo */}
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  ✨ Quer alcançar seu peso ideal?
+                  {isCoach ? '✨ Quer equilibrar seu peso com saúde?' : '✨ Quer alcançar seu peso ideal?'}
                 </h3>
                 <p className="text-gray-600">
-                  Te ajudo a alcançar seus objetivos de forma personalizada!
+                  {isCoach
+                    ? 'Te ajudo a alcançar equilíbrio saudável de forma personalizada e sustentável!'
+                    : 'Te ajudo a alcançar seus objetivos de forma personalizada!'}
                 </p>
               </div>
 
@@ -374,24 +388,45 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
                   <span className="text-2xl mr-2">✨</span>
                   O que você vai receber:
                 </h4>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Plano alimentar personalizado para seu objetivo</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Estratégias para perder peso de forma saudável</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Acompanhamento nutricional profissional</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Manter resultados de forma sustentável</span>
-                  </li>
-                </ul>
+                {isCoach ? (
+                  <ul className="space-y-2">
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Acompanhamento de bem-estar personalizado</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Estratégias de equilíbrio saudável e sustentável</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Apoio especializado no seu ritmo e rotina</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Hábitos que se encaixam na sua vida real</span>
+                    </li>
+                  </ul>
+                ) : (
+                  <ul className="space-y-2">
+                    <li className="flex items-start">
+                      <span className="text-green-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Plano alimentar personalizado para seu objetivo</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Estratégias para perder peso de forma saudável</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Acompanhamento nutricional profissional</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-600 mr-2 text-lg">✓</span>
+                      <span className="text-gray-700">Manter resultados de forma sustentável</span>
+                    </li>
+                  </ul>
+                )}
               </div>
 
               {/* CTA Button - Botão do WhatsApp sem coleta de dados */}

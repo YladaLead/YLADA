@@ -18,6 +18,7 @@ export interface ToolConfig {
   template_slug?: string // Slug do template para identificar mensagem automática
   country_code?: string // Código do país (ex: 'US', 'BR', 'OTHER')
   show_whatsapp_button?: boolean // Mostrar botão WhatsApp pequeno ao lado do CTA principal
+  vertical?: string // Vertical que está usando o template: 'wellness' | 'coach-bem-estar' | 'nutri' | 'coach'
   leader_data_collection?: {
     coletar_dados?: boolean
     campos_coleta?: {
