@@ -539,7 +539,7 @@ export default function NoelChat({
         const links = lJson?.success ? lJson.data ?? [] : []
         const prefix = getYladaAreaPathPrefix(area)
         const leadsPath = getYladaLeadsPath(area)
-        const ctx = buildNoelContextualWelcome(dashboard, links, prefix, leadsPath)
+        const ctx = buildNoelContextualWelcome(dashboard, links, prefix, leadsPath, area)
         if (cancelled || contextualLoadedRef.current) return
         contextualLoadedRef.current = true
         setMessages([{ id: 'welcome', role: 'assistant', content: ctx.message, timestamp: new Date() }])

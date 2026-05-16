@@ -41,7 +41,8 @@ export function buildNoelContextualWelcome(
   dashboard: DashboardData | null,
   links: LinkRow[],
   prefix: string,
-  leadsPath: string
+  leadsPath: string,
+  areaCodigo?: string
 ): NoelContextualWelcome {
   const safeLinks = links ?? []
   const respostasHoje = dashboard?.respostas_hoje ?? 0
@@ -52,6 +53,16 @@ export function buildNoelContextualWelcome(
   const novoLinkHref = `${prefix}/links/novo`
 
   if (safeLinks.length === 0) {
+    if (areaCodigo === 'coach-bem-estar') {
+      return {
+        message: 'Olá! Estou aqui para te ajudar. Me conta o que você quer trabalhar hoje.',
+        actions: [
+          { label: 'Criar um diagnóstico', href: novoLinkHref },
+          { label: 'Atrair mais clientes', prompt: 'Como posso atrair mais clientes como coach de bem-estar?' },
+          { label: 'Organizar meu método', prompt: 'Me ajuda a organizar meu método de acompanhamento' },
+        ],
+      }
+    }
     return {
       message: 'Vamos montar seu primeiro link agora.',
       actions: [
