@@ -29,21 +29,19 @@ type Script = {
 type Stage = 'gerar_contato' | 'abordagem' | 'followup' | 'objecoes'
 
 export const STAGES: { key: Stage; label: string; desc: string }[] = [
-  { key: 'gerar_contato', label: '📣 Gerar Contato', desc: 'Primeira mensagem — desperta curiosidade e pede permissão' },
-  { key: 'abordagem',     label: '💬 Abordagem',     desc: 'Quando a pessoa responde — perguntas socráticas' },
-  { key: 'followup',      label: '🔁 Follow-up',     desc: 'Acompanhamento após visita, prova ou silêncio' },
-  { key: 'objecoes',      label: '🛡️ Objeções',      desc: 'Respostas para dúvidas e resistências comuns' },
+  { key: 'gerar_contato', label: '📣 Gerar Contato',    desc: 'Primeira mensagem — desperta curiosidade e pede permissão' },
+  { key: 'abordagem',     label: '💬 Primeiro Contato', desc: 'Quando a pessoa responde — aprofunde e entenda a situação' },
+  { key: 'followup',      label: '🔁 Acompanhamento',   desc: 'Após visita, experimentação ou silêncio prolongado' },
+  { key: 'objecoes',      label: '🛡️ Objeções',         desc: 'Respostas para dúvidas e resistências comuns' },
 ]
 
-const PUBLICOS: { key: Publico | 'todos'; label: string; badge: string }[] = [
-  { key: 'todos',        label: 'Todos',          badge: '' },
+const PUBLICOS: { key: Publico; label: string; badge: string }[] = [
   { key: 'lista_quente', label: '🔥 Lista Quente', badge: 'bg-orange-100 text-orange-700' },
   { key: 'lista_fria',   label: '❄️ Lista Fria',   badge: 'bg-sky-100 text-sky-700' },
   { key: 'indicacao',    label: '🤝 Indicação',    badge: 'bg-purple-100 text-purple-700' },
 ]
 
-const CANAIS: { key: Canal | 'todos'; label: string; badge: string }[] = [
-  { key: 'todos',      label: 'Todos',          badge: '' },
+const CANAIS: { key: Canal; label: string; badge: string }[] = [
   { key: 'presencial', label: '🏠 Presencial',   badge: 'bg-green-100 text-green-700' },
   { key: 'online',     label: '📱 Online/DM',    badge: 'bg-indigo-100 text-indigo-700' },
 ]
@@ -507,7 +505,7 @@ export function ProLideresFerramentasTab() {
               {PUBLICOS.map(p => (
                 <button
                   key={p.key}
-                  onClick={() => setActivePublico(p.key as Publico | 'todos')}
+                  onClick={() => setActivePublico(prev => prev === p.key ? 'todos' : p.key)}
                   className={`text-xs font-semibold px-3 py-1 rounded-full border transition ${
                     activePublico === p.key
                       ? 'bg-indigo-600 text-white border-indigo-600'
@@ -515,11 +513,9 @@ export function ProLideresFerramentasTab() {
                   }`}
                 >
                   {p.label}
-                  {p.key !== 'todos' && (
-                    <span className="ml-1 opacity-60">
-                      {stageScripts.filter(s => (s.contexto ?? 'geral') === p.key).length}
-                    </span>
-                  )}
+                  <span className="ml-1 opacity-60">
+                    {stageScripts.filter(s => (s.contexto ?? 'geral') === p.key).length}
+                  </span>
                 </button>
               ))}
             </div>
@@ -529,7 +525,7 @@ export function ProLideresFerramentasTab() {
               {CANAIS.map(c => (
                 <button
                   key={c.key}
-                  onClick={() => setActiveCanal(c.key as Canal | 'todos')}
+                  onClick={() => setActiveCanal(prev => prev === c.key ? 'todos' : c.key)}
                   className={`text-xs font-semibold px-3 py-1 rounded-full border transition ${
                     activeCanal === c.key
                       ? 'bg-indigo-600 text-white border-indigo-600'
@@ -537,11 +533,9 @@ export function ProLideresFerramentasTab() {
                   }`}
                 >
                   {c.label}
-                  {c.key !== 'todos' && (
-                    <span className="ml-1 opacity-60">
-                      {stageScripts.filter(s => (s.canal ?? 'geral') === c.key).length}
-                    </span>
-                  )}
+                  <span className="ml-1 opacity-60">
+                    {stageScripts.filter(s => (s.canal ?? 'geral') === c.key).length}
+                  </span>
                 </button>
               ))}
             </div>
@@ -685,13 +679,13 @@ export function ProLideresFerramentasTab() {
               />
               {/* Quem */}
               <div>
-                <p className="text-xs font-semibold text-gray-500 mb-1.5">Quem você está contatando?</p>
+                <p className="text-xs font-semibold text-gray-500 mb-1.5">Quem você está contatando? <span className="font-normal text-gray-400">(deixe sem seleção = serve pra todos)</span></p>
                 <div className="flex flex-wrap gap-1.5">
-                  {PUBLICOS.filter(p => p.key !== 'todos').map(p => (
+                  {PUBLICOS.map(p => (
                     <button
                       key={p.key}
                       type="button"
-                      onClick={() => setScriptPublico(p.key as Publico)}
+                      onClick={() => setScriptPublico(prev => prev === p.key ? 'geral' : p.key)}
                       className={`text-xs font-semibold px-3 py-1 rounded-full border transition ${
                         scriptPublico === p.key
                           ? 'bg-indigo-600 text-white border-indigo-600'
@@ -701,28 +695,17 @@ export function ProLideresFerramentasTab() {
                       {p.label}
                     </button>
                   ))}
-                  <button
-                    type="button"
-                    onClick={() => setScriptPublico('geral')}
-                    className={`text-xs font-semibold px-3 py-1 rounded-full border transition ${
-                      scriptPublico === 'geral'
-                        ? 'bg-indigo-600 text-white border-indigo-600'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    📋 Geral (todos)
-                  </button>
                 </div>
               </div>
               {/* Como */}
               <div>
-                <p className="text-xs font-semibold text-gray-500 mb-1.5">Qual o canal?</p>
+                <p className="text-xs font-semibold text-gray-500 mb-1.5">Qual o canal? <span className="font-normal text-gray-400">(deixe sem seleção = serve pra ambos)</span></p>
                 <div className="flex flex-wrap gap-1.5">
-                  {CANAIS.filter(c => c.key !== 'todos').map(c => (
+                  {CANAIS.map(c => (
                     <button
                       key={c.key}
                       type="button"
-                      onClick={() => setScriptCanal(c.key as Canal)}
+                      onClick={() => setScriptCanal(prev => prev === c.key ? 'geral' : c.key)}
                       className={`text-xs font-semibold px-3 py-1 rounded-full border transition ${
                         scriptCanal === c.key
                           ? 'bg-indigo-600 text-white border-indigo-600'
@@ -732,17 +715,6 @@ export function ProLideresFerramentasTab() {
                       {c.label}
                     </button>
                   ))}
-                  <button
-                    type="button"
-                    onClick={() => setScriptCanal('geral')}
-                    className={`text-xs font-semibold px-3 py-1 rounded-full border transition ${
-                      scriptCanal === 'geral'
-                        ? 'bg-indigo-600 text-white border-indigo-600'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    📋 Ambos
-                  </button>
                 </div>
               </div>
               <textarea

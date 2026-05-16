@@ -5,7 +5,7 @@ import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 
 /**
  * POST /api/pro-lideres/ferramentas/seed
- * Cria as 2 ferramentas padrão com scripts socráticos para o tenant do líder.
+ * Cria as 2 ferramentas padrão com scripts para o tenant do líder.
  * Seguro: não apaga nada existente — só adiciona se não houver ferramentas ainda.
  */
 
@@ -117,7 +117,7 @@ Pergunto porque tenho algo que pode ser relevante pro seu caso — mas só quero
         stage: 'abordagem',
         contexto: 'geral',
         canal: 'geral',
-        title: 'Primeira pergunta socrática',
+        title: 'Primeira pergunta — entender a situação',
         content: `Que bom que você respondeu! Antes de te explicar tudo, me conta uma coisa:
 
 O que você sente que mais atrapalha a sua saúde hoje — a rotina corrida, a alimentação fora de casa ou outra coisa?
@@ -598,7 +598,7 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    message: '2 ferramentas criadas com scripts socráticos.',
+    message: '2 ferramentas criadas com sucesso.',
     results,
   })
 }
