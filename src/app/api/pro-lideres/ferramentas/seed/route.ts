@@ -309,84 +309,143 @@ Pergunto porque aqui a gente não começa pelo produto — começa entendendo o 
   {
     name: 'Reset Metabólico',
     emoji: '🔄',
-    description: 'Scripts para o programa Reset Metabólico',
+    description: 'Scripts para apresentar e vender o Reset Metabólico — bebida funcional de 5 dias',
     scripts: [
+
+      // ── GERAR CONTATO ─────────────────────────────────────────────
       {
         stage: 'gerar_contato',
         contexto: 'lista_fria',
         canal: 'geral',
         title: 'Despertar curiosidade — desconhecido',
-        content: `Oi [nome]! Posso te fazer uma pergunta?
+        content: `Oi [nome]! Posso te fazer uma pergunta rápida?
 
-Você já sentiu que mesmo comendo bem e se exercitando, o seu corpo não responde como deveria?
+Você costuma sentir aquele cansaço que não passa, mesmo dormindo bem? Ou aquela sensação de inchaço no final do dia?
 
-Pergunto porque descobri algo que pode explicar isso — e que ajudou muitas pessoas aqui. Posso te contar mais se você quiser 😊`,
+Pergunto porque tenho algo que tem ajudado muita gente com exatamente isso — e é bem simples. Posso te contar mais? 😊`,
+      },
+      {
+        stage: 'gerar_contato',
+        contexto: 'lista_fria',
+        canal: 'geral',
+        title: 'Abrir conversa com benefício específico',
+        content: `Oi [nome]! Uma pergunta bem direta:
+
+Você sente que o seu metabolismo está travado — que independente do que você faz, o corpo não responde como deveria?
+
+Descobri uma bebida funcional de 5 dias que muita gente aqui está usando pra "zerar" isso. Se quiser entender como funciona, posso te contar 😊`,
       },
       {
         stage: 'gerar_contato',
         contexto: 'lista_quente',
         canal: 'geral',
-        title: 'Convite com urgência e exclusividade',
-        content: `[Nome], estou fazendo uma coisa diferente esse mês e lembrei de você.
+        title: 'Convite direto para quem você conhece',
+        content: `[Nome], lembrei de você agora e precisei te perguntar uma coisa:
 
-Um grupo pequeno — umas 5 pessoas só — vai fazer um reset de 10 dias focado em metabolismo e disposição. Não é dieta radical, é uma reeducação guiada.
+Você anda sentindo mais cansaço, inchaço ou aquela sensação de que o corpo está pesado mesmo sem comer mal?
 
-Você teria interesse em saber mais antes de eu fechar as vagas? 😊`,
+Pergunto porque tenho uma sacola do Reset Metabólico aqui — são 5 dias de uma bebida funcional que está bombando. Já vi resultado em gente próxima e acho que você ia gostar de experimentar. Posso te contar? 😊`,
+      },
+      {
+        stage: 'gerar_contato',
+        contexto: 'lista_quente',
+        canal: 'geral',
+        title: 'Compartilhar resultado próprio ou de cliente',
+        content: `[Nome], você me permite compartilhar algo que aconteceu aqui?
+
+[Fulano / eu mesmo] fez o Reset Metabólico — são 5 dias de uma bebida funcional — e o que mais chamou atenção foi [energia, leveza, foco, menos inchaço].
+
+Não to fazendo propaganda — só queria saber se você teria curiosidade em entender como funciona. Me fala se quiser 😊`,
       },
       {
         stage: 'gerar_contato',
         contexto: 'indicacao',
         canal: 'geral',
         title: 'Pedir indicação após resultado',
-        content: `[Nome]! Você concluiu o Reset e os resultados foram incríveis 🎉
+        content: `[Nome]! Os seus 5 dias de Reset foram incríveis 🎉
 
-Posso te fazer uma pergunta? Tem alguém na sua vida que você acha que passaria pela mesma transformação se tivesse a oportunidade?
+Posso te fazer uma pergunta? Tem alguém na sua vida — amigo, familiar, colega — que você acha que se beneficiaria do mesmo jeito?
 
-Às vezes a pessoa que mais precisa é quem a gente não esperaria. Quem veio na sua cabeça agora? 😊`,
+Às vezes a pessoa que mais precisa é quem a gente menos esperaria. Quem veio na sua cabeça agora? 😊`,
+      },
+      {
+        stage: 'gerar_contato',
+        contexto: 'indicacao',
+        canal: 'geral',
+        title: 'Colher indicação com contexto do produto',
+        content: `[Nome], você toparia me ajudar com uma coisa?
+
+Estou com sacolas do Reset Metabólico disponíveis esse mês — 5 dias de bebida funcional pra energia, leveza e metabolismo. Pensando nas pessoas que você conhece, tem alguém que está reclamando de cansaço, inchaço ou que sente que o corpo "não responde"?
+
+Se quiser, posso te dar um convite pra você oferecer. Você decide se faz sentido 😊`,
       },
       {
         stage: 'gerar_contato',
         contexto: 'geral',
         canal: 'presencial',
-        title: 'Abordagem presencial — Reset',
+        title: 'Abordagem presencial com sacola na mão',
         content: `Com licença! Posso te fazer uma pergunta rápida?
 
-Você já sentiu que o seu corpo não responde mais como antes — mesmo quando você tenta comer melhor ou se movimentar mais?
+Você sente aquele cansaço que não passa, ou aquela sensação de inchaço no final do dia?
 
-Pergunto porque tenho um programa de 10 dias que muita gente aqui fez pra "zerar o sistema" e voltar a sentir diferença. Posso te contar mais em 2 minutos? 😊`,
+Tenho uma bebida funcional de 5 dias aqui que muita gente está usando pra "dar um reset" no metabolismo — energia, leveza, foco. Posso te mostrar em 2 minutinhos? 😊`,
       },
       {
         stage: 'gerar_contato',
         contexto: 'geral',
         canal: 'online',
-        title: 'Primeiro contato via DM — Reset',
+        title: 'Primeiro contato via DM ou WhatsApp',
         content: `Oi [nome]! Aqui é [seu nome] 😊
 
-Vi [seu post / que você busca mais saúde / que temos amigos em comum] e fiquei curioso:
+Vi [seu post / que temos amigos em comum] e fiquei com vontade de te perguntar uma coisa:
 
-Você já sentiu que o metabolismo tá "travado" — que independente do que você faz, o corpo não responde?
+Você costuma sentir cansaço, inchaço ou aquela sensação de que o metabolismo está "travado"?
 
-Pergunto porque tenho algo que pode fazer sentido pro seu caso. Mas só quero te contar se você tiver curiosidade real 😊`,
+Pergunto porque tenho uma bebida funcional de 5 dias que pode fazer sentido pro seu caso — mas só quero te contar se você tiver curiosidade real 😊`,
+      },
+
+      // ── PRIMEIRO CONTATO ──────────────────────────────────────────
+      {
+        stage: 'abordagem',
+        contexto: 'geral',
+        canal: 'geral',
+        title: 'Entender qual benefício interessa mais',
+        content: `Que bom que você respondeu!
+
+Me conta: o que mais te incomoda hoje — é mais o cansaço, o inchaço, a falta de foco, ou a sensação de que o metabolismo está lento?
+
+Pergunto porque o Reset age nas duas primeiras horas e cada pessoa sente diferente — quero entender o que seria mais impactante pra você 😊`,
+      },
+      {
+        stage: 'abordagem',
+        contexto: 'geral',
+        canal: 'geral',
+        title: 'Explicar o produto de forma simples',
+        content: `Então te explico em poucas palavras:
+
+O Reset Metabólico é uma bebida funcional em sachê — você mistura com água e toma por 5 dias. Não é dieta, não muda sua rotina. O que as pessoas relatam: mais energia já no primeiro dia, menos inchaço, menos vontade de doce, e uma sensação geral de leveza.
+
+O que mais te chamou atenção nessa descrição? 😊`,
       },
       {
         stage: 'abordagem',
         contexto: 'lista_quente',
         canal: 'geral',
-        title: 'Aprofundar com amigo ou conhecido — Reset',
-        content: `[Nome], você sabe que só te falei porque acho que pode fazer diferença de verdade pra você, né?
+        title: 'Conversa direta com quem você conhece',
+        content: `[Nome], você sabe que só te falei porque acho que pode fazer diferença real pra você, né?
 
-Me conta uma coisa honesta: o que mais te incomoda hoje — é mais estético, é disposição, é o sono, ou é uma mistura de tudo?
+Me conta uma coisa honesta: o que mais está te incomodando agora — é cansaço, inchaço, falta de energia, ou outra coisa?
 
-Pergunto porque o Reset age diferente dependendo do caso. Quero entender o seu antes de te explicar qualquer coisa 😊`,
+Com isso entendo se o Reset faz sentido pro seu momento 😊`,
       },
       {
         stage: 'abordagem',
         contexto: 'lista_fria',
         canal: 'geral',
-        title: 'Aprofundar com desconhecido — Reset',
+        title: 'Aprofundar com quem não te conhece',
         content: `Que bom que você respondeu!
 
-Me conta: quando você fala que o corpo não responde, como isso aparece no dia a dia — é cansaço, é peso que não sai, é falta de disposição pra começar o dia?
+Me conta: quando você fala que o corpo não está respondendo bem, como isso aparece no seu dia a dia? É cansaço logo de manhã, inchaço à tarde, dificuldade de foco, ou outra coisa?
 
 Quero entender o que é mais real pra você antes de qualquer coisa 😊`,
       },
@@ -394,43 +453,89 @@ Quero entender o que é mais real pra você antes de qualquer coisa 😊`,
         stage: 'abordagem',
         contexto: 'indicacao',
         canal: 'geral',
-        title: 'Abordagem com quem foi indicado — Reset',
+        title: 'Abordagem com quem foi indicado',
         content: `Oi [nome]! Que bom que você topou conversar 😊
 
-[Nome de quem indicou] comentou que você poderia se interessar — mas quero entender o seu caso antes de qualquer coisa.
+[Nome de quem indicou] comentou que você poderia se interessar no Reset Metabólico. Antes de te explicar qualquer coisa, me conta:
 
-Me conta: o que está te incomodando hoje? É mais relacionado a peso, energia, ou algo diferente?`,
+O que está te incomodando hoje — é mais cansaço, inchaço, falta de energia, ou outra coisa?`,
       },
       {
         stage: 'abordagem',
         contexto: 'geral',
         canal: 'presencial',
-        title: 'Após mostrar o Reset pessoalmente',
-        content: `E aí, o que você achou do que eu te expliquei?
+        title: 'Após mostrar a sacola pessoalmente',
+        content: `E aí, o que você achou?
 
-Teve alguma coisa que te chamou mais atenção — ou alguma dúvida que surgiu agora que a gente está frente a frente?
+Alguma coisa chamou sua atenção — nos benefícios, na simplicidade, ou ficou com alguma dúvida?
 
-(Fique à vontade pra ser honesto — prefiro entender o que você está pensando de verdade 😊)`,
+(Pode falar à vontade — prefiro entender o que você está pensando de verdade 😊)`,
       },
       {
         stage: 'abordagem',
         contexto: 'geral',
         canal: 'online',
-        title: 'Aprofundar por DM — Reset',
+        title: 'Aprofundar por DM ou WhatsApp',
         content: `Que bom que você respondeu!
 
-Antes de te explicar como funciona o Reset, me conta uma coisa: você já fez algum programa de 10 dias ou curto assim antes? O que aconteceu — funcionou, desistiu, ou o resultado não ficou?
+Antes de te explicar tudo, me conta: o que mais te incomoda no dia a dia — é o cansaço, o inchaço, a falta de foco ou a sensação de que o metabolismo está lento?
 
-Pergunto porque o Reset tem um jeito diferente de funcionar, e quero saber se vai fazer sentido pro seu histórico 😊`,
+Com isso consigo te mostrar o que o Reset faz especificamente pro seu caso 😊`,
+      },
+
+      // ── ACOMPANHAMENTO ────────────────────────────────────────────
+      {
+        stage: 'followup',
+        contexto: 'geral',
+        canal: 'geral',
+        title: 'Dia 1 — confirmar que começou',
+        content: `Oi [nome]! Só passando pra saber: você conseguiu tomar a primeira sacola hoje?
+
+O que achou do sabor? Sentiu alguma coisa diferente nas primeiras horas — mais energia, menos fome, alguma sensação nova?
+
+Conte aqui 😊`,
+      },
+      {
+        stage: 'followup',
+        contexto: 'geral',
+        canal: 'geral',
+        title: 'Dia 3 — meio do caminho',
+        content: `Oi [nome]! Dia 3 — metade do caminho! Como está sendo?
+
+Às vezes nessa fase a pessoa já começa a sentir diferença no metabolismo — menos inchaço, mais energia, menos vontade de doce. Em outras, o corpo ainda está se ajustando.
+
+Como você está se sentindo? Alguma dúvida? 😊`,
+      },
+      {
+        stage: 'followup',
+        contexto: 'geral',
+        canal: 'geral',
+        title: 'Dia 5 — último dia',
+        content: `[Nome]! Hoje é o último dia do Reset 🎉
+
+Me conta: o que você sentiu nesses 5 dias — teve mais energia, menos inchaço, menos vontade de doce, ou outra coisa?
+
+Quero ouvir sua versão com detalhes 😊`,
+      },
+      {
+        stage: 'followup',
+        contexto: 'geral',
+        canal: 'geral',
+        title: 'Silêncio após apresentação',
+        content: `Oi [nome]! Aqui é [seu nome].
+
+Não quero incomodar — só queria saber se você ainda tem interesse no Reset ou se mudou de ideia. Tudo bem de qualquer jeito, só preciso saber pra organizar as sacolas 😊
+
+Uma pergunta direta: o que faria você querer experimentar?`,
       },
       {
         stage: 'followup',
         contexto: 'geral',
         canal: 'presencial',
-        title: 'Follow-up após conversa presencial — Reset',
-        content: `Oi [nome]! Tudo bem?
+        title: 'Follow-up após mostrar pessoalmente',
+        content: `Oi [nome]! Passando rapidinho.
 
-Passando pra saber se ficou com alguma dúvida depois que a gente conversou — às vezes a pessoa vai embora e aí a dúvida aparece 😄
+Ficou com alguma dúvida depois que a gente conversou — às vezes a gente vai embora e a dúvida aparece só depois 😄
 
 Tem alguma coisa que ficou na sua cabeça?`,
       },
@@ -438,89 +543,71 @@ Tem alguma coisa que ficou na sua cabeça?`,
         stage: 'followup',
         contexto: 'geral',
         canal: 'online',
-        title: 'Follow-up 48h — DM/WhatsApp — Reset',
+        title: 'Follow-up 48h — DM ou WhatsApp',
         content: `Oi [nome]! Passando rapidinho.
 
-Você conseguiu pensar um pouco no que conversamos sobre o Reset? Tem alguma coisa que ficou na cabeça — boa ou ruim — que você queira perguntar?
-
-Pode me mandar à vontade 😊`,
-      },
-      {
-        stage: 'abordagem',
-        contexto: 'geral',
-        canal: 'geral',
-        title: 'Entender o histórico',
-        content: `Que bom que você topou conversar!
-
-Me conta: você já fez alguma dieta ou programa de saúde antes? O que aconteceu — teve resultado, desistiu no meio, ou o resultado não durou?
-
-Pergunto porque o Reset funciona diferente dependendo do histórico da pessoa. Quero entender o seu caso antes de explicar tudo 😊`,
-      },
-      {
-        stage: 'abordagem',
-        contexto: 'geral',
-        canal: 'geral',
-        title: 'Identificar a dor principal',
-        content: `Legal! Antes de te explicar como funciona, quero entender uma coisa:
-
-O que te incomoda mais hoje — a balança, a falta de energia, o inchaço, ou outra coisa?
-
-Com isso em mente consigo te mostrar a parte do programa que vai fazer mais diferença pra você especificamente 😊`,
-      },
-      {
-        stage: 'followup',
-        contexto: 'geral',
-        canal: 'geral',
-        title: 'Follow-up pós explicação',
-        content: `Oi [nome]! Passando rapidinho.
-
-Você conseguiu pensar um pouco no que conversamos sobre o Reset? Tem alguma dúvida que surgiu — sobre como funciona, sobre os dias, sobre o que é permitido?
+Você conseguiu pensar um pouco no que conversamos sobre o Reset? Tem alguma coisa que ficou na cabeça — boa ou ruim?
 
 Pode me perguntar à vontade 😊`,
       },
+
+      // ── OBJEÇÕES ─────────────────────────────────────────────────
       {
-        stage: 'followup',
+        stage: 'objecoes',
         contexto: 'geral',
         canal: 'geral',
-        title: 'Suporte no dia 3 do programa',
-        content: `Oi [nome]! Dia 3 — como está sendo?
+        title: 'O que é isso exatamente?',
+        content: `Boa pergunta!
 
-Às vezes nessa fase a gente sente um pouco de diferença no corpo — pode ser uma leve dor de cabeça, mais disposição, ou até nada ainda.
+O Reset Metabólico é uma bebida funcional em sachê — você mistura com água e toma por 5 dias. É da Herbalife, empresa líder mundial em bem-estar, presente em mais de 90 países.
 
-Como você está se sentindo? Alguma dúvida ou dificuldade?`,
-      },
-      {
-        stage: 'followup',
-        contexto: 'geral',
-        canal: 'geral',
-        title: 'Celebrar o fim do programa',
-        content: `[Nome]! Parabéns por concluir os 10 dias! 🎉
+Não é remédio, não é dieta. É uma bebida que apoia o metabolismo, dá energia, reduz o inchaço e ajuda a controlar a vontade de doce.
 
-Me conta: o que mudou pra você? Tanto no físico quanto em como você se sente no dia a dia.
-
-Quero ouvir sua versão — sem pressa, com detalhes 😊`,
+Teve alguma outra dúvida que ficou? 😊`,
       },
       {
         stage: 'objecoes',
         contexto: 'geral',
         canal: 'geral',
-        title: 'É muito radical / restritivo',
-        content: `Faz sentido essa preocupação — a palavra "reset" às vezes assusta um pouco.
+        title: 'Não acredito que funciona',
+        content: `Faz sentido querer ter certeza antes.
 
-Me conta: o que você imagina que vai ter que abrir mão? Quero entender o que está te preocupando especificamente.
+Me conta: o que você precisaria ver pra acreditar que poderia funcionar pra você? Depoimento de alguém que você conhece, resultado em mim mesmo, alguma informação técnica?
 
-Pergunto porque a maioria das pessoas fica surpresa com o quanto é mais tranquilo do que parecia 😊`,
+Pergunto porque cada pessoa precisa de um tipo de evidência — e às vezes consigo mostrar exatamente o que você precisa ver 😊`,
       },
       {
         stage: 'objecoes',
         contexto: 'geral',
         canal: 'geral',
-        title: 'Não tenho disciplina',
-        content: `Olha, admiro muito você ser honesto com isso — a maioria das pessoas não fala.
+        title: 'É caro',
+        content: `Entendo a preocupação — faz sentido querer ter certeza antes de investir.
 
-Me faz uma pergunta: o que acontece nas vezes que você começa algo e não continua? É falta de tempo, de motivação, ou a metodologia não te ajuda a manter?
+Me conta: o que você gasta por semana com café, energético, suplemento ou qualquer coisa pra manter a disposição no dia a dia?
 
-Pergunto porque o Reset foi desenhado justamente pra quem já tentou e caiu — tem suporte diário. Mas quero entender se faria diferença pra você 😊`,
+Pergunto porque quando a gente faz essa conta, os 5 dias do Reset geralmente custam menos do que parece — e ainda entrega resultado. Mas quero que você chegue nessa conclusão sozinho 😊`,
+      },
+      {
+        stage: 'objecoes',
+        contexto: 'geral',
+        canal: 'geral',
+        title: 'Não tenho tempo pra isso',
+        content: `Faz sentido — todo mundo está corrido.
+
+Me conta: o que você imagina que precisa fazer? O Reset é só misturar o sachê na água e tomar. Não muda sua alimentação, não exige horário específico.
+
+Pergunto porque às vezes a gente imagina que é mais complicado do que é na prática 😊`,
+      },
+      {
+        stage: 'objecoes',
+        contexto: 'geral',
+        canal: 'geral',
+        title: 'Já tentei de tudo e nada funcionou',
+        content: `Entendo esse cansaço — é frustrante investir e não ver resultado.
+
+Me conta: das coisas que você tentou, o que você acha que faltou pra funcionar de verdade?
+
+Pergunto porque o Reset é diferente de dieta ou treino — é uma bebida funcional. Muitas pessoas que chegam aqui dizendo "já tentei tudo" ficam surpresas porque é algo que elas nunca experimentaram de verdade 😊`,
       },
     ],
   },
