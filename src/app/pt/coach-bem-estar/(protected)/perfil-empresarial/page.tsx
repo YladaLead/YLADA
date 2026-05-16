@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
+import PerfilEmpresarialView from '@/components/perfil/PerfilEmpresarialView'
 
-export default function CoachBemEstarPerfilEmpresarialRedirect() {
-  redirect('/pt/wellness/conta/perfil')
+export default function CoachBemEstarPerfilPage() {
+  return <PerfilEmpresarialView areaCodigo="coach-bem-estar" areaLabel="Coach de bem-estar" />
 }

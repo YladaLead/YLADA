@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
+import YladaConfiguracaoContent from '@/components/ylada/YladaConfiguracaoContent'
 
-export default function CoachBemEstarConfiguracaoRedirect() {
-  redirect('/pt/wellness/configuracao')
+export default function CoachBemEstarConfiguracaoPage() {
+  return <YladaConfiguracaoContent areaCodigo="coach-bem-estar" areaLabel="Coach de bem-estar" />
 }
