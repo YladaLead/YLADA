@@ -7,7 +7,6 @@ export default async function ProLideresMembroTarefasPage() {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) redirect(gate.redirect)
 
-  const ui = await loadProLideresPainelUiForRequest(gate)
   const visibleForTeam = gate.tenant.daily_tasks_visible_to_team !== false
 
   if (!visibleForTeam) {

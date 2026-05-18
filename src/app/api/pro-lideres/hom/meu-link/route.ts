@@ -2,11 +2,13 @@
  * GET /api/pro-lideres/hom/meu-link
  * Membro busca o próprio link HOM único, headline e estado do WhatsApp.
  */
+import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
-import { fetchHOMConfig } from '@/lib/pro-lideres-hom'
+import { fetchHOMConfig, resolveProLideresHomLinkSubject } from '@/lib/pro-lideres-hom'
+import { PRO_LIDERES_TEAM_PREVIEW_COOKIE } from '@/lib/pro-lideres-team-preview'
 import { resolveYladaOgBaseUrlForMetadata } from '@/lib/ylada-public-link-base-url'
 
 export async function GET(request: NextRequest) {
@@ -20,24 +22,21 @@ export async function GET(request: NextRequest) {
   if (!paid.ok) return paid.response
   const { ctx } = paid
 
-  // Busca share_slug do membro
-  const { data: member } = await supabaseAdmin
-    .from('leader_tenant_members')
-    .select('pro_lideres_share_slug')
-    .eq('leader_tenant_id', ctx.tenant.id)
-    .eq('user_id', user.id)
-    .maybeSingle()
+  const cookieStore = await cookies()
+  const leaderTeamPreview =
+    ctx.role === 'leader' && cookieStore.get(PRO_LIDERES_TEAM_PREVIEW_COOKIE)?.value === '1'
 
-  const shareSlug = (member?.pro_lideres_share_slug as string | null) ?? null
+  const { shareSlug, subjectUserId, leaderTeamPreview: previewMode } =
+    await resolveProLideresHomLinkSubject(ctx.tenant.id, ctx.tenant.owner_user_id, user.id, {
+      leaderTeamPreview,
+    })
 
-  // Busca config HOM do tenant
   const cfg = await fetchHOMConfig(ctx.tenant.id)
 
-  // Busca WhatsApp do membro
   const { data: profile } = await supabaseAdmin
     .from('user_profiles')
     .select('whatsapp, nome_completo')
-    .eq('user_id', user.id)
+    .eq('user_id', subjectUserId)
     .maybeSingle()
 
   const hasWhatsapp = !!((profile?.whatsapp as string | null)?.trim())
@@ -55,5 +54,6 @@ export async function GET(request: NextRequest) {
     memberName: (profile?.nome_completo as string | null) ?? null,
     headline: cfg?.headline ?? null,
     videoConfigured: !!(cfg?.videoUrl),
+    leaderTeamPreview: previewMode,
   })
 }

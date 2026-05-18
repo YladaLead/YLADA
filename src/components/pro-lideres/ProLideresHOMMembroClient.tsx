@@ -10,6 +10,7 @@ type HOMData = {
   memberName: string | null
   headline: string | null
   videoConfigured: boolean
+  leaderTeamPreview?: boolean
 }
 
 export default function ProLideresHOMMembroClient() {
@@ -50,6 +51,14 @@ export default function ProLideresHOMMembroClient() {
 
   return (
     <div className="space-y-6">
+
+      {data?.leaderTeamPreview ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">
+          <strong className="font-semibold">Pré-visualização do líder</strong> — você está vendo a tela como a
+          equipe. O link abaixo é o <strong>exemplo do líder</strong> (mesmo vídeo e botões). Cada membro precisa do{' '}
+          <strong>slug de divulgação</strong> no perfil para ter o link próprio.
+        </div>
+      ) : null}
 
       {/* Link do membro */}
       {data?.homUrl ? (
@@ -118,8 +127,17 @@ export default function ProLideresHOMMembroClient() {
           <h2 className="mb-2 font-bold text-amber-900">🔗 Seu link ainda não está ativo</h2>
           {!data?.shareSlug ? (
             <p className="text-sm text-amber-800">
-              Para ter um link personalizado da HOM, você precisa cadastrar o seu <strong>slug de divulgação</strong> no perfil.
-              {' '}
+              {data?.videoConfigured ? (
+                <>
+                  O vídeo da HOM já está configurado pelo líder. Falta cadastrar o seu{' '}
+                  <strong>slug de divulgação</strong> no perfil para gerar o seu link pessoal.{' '}
+                </>
+              ) : (
+                <>
+                  Para ter um link personalizado da HOM, você precisa cadastrar o seu{' '}
+                  <strong>slug de divulgação</strong> no perfil.{' '}
+                </>
+              )}
               <Link href="/pro-lideres/membro/perfil" className="font-semibold underline">
                 Ir para o perfil →
               </Link>

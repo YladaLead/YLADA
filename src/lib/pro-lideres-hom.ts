@@ -16,6 +16,61 @@ export type ProLideresHOMConfig = {
 const DEFAULT_HEADLINE = 'Oportunidade: R$500 extra por semana com bebidas funcionais'
 const DEFAULT_SUBHEADLINE = 'Assista à apresentação completa e escolha o próximo passo'
 
+/** Slug fixo na URL pública da HOM para o dono do tenant (líder). */
+export const PRO_LIDERES_HOM_LEADER_SLUG = 'lider' as const
+
+export type ProLideresHomLinkSubject = {
+  shareSlug: string | null
+  subjectUserId: string
+  leaderTeamPreview: boolean
+}
+
+/**
+ * Resolve slug + utilizador cujo WhatsApp/nome entram na página HOM.
+ * Em «ver como equipe», o líder autenticado não tem linha de membro com slug — usa-se o link /lider do dono.
+ */
+export async function resolveProLideresHomLinkSubject(
+  tenantId: string,
+  tenantOwnerUserId: string,
+  userId: string,
+  options: { leaderTeamPreview: boolean }
+): Promise<ProLideresHomLinkSubject> {
+  if (options.leaderTeamPreview) {
+    return {
+      shareSlug: PRO_LIDERES_HOM_LEADER_SLUG,
+      subjectUserId: tenantOwnerUserId,
+      leaderTeamPreview: true,
+    }
+  }
+
+  if (!supabaseAdmin) {
+    return { shareSlug: null, subjectUserId: userId, leaderTeamPreview: false }
+  }
+
+  const { data: member } = await supabaseAdmin
+    .from('leader_tenant_members')
+    .select('pro_lideres_share_slug, role')
+    .eq('leader_tenant_id', tenantId)
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  const slugRaw = (member?.pro_lideres_share_slug as string | null)?.trim() || null
+  if (slugRaw) {
+    return { shareSlug: slugRaw, subjectUserId: userId, leaderTeamPreview: false }
+  }
+
+  // Dono/co-líder com role leader na tabela mas sem slug de membro: mesmo caminho público /lider
+  if ((member?.role as string | undefined) === 'leader' && userId === tenantOwnerUserId) {
+    return {
+      shareSlug: PRO_LIDERES_HOM_LEADER_SLUG,
+      subjectUserId: tenantOwnerUserId,
+      leaderTeamPreview: false,
+    }
+  }
+
+  return { shareSlug: null, subjectUserId: userId, leaderTeamPreview: false }
+}
+
 // ── Config do líder ───────────────────────────────────────────────────────────
 
 export async function fetchHOMConfig(tenantId: string): Promise<ProLideresHOMConfig | null> {
