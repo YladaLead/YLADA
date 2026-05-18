@@ -45,6 +45,25 @@ export async function proLideresMemberHasNoelMemberSubscription(userId: string):
   return hasActiveSubscription(userId, PRO_LIDERES_NOEL_MEMBER_SUBSCRIPTION_AREA)
 }
 
+/** Já contratou Noel membro alguma vez, mas não está ativo agora (venceu / cancelou). */
+export async function proLideresMemberNoelSubscriptionLapsed(
+  admin: SupabaseClient,
+  userId: string
+): Promise<boolean> {
+  if (await proLideresMemberHasNoelMemberSubscription(userId)) return false
+  const { data, error } = await admin
+    .from('subscriptions')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('area', PRO_LIDERES_NOEL_MEMBER_SUBSCRIPTION_AREA)
+    .limit(1)
+  if (error) {
+    console.error('[proLideresMemberNoelSubscriptionLapsed]', error.message)
+    return false
+  }
+  return (data?.length ?? 0) > 0
+}
+
 export type ProLideresNoelMemberSurface = {
   offerEnabled: boolean
   offerScope: ProLideresNoelMemberOfferScope
@@ -53,6 +72,8 @@ export type ProLideresNoelMemberSurface = {
   /** Item no menu (membro, líder com oferta ligada ou líder em «Ver como equipe»). */
   showSidebarNav: boolean
   hasPersonalSubscription: boolean
+  /** Membro já teve Noel membro ativo e precisa renovar (add-on separado da equipe). */
+  noelMemberLapsed: boolean
   /** Dono/líder: mesmo Noel da equipe, incluído na assinatura Pro Líderes equipe (sem add-on MP). */
   noelMemberIncludedForLeader: boolean
   /** Pode chamar o chat (API revalida). */
@@ -83,6 +104,10 @@ export async function resolveProLideresNoelMemberSurface(
   )
 
   const hasPersonalSubscription = await proLideresMemberHasNoelMemberSubscription(user.id)
+  const noelMemberLapsed =
+    ctx.role === 'member' && !hasPersonalSubscription
+      ? await proLideresMemberNoelSubscriptionLapsed(admin, user.id)
+      : false
   const teamPaid = await proLideresTeamSubscriptionAllowsAccess(user, ctx)
 
   const canOpenChat = Boolean(
@@ -99,6 +124,7 @@ export async function resolveProLideresNoelMemberSurface(
     inOfferScope,
     showSidebarNav,
     hasPersonalSubscription,
+    noelMemberLapsed,
     noelMemberIncludedForLeader,
     canOpenChat,
   }

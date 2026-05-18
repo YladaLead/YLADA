@@ -14,11 +14,14 @@ export type ProLideresNoelMembroClientVariant =
 export default function ProLideresNoelMembroClient({
   variant = 'member',
   initialHasSubscription,
+  initialNoelMemberLapsed = false,
   initialCanChat,
   monthlyAmountBrl,
 }: {
   variant?: ProLideresNoelMembroClientVariant
   initialHasSubscription: boolean
+  /** Já teve Noel membro; período venceu (add-on à parte do plano da equipe). */
+  initialNoelMemberLapsed?: boolean
   initialCanChat: boolean
   monthlyAmountBrl: number
 }) {
@@ -113,6 +116,9 @@ export default function ProLideresNoelMembroClient({
   const previewMembroComoLider = variant === 'leader_preview_member_noel'
 
   if (variant === 'member' || previewMembroComoLider) {
+    const lapsed = initialNoelMemberLapsed && !previewMembroComoLider
+    const ctaLabel = lapsed ? 'Renovar Noel' : 'Aderir'
+
     return (
       <div className="mx-auto max-w-lg space-y-5 py-4">
         {previewMembroComoLider ? (
@@ -122,7 +128,14 @@ export default function ProLideresNoelMembroClient({
           </p>
         ) : null}
         <h1 className="text-xl font-bold text-gray-900">Noel</h1>
-        <ProLideresNoelMembroAdesaoPitch brlMensal={brlMensal} />
+        {lapsed ? (
+          <p className="text-sm leading-relaxed text-gray-600">
+            Seu Noel venceu. Renove no Mercado Pago para voltar ao chat — plano à parte da assinatura da equipe (R${' '}
+            {brlMensal}/mês).
+          </p>
+        ) : (
+          <ProLideresNoelMembroAdesaoPitch brlMensal={brlMensal} />
+        )}
         {!previewMembroComoLider && err ? <p className="text-sm text-red-600">{err}</p> : null}
         {!previewMembroComoLider && sp.get('mp') === 'fail' ? (
           <p className="text-sm text-amber-800">Tente de novo.</p>
@@ -137,10 +150,12 @@ export default function ProLideresNoelMembroClient({
           className={`touch-manipulation w-full rounded-lg px-4 py-3.5 text-sm font-bold shadow-sm ${
             previewMembroComoLider
               ? 'cursor-not-allowed border border-gray-200 bg-gray-100 text-gray-500'
-              : 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60'
+              : lapsed
+                ? 'border border-gray-300 bg-white text-gray-900 hover:bg-gray-50 disabled:opacity-60'
+                : 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60'
           }`}
         >
-          {checkoutLoading ? 'Um instante…' : 'Aderir'}
+          {checkoutLoading ? 'Um instante…' : ctaLabel}
         </button>
       </div>
     )

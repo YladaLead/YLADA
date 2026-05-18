@@ -49,6 +49,7 @@ export default async function ProLideresMembroNoelMembroPage() {
       <ProLideresNoelMembroClient
         variant={leaderPreviewingAsTeam ? 'leader_preview_member_noel' : 'member'}
         initialHasSubscription={surface.hasPersonalSubscription}
+        initialNoelMemberLapsed={surface.noelMemberLapsed}
         initialCanChat={surface.canOpenChat}
         monthlyAmountBrl={proLideresNoelMemberMonthlyAmountBrl()}
       />

@@ -199,6 +199,7 @@ export async function PATCH(request: NextRequest) {
   const { data: tenant, error } = await supabaseAdmin
     .from('leader_tenants')
     .update(payload)
+    .eq('id', ctx.tenant.id)
     .eq('owner_user_id', user.id)
     .select()
     .single()

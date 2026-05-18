@@ -86,8 +86,7 @@ export async function POST(request: NextRequest) {
     if (!hasSub) {
       return NextResponse.json(
         {
-          error:
-            'Ative a assinatura Noel membro Pro Líderes (Mercado Pago) na área do membro para continuar.',
+          error: 'Renove o Noel no painel para continuar o chat.',
           code: 'pro_lideres_noel_member_required',
         },
         { status: 402 }
