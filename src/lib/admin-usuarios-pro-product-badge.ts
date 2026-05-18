@@ -112,3 +112,40 @@ export async function fetchAdminProProductBadgesByUserId(
 
   return out
 }
+
+/** `user_id` com tenant Pro Líderes (vertical h-lider): dono ou membro de equipa. */
+export async function fetchAdminProLideresUserIds(admin: SupabaseClient): Promise<string[]> {
+  const out = new Set<string>()
+
+  const { data: owned } = await admin
+    .from('leader_tenants')
+    .select('owner_user_id')
+    .eq('vertical_code', VERTICAL_H_LIDER)
+  for (const r of owned ?? []) {
+    const uid = (r as { owner_user_id?: string }).owner_user_id
+    if (uid) out.add(uid)
+  }
+
+  const { data: members } = await admin
+    .from('leader_tenant_members')
+    .select('user_id, leader_tenant_id')
+
+  const memberRows = (members ?? []) as { user_id?: string; leader_tenant_id?: string }[]
+  const tenantIds = [...new Set(memberRows.map((m) => m.leader_tenant_id).filter(Boolean) as string[])]
+  if (tenantIds.length === 0) return [...out]
+
+  const { data: tenants } = await admin
+    .from('leader_tenants')
+    .select('id')
+    .in('id', tenantIds)
+    .eq('vertical_code', VERTICAL_H_LIDER)
+
+  const hLiderTenantIds = new Set((tenants ?? []).map((t) => (t as { id?: string }).id).filter(Boolean) as string[])
+  for (const m of memberRows) {
+    if (m.user_id && m.leader_tenant_id && hLiderTenantIds.has(String(m.leader_tenant_id))) {
+      out.add(m.user_id)
+    }
+  }
+
+  return [...out]
+}

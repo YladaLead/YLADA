@@ -117,9 +117,12 @@ export async function GET(
 }
 
 type PatchBody = {
-  action?: 'activate' | 'pause' | 'resume' | 'remove' | 'set_expiry'
+  action?: 'activate' | 'pause' | 'resume' | 'remove' | 'set_expiry' | 'add_member'
   accessDays?: number | null
   accessExpiresAt?: string | null
+  leaderTenantId?: string
+  /** Ao vincular: `pending_activation` (padrão) ou `active`. */
+  teamAccessState?: 'pending_activation' | 'active'
 }
 
 /**
@@ -145,8 +148,60 @@ export async function PATCH(
   }
 
   const action = body.action
-  if (!action || !['activate', 'pause', 'resume', 'remove', 'set_expiry'].includes(action)) {
+  if (!action || !['activate', 'pause', 'resume', 'remove', 'set_expiry', 'add_member'].includes(action)) {
     return NextResponse.json({ error: 'action inválida' }, { status: 400 })
+  }
+
+  if (action === 'add_member') {
+    const tenantId = body.leaderTenantId?.trim()
+    if (!tenantId) {
+      return NextResponse.json({ error: 'Escolha o espaço Pro Líderes (equipa).' }, { status: 400 })
+    }
+    const { data: tenant } = await supabaseAdmin
+      .from('leader_tenants')
+      .select('id, vertical_code')
+      .eq('id', tenantId)
+      .maybeSingle()
+    if (!tenant || (tenant.vertical_code as string) !== 'h-lider') {
+      return NextResponse.json({ error: 'Espaço Pro Líderes inválido.' }, { status: 400 })
+    }
+    const { data: existing } = await supabaseAdmin
+      .from('leader_tenant_members')
+      .select('id')
+      .eq('leader_tenant_id', tenantId)
+      .eq('user_id', userId)
+      .maybeSingle()
+    if (existing?.id) {
+      return NextResponse.json({ error: 'Esta pessoa já está nesta equipa.' }, { status: 409 })
+    }
+    const resolved = resolveTeamAccessExpiresAt({
+      accessDays: body.accessDays,
+      accessExpiresAt: body.accessExpiresAt,
+      requireFutureDate: false,
+    })
+    if (resolved.error) {
+      return NextResponse.json({ error: resolved.error }, { status: 400 })
+    }
+    const accessState =
+      body.teamAccessState === 'active' ? 'active' : 'pending_activation'
+    const { error: insErr } = await supabaseAdmin.from('leader_tenant_members').insert({
+      leader_tenant_id: tenantId,
+      user_id: userId,
+      role: 'member',
+      team_access_state: accessState,
+      team_access_expires_at: resolved.expiresAt,
+    })
+    if (insErr) {
+      console.error('[admin/usuarios pro-lideres add_member]', insErr)
+      return NextResponse.json({ error: 'Não foi possível vincular à equipa.' }, { status: 500 })
+    }
+    return NextResponse.json({
+      success: true,
+      message:
+        accessState === 'active'
+          ? 'Vinculada à equipa Pro Líderes com acesso ativo.'
+          : 'Vinculada à equipa. Ative o acesso quando confirmar o pagamento.',
+    })
   }
 
   const detail = await loadDetail(userId)
@@ -254,11 +309,22 @@ export async function PATCH(
     if (state !== 'paused') {
       return NextResponse.json({ error: 'Só membros pausados podem ser retomados.' }, { status: 400 })
     }
+    const resolvedResume = resolveTeamAccessExpiresAt({
+      accessDays: body.accessDays,
+      accessExpiresAt: body.accessExpiresAt,
+      requireFutureDate: false,
+    })
+    if (resolvedResume.error) {
+      return NextResponse.json({ error: resolvedResume.error }, { status: 400 })
+    }
     const { error } = await supabaseAdmin
       .from('leader_tenant_members')
-      .update({ team_access_state: 'active' })
-      .eq('id', detail.membershipId)
-      .eq('leader_tenant_id', detail.tenantId)
+      .update({
+        team_access_state: 'active',
+        team_access_expires_at: resolvedResume.expiresAt,
+      })
+      .eq('id', detail.membershipId!)
+      .eq('leader_tenant_id', detail.tenantId!)
     if (error) {
       return NextResponse.json({ error: 'Não foi possível retomar.' }, { status: 500 })
     }

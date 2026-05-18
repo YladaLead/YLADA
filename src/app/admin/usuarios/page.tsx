@@ -150,6 +150,11 @@ export default function AdminUsuarios() {
   const [proLideresAccessDays, setProLideresAccessDays] = useState('')
   const [proLideresAccessDate, setProLideresAccessDate] = useState('')
   const [salvandoProLideres, setSalvandoProLideres] = useState(false)
+  const [proLideresTenants, setProLideresTenants] = useState<
+    Array<{ id: string; displayName: string; contactEmail: string | null }>
+  >([])
+  const [proLideresTenantId, setProLideresTenantId] = useState('')
+  const [proLideresLinkAsActive, setProLideresLinkAsActive] = useState(false)
 
   // Todas as áreas para edição de perfil (modal Editar Usuário)
   const TODAS_AREAS_EDICAO: { value: string; label: string }[] = useMemo(() => [
@@ -172,6 +177,7 @@ export default function AdminUsuarios() {
 
   const opcoesSegmento = useMemo(() => {
     const todosOpt = { value: 'todos', label: t.filters.all }
+    const proLideresOpt = { value: 'pro_lideres', label: t.areas.pro_lideres }
     const labelFor = (value: string) => {
       const k = value as keyof typeof t.areas
       return k in t.areas ? t.areas[k] : value
@@ -181,12 +187,21 @@ export default function AdminUsuarios() {
         todosOpt,
         { value: 'wellness', label: t.areas.wellness },
         { value: 'coach-bem-estar', label: t.areas['coach-bem-estar'] },
+        proLideresOpt,
       ]
     }
     if (filtroBloco === 'ylada') {
-      return [todosOpt, ...PERFIS_MATRIZ_YLADA.map((p) => ({ value: p, label: labelFor(p) }))]
+      return [
+        todosOpt,
+        ...PERFIS_MATRIZ_YLADA.map((p) => ({ value: p, label: labelFor(p) })),
+        proLideresOpt,
+      ]
     }
-    return [todosOpt, ...TODAS_AREAS_EDICAO.map((a) => ({ value: a.value, label: a.label }))]
+    return [
+      todosOpt,
+      ...TODAS_AREAS_EDICAO.map((a) => ({ value: a.value, label: a.label })),
+      proLideresOpt,
+    ]
   }, [filtroBloco, t, TODAS_AREAS_EDICAO])
 
   const filtrosAtivosCount = useMemo(() => {
@@ -358,6 +373,25 @@ export default function AdminUsuarios() {
     busca,
   ])
 
+  const carregarProLideresTenants = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) return
+      const res = await fetch('/api/admin/pro-lideres/tenants', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        credentials: 'include',
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && Array.isArray((data as { tenants?: unknown }).tenants)) {
+        setProLideresTenants(
+          (data as { tenants: Array<{ id: string; displayName: string; contactEmail: string | null }> }).tenants
+        )
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
   const carregarProLideresDetail = async (userId: string) => {
     setProLideresDetailLoading(true)
     setProLideresDetail(null)
@@ -390,10 +424,14 @@ export default function AdminUsuarios() {
   }
 
   const aplicarAcaoProLideres = async (
-    action: 'activate' | 'pause' | 'resume' | 'remove' | 'set_expiry'
+    action: 'activate' | 'pause' | 'resume' | 'remove' | 'set_expiry' | 'add_member'
   ) => {
     if (!usuarioSelecionado) return
     if (action === 'remove' && !window.confirm('Remover esta pessoa da equipa Pro Líderes?')) return
+    if (action === 'add_member' && !proLideresTenantId.trim()) {
+      setError(t.modal.proLideresSelectTeam)
+      return
+    }
 
     setSalvandoProLideres(true)
     setError(null)
@@ -410,10 +448,22 @@ export default function AdminUsuarios() {
         action: typeof action
         accessDays?: number | null
         accessExpiresAt?: string | null
+        leaderTenantId?: string
+        teamAccessState?: 'pending_activation' | 'active'
       } = { action }
+      if (action === 'add_member') {
+        body.leaderTenantId = proLideresTenantId.trim()
+        body.teamAccessState = proLideresLinkAsActive ? 'active' : 'pending_activation'
+      }
       if (accessDateRaw) {
         body.accessExpiresAt = accessDateRaw
-      } else if (accessDaysRaw && (action === 'activate' || action === 'set_expiry' || action === 'resume')) {
+      } else if (
+        accessDaysRaw &&
+        (action === 'activate' ||
+          action === 'set_expiry' ||
+          action === 'resume' ||
+          action === 'add_member')
+      ) {
         const d = parseInt(accessDaysRaw, 10)
         if (Number.isFinite(d) && d > 0) body.accessDays = d
       }
@@ -455,10 +505,11 @@ export default function AdminUsuarios() {
     setProLideresAccessDays('')
     setProLideresAccessDate('')
     setProLideresDetail(null)
+    setProLideresTenantId('')
+    setProLideresLinkAsActive(false)
     setMostrarEditarUsuario(true)
-    if (usuario.proProductBadge === 'pro_lideres' || usuario.acessoWellnessViaProLideres) {
-      void carregarProLideresDetail(usuario.id)
-    }
+    void carregarProLideresDetail(usuario.id)
+    void carregarProLideresTenants()
   }
 
   const criarPlanoFreeYlada = async (kind: 'migration' | 'courtesy', diasBruto: number) => {
@@ -1562,10 +1613,7 @@ export default function AdminUsuarios() {
                 )}
               </div>
 
-              {(usuarioSelecionado.proProductBadge === 'pro_lideres' ||
-                usuarioSelecionado.acessoWellnessViaProLideres ||
-                proLideresDetail?.hasProLideres) && (
-                <div className="rounded-lg border border-violet-200 bg-violet-50/40 p-4 space-y-3">
+              <div className="rounded-lg border border-violet-200 bg-violet-50/40 p-4 space-y-3">
                   <h3 className="text-sm font-semibold text-violet-950">{t.modal.proLideresSectionTitle}</h3>
                   <p className="text-xs text-violet-900/90 leading-relaxed">{t.modal.proLideresSectionIntro}</p>
                   {proLideresDetailLoading ? (
@@ -1686,10 +1734,66 @@ export default function AdminUsuarios() {
                       ) : null}
                     </>
                   ) : (
-                    <p className="text-xs text-gray-600">{t.modal.proLideresNoLink}</p>
+                    <div className="space-y-3 pt-1">
+                      <p className="text-xs text-gray-700">{t.modal.proLideresNoLink}</p>
+                      <p className="text-xs font-medium text-violet-950">{t.modal.proLideresLinkTeam}</p>
+                      <label className="block text-xs font-medium text-gray-700">
+                        {t.modal.proLideresSelectTeam}
+                        <select
+                          value={proLideresTenantId}
+                          onChange={(e) => setProLideresTenantId(e.target.value)}
+                          className="mt-1 w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm bg-white"
+                        >
+                          <option value="">—</option>
+                          {proLideresTenants.map((tenant) => (
+                            <option key={tenant.id} value={tenant.id}>
+                              {tenant.displayName}
+                              {tenant.contactEmail ? ` (${tenant.contactEmail})` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="text-xs font-medium text-gray-700">
+                        {t.modal.proLideresAccessDays}
+                        <input
+                          type="number"
+                          min={1}
+                          max={3660}
+                          placeholder="Opcional"
+                          value={proLideresAccessDays}
+                          onChange={(e) => setProLideresAccessDays(e.target.value)}
+                          className="mt-1 w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
+                        />
+                      </label>
+                      <label className="text-xs font-medium text-gray-700">
+                        Ou data fixa (ex.: fim do plano anual)
+                        <input
+                          type="date"
+                          value={proLideresAccessDate}
+                          onChange={(e) => setProLideresAccessDate(e.target.value)}
+                          className="mt-1 w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
+                        />
+                      </label>
+                      <label className="flex items-center gap-2 text-xs text-gray-800">
+                        <input
+                          type="checkbox"
+                          checked={proLideresLinkAsActive}
+                          onChange={(e) => setProLideresLinkAsActive(e.target.checked)}
+                          className="rounded border-gray-300"
+                        />
+                        {t.modal.proLideresLinkAsActive}
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => aplicarAcaoProLideres('add_member')}
+                        disabled={salvandoProLideres || salvando || !proLideresTenantId.trim()}
+                        className="px-3 py-2 bg-violet-700 text-white text-sm rounded-lg hover:bg-violet-800 disabled:opacity-50"
+                      >
+                        {salvandoProLideres ? t.modal.saving : t.modal.proLideresAddMember}
+                      </button>
+                    </div>
                   )}
                 </div>
-              )}
 
               {mostrarColunasPresidente && (
                 <div>

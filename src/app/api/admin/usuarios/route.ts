@@ -5,7 +5,10 @@ import { getNamesForCanonical, getCanonicalName } from '@/lib/presidente-canonic
 import { isPerfilMatrizYlada, PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 import { parseYladaFreeGrantKind } from '@/lib/admin-ylada-free-matriz'
 import { isAdminTestAccountEmail } from '@/lib/admin-test-accounts'
-import { fetchAdminProProductBadgesByUserId } from '@/lib/admin-usuarios-pro-product-badge'
+import {
+  fetchAdminProProductBadgesByUserId,
+  fetchAdminProLideresUserIds,
+} from '@/lib/admin-usuarios-pro-product-badge'
 import { batchProLideresContextUnlocksYladaMatrixApis } from '@/lib/pro-lideres-server'
 import { fetchProEsteticaConsultoriaAccessUntilByUserId } from '@/lib/admin-usuarios-pro-estetica-consultoria-access'
 import { toYmdInTimeZone } from '@/lib/date-utils'
@@ -19,7 +22,7 @@ import { toYmdInTimeZone } from '@/lib/date-utils'
  * Query params:
  * - bloco?: 'todos' | 'ylada' | 'wellness' — escopo da listagem (UI: um único filtro “Base”).
  *   ylada = todos os perfis da matriz (PERFIS_MATRIZ_YLADA: med, psi, ylada, nutri…); wellness = só perfil wellness; omitido/todos = sem filtro de bloco.
- * - perfil?: slug exato em user_profiles.perfil (nutri, coach, ylada, …). UI: filtro “Segmento”.
+ * - perfil?: slug exato em user_profiles.perfil (nutri, coach, ylada, …) ou `pro_lideres` (vínculo equipa/líder, não coluna perfil). UI: filtro “Segmento”.
  *   Preferir a `perfil` em vez de `area` para o perfil literal `ylada` ( `area=ylada` continua legado = matriz inteira).
  * - area?: legado | demais_segmentos | ylada (matriz) | todos — refinamentos antigos; sem `perfil`.
  * - status?: 'todos' | 'ativo' | 'inativo' - Filtrar por status
@@ -109,8 +112,18 @@ export async function GET(request: NextRequest) {
       profilesQuery = profilesQuery.in('perfil', ['wellness', 'coach-bem-estar'])
     }
 
-    // Segmento exato (coluna Área) — não usar `area=ylada` aqui (esse valor é legado = matriz inteira)
-    if (perfilFiltro && perfilFiltro !== 'todos') {
+    // Segmento exato (coluna Área) — `pro_lideres` = filtro por vínculo em leader_tenants / members (não é user_profiles.perfil)
+    if (perfilFiltro === 'pro_lideres') {
+      const plUserIds = await fetchAdminProLideresUserIds(supabaseAdmin)
+      if (plUserIds.length === 0) {
+        return NextResponse.json({
+          success: true,
+          usuarios: [],
+          stats: { total: 0, ativos: 0, inativos: 0 },
+        })
+      }
+      profilesQuery = profilesQuery.in('user_id', plUserIds)
+    } else if (perfilFiltro && perfilFiltro !== 'todos') {
       profilesQuery = profilesQuery.eq('perfil', perfilFiltro)
     } else if (areaFiltro === 'legado') {
       profilesQuery = profilesQuery.in('perfil', LEGADO_AREAS)

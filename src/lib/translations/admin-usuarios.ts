@@ -240,6 +240,10 @@ export interface AdminUsuariosTranslations {
     proLideresActivateSuccess: string
     proLideresNoLink: string
     proLideresLoading: string
+    proLideresLinkTeam: string
+    proLideresSelectTeam: string
+    proLideresAddMember: string
+    proLideresLinkAsActive: string
     matrizFreeMigrationCreateBtn: string
     matrizFreeCourtesyCreateBtn: string
   }
@@ -285,7 +289,7 @@ const pt: AdminUsuariosTranslations = {
     president: 'Presidente',
     segment: 'Segmento',
     segmentHint:
-      'Refina pela coluna Área (perfil no cadastro). As opções respeitam a Base: em YLADA, só segmentos da matriz.',
+      'Segmento do produto (coluna Área) ou «Pro Líderes» = quem tem vínculo de equipa/líder (pode continuar Wellness na base).',
     hideTestAccounts: 'Ocultar contas de teste (lista e CSV)',
     all: 'Todos',
     active: 'Com acesso (plano, Freedom ou equipa Pro Líderes)',
@@ -443,6 +447,10 @@ const pt: AdminUsuariosTranslations = {
     proLideresActivateSuccess: 'Acesso Pro Líderes atualizado.',
     proLideresNoLink: 'Sem vínculo Pro Líderes nesta conta.',
     proLideresLoading: 'A carregar Pro Líderes…',
+    proLideresLinkTeam: 'Vincular à equipa Pro Líderes',
+    proLideresSelectTeam: 'Espaço do líder (equipa)',
+    proLideresAddMember: 'Vincular à equipa',
+    proLideresLinkAsActive: 'Já ativar acesso (sem passo de pagamento)',
     president: 'Presidente',
     presidentHint: 'Selecione o presidente ao qual este usuário pertence',
     cancel: 'Cancelar',
@@ -749,6 +757,10 @@ const es: AdminUsuariosTranslations = {
     proLideresActivateSuccess: 'Acceso Pro Líderes actualizado.',
     proLideresNoLink: 'Sin vínculo Pro Líderes en esta cuenta.',
     proLideresLoading: 'Cargando Pro Líderes…',
+    proLideresLinkTeam: 'Vincular al equipo Pro Líderes',
+    proLideresSelectTeam: 'Espacio del líder (equipo)',
+    proLideresAddMember: 'Vincular al equipo',
+    proLideresLinkAsActive: 'Activar acceso ya (sin paso de pago)',
   },
   messages: {
     noUsers: 'Ningún usuario encontrado',
@@ -1004,6 +1016,10 @@ const en: AdminUsuariosTranslations = {
     proLideresActivateSuccess: 'Pro Leaders access updated.',
     proLideresNoLink: 'No Pro Leaders link on this account.',
     proLideresLoading: 'Loading Pro Leaders…',
+    proLideresLinkTeam: 'Link to Pro Leaders team',
+    proLideresSelectTeam: 'Leader workspace (team)',
+    proLideresAddMember: 'Link to team',
+    proLideresLinkAsActive: 'Activate access now (skip payment step)',
   },
   messages: {
     noUsers: 'No users found',
