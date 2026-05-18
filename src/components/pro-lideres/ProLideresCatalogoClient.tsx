@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 
 import { PRO_LIDERES_VERTICAL_BRAND_LABEL } from '@/config/pro-lideres-vertical'
+import ProLideresHOMSettings from '@/components/pro-lideres/ProLideresHOMSettings'
+import ProLideresHOMMembroClient from '@/components/pro-lideres/ProLideresHOMMembroClient'
 import type { ProLideresCatalogCategory, ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
 import { copyTextToClipboard } from '@/lib/clipboard'
@@ -261,6 +263,7 @@ export function ProLideresCatalogoClient({
   const [search, setSearch] = useState('')
   const [teamVisibilityBusyId, setTeamVisibilityBusyId] = useState<string | null>(null)
   const [highlightYladaLinkId, setHighlightYladaLinkId] = useState<string | null>(null)
+  const [showHOM, setShowHOM] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -404,6 +407,35 @@ export function ProLideresCatalogoClient({
           ) : null}
         </header>
       ) : null}
+
+      {/* Card Link da HOM */}
+      <div className="overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setShowHOM((v) => !v)}
+          className="flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-emerald-100/60"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-xl shadow-sm">🎥</span>
+            <div>
+              <p className="font-bold text-gray-900">Link da HOM</p>
+              <p className="text-xs text-emerald-700">
+                {isLeaderWorkspace
+                  ? 'Configure o vídeo e copie os links únicos de cada membro'
+                  : 'Seu link personalizado para compartilhar a apresentação'}
+              </p>
+            </div>
+          </div>
+          <span className={`text-emerald-600 transition-transform duration-200 ${showHOM ? 'rotate-180' : ''}`}>
+            ▼
+          </span>
+        </button>
+        {showHOM && (
+          <div className="border-t border-emerald-200 bg-white p-5">
+            {isLeaderWorkspace ? <ProLideresHOMSettings /> : <ProLideresHOMMembroClient />}
+          </div>
+        )}
+      </div>
 
       <div className="rounded-2xl border-2 border-slate-200 bg-gradient-to-b from-slate-50/90 to-white p-5 shadow-md ring-1 ring-slate-900/5">
         <div className="flex flex-col gap-5">

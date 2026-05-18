@@ -987,7 +987,7 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    message: '2 ferramentas criadas com sucesso.',
+    message: '3 ferramentas criadas com sucesso.',
     results,
   })
 }
