@@ -89,6 +89,32 @@ export default function AutoRedirect() {
           const checkYladaProfile = async () => {
             await new Promise(resolve => setTimeout(resolve, 500))
             if (hasRedirectedRef.current) return
+            const perfil = userProfile?.perfil
+            if (perfil === 'wellness' || perfil === 'coach-bem-estar') {
+              try {
+                const plRes = await fetch('/api/pro-lideres/wellness-matrix-redirect', {
+                  credentials: 'include',
+                  signal: AbortSignal.timeout(2500),
+                })
+                if (hasRedirectedRef.current) return
+                if (plRes.ok) {
+                  const plData = (await plRes.json()) as { redirectTo?: string }
+                  if (typeof plData.redirectTo === 'string' && plData.redirectTo.startsWith('/')) {
+                    hasRedirectedRef.current = true
+                    router.replace(plData.redirectTo)
+                    return
+                  }
+                }
+              } catch {
+                /* fallback home abaixo */
+              }
+              if (hasRedirectedRef.current) return
+              hasRedirectedRef.current = true
+              router.replace(
+                perfil === 'coach-bem-estar' ? '/pt/coach-bem-estar/home' : '/pt/wellness/home'
+              )
+              return
+            }
             try {
               const res = await fetch('/api/ylada/profile?segment=ylada', { credentials: 'include', signal: AbortSignal.timeout(2000) })
               if (hasRedirectedRef.current) return

@@ -8,6 +8,7 @@ import {
   proLideresTeamViewPreviewFromCaps,
   type ProLideresCookieStoreLike,
 } from '@/lib/pro-lideres-team-preview'
+import { PRO_LIDERES_BASE_PATH, PRO_LIDERES_MEMBER_BASE_PATH } from '@/config/pro-lideres-menu'
 
 export type { LeaderTenantRow, ProLideresTenantRole }
 
@@ -250,6 +251,50 @@ function pickEnsureRedirectAmongMemberships(rows: LeaderMemberLite[]): string | 
   if (hasExpiredWhileActive) return '/pro-lideres/membro/acesso-expirado'
 
   return null
+}
+
+/**
+ * Conta Wellness / Coach Bem-estar com vínculo Pro Líderes: destino em vez do onboarding da matriz YLADA.
+ * Inclui `pending_activation` — o admin pode mostrar badge Pro antes do acesso estar ativo.
+ */
+export async function resolveProLideresRedirectForWellnessAccount(userId: string): Promise<string | null> {
+  const admin = getSupabaseAdmin()
+  if (!admin) return null
+
+  const { data: asOwner } = await admin
+    .from('leader_tenants')
+    .select('id')
+    .eq('owner_user_id', userId)
+    .limit(1)
+    .maybeSingle()
+  if (asOwner?.id) return PRO_LIDERES_BASE_PATH
+
+  const { data: memberships } = await admin
+    .from('leader_tenant_members')
+    .select('leader_tenant_id, role, team_access_state, team_access_expires_at, created_at')
+    .eq('user_id', userId)
+
+  const rows = (memberships ?? []) as LeaderMemberLite[]
+  if (!rows.length) return null
+
+  const gateRedirect = pickEnsureRedirectAmongMemberships(rows)
+  if (gateRedirect) return gateRedirect
+
+  const tenantIds = [...new Set(rows.map((r) => String(r.leader_tenant_id)))]
+  const { data: tenantRows } = await admin.from('leader_tenants').select('id, owner_user_id').in('id', tenantIds)
+  const ownerByTenantId = new Map<string, string>()
+  for (const t of tenantRows ?? []) {
+    const id = t.id as string
+    const ou = t.owner_user_id as string
+    if (id && ou) ownerByTenantId.set(id, ou)
+  }
+
+  const activeMembership = pickResolvableMembership(rows, userId, ownerByTenantId)
+  if (!activeMembership) return null
+
+  const dbRole = activeMembership.role as string
+  if (dbRole === 'leader') return PRO_LIDERES_BASE_PATH
+  return PRO_LIDERES_MEMBER_BASE_PATH
 }
 
 /**

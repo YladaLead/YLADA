@@ -2,6 +2,7 @@ import { cookies, headers } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { redirect } from 'next/navigation'
 import { hasActiveSubscription, canBypassSubscription, wellnessAreaSubscriptionOrProLideresAccess } from '@/lib/subscription-helpers'
+import { resolveProLideresRedirectForWellnessAccount } from '@/lib/pro-lideres-server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 
@@ -340,6 +341,22 @@ export async function validateProtectedAccess(
       redirect('/pt/coach-bem-estar/home')
     }
 
+    // Wellness na matriz (/pt/*): não usar onboarding/diagnóstico YLADA; Pro Líderes (incl. ativação pendente) ou home Wellness.
+    if (
+      area === 'ylada' &&
+      profile.perfil === 'wellness' &&
+      !canBypassProfile &&
+      !isAllowAnyPerfilPath
+    ) {
+      const plRedirect = await resolveProLideresRedirectForWellnessAccount(user.id)
+      if (plRedirect) {
+        console.log(`ℹ️ ProtectedLayout [ylada]: wellness + Pro Líderes — redirecionando para ${plRedirect}`)
+        redirect(plRedirect)
+      }
+      console.log('ℹ️ ProtectedLayout [ylada]: perfil wellness — redirecionando para /pt/wellness/home')
+      redirect('/pt/wellness/home')
+    }
+
     if (!profileMatchesArea && !canBypassProfile && !isAllowAnyPerfilPath) {
       console.log(`❌ ProtectedLayout [${area}]: Perfil incorreto (${profile.perfil}), redirecionando para login`)
       redirect(area === 'ylada' ? '/pt/login' : `/pt/${area}/login`)
@@ -397,9 +414,12 @@ export async function validateProtectedAccess(
       })
 
     // 4b. Coach e YLADA (matriz): exigir perfil Noel/YLADA completo em ylada_noel_profile (além da 4a em user_profiles).
-    // Wellness não passa por aqui. Não exigir nas rotas de completar perfil (evita loop).
+    // Wellness / Coach Bem-estar não passam por aqui (produto Herbalife + Pro Líderes). Não exigir nas rotas de completar perfil (evita loop).
+    const skipYladaNoelForWellnessProduct =
+      profile.perfil === 'wellness' || profile.perfil === 'coach-bem-estar'
     if (
       (area === 'coach' || area === 'ylada') &&
+      !skipYladaNoelForWellnessProduct &&
       !canBypassProfile &&
       !isAllowAnyPerfilPath &&
       !skipYladaNoelProfileForRoute &&

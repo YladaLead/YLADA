@@ -3,13 +3,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
+import { resolveTeamAccessExpiresAt } from '@/lib/pro-lideres-team-access-expiry'
 import { supabaseAdmin } from '@/lib/supabase'
 
 type Body = {
   targetUserId?: string
-  action?: 'pause' | 'resume' | 'remove' | 'activate'
-  /** Dias a partir da ativação; omitir ou `null` = sem data de fim. */
+  action?: 'pause' | 'resume' | 'remove' | 'activate' | 'set_expiry'
+  /** Dias a partir de hoje; omitir ou `null` = sem data de fim (se não houver accessExpiresAt). */
   accessDays?: number | null
+  /** Data fixa de fim (YYYY-MM-DD ou ISO). Alternativa a accessDays. */
+  accessExpiresAt?: string | null
 }
 
 function publicAppBaseUrl(): string {
@@ -52,7 +55,7 @@ export async function POST(request: NextRequest) {
   if (targetUserId === user.id) {
     return NextResponse.json({ error: 'Não é possível alterar o próprio acesso aqui.' }, { status: 400 })
   }
-  if (!['pause', 'resume', 'remove', 'activate'].includes(action)) {
+  if (!['pause', 'resume', 'remove', 'activate', 'set_expiry'].includes(action)) {
     return NextResponse.json({ error: 'action inválida' }, { status: 400 })
   }
 
@@ -96,23 +99,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    let expiresAt: string | null = null
-    const rawDays = body.accessDays
-    if (rawDays !== undefined && rawDays !== null) {
-      if (typeof rawDays !== 'number' || !Number.isFinite(rawDays)) {
-        return NextResponse.json({ error: 'accessDays inválido.' }, { status: 400 })
-      }
-      const d = Math.floor(rawDays)
-      if (d < 1 || d > 3660) {
-        return NextResponse.json(
-          { error: 'Indique entre 1 e 3660 dias de validade, ou deixe em branco para acesso sem data de fim.' },
-          { status: 400 }
-        )
-      }
-      const until = new Date()
-      until.setDate(until.getDate() + d)
-      expiresAt = until.toISOString()
+    const resolved = resolveTeamAccessExpiresAt({
+      accessDays: body.accessDays,
+      accessExpiresAt: body.accessExpiresAt,
+      requireFutureDate: true,
+    })
+    if (resolved.error) {
+      return NextResponse.json({ error: resolved.error }, { status: 400 })
     }
+    const expiresAt = resolved.expiresAt
 
     const { error: updErr } = await supabaseAdmin
       .from('leader_tenant_members')
@@ -197,22 +192,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true })
     }
 
-    let resumeExpiresAt: string | null = null
-    if (rawResumeDays !== null) {
-      if (typeof rawResumeDays !== 'number' || !Number.isFinite(rawResumeDays)) {
-        return NextResponse.json({ error: 'accessDays inválido.' }, { status: 400 })
-      }
-      const d = Math.floor(rawResumeDays)
-      if (d < 1 || d > 3660) {
-        return NextResponse.json(
-          { error: 'Indique entre 1 e 3660 dias de validade, ou deixe em branco para acesso sem data de fim.' },
-          { status: 400 }
-        )
-      }
-      const until = new Date()
-      until.setDate(until.getDate() + d)
-      resumeExpiresAt = until.toISOString()
+    const resolvedResume = resolveTeamAccessExpiresAt({
+      accessDays: rawResumeDays,
+      accessExpiresAt: body.accessExpiresAt,
+      requireFutureDate: true,
+    })
+    if (resolvedResume.error) {
+      return NextResponse.json({ error: resolvedResume.error }, { status: 400 })
     }
+    const resumeExpiresAt = resolvedResume.expiresAt
 
     const { error: updErr } = await supabaseAdmin
       .from('leader_tenant_members')
@@ -226,6 +214,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Não foi possível atualizar o acesso.' }, { status: 500 })
     }
     return NextResponse.json({ ok: true })
+  }
+
+  if (action === 'set_expiry') {
+    if (state !== 'active') {
+      return NextResponse.json(
+        { error: 'Só é possível ajustar a validade de membros com acesso ativo.' },
+        { status: 400 }
+      )
+    }
+    const resolvedExpiry = resolveTeamAccessExpiresAt({
+      accessDays: body.accessDays,
+      accessExpiresAt: body.accessExpiresAt,
+      requireFutureDate: false,
+    })
+    if (resolvedExpiry.error) {
+      return NextResponse.json({ error: resolvedExpiry.error }, { status: 400 })
+    }
+    const { error: updErr } = await supabaseAdmin
+      .from('leader_tenant_members')
+      .update({ team_access_expires_at: resolvedExpiry.expiresAt })
+      .eq('id', row.id as string)
+      .eq('leader_tenant_id', ctx.tenant.id)
+      .eq('role', 'member')
+
+    if (updErr) {
+      console.error('[pro-lideres/equipe/members/access set_expiry]', updErr)
+      return NextResponse.json({ error: 'Não foi possível atualizar a validade.' }, { status: 500 })
+    }
+    return NextResponse.json({ ok: true, accessExpiresAt: resolvedExpiry.expiresAt })
   }
 
   return NextResponse.json({ error: 'Ação não suportada.' }, { status: 400 })

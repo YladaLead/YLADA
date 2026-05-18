@@ -525,6 +525,38 @@ export default function LoginForm({
         }
 
         let baseRedirectPath = redirectPath
+        const loggedInPerfil = profileCheck?.perfil || perfil
+
+        if (
+          !proLideresLogin &&
+          !proEsteticaCorporalLogin &&
+          !proEsteticaCapilarLogin &&
+          (loggedInPerfil === 'wellness' || loggedInPerfil === 'coach-bem-estar') &&
+          session.access_token
+        ) {
+          try {
+            const plRes = await fetch('/api/pro-lideres/wellness-matrix-redirect', {
+              headers: { Authorization: `Bearer ${session.access_token}` },
+              credentials: 'include',
+            })
+            if (plRes.ok) {
+              const plData = (await plRes.json()) as { redirectTo?: string | null }
+              if (typeof plData.redirectTo === 'string' && plData.redirectTo.startsWith('/')) {
+                baseRedirectPath = plData.redirectTo
+                console.log('🔄 Login: wellness/coach + Pro Líderes —', baseRedirectPath)
+              } else {
+                baseRedirectPath =
+                  loggedInPerfil === 'coach-bem-estar' ? '/pt/coach-bem-estar/home' : '/pt/wellness/home'
+              }
+            } else {
+              baseRedirectPath =
+                loggedInPerfil === 'coach-bem-estar' ? '/pt/coach-bem-estar/home' : '/pt/wellness/home'
+            }
+          } catch {
+            baseRedirectPath =
+              loggedInPerfil === 'coach-bem-estar' ? '/pt/coach-bem-estar/home' : '/pt/wellness/home'
+          }
+        }
 
         if (proLideresLogin && session.access_token) {
           try {

@@ -222,6 +222,24 @@ export interface AdminUsuariosTranslations {
     matrizFreeMigrationIntro: string
     matrizFreeCourtesyTitle: string
     matrizFreeCourtesyIntro: string
+    proLideresSectionTitle: string
+    proLideresSectionIntro: string
+    proLideresAreaSeparateHint: string
+    proLideresTenantLabel: string
+    proLideresRoleOwner: string
+    proLideresRoleMember: string
+    proLideresStatePending: string
+    proLideresStateActive: string
+    proLideresStatePaused: string
+    proLideresActivate: string
+    proLideresPause: string
+    proLideresResume: string
+    proLideresRemove: string
+    proLideresAccessDays: string
+    proLideresAccessDaysHint: string
+    proLideresActivateSuccess: string
+    proLideresNoLink: string
+    proLideresLoading: string
     matrizFreeMigrationCreateBtn: string
     matrizFreeCourtesyCreateBtn: string
   }
@@ -403,7 +421,28 @@ const pt: AdminUsuariosTranslations = {
     editUser: 'Editar Usuário',
     fullName: 'Nome Completo',
     area: 'Área',
-    areaHint: 'Perfil do usuário na plataforma',
+    areaHint:
+      'Produto YLADA (Wellness, Nutri, matriz…). Pro Líderes é configurado na secção abaixo — não substitui esta área.',
+    proLideresSectionTitle: 'Pro Líderes',
+    proLideresSectionIntro:
+      'Vínculo com equipa ou painel de líder. Quem é Wellness continua Wellness; aqui controla o acesso ao Pro Líderes.',
+    proLideresAreaSeparateHint:
+      'A coluna «Área» na lista mostra o produto (ex.: Wellness). O selo Pro Líderes reflete este vínculo.',
+    proLideresTenantLabel: 'Espaço',
+    proLideresRoleOwner: 'Líder (dona do espaço)',
+    proLideresRoleMember: 'Membro de equipa',
+    proLideresStatePending: 'Aguardando ativação',
+    proLideresStateActive: 'Ativo',
+    proLideresStatePaused: 'Pausado',
+    proLideresActivate: 'Ativar acesso',
+    proLideresPause: 'Pausar',
+    proLideresResume: 'Retomar',
+    proLideresRemove: 'Remover da equipa',
+    proLideresAccessDays: 'Validade (dias, opcional)',
+    proLideresAccessDaysHint: 'Deixe vazio para acesso sem data de fim.',
+    proLideresActivateSuccess: 'Acesso Pro Líderes atualizado.',
+    proLideresNoLink: 'Sem vínculo Pro Líderes nesta conta.',
+    proLideresLoading: 'A carregar Pro Líderes…',
     president: 'Presidente',
     presidentHint: 'Selecione o presidente ao qual este usuário pertence',
     cancel: 'Cancelar',
@@ -637,7 +676,8 @@ const es: AdminUsuariosTranslations = {
     editUser: 'Editar Usuario',
     fullName: 'Nombre Completo',
     area: 'Área',
-    areaHint: 'Perfil del usuario en la plataforma',
+    areaHint:
+      'Producto YLADA (Wellness, Nutri, matriz…). Pro Líderes se configura abajo — no reemplaza esta área.',
     president: 'Presidente',
     presidentHint: 'Seleccione el presidente al que pertenece este usuario',
     cancel: 'Cancelar',
@@ -689,6 +729,26 @@ const es: AdminUsuariosTranslations = {
       'Concesión puntual con plazo (soporte, prueba extendida, etc.). No es la migración masiva del legado.',
     matrizFreeMigrationCreateBtn: 'Crear free (migración)',
     matrizFreeCourtesyCreateBtn: 'Crear free (cortesía)',
+    proLideresSectionTitle: 'Pro Líderes',
+    proLideresSectionIntro:
+      'Vínculo con equipo o panel de líder. Quien es Wellness sigue siendo Wellness; aquí se controla el acceso a Pro Líderes.',
+    proLideresAreaSeparateHint:
+      'La columna «Área» muestra el producto (ej. Wellness). La insignia Pro Líderes refleja este vínculo.',
+    proLideresTenantLabel: 'Espacio',
+    proLideresRoleOwner: 'Líder (dueña del espacio)',
+    proLideresRoleMember: 'Miembro del equipo',
+    proLideresStatePending: 'Pendiente de activación',
+    proLideresStateActive: 'Activo',
+    proLideresStatePaused: 'Pausado',
+    proLideresActivate: 'Activar acceso',
+    proLideresPause: 'Pausar',
+    proLideresResume: 'Reanudar',
+    proLideresRemove: 'Quitar del equipo',
+    proLideresAccessDays: 'Validez (días, opcional)',
+    proLideresAccessDaysHint: 'Deje vacío para acceso sin fecha de fin.',
+    proLideresActivateSuccess: 'Acceso Pro Líderes actualizado.',
+    proLideresNoLink: 'Sin vínculo Pro Líderes en esta cuenta.',
+    proLideresLoading: 'Cargando Pro Líderes…',
   },
   messages: {
     noUsers: 'Ningún usuario encontrado',
@@ -871,7 +931,8 @@ const en: AdminUsuariosTranslations = {
     editUser: 'Edit User',
     fullName: 'Full Name',
     area: 'Area',
-    areaHint: 'User profile on the platform',
+    areaHint:
+      'YLADA product (Wellness, Nutri, matrix…). Pro Leaders is configured below — it does not replace this area.',
     president: 'President',
     presidentHint: 'Select the president this user belongs to',
     cancel: 'Cancel',
@@ -923,6 +984,26 @@ const en: AdminUsuariosTranslations = {
       'One-off access with a defined period (support, extended trial, etc.). Not the same as bulk legacy migration.',
     matrizFreeMigrationCreateBtn: 'Create free (migration)',
     matrizFreeCourtesyCreateBtn: 'Create free (courtesy)',
+    proLideresSectionTitle: 'Pro Leaders',
+    proLideresSectionIntro:
+      'Team or leader panel link. Wellness users stay Wellness; control Pro Leaders access here.',
+    proLideresAreaSeparateHint:
+      'The «Area» column is the product (e.g. Wellness). The Pro Leaders badge reflects this link.',
+    proLideresTenantLabel: 'Workspace',
+    proLideresRoleOwner: 'Leader (workspace owner)',
+    proLideresRoleMember: 'Team member',
+    proLideresStatePending: 'Pending activation',
+    proLideresStateActive: 'Active',
+    proLideresStatePaused: 'Paused',
+    proLideresActivate: 'Activate access',
+    proLideresPause: 'Pause',
+    proLideresResume: 'Resume',
+    proLideresRemove: 'Remove from team',
+    proLideresAccessDays: 'Validity (days, optional)',
+    proLideresAccessDaysHint: 'Leave empty for access with no end date.',
+    proLideresActivateSuccess: 'Pro Leaders access updated.',
+    proLideresNoLink: 'No Pro Leaders link on this account.',
+    proLideresLoading: 'Loading Pro Leaders…',
   },
   messages: {
     noUsers: 'No users found',

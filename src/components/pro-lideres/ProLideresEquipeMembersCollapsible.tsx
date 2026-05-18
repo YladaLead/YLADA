@@ -320,9 +320,19 @@ function validadeAjuda(m: ProLideresMemberListItem, canManage: boolean): string 
     return 'Sem data gravada — não há pausa automática por calendário. Para passar a ter data: «Pausar» e depois «Ativar» para definir os dias.'
   }
   if (m.teamAccessState === 'active' && m.teamAccessExpiresAt) {
-    return 'A pausa automática corre na data acima (se o acesso ainda estiver ativo).'
+    return 'A pausa automática corre na data acima. Para mudar a data (ex.: alinhar ao plano anual), usa o botão «Validade».'
   }
   return null
+}
+
+function isoToDateInputValue(iso: string | null | undefined): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 export function ProLideresEquipeMembersCollapsible({
@@ -340,9 +350,11 @@ export function ProLideresEquipeMembersCollapsible({
   const [actionError, setActionError] = useState<string | null>(null)
 
   const [activateUserId, setActivateUserId] = useState<string | null>(null)
-  /** `pending` = primeira ativação; `paused` = retomar e gravar validade. */
-  const [activateFlow, setActivateFlow] = useState<'pending' | 'paused' | null>(null)
+  /** `pending` = primeira ativação; `paused` = retomar; `expiry` = ajustar data (já ativo). */
+  const [activateFlow, setActivateFlow] = useState<'pending' | 'paused' | 'expiry' | null>(null)
+  const [activateMode, setActivateMode] = useState<'days' | 'date'>('days')
   const [activateDays, setActivateDays] = useState('30')
+  const [activateEndDate, setActivateEndDate] = useState('')
   const [activateNoEnd, setActivateNoEnd] = useState(false)
   const [copyMessage, setCopyMessage] = useState<string | null>(null)
   const [copyCopied, setCopyCopied] = useState(false)
@@ -384,27 +396,43 @@ export function ProLideresEquipeMembersCollapsible({
   async function submitActivate() {
     if (!activateUserId || !activateFlow) return
     setActionError(null)
-    let accessDays: number | null = null
-    if (!activateNoEnd) {
-      const n = parseInt(activateDays, 10)
-      if (!Number.isFinite(n) || n < 1) {
-        setActionError('Indica um número válido de dias (ex.: 30) ou marca «sem data de fim».')
+    const payload: {
+      targetUserId: string
+      action: string
+      accessDays?: number | null
+      accessExpiresAt?: string | null
+    } = { targetUserId: activateUserId, action: '' }
+
+    if (activateFlow === 'expiry') {
+      payload.action = 'set_expiry'
+    } else {
+      payload.action = activateFlow === 'pending' ? 'activate' : 'resume'
+    }
+
+    if (activateNoEnd) {
+      payload.accessDays = null
+      payload.accessExpiresAt = null
+    } else if (activateMode === 'date') {
+      if (!activateEndDate.trim()) {
+        setActionError('Escolhe a data de validade ou marca «sem data de fim».')
         return
       }
-      accessDays = n
+      payload.accessExpiresAt = activateEndDate.trim()
+    } else {
+      const n = parseInt(activateDays, 10)
+      if (!Number.isFinite(n) || n < 1) {
+        setActionError('Indica um número válido de dias (ex.: 30) ou escolhe «até data».')
+        return
+      }
+      payload.accessDays = n
     }
 
     setBusyUserId(activateUserId)
     try {
-      const action = activateFlow === 'pending' ? 'activate' : 'resume'
       const res = await fetch('/api/pro-lideres/equipe/members/access', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          targetUserId: activateUserId,
-          action,
-          accessDays,
-        }),
+        body: JSON.stringify(payload),
       })
       const data = (await res.json().catch(() => ({}))) as { error?: string; copyMessage?: string }
       if (!res.ok) {
@@ -418,7 +446,9 @@ export function ProLideresEquipeMembersCollapsible({
       }
       setActivateUserId(null)
       setActivateFlow(null)
+      setActivateMode('days')
       setActivateDays('30')
+      setActivateEndDate('')
       setActivateNoEnd(false)
       router.refresh()
     } catch {
@@ -456,13 +486,47 @@ export function ProLideresEquipeMembersCollapsible({
         >
           <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-gray-200 bg-white p-5 shadow-xl">
             <h2 id="pro-lideres-ativar-titulo" className="text-lg font-bold text-gray-900">
-              {activateFlow === 'pending' ? 'Ativar acesso' : 'Retomar acesso'}
+              {activateFlow === 'pending'
+                ? 'Ativar acesso'
+                : activateFlow === 'paused'
+                  ? 'Retomar acesso'
+                  : 'Ajustar validade'}
             </h2>
             <p className="mt-2 text-sm text-gray-600">
               {activateFlow === 'pending'
-                ? 'A partir deste momento, define por quantos dias o acesso fica válido (ou sem data de fim). A data passa a aparecer na coluna «Validade» desta lista.'
-                : 'Ao retomar, escolhe de novo o prazo: a nova data de fim fica visível na coluna «Validade» e a pausa automática usa essa data.'}
+                ? 'Define o prazo do acesso Pro Líderes. Para alinhar ao plano anual Wellness, use a mesma data de vencimento da assinatura.'
+                : activateFlow === 'paused'
+                  ? 'Ao retomar, escolhe de novo o prazo. A data aparece na coluna «Validade».'
+                  : 'Altera só a data de fim (ex.: 10/01/2027). Não precisa pausar e ativar de novo.'}
             </p>
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                disabled={activateNoEnd}
+                onClick={() => setActivateMode('days')}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                  activateMode === 'days'
+                    ? 'bg-emerald-700 text-white'
+                    : 'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50'
+                } disabled:opacity-40`}
+              >
+                Por dias
+              </button>
+              <button
+                type="button"
+                disabled={activateNoEnd}
+                onClick={() => setActivateMode('date')}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                  activateMode === 'date'
+                    ? 'bg-emerald-700 text-white'
+                    : 'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50'
+                } disabled:opacity-40`}
+              >
+                Até data
+              </button>
+            </div>
+            {activateMode === 'days' ? (
+              <>
             <p className="mt-3 text-xs text-gray-500">Atalhos comuns (mês ~30/31 dias):</p>
             <div className="mt-1 flex flex-wrap gap-2">
               <button
@@ -500,6 +564,19 @@ export function ProLideresEquipeMembersCollapsible({
                 className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 disabled:bg-gray-100"
               />
             </label>
+              </>
+            ) : (
+              <label className="mt-4 block text-sm font-medium text-gray-800">
+                Válido até (inclusive)
+                <input
+                  type="date"
+                  disabled={activateNoEnd}
+                  value={activateEndDate}
+                  onChange={(e) => setActivateEndDate(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 disabled:bg-gray-100"
+                />
+              </label>
+            )}
             <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-gray-800">
               <input
                 type="checkbox"
@@ -532,7 +609,13 @@ export function ProLideresEquipeMembersCollapsible({
                 className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
                 onClick={() => void submitActivate()}
               >
-                {busyUserId ? 'A gravar…' : activateFlow === 'pending' ? 'Confirmar ativação' : 'Confirmar retomação'}
+                {busyUserId
+                  ? 'A gravar…'
+                  : activateFlow === 'pending'
+                    ? 'Confirmar ativação'
+                    : activateFlow === 'paused'
+                      ? 'Confirmar retomação'
+                      : 'Guardar validade'}
               </button>
             </div>
           </div>
@@ -639,8 +722,8 @@ export function ProLideresEquipeMembersCollapsible({
                     data de fim».
                   </li>
                   <li>
-                    <strong>Já ativo</strong> sem data na coluna: o acesso ficou sem fim no sistema; para passar a ter
-                    data (e pausa automática), usa <strong>Pausar</strong> e depois <strong>Ativar</strong> de novo.
+                    <strong>Já ativo</strong>: botão <strong>Validade</strong> para escolher uma data fixa (ex.: fim do
+                    plano anual) ou «Por dias» / «sem data de fim» ao ativar.
                   </li>
                 </ul>
               </div>
@@ -670,6 +753,7 @@ export function ProLideresEquipeMembersCollapsible({
                 const vText = validadeResumo(m)
                 const vAjuda = validadeAjuda(m, canManageMembers)
                 const canPause = m.teamAccessState === 'active'
+                const canEditExpiry = m.teamAccessState === 'active'
                 const canAtivar =
                   m.teamAccessState === 'pending_activation' || m.teamAccessState === 'paused'
 
@@ -737,6 +821,24 @@ export function ProLideresEquipeMembersCollapsible({
 
                         {showActions ? (
                           <div className="flex flex-wrap justify-stretch gap-2 sm:justify-end">
+                            {canEditExpiry ? (
+                              <button
+                                type="button"
+                                title="Alterar data de validade (ex.: alinhar ao plano anual)"
+                                disabled={isBusy}
+                                onClick={() => {
+                                  setActionError(null)
+                                  setActivateMode('date')
+                                  setActivateEndDate(isoToDateInputValue(m.teamAccessExpiresAt))
+                                  setActivateNoEnd(false)
+                                  setActivateFlow('expiry')
+                                  setActivateUserId(m.userId)
+                                }}
+                                className="min-h-[36px] flex-1 rounded-lg border border-violet-400 bg-violet-50 px-2.5 py-1.5 text-xs font-semibold text-violet-950 hover:bg-violet-100 disabled:opacity-50 sm:flex-none sm:min-w-[5.5rem]"
+                              >
+                                Validade
+                              </button>
+                            ) : null}
                             <button
                               type="button"
                               title={canPause ? 'Suspender o acesso ao painel' : 'Só com acesso ativo'}

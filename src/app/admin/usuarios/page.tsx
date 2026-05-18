@@ -136,6 +136,21 @@ export default function AdminUsuarios() {
   const [diasEstenderMatriz, setDiasEstenderMatriz] = useState(30)
   const [salvandoFreeMatriz, setSalvandoFreeMatriz] = useState(false)
 
+  type ProLideresAdminDetail = {
+    hasProLideres: boolean
+    isOwner: boolean
+    tenantId: string | null
+    tenantDisplayName: string | null
+    role: 'leader' | 'member' | null
+    teamAccessState: 'active' | 'paused' | 'pending_activation' | null
+    teamAccessExpiresAt: string | null
+  }
+  const [proLideresDetail, setProLideresDetail] = useState<ProLideresAdminDetail | null>(null)
+  const [proLideresDetailLoading, setProLideresDetailLoading] = useState(false)
+  const [proLideresAccessDays, setProLideresAccessDays] = useState('')
+  const [proLideresAccessDate, setProLideresAccessDate] = useState('')
+  const [salvandoProLideres, setSalvandoProLideres] = useState(false)
+
   // Todas as áreas para edição de perfil (modal Editar Usuário)
   const TODAS_AREAS_EDICAO: { value: string; label: string }[] = useMemo(() => [
     { value: 'wellness', label: t.areas.wellness },
@@ -343,6 +358,89 @@ export default function AdminUsuarios() {
     busca,
   ])
 
+  const carregarProLideresDetail = async (userId: string) => {
+    setProLideresDetailLoading(true)
+    setProLideresDetail(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) return
+      const res = await fetch(`/api/admin/usuarios/${userId}/pro-lideres`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        credentials: 'include',
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data.proLideres) {
+        const pl = data.proLideres as ProLideresAdminDetail
+        setProLideresDetail(pl)
+        if (pl.teamAccessExpiresAt) {
+          const d = new Date(pl.teamAccessExpiresAt)
+          if (!Number.isNaN(d.getTime())) {
+            const y = d.getFullYear()
+            const m = String(d.getMonth() + 1).padStart(2, '0')
+            const day = String(d.getDate()).padStart(2, '0')
+            setProLideresAccessDate(`${y}-${m}-${day}`)
+          }
+        }
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setProLideresDetailLoading(false)
+    }
+  }
+
+  const aplicarAcaoProLideres = async (
+    action: 'activate' | 'pause' | 'resume' | 'remove' | 'set_expiry'
+  ) => {
+    if (!usuarioSelecionado) return
+    if (action === 'remove' && !window.confirm('Remover esta pessoa da equipa Pro Líderes?')) return
+
+    setSalvandoProLideres(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        setError(t.messages.errorNotAuthenticated)
+        return
+      }
+      const accessDaysRaw = proLideresAccessDays.trim()
+      const accessDateRaw = proLideresAccessDate.trim()
+      const body: {
+        action: typeof action
+        accessDays?: number | null
+        accessExpiresAt?: string | null
+      } = { action }
+      if (accessDateRaw) {
+        body.accessExpiresAt = accessDateRaw
+      } else if (accessDaysRaw && (action === 'activate' || action === 'set_expiry' || action === 'resume')) {
+        const d = parseInt(accessDaysRaw, 10)
+        if (Number.isFinite(d) && d > 0) body.accessDays = d
+      }
+      const res = await fetch(`/api/admin/usuarios/${usuarioSelecionado.id}/pro-lideres`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        credentials: 'include',
+        body: JSON.stringify(body),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || t.messages.errorUpdate)
+        return
+      }
+      setSuccess((data as { message?: string }).message || t.modal.proLideresActivateSuccess)
+      await carregarProLideresDetail(usuarioSelecionado.id)
+      carregarUsuarios({ silent: true })
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t.messages.errorUpdate)
+    } finally {
+      setSalvandoProLideres(false)
+    }
+  }
+
   // Abrir modal de editar usuário (usa nome canônico no dropdown quando existir)
   const abrirEditarUsuario = (usuario: Usuario) => {
     setUsuarioSelecionado(usuario)
@@ -354,7 +452,13 @@ export default function AdminUsuarios() {
     setDiasMigracaoMatriz(3650)
     setDiasCortesiaMatriz(90)
     setDiasEstenderMatriz(30)
+    setProLideresAccessDays('')
+    setProLideresAccessDate('')
+    setProLideresDetail(null)
     setMostrarEditarUsuario(true)
+    if (usuario.proProductBadge === 'pro_lideres' || usuario.acessoWellnessViaProLideres) {
+      void carregarProLideresDetail(usuario.id)
+    }
   }
 
   const criarPlanoFreeYlada = async (kind: 'migration' | 'courtesy', diasBruto: number) => {
@@ -1450,7 +1554,143 @@ export default function AdminUsuarios() {
                   ))}
                 </select>
                 <p className="text-xs text-gray-500 mt-1">{t.modal.areaHint}</p>
+                {(usuarioSelecionado.proProductBadge === 'pro_lideres' ||
+                  usuarioSelecionado.acessoWellnessViaProLideres) && (
+                  <p className="text-xs text-violet-800 bg-violet-50 border border-violet-100 rounded-md px-2 py-1.5 mt-2">
+                    {t.modal.proLideresAreaSeparateHint}
+                  </p>
+                )}
               </div>
+
+              {(usuarioSelecionado.proProductBadge === 'pro_lideres' ||
+                usuarioSelecionado.acessoWellnessViaProLideres ||
+                proLideresDetail?.hasProLideres) && (
+                <div className="rounded-lg border border-violet-200 bg-violet-50/40 p-4 space-y-3">
+                  <h3 className="text-sm font-semibold text-violet-950">{t.modal.proLideresSectionTitle}</h3>
+                  <p className="text-xs text-violet-900/90 leading-relaxed">{t.modal.proLideresSectionIntro}</p>
+                  {proLideresDetailLoading ? (
+                    <p className="text-xs text-gray-600">{t.modal.proLideresLoading}</p>
+                  ) : proLideresDetail?.hasProLideres ? (
+                    <>
+                      <dl className="text-xs space-y-1 text-gray-800">
+                        {proLideresDetail.tenantDisplayName ? (
+                          <div>
+                            <span className="font-medium">{t.modal.proLideresTenantLabel}: </span>
+                            {proLideresDetail.tenantDisplayName}
+                          </div>
+                        ) : null}
+                        <div>
+                          <span className="font-medium">Papel: </span>
+                          {proLideresDetail.isOwner || proLideresDetail.role === 'leader'
+                            ? t.modal.proLideresRoleOwner
+                            : t.modal.proLideresRoleMember}
+                        </div>
+                        {!proLideresDetail.isOwner && proLideresDetail.teamAccessState ? (
+                          <div>
+                            <span className="font-medium">Estado: </span>
+                            {proLideresDetail.teamAccessState === 'pending_activation'
+                              ? t.modal.proLideresStatePending
+                              : proLideresDetail.teamAccessState === 'paused'
+                                ? t.modal.proLideresStatePaused
+                                : t.modal.proLideresStateActive}
+                            {proLideresDetail.teamAccessExpiresAt
+                              ? ` · até ${new Date(proLideresDetail.teamAccessExpiresAt).toLocaleDateString('pt-BR')}`
+                              : ''}
+                          </div>
+                        ) : null}
+                      </dl>
+                      {!proLideresDetail.isOwner && proLideresDetail.role === 'member' ? (
+                        <div className="flex flex-col gap-2 pt-1">
+                          {proLideresDetail.teamAccessState === 'pending_activation' ? (
+                            <>
+                              <label className="text-xs font-medium text-gray-700">
+                                {t.modal.proLideresAccessDays}
+                              </label>
+                              <input
+                                type="number"
+                                min={1}
+                                max={3660}
+                                placeholder="Opcional"
+                                value={proLideresAccessDays}
+                                onChange={(e) => setProLideresAccessDays(e.target.value)}
+                                className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
+                              />
+                              <p className="text-[11px] text-gray-600">{t.modal.proLideresAccessDaysHint}</p>
+                              <label className="text-xs font-medium text-gray-700">
+                                Ou data fixa (ex.: fim do plano anual)
+                                <input
+                                  type="date"
+                                  value={proLideresAccessDate}
+                                  onChange={(e) => setProLideresAccessDate(e.target.value)}
+                                  className="mt-1 w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
+                                />
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => aplicarAcaoProLideres('activate')}
+                                disabled={salvandoProLideres || salvando}
+                                className="px-3 py-2 bg-emerald-700 text-white text-sm rounded-lg hover:bg-emerald-800 disabled:opacity-50"
+                              >
+                                {salvandoProLideres ? t.modal.saving : t.modal.proLideresActivate}
+                              </button>
+                            </>
+                          ) : null}
+                          {proLideresDetail.teamAccessState === 'active' ? (
+                            <>
+                              <label className="text-xs font-medium text-gray-700">
+                                Validade até
+                                <input
+                                  type="date"
+                                  value={proLideresAccessDate}
+                                  onChange={(e) => setProLideresAccessDate(e.target.value)}
+                                  className="mt-1 w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
+                                />
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => aplicarAcaoProLideres('set_expiry')}
+                                disabled={salvandoProLideres || salvando || !proLideresAccessDate.trim()}
+                                className="px-3 py-2 bg-violet-700 text-white text-sm rounded-lg hover:bg-violet-800 disabled:opacity-50"
+                              >
+                                {salvandoProLideres ? t.modal.saving : 'Guardar validade'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => aplicarAcaoProLideres('pause')}
+                              disabled={salvandoProLideres || salvando}
+                              className="px-3 py-2 border border-amber-300 bg-white text-amber-900 text-sm rounded-lg hover:bg-amber-50 disabled:opacity-50"
+                            >
+                              {t.modal.proLideresPause}
+                            </button>
+                            </>
+                          ) : null}
+                          {proLideresDetail.teamAccessState === 'paused' ? (
+                            <button
+                              type="button"
+                              onClick={() => aplicarAcaoProLideres('resume')}
+                              disabled={salvandoProLideres || salvando}
+                              className="px-3 py-2 bg-violet-700 text-white text-sm rounded-lg hover:bg-violet-800 disabled:opacity-50"
+                            >
+                              {t.modal.proLideresResume}
+                            </button>
+                          ) : null}
+                          <button
+                            type="button"
+                            onClick={() => aplicarAcaoProLideres('remove')}
+                            disabled={salvandoProLideres || salvando}
+                            className="px-3 py-2 border border-red-200 text-red-800 text-sm rounded-lg hover:bg-red-50 disabled:opacity-50"
+                          >
+                            {t.modal.proLideresRemove}
+                          </button>
+                        </div>
+                      ) : null}
+                    </>
+                  ) : (
+                    <p className="text-xs text-gray-600">{t.modal.proLideresNoLink}</p>
+                  )}
+                </div>
+              )}
+
               {mostrarColunasPresidente && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t.modal.president}</label>

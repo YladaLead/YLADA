@@ -259,6 +259,57 @@ export function OnboardingPageContent({
         })
         const data = await response.json().catch(() => ({}))
         if (!response.ok) {
+          const errMsg = typeof data.error === 'string' ? data.error : ''
+          if (
+            response.status === 403 &&
+            errMsg.includes('Contas Wellness usam apenas')
+          ) {
+            const wellnessRes = await fetch('/api/wellness/profile', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', ...authHeader },
+              credentials: 'include',
+              body: JSON.stringify({
+                nome: nomeCompleto.trim(),
+                telefone: telefoneLimpo,
+                whatsapp: telefoneLimpo,
+                countryCode,
+              }),
+            })
+            const wellnessData = await wellnessRes.json().catch(() => ({}))
+            if (!wellnessRes.ok) {
+              setErro(
+                (wellnessData as { error?: string }).error ||
+                  'Não foi possível salvar. Tente de novo.'
+              )
+              setSalvando(false)
+              return
+            }
+            try {
+              const plRes = await fetch('/api/pro-lideres/wellness-matrix-redirect', {
+                credentials: 'include',
+                headers: { ...authHeader },
+              })
+              if (plRes.ok) {
+                const plData = (await plRes.json()) as { redirectTo?: string }
+                if (typeof plData.redirectTo === 'string' && plData.redirectTo.startsWith('/')) {
+                  setSalvando(false)
+                  setPreparando(true)
+                  setTimeout(() => {
+                    window.location.href = plData.redirectTo!
+                  }, 800)
+                  return
+                }
+              }
+            } catch {
+              /* segue redirectAfterSave */
+            }
+            setSalvando(false)
+            setPreparando(true)
+            setTimeout(() => {
+              window.location.href = '/pt/wellness/home'
+            }, 800)
+            return
+          }
           setErro(data.error || 'Não foi possível salvar. Tente de novo.')
           setSalvando(false)
           return

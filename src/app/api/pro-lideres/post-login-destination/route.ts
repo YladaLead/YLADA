@@ -7,6 +7,7 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import {
   getProLideresPainelLeaderCapabilities,
+  resolveProLideresRedirectForWellnessAccount,
   resolveProLideresTenantContext,
 } from '@/lib/pro-lideres-server'
 import {
@@ -37,6 +38,14 @@ export async function GET(request: NextRequest) {
 
   const ctx = await resolveProLideresTenantContext(supabaseAdmin, user)
   if (!ctx) {
+    const gateRedirect = await resolveProLideresRedirectForWellnessAccount(user.id)
+    if (gateRedirect) {
+      return NextResponse.json({
+        redirectTo: gateRedirect,
+        canManageAsLeader: false,
+        pendingActivation: true,
+      })
+    }
     return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
   }
 
