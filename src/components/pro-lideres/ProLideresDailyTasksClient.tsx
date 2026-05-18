@@ -83,6 +83,7 @@ export function ProLideresDailyTasksClient() {
   const [savingEdits, setSavingEdits] = useState(false)
   const [savingToday, setSavingToday] = useState(false)
   const [todayDraft, setTodayDraft] = useState<Set<string>>(() => new Set())
+  const [todaySaveOk, setTodaySaveOk] = useState(true)
   const [bonusPts, setBonusPts] = useState('10')
   const [savingBonus, setSavingBonus] = useState(false)
 
@@ -119,15 +120,29 @@ export function ProLideresDailyTasksClient() {
     void load()
   }, [load])
 
+  const loadTodayChecklist = useCallback(async () => {
+    if (isLeader || !myUserId) return
+    try {
+      const res = await fetch(
+        `/api/pro-lideres/daily-tasks?from=${encodeURIComponent(todayStr)}&to=${encodeURIComponent(todayStr)}`,
+        { credentials: 'include' }
+      )
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) return
+      const completions = (json as ApiGet).completions ?? []
+      const done = new Set(
+        completions.filter((c) => c.member_user_id === myUserId).map((c) => c.task_id)
+      )
+      setTodayDraft(done)
+      setTodaySaveOk(true)
+    } catch {
+      /* mantém rascunho local */
+    }
+  }, [isLeader, myUserId, todayStr])
+
   useEffect(() => {
-    if (!data || !myUserId || isLeader) return
-    const done = new Set(
-      data.completions
-        .filter((c) => c.completed_on === todayStr && c.member_user_id === myUserId)
-        .map((c) => c.task_id)
-    )
-    setTodayDraft(done)
-  }, [data, todayStr, myUserId, isLeader])
+    void loadTodayChecklist()
+  }, [loadTodayChecklist])
 
   const tasksSnapshot = useMemo(() => {
     const list = data?.tasks ?? []
@@ -198,8 +213,8 @@ export function ProLideresDailyTasksClient() {
     }
   }
 
-  async function saveTodayExecution() {
-    if (isLeader || !myUserId) return
+  async function saveTodayExecution(completedIds: Set<string>): Promise<boolean> {
+    if (isLeader || !myUserId) return false
     setSavingToday(true)
     setError(null)
     try {
@@ -209,20 +224,37 @@ export function ProLideresDailyTasksClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           date: todayStr,
-          completed_task_ids: Array.from(todayDraft),
+          completed_task_ids: Array.from(completedIds),
         }),
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
         setError((json as { error?: string }).error || 'Erro ao guardar.')
-        return
+        setTodaySaveOk(false)
+        await loadTodayChecklist()
+        return false
       }
-      await load()
+      setTodaySaveOk(true)
+      void load()
+      return true
     } catch {
       setError('Erro de rede.')
+      setTodaySaveOk(false)
+      await loadTodayChecklist()
+      return false
     } finally {
       setSavingToday(false)
     }
+  }
+
+  async function toggleTodayTask(taskId: string) {
+    if (savingToday) return
+    const next = new Set(todayDraft)
+    if (next.has(taskId)) next.delete(taskId)
+    else next.add(taskId)
+    setTodayDraft(next)
+    setTodaySaveOk(false)
+    await saveTodayExecution(next)
   }
 
   async function createTask(e: React.FormEvent) {
@@ -395,7 +427,7 @@ export function ProLideresDailyTasksClient() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Tarefas diárias</h1>
           <p className="mt-1 max-w-xl text-sm text-gray-500">
-            Marca o que fizeste hoje e guarda. Abaixo vês o teu relatório de pontos.
+            Marca o que fizeste hoje — cada alteração guarda-se sozinha. Abaixo vês o teu relatório de pontos.
           </p>
         </div>
       )}
@@ -464,7 +496,16 @@ export function ProLideresDailyTasksClient() {
               <span className="font-bold text-blue-800">+{data.fullDayBonusPoints ?? 0} pts</span> bônus de dia
               completo.
             </p>
-            <p className="mt-3 text-xs text-gray-500">Hoje · {todayStr}</p>
+            <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+              <span>Hoje · {todayStr}</span>
+              {savingToday ? (
+                <span className="font-medium text-blue-700">A guardar…</span>
+              ) : todaySaveOk ? (
+                <span className="text-gray-400">Guardado automaticamente</span>
+              ) : (
+                <span className="font-medium text-red-600">Não foi possível guardar — tenta outra vez</span>
+              )}
+            </p>
           </div>
           <ul className="divide-y divide-gray-100 border-t border-gray-100">
             {applicableToday.length === 0 ? (
@@ -477,15 +518,9 @@ export function ProLideresDailyTasksClient() {
                     <input
                       type="checkbox"
                       checked={checked}
-                      onChange={() => {
-                        setTodayDraft((prev) => {
-                          const n = new Set(prev)
-                          if (n.has(t.id)) n.delete(t.id)
-                          else n.add(t.id)
-                          return n
-                        })
-                      }}
-                      className="mt-0.5 h-[18px] w-[18px] shrink-0 rounded border-gray-400 text-blue-600 focus:ring-blue-500"
+                      disabled={savingToday}
+                      onChange={() => void toggleTodayTask(t.id)}
+                      className="mt-0.5 h-[18px] w-[18px] shrink-0 rounded border-gray-400 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
                     />
                     <div className="flex min-w-0 flex-1 gap-3">
                       <span className="shrink-0 text-[15px] font-bold text-blue-700">{t.points} pts</span>
@@ -502,14 +537,10 @@ export function ProLideresDailyTasksClient() {
             )}
           </ul>
           <div className="border-t border-gray-100 p-4 sm:p-5">
-            <button
-              type="button"
-              disabled={savingToday || applicableToday.length === 0}
-              onClick={() => void saveTodayExecution()}
-              className="w-full rounded-xl bg-blue-700 px-4 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {savingToday ? 'A guardar…' : 'Salvar execução de hoje'}
-            </button>
+            <p className="text-center text-xs text-gray-500">
+              Cada marcação ou desmarcação é guardada na hora — podes atualizar a página sem perder o que
+              escolheste.
+            </p>
           </div>
         </div>
       )}
