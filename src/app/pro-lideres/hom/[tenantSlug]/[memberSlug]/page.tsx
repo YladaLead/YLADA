@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import ProLideresHOMClient from '@/components/pro-lideres/ProLideresHOMClient'
 import { fetchHOMPublicData } from '@/lib/pro-lideres-hom'
 import { parseOpportunityVideoUrl, type ParsedOpportunityVideo } from '@/lib/pro-lideres-opportunity-video'
+import { buildProLideresHomShareMetadata } from '@/lib/pro-lideres/pro-lideres-hom-og'
 import { resolveYladaOgBaseUrlForMetadata } from '@/lib/ylada-public-link-base-url'
 
 type Params = { tenantSlug: string; memberSlug: string }
@@ -15,14 +16,13 @@ export async function generateMetadata({
   const { tenantSlug, memberSlug } = await params
   const data = await fetchHOMPublicData(tenantSlug, memberSlug)
   const base = await resolveYladaOgBaseUrlForMetadata()
+  const canonical = `${base}/pro-lideres/hom/${encodeURIComponent(tenantSlug)}/${encodeURIComponent(memberSlug)}`
   if (!data) return { title: 'Apresentação | YLADA Pro Líderes' }
-  const memberLabel = data.memberName?.trim() || 'Distribuidor'
+
+  const share = buildProLideresHomShareMetadata(base, canonical)
   return {
-    title: `${data.headline} | YLADA`,
-    description: `Assista à apresentação de ${memberLabel} e dê o próximo passo.`,
-    alternates: {
-      canonical: `${base}/pro-lideres/hom/${encodeURIComponent(tenantSlug)}/${encodeURIComponent(memberSlug)}`,
-    },
+    ...share,
+    alternates: { canonical },
   }
 }
 

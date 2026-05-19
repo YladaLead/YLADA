@@ -42,7 +42,9 @@ export const PRO_LIDERES_OG_IMAGE_STEM_OVERRIDE_BY_FLUXO_ID: Record<string, stri
 }
 
 /** Ficheiro completo (com extensão) por fluxo — prevalece sobre `{stem}.jpg`. */
-export const PRO_LIDERES_OG_IMAGE_FILENAME_OVERRIDE_BY_FLUXO_ID: Record<string, string> = {}
+export const PRO_LIDERES_OG_IMAGE_FILENAME_OVERRIDE_BY_FLUXO_ID: Record<string, string> = {
+  hom: 'hom-bebidas-funcionais.jpg',
+}
 
 export function proLideresOgImageRelativeFile(fluxoId: string): string {
   const trimmed = fluxoId.trim()
