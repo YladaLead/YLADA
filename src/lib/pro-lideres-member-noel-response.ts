@@ -291,6 +291,8 @@ function defaultProximoPasso(mode: ProLideresMemberNoelMode, userMessage = ''): 
   const byMode: Partial<Record<ProLideresMemberNoelMode, string>> = {
     execucao: 'Me conta quantas pessoas você abordou — ajustamos a lista no próximo dia. 💪',
     objecao: 'Aguarde a resposta dela antes de insistir no próximo contato.',
+    fechamento:
+      'Confirme até amanhã quem aceitou o combinado — anote no painel YLADA. 💪',
     comportamento: 'Sem resposta em 48h, siga para o próximo nome da lista.',
     mentor: 'Faça pelo menos 1 convite leve hoje para manter o ritmo. 💪',
     catalogo: 'Pergunte o que ela achou depois que usar o link.',

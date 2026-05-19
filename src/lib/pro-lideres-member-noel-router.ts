@@ -5,6 +5,7 @@
 export type ProLideresMemberNoelMode =
   | 'execucao'
   | 'objecao'
+  | 'fechamento'
   | 'comportamento'
   | 'mentor'
   | 'catalogo'
@@ -84,6 +85,24 @@ export function classifyProLideresMemberNoelMessage(
     }
   }
 
+  const fechamentoInteresse =
+    /(depois do video|pos video|pos-video|pós video|viu o video|assistiu o video|o que falar depois|como fecho|fechar a venda|fechar venda|reservar|separar pra|quero comprar|fechou comigo|dar sequencia|dar sequência|fechar a experiencia|fechar experiencia)/.test(
+      m
+    ) ||
+    (/(gostou|curtiu|adorei|fez bem|experimentou|passou bem)/.test(m) &&
+      /(fechar|proximo|próximo|reservar|entrega|pix|sequencia|sequência|mandar|falar depois)/.test(m))
+
+  if (fechamentoInteresse) {
+    return {
+      mode: 'fechamento',
+      audience: audience === 'ambiguo' ? 'cliente' : audience,
+      includeLink: false,
+      includeMensagemPronta: true,
+      directive:
+        'Pós-interesse (material/vídeo/experiência): **mensagem pronta** com fecho leve — **A ou B** + prazo + como concluir (entrega/retirada/retorno) conforme **[FOCO]** e tarefas do líder. **Próximo passo:** métrica **sua** (confirmar até data), não só “aguarde” ou “pergunte o que achou”.',
+    }
+  }
+
   if (opts?.hasObjectionBase || /(objecao|objeção|caro|preco|preço|vou pensar|nao tenho tempo|nao sou vendedor|vergonha|nao funciona|medo de|nao e pra mim)/.test(m)) {
     return {
       mode: 'objecao',
@@ -91,7 +110,7 @@ export function classifyProLideresMemberNoelMessage(
       includeLink: /(link|mandar|enviar)/.test(m),
       includeMensagemPronta: true,
       directive:
-        'Postura + princípio (objeção). **Mensagem pronta** curta para responder com calma. Link só se couber.',
+        'Objeção de **timing** ou resistência — **não** é fechamento de venda. Postura + **mensagem pronta** curta. **Próximo passo:** espera ética ou 1 contato leve; **sem** opção A/B de compra se ela disse que não vai agora.',
     }
   }
 
@@ -195,7 +214,20 @@ Entendo, [nome]. O que pesou mais pra você: o valor em si ou ainda não ver com
 [Nome em Meus links] — [URL] — educativo, sem pressionar produto.
 
 **Próximo passo**
-Aguarde a resposta antes de insistir.`,
+Aguarde a resposta dela antes de insistir — se voltar, retome com calma.`,
+
+    fechamento: `Ela assistiu o vídeo e curtiu? Ótimo sinal — agora é **facilitar o próximo passo**, não só perguntar opinião 😊
+
+**Na prática**
+- Valide em **1 frase** o que ela disse (sem hype).
+- Ofereça **duas formas simples** de experimentar (ex.: retirada X ou entrega Y).
+- Deixe claro **como ela confirma** (responde sim, pix, horário).
+
+**Mensagem pronta**
+Que bom que fez sentido pra você, [nome]! Quer que eu separe pra você experimentar esta semana — prefere retirar comigo ou combinar entrega? Me avisa até amanhã que eu organizo 😊
+
+**Próximo passo**
+Confirme até amanhã quem aceitou — anote no painel YLADA. 💪`,
 
     comportamento: `Sumiu depois do link? Acontece — e no WhatsApp a gente **não cobra**, só retoma com leveza 👋
 
@@ -240,7 +272,7 @@ Posso te mandar um link de 2 min sobre hábito de água no dia a dia? Sem compro
 [Nome em Meus links] — [URL exata]
 
 **Próximo passo**
-Pergunte o que ela achou depois que usar.`,
+Se ela usar o link, mande mensagem em 24–48h com **uma** pergunta objetiva (ex.: “Fez sentido pra você?”) — se mostrar interesse, ofereça o próximo passo do método do líder.`,
 
     emocional: `Faz sentido querer pausar — desânimo bate em todo mundo 🫶 Parar a semana inteira, porém, costuma pesar mais do que um passo pequeno hoje.
 
