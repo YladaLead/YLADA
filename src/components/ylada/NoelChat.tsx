@@ -19,6 +19,23 @@ import {
   stripMarkdownProLideresProximoPassoSection,
 } from '@/lib/ylada-quiz-markdown-url-canonicalize'
 import { assistantContentIsProLideresQuizDraftNoOfficialLink } from '@/lib/pro-lideres-noel-quiz-draft-detect'
+import {
+  polishProLideresMemberNoelForDisplay,
+  softenProLideresMemberNoelMarkdown,
+} from '@/lib/pro-lideres-member-noel-response'
+import { ProLideresMemberNoelMessageBody } from '@/components/pro-lideres/ProLideresMemberNoelMessageBody'
+
+function proLideresMemberNoelStoredContent(
+  area: NoelArea,
+  raw: string | undefined,
+  userMessage = ''
+): string {
+  const t = raw?.trim() || 'Desculpe, não consegui processar. Tente novamente.'
+  if (area === 'pro_lideres_member') {
+    return polishProLideresMemberNoelForDisplay(t, userMessage) || t
+  }
+  return t
+}
 
 /** Texto plano dos nós do markdown (para detectar parágrafos que são perguntas). */
 function markdownPlainText(children: ReactNode): string {
@@ -697,7 +714,7 @@ export default function NoelChat({
       const assistantMsg: Message = {
         id: `a-${Date.now()}`,
         role: 'assistant',
-        content: data.response?.trim() || 'Desculpe, não consegui processar. Tente novamente.',
+        content: proLideresMemberNoelStoredContent(area, data.response, text),
         timestamp: new Date(),
         linkContext: data.lastLinkContext ?? undefined,
       }
@@ -988,7 +1005,7 @@ export default function NoelChat({
         const assistantMsg: Message = {
           id: `a-${Date.now()}`,
           role: 'assistant',
-          content: data.response?.trim() || 'Desculpe, não consegui processar. Tente novamente.',
+          content: proLideresMemberNoelStoredContent(area, data.response, text),
           timestamp: new Date(),
           linkContext: data.lastLinkContext ?? undefined,
         }
@@ -1080,7 +1097,13 @@ export default function NoelChat({
                 )
               : msg.content
           const assistantMarkdownNormalized =
-            msg.role === 'assistant' ? normalizeNoelAssistantMarkdown(assistantMarkdownSource) : ''
+            msg.role === 'assistant'
+              ? area === 'pro_lideres_member'
+                ? softenProLideresMemberNoelMarkdown(
+                    normalizeNoelAssistantMarkdown(assistantMarkdownSource)
+                  )
+                : normalizeNoelAssistantMarkdown(assistantMarkdownSource)
+              : ''
 
           return (
           <div
@@ -1102,6 +1125,9 @@ export default function NoelChat({
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
               ) : (
                 <div>
+                  {area === 'pro_lideres_member' ? (
+                    <ProLideresMemberNoelMessageBody markdown={assistantMarkdownNormalized} />
+                  ) : (
                   <div className="prose prose-sm max-w-none prose-p:my-4 prose-p:leading-relaxed prose-ul:my-5 prose-li:my-2 prose-li:leading-relaxed prose-strong:text-gray-900 prose-a:no-underline hover:prose-a:underline prose-hr:my-8 prose-hr:border-sky-100 [&_h3]:border-l-4 [&_h3]:border-sky-400 [&_h3]:pl-3 [&_h3]:-ml-1 [&_h3]:border-b [&_h3]:border-sky-100 [&_h3]:pb-2 [&_h3]:mb-4 [&_h3]:mt-8 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-sky-600">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm, remarkBreaks]}
@@ -1165,6 +1191,7 @@ export default function NoelChat({
                       {assistantMarkdownNormalized}
                     </ReactMarkdown>
                   </div>
+                  )}
                   {capilarFeedbackEnabled &&
                   msg.role === 'assistant' &&
                   msg.id !== 'welcome' &&

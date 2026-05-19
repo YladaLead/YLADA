@@ -4,24 +4,24 @@
  */
 const ADESAO_ITENS = [
   {
-    title: 'Tirar dúvidas na hora',
-    detail: 'Antes de mandar mensagem, ligar ou responder alguém da sua lista.',
+    title: 'Disciplina e lista do dia',
+    detail: 'Quem abordar, geração de contato e rotina alinhada às tarefas do seu líder.',
   },
   {
-    title: 'Saber o que postar',
-    detail: 'Ideia e tom para o dia — sem ficar olhando a tela sem saber o que escrever.',
+    title: 'O que falar e mensagem pronta',
+    detail: 'Orientação + texto curto para usar no WhatsApp (você envia; não é automação).',
   },
   {
-    title: 'Mensagem na hora',
-    detail: 'Convite, acompanhamento e retomada de conversa com texto curto e natural.',
+    title: 'Qual link enviar',
+    detail: 'Indica o link certo em Meus links — e por quê naquele momento.',
   },
   {
-    title: 'Objeções sem travar',
-    detail: 'Como responder com leveza, sem pressão e no tom certo para o seu time.',
+    title: 'Objeções e convites',
+    detail: 'Postura consultiva, sem pressão nem promessa de ganho.',
   },
   {
-    title: 'Próximo passo claro',
-    detail: 'O que fazer nas próximas 24h em campo — lista, rotina e foco do dia.',
+    title: 'O que postar',
+    detail: 'Ideia e tom para story/post do dia.',
   },
 ] as const
 
@@ -44,7 +44,7 @@ export function ProLideresNoelMembroAdesaoPitch({ brlMensal }: { brlMensal: stri
           </li>
         ))}
       </ul>
-      <p className="text-center text-xs text-gray-500">R$ {brlMensal}/mês · cancela quando quiser no Mercado Pago</p>
+      <p className="text-center text-xs text-gray-500">R$ {brlMensal}/mês · cancela quando quiser</p>
     </div>
   )
 }

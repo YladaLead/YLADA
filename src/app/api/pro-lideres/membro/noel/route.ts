@@ -4,10 +4,20 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
-import {
-  buildProLideresMemberNoelSystemPrompt,
-} from '@/lib/pro-lideres-member-noel-prompt'
+import { buildProLideresMemberNoelSystemPrompt } from '@/lib/pro-lideres-member-noel-prompt'
 import { buildProLideresMemberNoelCatalogExcerpt } from '@/lib/pro-lideres-member-noel-catalog'
+import {
+  PRO_LIDERES_NOEL_MEMBER_MODEL,
+  buildProLideresMemberNoelDailyTasksExcerpt,
+  buildProLideresMemberNoelObjectionExcerpt,
+  fetchProLideresMemberNoelObjection,
+} from '@/lib/pro-lideres-member-noel-context'
+import {
+  buildProLideresMemberNoelCatalogHint,
+  matchProLideresMemberNoelCatalog,
+} from '@/lib/pro-lideres-member-noel-catalog-match'
+import { classifyProLideresMemberNoelMessage } from '@/lib/pro-lideres-member-noel-router'
+import { normalizeProLideresMemberNoelResponse } from '@/lib/pro-lideres-member-noel-response'
 import {
   fetchProLideresMemberTabulatorName,
   proLideresMemberHasNoelMemberSubscription,
@@ -120,6 +130,9 @@ export async function POST(request: NextRequest) {
   const baseUrl = requestOrigin(request).replace(/\/$/, '')
 
   let catalogExcerpt: string | null = null
+  let dailyTasksExcerpt: string | null = null
+  let objectionExcerpt: string | null = null
+
   try {
     catalogExcerpt = await buildProLideresMemberNoelCatalogExcerpt(supabaseAdmin, {
       tenant: t,
@@ -130,12 +143,52 @@ export async function POST(request: NextRequest) {
     console.warn('[pro-lideres/membro/noel] catálogo', e)
   }
 
+  try {
+    dailyTasksExcerpt = await buildProLideresMemberNoelDailyTasksExcerpt(supabaseAdmin, {
+      tenant: t,
+      role: ctx.role,
+    })
+  } catch (e) {
+    console.warn('[pro-lideres/membro/noel] tarefas', e)
+  }
+
+  const objectionProbe = [
+    ...historyNorm.filter((h) => h.role === 'user').slice(-2).map((h) => h.content),
+    message,
+  ]
+    .join(' ')
+    .slice(-2500)
+
+  try {
+    const obj = await fetchProLideresMemberNoelObjection(objectionProbe)
+    objectionExcerpt = buildProLideresMemberNoelObjectionExcerpt(obj)
+  } catch (e) {
+    console.warn('[pro-lideres/membro/noel] objeção', e)
+  }
+
+  const priorUserTurns = historyNorm.filter((h) => h.role === 'user').length
+
+  const route = classifyProLideresMemberNoelMessage(message, {
+    hasObjectionBase: Boolean(objectionExcerpt),
+  })
+
+  const catalogMatches = matchProLideresMemberNoelCatalog(message, catalogExcerpt)
+  const catalogHint = buildProLideresMemberNoelCatalogHint(catalogMatches)
+
+  const focusNotes = t.focus_notes?.trim() || null
+
   const systemPrompt = buildProLideresMemberNoelSystemPrompt({
     operationLabel,
     verticalCode,
     replyLanguage,
     catalogExcerpt,
     tabulatorName,
+    focusNotes,
+    dailyTasksExcerpt,
+    objectionExcerpt,
+    route,
+    catalogHint,
+    priorUserTurns,
   })
 
   const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -149,20 +202,17 @@ export async function POST(request: NextRequest) {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: PRO_LIDERES_NOEL_MEMBER_MODEL,
       messages: openaiMessages,
-      temperature: 0.45,
-      max_tokens: 1400,
+      temperature: 0.55,
+      max_tokens: 1600,
     })
-    const text = completion.choices[0]?.message?.content?.trim()
-    if (!text) {
+    const raw = completion.choices[0]?.message?.content?.trim()
+    if (!raw) {
       return NextResponse.json({ error: 'Resposta vazia do modelo' }, { status: 502 })
     }
-    return NextResponse.json({
-      response: text,
-      noelProfileId: 'noel_pro_lideres_member_field_v1',
-      lastLinkContext: null,
-    })
+    const text = normalizeProLideresMemberNoelResponse(raw, route, message)
+    return NextResponse.json({ response: text })
   } catch (e) {
     console.error('[pro-lideres/membro/noel]', e)
     return NextResponse.json({ error: 'Falha ao gerar resposta. Tente novamente.' }, { status: 502 })

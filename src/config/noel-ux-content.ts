@@ -157,21 +157,38 @@ const PRO_LIDERES_SUGGESTIONS = [
   },
 ]
 
+/** Noel membro — abertura curta (sem pedir para criar link). */
+export const NOEL_PRO_LIDERES_MEMBER_WELCOME = `Sou seu **Noel de campo** na **YLADA** (Pro Líderes / Herbalife): lista, disciplina, o que postar, como falar no WhatsApp e objeções — no tom da operação do seu líder 😊
+
+Te oriento com conversa leve e, quando ajudar, **mensagem pronta** pra copiar. Links só de **Meus links** no painel.
+
+O que está travando hoje?`
+
 const PRO_LIDERES_MEMBER_SUGGESTIONS = [
   {
-    label: 'O que falar na lista',
+    label: 'Lista de hoje',
     prompt:
-      'Preciso de ideias curtas: quem priorizar na minha lista hoje e uma primeira mensagem que soe natural (sem parecer robô).',
+      'Quem priorizar na minha lista hoje (quente/morno/frio) e qual disciplina de contato fazer ainda hoje?',
   },
   {
-    label: 'Objeção na conversa',
+    label: 'Objeção',
     prompt:
-      'A pessoa soltou uma objeção (preço, tempo ou desconfiança). Me ajuda a responder com calma, sem pressão, e a pedir o próximo passo.',
+      'Recebi objeção (preço, tempo ou desconfiança). Me orienta a postura e me dá uma mensagem pronta curta para responder com calma.',
   },
   {
-    label: 'Script ou post',
+    label: 'Convite',
     prompt:
-      'Quero ajustar um script de WhatsApp ou pensar um post/story simples: me dá 2 opções de texto no meu tom, curtas.',
+      'Quero convidar alguém para a oportunidade sem prometer dinheiro: princípio, mensagem pronta e qual link de Meus links usar depois da permissão.',
+  },
+  {
+    label: 'Qual link enviar',
+    prompt:
+      'Tenho um contato interessado: qual link de Meus links enviar, por quê, e uma mensagem pronta para pedir permissão antes?',
+  },
+  {
+    label: 'O que postar',
+    prompt:
+      'Não sei o que postar hoje no Instagram/story: me dá ideia, tom e uma legenda curta alinhada ao projeto do líder.',
   },
 ]
 
@@ -334,8 +351,8 @@ const NOEL_UX_BY_AREA: Record<NoelArea, NoelUxContentWithoutWelcome> = {
   },
   pro_lideres_member: {
     suggestions: PRO_LIDERES_MEMBER_SUGGESTIONS,
-    placeholder: 'Escreva o que está travando (fala, objeção, script ou post)…',
-    placeholderExample: 'Ex.: o que responder se a pessoa sumir depois do link',
+    placeholder: 'Lista, objeção, convite, o que postar, qual link enviar…',
+    placeholderExample: 'Ex.: objeção de preço — como responder?',
   },
   pro_estetica_corporal: {
     suggestions: PRO_ESTETICA_CORPORAL_SUGGESTIONS,
@@ -353,7 +370,7 @@ export function getNoelUxContent(area: NoelArea): NoelUxContent {
   const row = NOEL_UX_BY_AREA[area] ?? DEFAULT_NOEL_UX_ROW
   let welcomeMessage = NOEL_UNIVERSAL_WELCOME
   if (area === 'pro_lideres') welcomeMessage = NOEL_PRO_LIDERES_WELCOME
-  if (area === 'pro_lideres_member') welcomeMessage = ''
+  if (area === 'pro_lideres_member') welcomeMessage = NOEL_PRO_LIDERES_MEMBER_WELCOME
   if (area === 'pro_estetica_corporal' || area === 'pro_estetica_capilar') welcomeMessage = ''
   return {
     welcomeMessage,

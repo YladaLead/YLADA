@@ -1,9 +1,11 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import NoelChat from '@/components/ylada/NoelChat'
 import { ProLideresNoelMembroAdesaoPitch } from '@/components/pro-lideres/pro-lideres-noel-membro-adesao-copy'
+import { PRO_LIDERES_BASE_PATH } from '@/config/pro-lideres-menu'
 
 export type ProLideresNoelMembroClientVariant =
   | 'member'
@@ -86,6 +88,16 @@ export default function ProLideresNoelMembroClient({
             na YLADA. Membros que quiserem o add-on contratam à parte, na própria conta.
           </p>
         ) : null}
+        {variant === 'leader_included' ? (
+          <p className="text-center">
+            <Link
+              href={`${PRO_LIDERES_BASE_PATH}/noel-membro-laboratorio`}
+              className="text-xs font-medium text-emerald-800 hover:underline"
+            >
+              Laboratório de testes (líder)
+            </Link>
+          </p>
+        ) : null}
         <NoelChat
           area="pro_lideres_member"
           className="flex min-h-[min(70vh,560px)] flex-1 flex-col"
@@ -95,7 +107,7 @@ export default function ProLideresNoelMembroClient({
           showChatHeaderTitle
           showHeaderEmoji={false}
           headerTitle="Noel"
-          headerTagline="Estou aqui para ajudar, pergunte o que precisar para desenvolver você e sua equipe."
+          headerTagline="Estou aqui para ajudar, pergunte apenas o que precisar para desenvolver você."
           hideInputHint
           sendButtonLabel="Enviar"
           locale="pt"
