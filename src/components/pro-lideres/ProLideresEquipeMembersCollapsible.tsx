@@ -283,7 +283,7 @@ function formatExpiryPt(iso: string | null): string | null {
   if (!iso) return null
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return null
-  return d.toLocaleDateString('pt-BR', { dateStyle: 'long' })
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 /** Texto da coluna «Validade» para o líder. */
@@ -295,7 +295,7 @@ function validadeResumo(m: ProLideresMemberListItem): string {
     return expLabel ? `Após ativar (${expLabel})` : 'Após ativar'
   }
   if (!expLabel) {
-    return m.teamAccessState === 'active' ? 'Sem data de fim no sistema' : '—'
+    return m.teamAccessState === 'active' ? 'Sem data de fim' : '—'
   }
   if (m.teamAccessState === 'active') {
     const past = exp && new Date(exp).getTime() <= Date.now()
@@ -305,24 +305,6 @@ function validadeResumo(m: ProLideresMemberListItem): string {
     return `Última validade: ${expLabel}`
   }
   return expLabel
-}
-
-/** Linha extra sob a validade: onde clicar e o que esperar. */
-function validadeAjuda(m: ProLideresMemberListItem, canManage: boolean): string | null {
-  if (!canManage || m.role === 'leader') return null
-  if (m.teamAccessState === 'pending_activation') {
-    return 'Clica em «Ativar» nas ações: abre o passo com atalhos 30 / 31 dias (ou outro prazo).'
-  }
-  if (m.teamAccessState === 'paused') {
-    return 'Clica em «Ativar»: o mesmo passo para escolher de novo quantos dias (ou sem data de fim).'
-  }
-  if (m.teamAccessState === 'active' && !m.teamAccessExpiresAt) {
-    return 'Sem data gravada — não há pausa automática por calendário. Para passar a ter data: «Pausar» e depois «Ativar» para definir os dias.'
-  }
-  if (m.teamAccessState === 'active' && m.teamAccessExpiresAt) {
-    return 'A pausa automática corre na data acima. Para mudar a data (ex.: alinhar ao plano anual), usa o botão «Validade».'
-  }
-  return null
 }
 
 function isoToDateInputValue(iso: string | null | undefined): string {
@@ -344,7 +326,7 @@ export function ProLideresEquipeMembersCollapsible({
   canManageMembers?: boolean
 }) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   const [query, setQuery] = useState('')
   const [busyUserId, setBusyUserId] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -687,54 +669,36 @@ export function ProLideresEquipeMembersCollapsible({
 
       {open ? (
         <div className="border-t border-emerald-100/90">
-          <div className="border-b border-gray-100 bg-white px-4 py-3">
-            <label htmlFor="pro-lideres-equipe-busca" className="mb-1.5 block text-xs font-semibold text-gray-700">
-              Buscar por nome ou e-mail
-            </label>
+          <div className="border-b border-gray-100 bg-white px-4 py-2">
             <input
               id="pro-lideres-equipe-busca"
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Comece a digitar…"
+              placeholder="Buscar por nome ou e-mail…"
+              aria-label="Buscar por nome ou e-mail"
               autoComplete="off"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
             />
             {query.trim() ? (
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-1 text-[11px] text-gray-500">
                 {filtered.length === 0
                   ? 'Nenhum resultado.'
-                  : `${filtered.length} de ${members.length} pessoa(s)`}
+                  : `${filtered.length} de ${members.length}`}
               </p>
             ) : null}
             {canManageMembers && actionError && !activateUserId ? (
-              <p className="mt-2 text-xs font-medium text-red-600" role="alert">
+              <p className="mt-1.5 text-xs font-medium text-red-600" role="alert">
                 {actionError}
               </p>
             ) : null}
-            {canManageMembers ? (
-              <div className="mt-3 rounded-lg border border-blue-100 bg-blue-50/80 px-3 py-2.5 text-xs leading-relaxed text-blue-950">
-                <p className="font-semibold text-blue-900">Onde se define a data de validade</p>
-                <ul className="mt-1.5 list-inside list-disc space-y-1 text-blue-900/90">
-                  <li>
-                    <strong>Aguarda ativação</strong> ou <strong>Pausado</strong>: botão <strong>Ativar</strong> abre
-                    este passo — atalhos <strong>30 dias</strong> e <strong>31 dias</strong>, outro número, ou «sem
-                    data de fim».
-                  </li>
-                  <li>
-                    <strong>Já ativo</strong>: botão <strong>Validade</strong> para escolher uma data fixa (ex.: fim do
-                    plano anual) ou «Por dias» / «sem data de fim» ao ativar.
-                  </li>
-                </ul>
-              </div>
-            ) : null}
           </div>
           <ul
-            className="max-h-[min(60vh,28rem)] divide-y divide-gray-100 overflow-y-auto overscroll-contain"
+            className="max-h-[min(72vh,40rem)] divide-y divide-gray-100 overflow-y-auto overscroll-contain"
             aria-labelledby="pro-lideres-equipe-analise-heading"
           >
             {canManageMembers ? (
-              <li className="hidden px-4 py-2 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,11rem)_auto] sm:gap-3 sm:bg-gray-50/80">
+              <li className="hidden px-4 py-1.5 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,8.5rem)_auto] sm:gap-2 sm:bg-gray-50/80">
                 <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Pessoa</span>
                 <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Validade</span>
                 <span className="text-right text-[11px] font-semibold uppercase tracking-wide text-gray-500">Ações</span>
@@ -751,7 +715,6 @@ export function ProLideresEquipeMembersCollapsible({
                 const showActions = canManageMembers && m.role === 'member'
                 const isBusy = busyUserId === m.userId
                 const vText = validadeResumo(m)
-                const vAjuda = validadeAjuda(m, canManageMembers)
                 const canPause = m.teamAccessState === 'active'
                 const canEditExpiry = m.teamAccessState === 'active'
                 const canAtivar =
@@ -787,15 +750,12 @@ export function ProLideresEquipeMembersCollapsible({
                         </div>
                       </div>
 
-                      <div className="text-sm text-gray-800 sm:border-l sm:border-gray-100 sm:pl-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 sm:hidden">Validade</p>
-                        <p className="mt-0.5 font-medium leading-snug text-gray-900">{vText}</p>
-                        {vAjuda ? (
-                          <p className="mt-1.5 text-[11px] leading-snug text-gray-600">{vAjuda}</p>
-                        ) : null}
-                      </div>
+                      <motion.div className="text-xs text-gray-800 sm:border-l sm:border-gray-100 sm:pl-2">
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 sm:hidden">Validade</p>
+                        <p className="font-medium leading-tight text-gray-900">{vText}</p>
+                      </motion.div>
 
-                      <div className="flex flex-col items-stretch gap-2 sm:items-end">
+                      <div className="flex flex-col items-stretch gap-1.5 sm:items-end">
                         <div className="hidden flex-wrap justify-end gap-1.5 sm:flex">
                           {m.role === 'leader' ? (
                             <span className="inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
@@ -834,7 +794,7 @@ export function ProLideresEquipeMembersCollapsible({
                                   setActivateFlow('expiry')
                                   setActivateUserId(m.userId)
                                 }}
-                                className="min-h-[36px] flex-1 rounded-lg border border-violet-400 bg-violet-50 px-2.5 py-1.5 text-xs font-semibold text-violet-950 hover:bg-violet-100 disabled:opacity-50 sm:flex-none sm:min-w-[5.5rem]"
+                                className="min-h-[30px] flex-1 rounded-md border border-violet-400 bg-violet-50 px-2 py-1 text-xs font-semibold text-violet-950 hover:bg-violet-100 disabled:opacity-50 sm:flex-none sm:min-w-[4.75rem]"
                               >
                                 Validade
                               </button>

@@ -1,11 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import NoelChat from '@/components/ylada/NoelChat'
 import { ProLideresNoelMembroAdesaoPitch } from '@/components/pro-lideres/pro-lideres-noel-membro-adesao-copy'
-import { PRO_LIDERES_BASE_PATH } from '@/config/pro-lideres-menu'
 
 export type ProLideresNoelMembroClientVariant =
   | 'member'
@@ -86,16 +84,6 @@ export default function ProLideresNoelMembroClient({
           <p className="text-xs leading-relaxed text-gray-700 rounded-lg border border-sky-100 bg-sky-50/90 px-3 py-2">
             <strong>Incluído no seu plano:</strong> este Noel da equipe vem na mensalidade Pro Líderes — sem taxa extra
             na YLADA. Membros que quiserem o add-on contratam à parte, na própria conta.
-          </p>
-        ) : null}
-        {variant === 'leader_included' ? (
-          <p className="text-center">
-            <Link
-              href={`${PRO_LIDERES_BASE_PATH}/noel-membro-laboratorio`}
-              className="text-xs font-medium text-emerald-800 hover:underline"
-            >
-              Laboratório de testes (líder)
-            </Link>
           </p>
         ) : null}
         <NoelChat

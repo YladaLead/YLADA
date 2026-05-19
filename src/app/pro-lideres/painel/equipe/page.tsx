@@ -1,14 +1,13 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { ProLideresEquipeAttributionPanel } from '@/components/pro-lideres/ProLideresEquipeAttributionPanel'
 import { ProLideresEquipeMembersCollapsible } from '@/components/pro-lideres/ProLideresEquipeMembersCollapsible'
-import { proLideresItemHref } from '@/config/pro-lideres-menu'
 import { ensureLeaderTenantAccess, loadProLideresPainelUiForRequest } from '@/lib/pro-lideres-server'
 import {
   fetchProLideresMembersEnriched,
   syncProLideresMemberExpiryPauses,
 } from '@/lib/pro-lideres-members-enriched'
+
 export default async function ProLideresEquipePage() {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) redirect(gate.redirect)
@@ -23,41 +22,8 @@ export default async function ProLideresEquipePage() {
   const members = await fetchProLideresMembersEnriched(gate.tenant.id)
 
   return (
-    <div className="max-w-4xl space-y-6">
-      <div>
-        <p className="text-sm font-medium text-blue-600">Principal</p>
-        <h1 className="text-2xl font-bold text-gray-900">Análise da equipe</h1>
-        <p className="mt-2 text-gray-700">
-          {isLeader ? (
-            <>
-              Aqui você vê <strong className="text-gray-900">quem está com você neste espaço</strong> e gerencia o
-              acesso: convide novas pessoas em <strong className="text-gray-800">Convites equipe</strong>. Quem acabou de
-              entrar aparece como <strong className="text-gray-800">aguarda ativação</strong> até você confirmar o
-              pagamento e clicar em <strong className="text-gray-800">Ativar</strong>, definindo quantos dias o acesso fica
-              válido (ex.: 30 ou 31 dias, ou sem data de fim). Na lista você vê a{' '}
-              <strong className="text-gray-800">data de validade</strong>; quando essa data passa, o acesso{' '}
-              <strong className="text-gray-800">pausa automaticamente</strong> até você renovar. Use{' '}
-              <strong className="text-gray-800">Pausar</strong>, <strong className="text-gray-800">Ativar</strong> ou{' '}
-              <strong className="text-gray-800">Remover</strong> —{' '}
-              <strong className="text-gray-800">o que a pessoa já criou na conta YLADA não some</strong>.
-            </>
-          ) : (
-            <>
-              Aqui você vê quem compartilha este espaço com você. A gestão de novos acessos é feita pela operação.
-            </>
-          )}
-        </p>
-        {isLeader ? (
-          <p className="mt-3 rounded-lg border border-gray-200 bg-gray-50/90 px-3 py-2 text-sm text-gray-700">
-            <strong className="text-gray-900">Download por tabulador (Excel):</strong> use o menu lateral{' '}
-            <Link href={proLideresItemHref('tabuladores')} className="font-semibold text-blue-700 underline hover:text-blue-800">
-              Tabuladores
-            </Link>
-            — lá pode escolher o período e baixar o arquivo (ranking de links e de membros, conversões, detalhe por
-            ferramenta, tabuladores e tarefas).
-          </p>
-        ) : null}
-      </div>
+    <div className="max-w-6xl space-y-4">
+      <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Análise da equipe</h1>
 
       <ProLideresEquipeMembersCollapsible members={members} canManageMembers={isLeader} />
 
