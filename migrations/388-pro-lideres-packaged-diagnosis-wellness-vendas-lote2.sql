@@ -39,7 +39,7 @@ VALUES
     'moderado',
     NULL,
     jsonb_build_object(
-      'profile_title', 'Foco e clareza mental já estão pesando na tua produtividade',
+      'profile_title', 'Foco e clareza mental já estão pesando na sua produtividade',
       'profile_summary', 'Pelas respostas, dificuldade de manter foco, mente pesada ou procrastinação por falta de energia mental já aparecem com frequência nítida.',
       'frase_identificacao', 'Se você se identificou, talvez já associe certos horários ao “apagão mental”.',
       'main_blocker', 'O custo é alto: você até produz, mas com sensação de embaçamento, cansaço mental ou necessidade constante de “reiniciar” a atenção.',
@@ -145,7 +145,7 @@ VALUES
     'moderado',
     NULL,
     jsonb_build_object(
-      'profile_title', 'Inchaço e “corpo pesado” já são tema frequente no teu dia',
+      'profile_title', 'Inchaço e “corpo pesado” já são tema frequente no seu dia',
       'profile_summary', 'Pelas respostas, a incomodação com retenção ou sensação de metabolismo mais lento aparece com frequência e já afeta como você se sente no dia a dia.',
       'frase_identificacao', 'Se você se identificou, talvez já associe certas roupas ou horários ao desconforto.',
       'main_blocker', 'O bloqueio é dificuldade de se sentir leve: o corpo parece “segurar” líquido ou peso mesmo com esforço informal para melhorar.',
@@ -182,7 +182,7 @@ VALUES
     NULL,
     jsonb_build_object(
       'profile_title', 'Desconforto na barriga aparece, mas ainda parece manejável',
-      'profile_summary', 'Pelas respostas, sensação de barriga pesada ou estufamento entra no seu dia, porém num patamar que ainda parece dá para organizar com apoio.',
+      'profile_summary', 'Pelas respostas, sensação de barriga pesada ou estufamento entra no seu dia, porém num patamar que ainda parece dar para organizar com apoio.',
       'frase_identificacao', 'Se faz sentido, você provavelmente já notou horários ou refeições em que isso aparece mais.',
       'main_blocker', 'A tensão é o estufamento ou peso que tira leveza — especialmente se oscila com refeições ou ao longo do dia.',
       'consequence', 'Se vira hábito, o desconforto vira pano de fundo e rouba disposição para outras coisas que você gostaria de fazer.',
@@ -202,9 +202,9 @@ VALUES
       'profile_summary', 'Pelas respostas, o desconforto abdominal ou sensação de peso já aparece de forma recorrente e afeta seu bem-estar ao longo do dia.',
       'frase_identificacao', 'Se você se identificou, provavelmente já adaptou roupa, horário de refeições ou postura por causa disso.',
       'main_blocker', 'O bloqueio é dificuldade de se sentir leve: o corpo reage com desconforto que se repete e cobra atenção.',
-      'consequence', 'Continuar sem estratégia tende a manter o ciclo de incômodo e sensação de nunca “encerar” o dia confortável.',
+      'consequence', 'Continuar sem estratégia tende a manter o ciclo de incômodo e sensação de nunca “encerrar” o dia confortável.',
       'growth_potential', 'Conversar com quem te enviou permite montar plano prático — nutrição funcional e hábitos — para reduzir o estufamento e ganhar leveza.',
-      'dica_rapida', 'Quando piora após refeições, vale padrão alimentar + apoio do que combina com o teu dia — não só “comer menos” no improviso.',
+      'dica_rapida', 'Quando piora após refeições, vale padrão alimentar + apoio do que combina com o seu dia — não só “comer menos” no improviso.',
       'cta_text', 'Quero ajuda com estufamento e leveza',
       'whatsapp_prefill', 'Oi! Fiz o quiz sobre barriga pesada e o resultado mostrou incômodo frequente. Quero falar com quem me enviou este link sobre o próximo passo.'
     )
@@ -215,13 +215,13 @@ VALUES
     'urgente',
     NULL,
     jsonb_build_object(
-      'profile_title', 'Esse desconforto na barriga está pesado no teu dia — merece plano',
+      'profile_title', 'Esse desconforto na barriga está pesado no seu dia — merece plano',
       'profile_summary', 'Pelas respostas, a intensidade do estufamento ou da sensação de barriga pesada é alta e interfere de forma nítida na sua rotina.',
       'frase_identificacao', 'Se isso é você, o tema provavelmente já não é “detalhe” — afeta disposição e paz no dia a dia.',
       'main_blocker', 'A tensão é alto impacto no conforto: leveza e bem-estar ficam travados enquanto o padrão se repete.',
       'consequence', 'Adiar apoio costuma manter o desconforto no centro das suas escolhas diárias.',
       'growth_potential', 'Fala com quem te enviou: dá para estruturar nutrição funcional e hábitos com foco em sensação de leveza — sempre lembrando que avaliação individual é conversa com quem te acompanha.',
-      'dica_rapida', 'Neste patamar, consistência e direção importam mais volume de tentativas aleatórias.',
+      'dica_rapida', 'Neste patamar, consistência e direção importam mais do que volume de tentativas aleatórias.',
       'cta_text', 'Preciso melhorar esse desconforto — vamos conversar?',
       'whatsapp_prefill', 'Oi! Fiz o quiz sobre barriga pesada/estufamento e o resultado ficou bem intenso. Quero conversar com quem me enviou este link para um plano de apoio.'
     )
@@ -240,7 +240,7 @@ VALUES
       'main_blocker', 'A tensão é a sensação de corpo menos leve ou inchado, puxando conforto e autoimagem no dia a dia.',
       'consequence', 'Se o padrão cresce, pequenos inchados viram narrativa fixa do corpo e cansam.',
       'growth_potential', 'Quem te enviou pode indicar próximo passo com nutrição funcional e hábitos para apoiar sensação de leveza — conversa curta, objetiva.',
-      'dica_rapida', 'Movimento, hidratação e ritmo alimentar costumam ser base; o que falta muitas vezes é calibrar com quem entende o teu caso.',
+      'dica_rapida', 'Movimento, hidratação e ritmo alimentar costumam ser base; o que falta muitas vezes é calibrar com quem entende o seu caso.',
       'cta_text', 'Quero falar sobre retenção e leveza',
       'whatsapp_prefill', 'Oi! Fiz o quiz sobre retenção/inchaço (pernas/rosto) e saiu um padrão leve. Quero conversar com quem me enviou este link sobre apoio.'
     )
@@ -256,7 +256,7 @@ VALUES
       'frase_identificacao', 'Se você se identificou, talvez já tenha estratégias caseiras que “seguram”, mas não resolvem de vez.',
       'main_blocker', 'O bloqueio é corpo que parece reter com facilidade, reduzindo leveza e conforto em horários ou dias específicos.',
       'consequence', 'Manter no improviso tende a repetir o ciclo e aumentar frustração com sensação de peso ou inchaço visível.',
-      'growth_potential', 'Conversar com quem te enviou ajuda a montar plano com nutrição funcional e hábitos voltados à tua rotina real — trabalho sentado, calor, horários, etc.',
+      'growth_potential', 'Conversar com quem te enviou ajuda a montar plano com nutrição funcional e hábitos voltados à sua rotina real — trabalho sentado, calor, horários, etc.',
       'dica_rapida', 'Retenção perceptível quase sempre melhora quando há combinação de ritmo diário + apoio interno coerente — individualizado na conversa.',
       'cta_text', 'Quero reduzir essa sensação de retenção',
       'whatsapp_prefill', 'Oi! Fiz o quiz sobre retenção/inchaço e o resultado mostrou incômodo frequente. Quero falar com quem me enviou este link.'
@@ -268,7 +268,7 @@ VALUES
     'urgente',
     NULL,
     jsonb_build_object(
-      'profile_title', 'Inchaço e retenção estão forte no teu dia — melhor conversar já',
+      'profile_title', 'Inchaço e retenção estão forte no seu dia — melhor conversar já',
       'profile_summary', 'Pelas respostas, o incômodo com retenção ou inchaço é intenso, recorrente e já interfere de forma clara na forma como você vive o corpo no dia a dia.',
       'frase_identificacao', 'Se isso é você, o tema provavelmente ocupa cabeça e corpo de maneira central.',
       'main_blocker', 'A tensão é alto impacto na leveza: sensação de corpo “inchado” ou travado que não costuma passar só com desejo.',

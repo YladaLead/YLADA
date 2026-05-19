@@ -11,19 +11,19 @@ import { PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS } from '@/lib/pro-lideres/pro
  */
 const PRO_LIDERES_RECRUITMENT_CLASSIC_IDS = [
   'renda-extra-imediata',
-  'maes-trabalhar-casa',
-  'perderam-emprego-transicao',
   'transformar-consumo-renda',
-  'jovens-empreendedores',
+  'maes-trabalhar-casa',
   'ja-consome-bem-estar',
+  'perderam-emprego-transicao',
+  'cansadas-trabalho-atual',
   'trabalhar-apenas-links',
   'ja-usa-energia-acelera',
-  'cansadas-trabalho-atual',
   'ja-tentaram-outros-negocios',
   'querem-trabalhar-digital',
   'ja-empreendem',
   'querem-emagrecer-renda',
   'boas-venda-comercial',
+  'jovens-empreendedores',
 ] as const
 
 function upgradeFluxoForNoel(fluxo: FluxoCliente): FluxoCliente {

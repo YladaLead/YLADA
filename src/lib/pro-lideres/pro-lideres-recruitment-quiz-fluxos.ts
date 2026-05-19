@@ -12,8 +12,8 @@ import { PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS } from '@/lib/pro-lideres/pro
 
 export const PRO_LIDERES_RECRUITMENT_WELLNESS_MIRROR_QUIZ_IDS = [
   'quiz-recrut-ganhos-prosperidade',
-  'quiz-recrut-potencial-crescimento',
   'quiz-recrut-proposito-equilibrio',
+  'quiz-recrut-potencial-crescimento',
 ] as const
 
 export const proLideresRecruitmentQuizFluxos: FluxoCliente[] = [
@@ -36,24 +36,6 @@ export const proLideresRecruitmentQuizFluxos: FluxoCliente[] = [
     tags: ['quiz', 'ganhos', 'prosperidade', 'recrutamento', 'pro-lideres'],
   },
   {
-    id: 'quiz-recrut-potencial-crescimento',
-    nome: 'Quiz: Potencial e Crescimento',
-    objetivo:
-      'Entrada temática Potencial — mesmo questionário padrão da biblioteca; o resultado continua específico deste fluxo.',
-    perguntas: PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS,
-    diagnostico: {
-      titulo: 'Potencial e ritmo de crescimento',
-      descricao:
-        'Mesma linha de perguntas do quiz Potencial no Wellness — útil para falar de metas e apoio com quem compartilhou o link.',
-      sintomas: ['Uso do potencial', 'Frequência de revisão de metas', 'Investimento em desenvolvimento'],
-      beneficios: ['Conversa objetiva sobre ritmo', 'Encaixe com mentoria e equipe'],
-      mensagemPositiva: 'Crescimento com direção costuma começar com uma conversa honesta sobre onde você quer chegar.',
-    },
-    kitRecomendado: 'energia',
-    cta: 'Quero conhecer novas oportunidades',
-    tags: ['quiz', 'potencial', 'crescimento', 'recrutamento', 'pro-lideres'],
-  },
-  {
     id: 'quiz-recrut-proposito-equilibrio',
     nome: 'Quiz: Propósito e Equilíbrio',
     objetivo:
@@ -70,5 +52,23 @@ export const proLideresRecruitmentQuizFluxos: FluxoCliente[] = [
     kitRecomendado: 'energia',
     cta: 'Quero conhecer novas oportunidades',
     tags: ['quiz', 'propósito', 'equilíbrio', 'recrutamento', 'pro-lideres'],
+  },
+  {
+    id: 'quiz-recrut-potencial-crescimento',
+    nome: 'Quiz: Potencial e Crescimento',
+    objetivo:
+      'Entrada temática Potencial — mesmo questionário padrão da biblioteca; o resultado continua específico deste fluxo.',
+    perguntas: PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS,
+    diagnostico: {
+      titulo: 'Potencial e ritmo de crescimento',
+      descricao:
+        'Mesma linha de perguntas do quiz Potencial no Wellness — útil para falar de metas e apoio com quem compartilhou o link.',
+      sintomas: ['Uso do potencial', 'Frequência de revisão de metas', 'Investimento em desenvolvimento'],
+      beneficios: ['Conversa objetiva sobre ritmo', 'Encaixe com mentoria e equipe'],
+      mensagemPositiva: 'Crescimento com direção costuma começar com uma conversa honesta sobre onde você quer chegar.',
+    },
+    kitRecomendado: 'energia',
+    cta: 'Quero conhecer novas oportunidades',
+    tags: ['quiz', 'potencial', 'crescimento', 'recrutamento', 'pro-lideres'],
   },
 ]

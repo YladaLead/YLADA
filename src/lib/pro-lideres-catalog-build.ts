@@ -5,6 +5,7 @@ import {
   type ProLideresFlowCatalogKind,
   inferProLideresFlowCatalogKindFromHref,
 } from '@/lib/pro-lideres-flow-catalog-kind'
+import { sortProLideresCatalogForDisplay } from '@/lib/pro-lideres/pro-lideres-catalog-display-order'
 
 /** Tipos em ylada_link_templates que entram no catálogo (ferramentas com resultado / diagnóstico). */
 const YLADA_CATALOG_TEMPLATE_TYPES = new Set(['calculator', 'diagnostico', 'quiz', 'triagem'])
@@ -49,6 +50,8 @@ export type ProLideresCatalogItem = {
   customFlowNotes?: string
   /** Só `source === 'custom'`: atalho vs diagnóstico YLADA (3 níveis). */
   customCatalogKind?: ProLideresFlowCatalogKind
+  /** Preset biblioteca (`meta.pro_lideres_fluxo_id` ou slug `pl-…-v|r-…`). */
+  presetFluxoId?: string | null
 }
 
 type EventRow = { link_id: string; event_type: string; cnt: number | string }
@@ -453,6 +456,15 @@ export async function buildProLideresCatalog(
         const linkRowId = row.id as string
         const yladaVis = opts?.yladaVisibleToTeamByLinkId?.[linkRowId]
         const visibleToTeam = yladaVis === undefined ? true : Boolean(yladaVis)
+        const cfgMeta = (row.config_json &&
+        typeof row.config_json === 'object' &&
+        !Array.isArray(row.config_json)
+          ? (row.config_json as Record<string, unknown>).meta
+          : null) as Record<string, unknown> | null
+        const presetFluxoId =
+          typeof cfgMeta?.pro_lideres_fluxo_id === 'string' && cfgMeta.pro_lideres_fluxo_id.trim()
+            ? cfgMeta.pro_lideres_fluxo_id.trim()
+            : null
 
         out.push({
           id: `ylada-${row.id}`,
@@ -474,6 +486,7 @@ export async function buildProLideresCatalog(
           situationBucket: enriched.situationBucket,
           createdAt: (row.created_at as string) ?? null,
           badge: null,
+          presetFluxoId,
         })
       }
     }
@@ -539,5 +552,5 @@ export async function buildProLideresCatalog(
 
   const deduped = dedupeProLideresCatalogItems(out)
   assignBadges(deduped)
-  return deduped
+  return sortProLideresCatalogForDisplay(deduped)
 }

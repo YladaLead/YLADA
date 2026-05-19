@@ -8,5 +8,5 @@ import { getProLideresWellnessCalculadorasBasicasPresetFluxos } from '@/lib/pro-
  * (presets TS alinhados ao preview iOS); links /l/ são criados por líder em `ensureProLideresPresetYladaLinks`.
  */
 export function getProLideresSalesPresetFluxos(): FluxoCliente[] {
-  return [...fluxosClientes, ...getProLideresWellnessCalculadorasBasicasPresetFluxos()]
+  return [...getProLideresWellnessCalculadorasBasicasPresetFluxos(), ...fluxosClientes]
 }

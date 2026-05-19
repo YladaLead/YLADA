@@ -262,7 +262,7 @@ VALUES
       'growth_potential', 'Quem te enviou o link pode montar próximo passo com apoio nutricional/hábitos voltado a estabilidade — para intensidade virar consistência.',
       'dica_rapida', 'Quem tem rotina pesada “paga” energia o dia todo; pequeno protocolo diário costuma valer mais que heroísmo pontual.',
       'cta_text', 'Quero consistência na minha rotina de trabalho',
-      'whatsapp_prefill', 'Oi! Fiz o quiz sobre rotina puxada e o resultado mostrou que minha carga alta já afoca energia e foco com frequência. Quero conversar com quem me enviou este link para um plano.'
+      'whatsapp_prefill', 'Oi! Fiz o quiz sobre rotina puxada e o resultado mostrou que minha carga alta já afeta energia e foco com frequência. Quero conversar com quem me enviou este link para um plano.'
     )
   ),
   (

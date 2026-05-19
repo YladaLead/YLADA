@@ -5,10 +5,10 @@ import type { FluxoCliente } from '@/types/wellness-system'
  * e ao preview dos campos (peso, altura, atividade, etc.).
  */
 export const WELLNESS_CALCULADORAS_BASICAS_PRESET_SLUGS = [
-  'agua',
   'calc-hidratacao',
-  'calc-calorias',
+  'agua',
   'calc-proteina',
+  'calc-calorias',
 ] as const
 
 export function isWellnessCalculadoraBasicaPresetFluxoId(fluxoId: string): boolean {
@@ -83,76 +83,6 @@ export function getProLideresWellnessCalculadorasBasicasPresetFluxos(): FluxoCli
   return [
     fluxoCalculadoraAguaWellness('calc-hidratacao', 'Calculadora de Hidratação'),
     {
-      id: 'calc-calorias',
-      nome: 'Calculadora de Calorias',
-      objetivo:
-        'Mesmos campos da Calculadora de Calorias no Wellness (idade, gênero, peso, altura, atividade, objetivo) — para falar de meta calórica com quem compartilhou o link.',
-      perguntas: [
-        {
-          id: 'p1',
-          texto: 'Idade *',
-          tipo: 'numero',
-          placeholder: 'Ex: 30',
-          min: 1,
-          max: 120,
-          step: 1,
-        },
-        {
-          id: 'p2',
-          texto: 'Gênero *',
-          tipo: 'multipla_escolha',
-          opcoes: ['Masculino', 'Feminino'],
-        },
-        {
-          id: 'p3',
-          texto: 'Peso (kg) *',
-          tipo: 'numero',
-          placeholder: 'Ex: 70',
-          min: 1,
-          max: 300,
-          step: 0.1,
-        },
-        {
-          id: 'p4',
-          texto: 'Altura (cm) *',
-          tipo: 'numero',
-          placeholder: 'Ex: 175',
-          min: 50,
-          max: 250,
-          step: 0.5,
-        },
-        {
-          id: 'p5',
-          texto: 'Nível de Atividade Física *',
-          tipo: 'multipla_escolha',
-          opcoes: [
-            'Sedentário (pouco ou nenhum exercício)',
-            'Leve (exercício leve 1-3 dias/semana)',
-            'Moderado (exercício moderado 3-5 dias/semana)',
-            'Intenso (exercício intenso 6-7 dias/semana)',
-            'Muito Intenso (exercício muito intenso, trabalho físico)',
-          ],
-        },
-        {
-          id: 'p6',
-          texto: 'Objetivo *',
-          tipo: 'multipla_escolha',
-          opcoes: ['Perder Peso', 'Manter Peso', 'Ganhar Peso'],
-        },
-      ],
-      diagnostico: {
-        titulo: 'Perfil calórico (visão geral)',
-        descricao:
-          'Idade, gênero, peso, altura, movimento e objetivo ajudam a enquadrar a conversa sobre energia no dia a dia — sem substituir avaliação profissional.',
-        sintomas: ['Oscilação de fome e energia', 'Dúvida se come “demais” ou “de menos” para o objetivo'],
-        beneficios: ['Linha de conversa clara com quem enviou o link', 'Próximo passo simples no WhatsApp'],
-        mensagemPositiva: 'Alinhar objetivo com rotina real costuma destravar resultados com mais tranquilidade.',
-      },
-      kitRecomendado: 'energia',
-      cta: 'Quero falar no WhatsApp',
-      tags: ['wellness', 'calculadora', 'calorias'],
-    },
-    {
       id: 'calc-proteina',
       nome: 'Calculadora de Proteína',
       objetivo:
@@ -221,6 +151,76 @@ export function getProLideresWellnessCalculadorasBasicasPresetFluxos(): FluxoCli
       kitRecomendado: 'energia',
       cta: 'Quero falar no WhatsApp',
       tags: ['wellness', 'calculadora', 'proteina'],
+    },
+    {
+      id: 'calc-calorias',
+      nome: 'Calculadora de Calorias',
+      objetivo:
+        'Mesmos campos da Calculadora de Calorias no Wellness (idade, gênero, peso, altura, atividade, objetivo) — para falar de meta calórica com quem compartilhou o link.',
+      perguntas: [
+        {
+          id: 'p1',
+          texto: 'Idade *',
+          tipo: 'numero',
+          placeholder: 'Ex: 30',
+          min: 1,
+          max: 120,
+          step: 1,
+        },
+        {
+          id: 'p2',
+          texto: 'Gênero *',
+          tipo: 'multipla_escolha',
+          opcoes: ['Masculino', 'Feminino'],
+        },
+        {
+          id: 'p3',
+          texto: 'Peso (kg) *',
+          tipo: 'numero',
+          placeholder: 'Ex: 70',
+          min: 1,
+          max: 300,
+          step: 0.1,
+        },
+        {
+          id: 'p4',
+          texto: 'Altura (cm) *',
+          tipo: 'numero',
+          placeholder: 'Ex: 175',
+          min: 50,
+          max: 250,
+          step: 0.5,
+        },
+        {
+          id: 'p5',
+          texto: 'Nível de Atividade Física *',
+          tipo: 'multipla_escolha',
+          opcoes: [
+            'Sedentário (pouco ou nenhum exercício)',
+            'Leve (exercício leve 1-3 dias/semana)',
+            'Moderado (exercício moderado 3-5 dias/semana)',
+            'Intenso (exercício intenso 6-7 dias/semana)',
+            'Muito Intenso (exercício muito intenso, trabalho físico)',
+          ],
+        },
+        {
+          id: 'p6',
+          texto: 'Objetivo *',
+          tipo: 'multipla_escolha',
+          opcoes: ['Perder Peso', 'Manter Peso', 'Ganhar Peso'],
+        },
+      ],
+      diagnostico: {
+        titulo: 'Perfil calórico (visão geral)',
+        descricao:
+          'Idade, gênero, peso, altura, movimento e objetivo ajudam a enquadrar a conversa sobre energia no dia a dia — sem substituir avaliação profissional.',
+        sintomas: ['Oscilação de fome e energia', 'Dúvida se come “demais” ou “de menos” para o objetivo'],
+        beneficios: ['Linha de conversa clara com quem enviou o link', 'Próximo passo simples no WhatsApp'],
+        mensagemPositiva: 'Alinhar objetivo com rotina real costuma destravar resultados com mais tranquilidade.',
+      },
+      kitRecomendado: 'energia',
+      cta: 'Quero falar no WhatsApp',
+      tags: ['wellness', 'calculadora', 'calorias'],
     },
   ]
 }

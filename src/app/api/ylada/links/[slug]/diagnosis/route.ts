@@ -463,8 +463,9 @@ export async function POST(
       diagnosisVertical,
       scoringSalt
     )
+    // v29: corrige whatsapp_prefill substituído erroneamente em diagnósticos pacotados (fromPackaged guard).
     const TEMPLATE_VERSION =
-      diagnosisVertical === 'capilar' || diagnosisVertical === 'corporal' ? 28 : 27
+      diagnosisVertical === 'capilar' || diagnosisVertical === 'corporal' ? 28 : 29
     const { data: cached } = await supabaseAdmin
       .from('ylada_diagnosis_cache')
       .select('diagnosis_json')
@@ -578,6 +579,8 @@ export async function POST(
     let diagnosis: Awaited<ReturnType<typeof generateDiagnosis>>['diagnosis']
     let fallbackUsed: boolean
     let level: Awaited<ReturnType<typeof generateDiagnosis>>['level']
+    /** true quando diagnóstico vem de pacote (link_content ou flow_id/template_id) — preserva whatsapp_prefill customizado. */
+    let fromPackaged = false
 
     const arch = architecture as DiagnosisArchitecture
     if (arch === 'RISK_DIAGNOSIS' || arch === 'BLOCKER_DIAGNOSIS' || arch === 'PROJECTION_CALCULATOR') {
@@ -601,6 +604,7 @@ export async function POST(
         })
         fallbackUsed = false
         level = decision.level
+        fromPackaged = true
       } else {
         // 2) Pacote por modelo (template_id) ou catálogo (flow_id) + arquétipo — migração 386
         const packaged = await fetchPackagedDiagnosisOutcome(supabaseAdmin, {
@@ -617,6 +621,7 @@ export async function POST(
           })
           fallbackUsed = false
           level = decision.level
+          fromPackaged = true
         } else {
           // 3) Arquétipos globais (vertical dedicada evita copy genérica de `aesthetics`)
           const segmentForArchetype = diagnosisVertical ?? segment_code ?? 'geral'
@@ -749,13 +754,17 @@ export async function POST(
     // WhatsApp: manter o prefill conversacional (IA) e acrescentar resumo objetivo para o profissional entender o caso
     let whatsappPrefill = diagnosis.whatsapp_prefill
     if (architecture !== 'PERFUME_PROFILE') {
-      const msgContainsResult =
-        diagnosis.main_blocker &&
-        whatsappPrefill?.toLowerCase().includes((diagnosis.main_blocker || '').toLowerCase().slice(0, 15))
-      const isGeneric = whatsappPrefill && diagnosis.main_blocker && !msgContainsResult
-      if (isGeneric && diagnosis.main_blocker) {
-        const theme = themeForSlots?.trim() || 'a análise'
-        whatsappPrefill = `Oi, fiz a análise de ${theme} e o resultado apontou ${diagnosis.main_blocker}. Gostaria de conversar sobre o próximo passo.`
+      // Diagnósticos pacotados têm whatsapp_prefill customizado e assertivo — não substituir pelo template genérico.
+      // Só aplicar a substituição quando o diagnóstico veio do motor (engine/arquétipo) e o prefill não menciona o achado.
+      if (!fromPackaged) {
+        const msgContainsResult =
+          diagnosis.main_blocker &&
+          whatsappPrefill?.toLowerCase().includes((diagnosis.main_blocker || '').toLowerCase().slice(0, 15))
+        const isGeneric = whatsappPrefill && diagnosis.main_blocker && !msgContainsResult
+        if (isGeneric && diagnosis.main_blocker) {
+          const theme = themeForSlots?.trim() || 'a análise'
+          whatsappPrefill = `Oi, fiz a análise de ${theme} e o resultado apontou ${diagnosis.main_blocker}. Gostaria de conversar sobre o próximo passo.`
+        }
       }
       const bulletLines = buildWhatsAppLeadBulletLines(
         visitor_answers,

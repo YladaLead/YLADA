@@ -62,7 +62,7 @@ VALUES
       'consequence', 'Adiar apoio prolonga desgaste e risco de medidas extremas que não duram.',
       'growth_potential', 'Fala com quem te enviou: construa plano por fases — nutrição funcional, hábitos e critério profissional quando necessário.',
       'dica_rapida', 'Neste patamar, método sustentável vence impulso; conversa evita erro caro.',
-      'cta_text', 'Preciso de plano serio com acompanhamento',
+      'cta_text', 'Preciso de plano sério com acompanhamento',
       'whatsapp_prefill', 'Oi! Fiz a calculadora de IMC e o resultado pede conversa firme para encaixe na minha vida. Quero conversar com quem me enviou este link.'
     )
   ),
