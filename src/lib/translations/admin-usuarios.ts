@@ -244,6 +244,8 @@ export interface AdminUsuariosTranslations {
     proLideresSelectTeam: string
     proLideresAddMember: string
     proLideresLinkAsActive: string
+    proLideresPaidLeadersHint: string
+    proLideresNoPaidLeaders: string
     matrizFreeMigrationCreateBtn: string
     matrizFreeCourtesyCreateBtn: string
   }
@@ -451,6 +453,10 @@ const pt: AdminUsuariosTranslations = {
     proLideresSelectTeam: 'Espaço do líder (equipa)',
     proLideresAddMember: 'Vincular à equipa',
     proLideresLinkAsActive: 'Já ativar acesso (sem passo de pagamento)',
+    proLideresPaidLeadersHint:
+      'Só líderes com assinatura Pro Líderes (equipe) ativa. O nome é o do espaço Pro Líderes — não usa a lista de presidentes Wellness.',
+    proLideresNoPaidLeaders:
+      'Nenhum líder com assinatura Pro Líderes ativa. Confira em Assinaturas ou crie o acesso em Admin → Pro Líderes.',
     president: 'Presidente',
     presidentHint: 'Selecione o presidente ao qual este usuário pertence',
     cancel: 'Cancelar',
@@ -761,6 +767,10 @@ const es: AdminUsuariosTranslations = {
     proLideresSelectTeam: 'Espacio del líder (equipo)',
     proLideresAddMember: 'Vincular al equipo',
     proLideresLinkAsActive: 'Activar acceso ya (sin paso de pago)',
+    proLideresPaidLeadersHint:
+      'Solo líderes con suscripción Pro Líderes (equipo) activa. El nombre es del espacio Pro Líderes, no de presidentes Wellness.',
+    proLideresNoPaidLeaders:
+      'Ningún líder con suscripción Pro Líderes activa.',
   },
   messages: {
     noUsers: 'Ningún usuario encontrado',
@@ -1020,6 +1030,9 @@ const en: AdminUsuariosTranslations = {
     proLideresSelectTeam: 'Leader workspace (team)',
     proLideresAddMember: 'Link to team',
     proLideresLinkAsActive: 'Activate access now (skip payment step)',
+    proLideresPaidLeadersHint:
+      'Only leaders with an active Pro Leaders (team) subscription. Name comes from the Pro Leaders workspace, not Wellness presidents.',
+    proLideresNoPaidLeaders: 'No leaders with an active Pro Leaders subscription.',
   },
   messages: {
     noUsers: 'No users found',

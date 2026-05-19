@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { resolveTeamAccessExpiresAt } from '@/lib/pro-lideres-team-access-expiry'
+import { ownerHasProLideresTeamSubscription } from '@/lib/pro-lideres-subscription-access'
 import { supabaseAdmin } from '@/lib/supabase'
 
 type ProLideresAccessState = 'active' | 'paused' | 'pending_activation'
@@ -159,11 +160,18 @@ export async function PATCH(
     }
     const { data: tenant } = await supabaseAdmin
       .from('leader_tenants')
-      .select('id, vertical_code')
+      .select('id, vertical_code, owner_user_id')
       .eq('id', tenantId)
       .maybeSingle()
     if (!tenant || (tenant.vertical_code as string) !== 'h-lider') {
       return NextResponse.json({ error: 'Espaço Pro Líderes inválido.' }, { status: 400 })
+    }
+    const ownerId = tenant.owner_user_id as string
+    if (!(await ownerHasProLideresTeamSubscription(ownerId))) {
+      return NextResponse.json(
+        { error: 'Este líder não tem assinatura Pro Líderes (equipe) ativa.' },
+        { status: 400 }
+      )
     }
     const { data: existing } = await supabaseAdmin
       .from('leader_tenant_members')

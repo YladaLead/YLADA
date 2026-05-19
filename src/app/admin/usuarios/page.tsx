@@ -151,7 +151,12 @@ export default function AdminUsuarios() {
   const [proLideresAccessDate, setProLideresAccessDate] = useState('')
   const [salvandoProLideres, setSalvandoProLideres] = useState(false)
   const [proLideresTenants, setProLideresTenants] = useState<
-    Array<{ id: string; displayName: string; contactEmail: string | null }>
+    Array<{
+      id: string
+      displayName: string
+      contactEmail: string | null
+      subscriptionExpiresAt?: string | null
+    }>
   >([])
   const [proLideresTenantId, setProLideresTenantId] = useState('')
   const [proLideresLinkAsActive, setProLideresLinkAsActive] = useState(false)
@@ -1737,6 +1742,14 @@ export default function AdminUsuarios() {
                     <div className="space-y-3 pt-1">
                       <p className="text-xs text-gray-700">{t.modal.proLideresNoLink}</p>
                       <p className="text-xs font-medium text-violet-950">{t.modal.proLideresLinkTeam}</p>
+                      <p className="text-[11px] text-violet-900/80 leading-relaxed">
+                        {t.modal.proLideresPaidLeadersHint}
+                      </p>
+                      {proLideresTenants.length === 0 ? (
+                        <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5">
+                          {t.modal.proLideresNoPaidLeaders}
+                        </p>
+                      ) : (
                       <label className="block text-xs font-medium text-gray-700">
                         {t.modal.proLideresSelectTeam}
                         <select
@@ -1745,14 +1758,20 @@ export default function AdminUsuarios() {
                           className="mt-1 w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm bg-white"
                         >
                           <option value="">—</option>
-                          {proLideresTenants.map((tenant) => (
+                          {proLideresTenants.map((tenant) => {
+                            const exp = tenant.subscriptionExpiresAt
+                              ? new Date(tenant.subscriptionExpiresAt).toLocaleDateString('pt-BR')
+                              : null
+                            return (
                             <option key={tenant.id} value={tenant.id}>
                               {tenant.displayName}
-                              {tenant.contactEmail ? ` (${tenant.contactEmail})` : ''}
+                              {exp ? ` · até ${exp}` : ''}
                             </option>
-                          ))}
+                            )
+                          })}
                         </select>
                       </label>
+                      )}
                       <label className="text-xs font-medium text-gray-700">
                         {t.modal.proLideresAccessDays}
                         <input
