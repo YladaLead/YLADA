@@ -721,12 +721,12 @@ export function ProLideresEquipeMembersCollapsible({
                   m.teamAccessState === 'pending_activation' || m.teamAccessState === 'paused'
 
                 return (
-                  <li key={m.userId} className="px-4 py-4">
-                    <div className="flex flex-col gap-3 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,11rem)_auto] sm:items-center sm:gap-3">
+                  <li key={m.userId} className="px-4 py-2.5">
+                    <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,8.5rem)_auto] sm:items-center sm:gap-2">
                       <div className="min-w-0">
-                        <p className="truncate font-medium text-gray-900">{title}</p>
-                        <p className="truncate text-sm text-gray-500">{subtitle}</p>
-                        <div className="mt-2 flex flex-wrap gap-1.5 sm:hidden">
+                        <p className="truncate text-sm font-medium text-gray-900">{title}</p>
+                        <p className="truncate text-xs text-gray-500">{subtitle}</p>
+                        <div className="mt-1 flex flex-wrap gap-1 sm:hidden">
                           {m.role === 'leader' ? (
                             <span className="inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
                               {roleLabel(m.role)}
@@ -750,10 +750,10 @@ export function ProLideresEquipeMembersCollapsible({
                         </div>
                       </div>
 
-                      <motion.div className="text-xs text-gray-800 sm:border-l sm:border-gray-100 sm:pl-2">
+                      <div className="text-xs text-gray-800 sm:border-l sm:border-gray-100 sm:pl-2">
                         <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 sm:hidden">Validade</p>
                         <p className="font-medium leading-tight text-gray-900">{vText}</p>
-                      </motion.div>
+                      </div>
 
                       <div className="flex flex-col items-stretch gap-1.5 sm:items-end">
                         <div className="hidden flex-wrap justify-end gap-1.5 sm:flex">
@@ -780,7 +780,7 @@ export function ProLideresEquipeMembersCollapsible({
                         </div>
 
                         {showActions ? (
-                          <div className="flex flex-wrap justify-stretch gap-2 sm:justify-end">
+                          <div className="flex flex-wrap justify-stretch gap-1.5 sm:justify-end">
                             {canEditExpiry ? (
                               <button
                                 type="button"
@@ -804,7 +804,7 @@ export function ProLideresEquipeMembersCollapsible({
                               title={canPause ? 'Suspender o acesso ao painel' : 'Só com acesso ativo'}
                               disabled={isBusy || !canPause}
                               onClick={() => void callAccessApi(m.userId, 'pause')}
-                              className="min-h-[36px] flex-1 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-950 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none sm:min-w-[5.5rem]"
+                              className="min-h-[30px] flex-1 rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-950 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none sm:min-w-[4.75rem]"
                             >
                               {isBusy && canPause ? '…' : 'Pausar'}
                             </button>
@@ -835,7 +835,7 @@ export function ProLideresEquipeMembersCollapsible({
                                   setActivateUserId(m.userId)
                                 }
                               }}
-                              className="min-h-[36px] flex-1 rounded-lg border border-green-600 bg-green-50 px-2.5 py-1.5 text-xs font-semibold text-green-950 hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none sm:min-w-[5.5rem]"
+                              className="min-h-[30px] flex-1 rounded-md border border-green-600 bg-green-50 px-2 py-1 text-xs font-semibold text-green-950 hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none sm:min-w-[4.75rem]"
                             >
                               {isBusy && canAtivar ? '…' : 'Ativar'}
                             </button>
@@ -853,7 +853,7 @@ export function ProLideresEquipeMembersCollapsible({
                                 }
                                 void callAccessApi(m.userId, 'remove')
                               }}
-                              className="min-h-[36px] flex-1 rounded-lg border border-red-300 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-900 hover:bg-red-100 disabled:opacity-50 sm:flex-none sm:min-w-[5.5rem]"
+                              className="min-h-[30px] flex-1 rounded-md border border-red-300 bg-red-50 px-2 py-1 text-xs font-semibold text-red-900 hover:bg-red-100 disabled:opacity-50 sm:flex-none sm:min-w-[4.75rem]"
                             >
                               {isBusy ? '…' : 'Remover'}
                             </button>
