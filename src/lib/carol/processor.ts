@@ -9,6 +9,40 @@ import {
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
+// ── Detecta auto-resposta de bots/assistentes de outras empresas ────────────
+function isAutoResponse(text: string): boolean {
+  const t = text.toLowerCase()
+  const patterns = [
+    'seja bem-vindo',
+    'bem-vindo(a)',
+    'bem vindo(a)',
+    'atendimento está encerrado',
+    'atendimento encerrado',
+    'fora do horário de atendimento',
+    'fora de horário',
+    'nosso horário de atendimento',
+    'assistente de atendimento',
+    'mensagem automática',
+    'resposta automática',
+    'este é um atendimento automático',
+    'no momento, nosso atendimento',
+    'em breve retornarei',
+    'retornarei sua mensagem',
+    'retornaremos em breve',
+    'deixe sua mensagem por aqui',
+    'você entrou em contato com',
+    'estamos fora do ar',
+    'voltarei assim que possível',
+  ]
+  return patterns.some(p => t.includes(p))
+}
+
+// ── Delay humanizado antes de enviar resposta (~15 segundos) ────────────────
+async function humanDelay(): Promise<void> {
+  const ms = 13000 + Math.random() * 4000 // 13–17s, média ~15s
+  await new Promise(resolve => setTimeout(resolve, ms))
+}
+
 const CAROL_SYSTEM_PROMPT = `Você é Carol, da equipe do Andre Faula.
 
 PERSONALIDADE:
@@ -50,22 +84,37 @@ Ele é direto, prático, sem teoria. Especialista em clínicas de estética corp
 
 ---
 
-FOCO TOTAL — AGENDA DE ESTÉTICA CORPORAL:
-Este canal atende exclusivamente donas de clínica de estética corporal no Brasil.
+FOCO TOTAL — AGENDA DE ESTÉTICA:
+Este canal atende donas de clínica de estética no Brasil — corporal, facial ou ambas.
 A dor central que trabalhamos: agenda que não fica cheia de forma consistente.
 Todo o roteiro gira em torno de descobrir por que a agenda não enche — e mostrar que existe um motivo específico que a dona ainda não identificou.
 
 PÚBLICO IDEAL:
-- Dona de clínica de estética corporal
+- Dona de clínica de estética (corporal, facial, pele, depilação, procedimentos estéticos de qualquer tipo)
 - Faturamento R$8k-30k/mês
 - Agenda que oscila: semanas cheias, semanas com buracos
 - Trabalha muito, faturamento não reflete o esforço
 
-SE A PESSOA NÃO FOR DONA DE CLÍNICA DE ESTÉTICA CORPORAL:
-Se ficar claro que a pessoa não tem clínica de estética corporal (perguntou por celular, está procurando emprego, é cliente de clínica, etc.):
-Responda com leveza: "Oi! Aqui a gente atende especificamente donas de clínica de estética corporal. Não é o seu caso, né? 😊"
+IMPORTANTE — QUEM É O PÚBLICO:
+Qualquer profissional que tem clínica/ateliê/espaço próprio de estética É o público:
+esteticista, dermatologista estética, especialista em pele, gerenciamento de pele facial, micropigmentação, depilação, nail designer com espaço próprio, etc.
+A dor da agenda vale para todos eles igualmente.
+
+SE NÃO FICOU CLARO SE A PESSOA TEM NEGÓCIO PRÓPRIO:
+Antes de descartar, sempre pergunte de forma neutra — nunca indutora:
+"Você tem espaço próprio de atendimento?"
+ou: "Você atende por conta própria ou trabalha pra alguém?"
+Isso qualifica qualquer profissional de estética: pele, micropigmentação, massagem, depilação, nail, etc.
+Só descarte DEPOIS de confirmar que a pessoa claramente não tem negócio próprio.
+
+DESCARTE DEFINITIVO — só para casos evidentes:
+cliente buscando tratamento para si mesma, pessoa procurando emprego na área, número errado, vendedor.
+Nesses casos: "Oi! Aqui a gente atende especificamente quem tem espaço próprio de atendimento em estética. Não é o seu caso, né? 😊"
 Se confirmar que não é: "Entendido! Obrigada pelo contato 😊"
-Nunca tente qualificar quem claramente não é o público.
+
+SE A PESSOA CORRIGIR VOCÊ ("Não, é meu caso sim" / "Tenho espaço sim" / "Trabalho por conta própria"):
+Retome com naturalidade — não se desculpe, não explique o engano:
+"Ah, com certeza! Me conta então — o que mais trava sua agenda hoje?"
 
 ---
 
@@ -203,6 +252,14 @@ export async function processMessage({
 
     const ANDRE_NUMBER = '5519981868000'
 
+    // ── AUTO-RESPOSTA: ignora bots de outras empresas ───────────────────────
+    if (isAutoResponse(text)) {
+      console.log(`[Carol] 🤖 Auto-resposta detectada de ${from} — ignorando silenciosamente`)
+      // Salva no histórico para contexto, mas não responde
+      await saveMessage(conversation.id, 'user', `[auto-resposta ignorada] ${text}`)
+      return
+    }
+
     // Salva mensagem recebida
     await saveMessage(conversation.id, 'user', text)
 
@@ -282,6 +339,9 @@ export async function processMessage({
 
     // Salva resposta da Carol
     await saveMessage(conversation.id, 'assistant', replyLimpo)
+
+    // Delay humanizado (~15s) antes de enviar — evita parecer bot
+    await humanDelay()
 
     // Envia resposta para o usuário
     await sendWhatsAppMessage(from, replyLimpo)

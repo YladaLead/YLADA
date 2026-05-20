@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, unstable_after as after } from 'next/server'
 import { processMessage } from '@/lib/carol/processor'
 import { sendWhatsAppMessage } from '@/lib/carol/sender'
 import { transcribeWhatsAppAudio } from '@/lib/carol/transcriber'
@@ -70,86 +70,90 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     if (body.object === 'whatsapp_business_account') {
-      for (const entry of body.entry) {
-        for (const change of entry.changes) {
-          if (change.field === 'messages') {
-            const messages = change.value.messages || []
-            const statuses = change.value.statuses || []
+      // Retorna 200 imediatamente pro Meta — processamento acontece em background
+      // Isso evita timeout do Meta (20s) e permite delay humano de 15s na resposta
+      after(async () => {
+        for (const entry of body.entry) {
+          for (const change of entry.changes) {
+            if (change.field === 'messages') {
+              const messages = change.value.messages || []
+              const statuses = change.value.statuses || []
 
-            // Ignora atualizações de status (entregue, lido, etc)
-            if (statuses.length > 0 && messages.length === 0) {
-              continue
-            }
+              // Ignora atualizações de status (entregue, lido, etc)
+              if (statuses.length > 0 && messages.length === 0) {
+                continue
+              }
 
-            for (const message of messages) {
-              const from = message.from
+              for (const message of messages) {
+                const from = message.from
 
-              if (message.type === 'text') {
-                console.log(`[Carol] Texto recebido de ${from}: ${message.text.body}`)
-                await processMessage({
-                  from,
-                  text: message.text.body,
-                  messageId: message.id,
-                  timestamp: message.timestamp,
-                })
-
-              } else if (message.type === 'sticker') {
-                console.log(`[Carol] Figurinha recebida de ${from}`)
-                await processMessage({
-                  from,
-                  text: '[a pessoa enviou uma figurinha]',
-                  messageId: message.id,
-                  timestamp: message.timestamp,
-                })
-
-              } else if (message.type === 'audio') {
-                console.log(`[Carol] Áudio recebido de ${from} — transcrevendo com Whisper...`)
-                try {
-                  const mediaId = message.audio.id
-                  const transcribed = await transcribeWhatsAppAudio(mediaId)
-                  console.log(`[Carol] Áudio transcrito de ${from}: ${transcribed}`)
+                if (message.type === 'text') {
+                  console.log(`[Carol] Texto recebido de ${from}: ${message.text.body}`)
                   await processMessage({
                     from,
-                    text: transcribed,
+                    text: message.text.body,
                     messageId: message.id,
                     timestamp: message.timestamp,
                   })
-                } catch (transcribeError) {
-                  console.error(`[Carol] Erro ao transcrever áudio de ${from}:`, transcribeError)
+
+                } else if (message.type === 'sticker') {
+                  console.log(`[Carol] Figurinha recebida de ${from}`)
+                  await processMessage({
+                    from,
+                    text: '[a pessoa enviou uma figurinha]',
+                    messageId: message.id,
+                    timestamp: message.timestamp,
+                  })
+
+                } else if (message.type === 'audio') {
+                  console.log(`[Carol] Áudio recebido de ${from} — transcrevendo com Whisper...`)
+                  try {
+                    const mediaId = message.audio.id
+                    const transcribed = await transcribeWhatsAppAudio(mediaId)
+                    console.log(`[Carol] Áudio transcrito de ${from}: ${transcribed}`)
+                    await processMessage({
+                      from,
+                      text: transcribed,
+                      messageId: message.id,
+                      timestamp: message.timestamp,
+                    })
+                  } catch (transcribeError) {
+                    console.error(`[Carol] Erro ao transcrever áudio de ${from}:`, transcribeError)
+                    await sendWhatsAppMessage(
+                      from,
+                      'Recebi seu áudio, mas tive dificuldade de processar 😊\nPode digitar o que queria me dizer?'
+                    )
+                  }
+
+                } else if (message.type === 'interactive' && message.interactive?.type === 'nfm_reply') {
+                  // Resposta de WhatsApp Flow (diagnóstico de 4 perguntas)
+                  console.log(`[Carol] Flow completado por ${from}`)
+                  const responseJson = message.interactive.nfm_reply?.response_json || '{}'
+                  const flowSummary = parseFlowResponse(responseJson)
+                  console.log(`[Carol] Flow data de ${from}:`, flowSummary)
+                  await processMessage({
+                    from,
+                    text: flowSummary,
+                    messageId: message.id,
+                    timestamp: message.timestamp,
+                    isFlowResponse: true,
+                  })
+
+                } else if (['image', 'video', 'document'].includes(message.type)) {
+                  console.log(`[Carol] Arquivo (${message.type}) recebido de ${from}`)
                   await sendWhatsAppMessage(
                     from,
-                    'Recebi seu áudio, mas tive dificuldade de processar 😊\nPode digitar o que queria me dizer?'
+                    'Recebi! Mas ainda não consigo visualizar arquivos por aqui 😊\nPode me descrever o que queria mostrar?'
                   )
+
+                } else {
+                  console.log(`[Carol] Tipo não tratado (${message.type}) de ${from} — ignorando`)
                 }
-
-              } else if (message.type === 'interactive' && message.interactive?.type === 'nfm_reply') {
-                // Resposta de WhatsApp Flow (diagnóstico de 4 perguntas)
-                console.log(`[Carol] Flow completado por ${from}`)
-                const responseJson = message.interactive.nfm_reply?.response_json || '{}'
-                const flowSummary = parseFlowResponse(responseJson)
-                console.log(`[Carol] Flow data de ${from}:`, flowSummary)
-                await processMessage({
-                  from,
-                  text: flowSummary,
-                  messageId: message.id,
-                  timestamp: message.timestamp,
-                  isFlowResponse: true,
-                })
-
-              } else if (['image', 'video', 'document'].includes(message.type)) {
-                console.log(`[Carol] Arquivo (${message.type}) recebido de ${from}`)
-                await sendWhatsAppMessage(
-                  from,
-                  'Recebi! Mas ainda não consigo visualizar arquivos por aqui 😊\nPode me descrever o que queria mostrar?'
-                )
-
-              } else {
-                console.log(`[Carol] Tipo não tratado (${message.type}) de ${from} — ignorando`)
               }
             }
           }
         }
-      }
+      })
     }
 
     return new NextResponse('OK', { status: 200 })
