@@ -49,7 +49,7 @@ export default function CoachBemEstarRecuperarSenhaPage() {
         <div className="text-center mb-8 sm:mb-10">
           <div className="flex justify-center mb-6 sm:mb-8">
             <Image
-              src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png"
+              src="/images/logo/ylada/novo/ylada-horizontal-claro.png"
               alt="YLADA — Coach de bem-estar"
               width={280}
               height={84}

@@ -101,8 +101,8 @@ export async function POST(request: NextRequest) {
     const payload = JSON.stringify({
       title,
       body: messageBody,
-      icon: icon || '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
-      badge: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
+      icon: icon || '/images/logo/ylada/novo/ylada-icon-512.png',
+      badge: '/images/logo/ylada/novo/ylada-icon-512.png',
       tag: tag || 'ylada-notification',
       data: {
         url: url || '/'

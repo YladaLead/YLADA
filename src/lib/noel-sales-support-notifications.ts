@@ -121,8 +121,8 @@ async function sendPushNotificationToAdmin(
     const payload = JSON.stringify({
       title: '🔴 NOEL não soube responder',
       body: `Pergunta: ${data.question.substring(0, 100)}${data.question.length > 100 ? '...' : ''}`,
-      icon: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
-      badge: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
+      icon: '/images/logo/ylada/novo/ylada-icon-512.png',
+      badge: '/images/logo/ylada/novo/ylada-icon-512.png',
       tag: 'noel-unanswered',
       data: {
         url: `${baseUrl}/pt/wellness/suporte`,

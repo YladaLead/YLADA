@@ -504,7 +504,7 @@ function AdminAnalyticsContent() {
             <div className="flex items-center gap-3 min-w-0">
               <Link href="/admin" className="shrink-0 touch-manipulation">
                 <Image
-                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+                  src="/images/logo/ylada/novo/ylada-horizontal-claro.png"
                   alt="YLADA"
                   width={180}
                   height={60}

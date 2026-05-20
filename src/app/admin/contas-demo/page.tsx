@@ -21,7 +21,7 @@ function ContasDemoContent() {
           </div>
           <Link href="/">
             <Image
-              src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+              src="/images/logo/ylada/novo/ylada-horizontal-claro.png"
               alt="YLADA"
               width={120}
               height={42}

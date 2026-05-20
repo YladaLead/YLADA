@@ -27,7 +27,7 @@ export default function NutraNavBar({ showTitle = false, title }: NutraNavBarPro
           <div className="flex items-center space-x-4">
             <Link href="/pt/nutra/home">
               <Image
-                src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+                src="/images/logo/ylada/novo/ylada-horizontal-claro.png"
                 alt="YLADA Nutra"
                 width={180}
                 height={60}

@@ -71,7 +71,7 @@ export default function WorkshopNutriEmpresariaPreviewSucessoPage() {
         <div className="container mx-auto px-4 flex justify-center">
           <Link href="/pt" className="block">
             <Image
-              src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+              src="/images/logo/ylada/novo/ylada-horizontal-claro.png"
               alt="YLADA"
               width={120}
               height={32}

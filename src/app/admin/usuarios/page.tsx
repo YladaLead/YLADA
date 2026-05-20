@@ -1013,7 +1013,7 @@ export default function AdminUsuarios() {
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <Link href="/admin" className="flex-shrink-0">
                 <Image
-                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+                  src="/images/logo/ylada/novo/ylada-horizontal-claro.png"
                   alt="YLADA"
                   width={140}
                   height={48}

@@ -769,7 +769,7 @@ export default function LoginForm({
     }
   }
 
-  const yladaHorizontalLogo = '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png'
+  const yladaHorizontalLogo = '/images/logo/ylada/novo/ylada-horizontal-claro.png'
 
   const logoSrc =
     logoPath ||

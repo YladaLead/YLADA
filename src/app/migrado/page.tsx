@@ -74,7 +74,7 @@ export default function MigradoPage() {
           <div className="text-center mb-8">
             <Link href="/">
               <Image
-                src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+                src="/images/logo/ylada/novo/ylada-horizontal-claro.png"
                 alt="YLADA"
                 width={200}
                 height={70}

@@ -17,11 +17,11 @@ export const metadata = {
   // Ícones em múltiplos tamanhos (Google recomenda 48x48 e 96x96 para resultados de busca)
   icons: {
     icon: [
-      { url: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png', sizes: '48x48', type: 'image/png' },
-      { url: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png', sizes: '96x96', type: 'image/png' },
-      { url: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png', sizes: '192x192', type: 'image/png' },
+      { url: '/images/logo/ylada/novo/ylada-icon-512.png', sizes: '48x48', type: 'image/png' },
+      { url: '/images/logo/ylada/novo/ylada-icon-512.png', sizes: '96x96', type: 'image/png' },
+      { url: '/images/logo/ylada/novo/ylada-icon-512.png', sizes: '192x192', type: 'image/png' },
     ],
-    apple: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png',
+    apple: '/images/logo/ylada/novo/ylada-icon-512.png',
   },
   openGraph: {
     title: 'YLADA - Boas conversas começam com boas perguntas',
@@ -30,7 +30,7 @@ export const metadata = {
     siteName: 'YLADA',
     images: [
       {
-        url: 'https://www.ylada.com/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png',
+        url: 'https://www.ylada.com/images/logo/ylada/novo/ylada-horizontal-claro.png',
         width: 1080,
         height: 1080,
         alt: 'YLADA - Boas conversas começam com boas perguntas',
@@ -44,7 +44,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'YLADA - Boas conversas começam com boas perguntas',
     description: 'Boas conversas começam com boas perguntas. Conecte-se através de links inteligentes.',
-    images: ['https://www.ylada.com/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'],
+    images: ['https://www.ylada.com/images/logo/ylada/novo/ylada-horizontal-claro.png'],
     creator: '@ylada',
   },
   robots: {
@@ -85,7 +85,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#3B82F6" />
         <meta name="msapplication-tap-highlight" content="no" />
-        <link rel="apple-touch-icon" href="/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png" />
+        <link rel="apple-touch-icon" href="/images/logo/ylada/novo/ylada-icon-512.png" />
         {/* Forçar não usar cache */}
         <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
         <meta httpEquiv="Pragma" content="no-cache" />

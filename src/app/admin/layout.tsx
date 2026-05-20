@@ -5,8 +5,8 @@ import { AdminNavClient } from '@/components/admin/AdminNavClient'
 export const metadata: Metadata = {
   manifest: '/manifest-admin.json',
   icons: {
-    icon: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
-    apple: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
+    icon: '/images/logo/ylada/novo/ylada-icon-512.png',
+    apple: '/images/logo/ylada/novo/ylada-icon-512.png',
   },
 }
 

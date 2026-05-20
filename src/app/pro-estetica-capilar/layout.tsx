@@ -5,8 +5,8 @@ export const metadata: Metadata = {
   title: 'YLADA Pro — Estética capilar',
   description: 'Sistema de expansão e qualificação em estética capilar — YLADA Pro',
   icons: {
-    icon: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png',
-    apple: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png',
+    icon: '/images/logo/ylada/novo/ylada-icon-512.png',
+    apple: '/images/logo/ylada/novo/ylada-icon-512.png',
   },
 }
 

@@ -13,7 +13,7 @@ import {
 import { buildYladaReferralWhatsappHref } from '@/lib/ylada-referral-whatsapp'
 import { useAuth } from '@/hooks/useAuth'
 
-const YLADA_LOGO = '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
+const YLADA_LOGO = '/images/logo/ylada/novo/ylada-horizontal-claro.png'
 
 interface YladaSidebarProps {
   areaCodigo: string

@@ -17,7 +17,7 @@ export default function CoachBemEstarRenovarPage() {
         <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
           <Link href="/pt/coach-bem-estar/login">
             <Image
-              src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png"
+              src="/images/logo/ylada/novo/ylada-horizontal-claro.png"
               alt="YLADA — Coach de bem-estar"
               width={280}
               height={84}

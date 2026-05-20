@@ -236,7 +236,7 @@ function SupportAgentsPage() {
             <div className="flex items-center space-x-6">
               <Link href="/admin">
                 <Image
-                  src="/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png"
+                  src="/images/logo/ylada/novo/ylada-icon-512.png"
                   alt="YLADA Admin"
                   width={40}
                   height={40}

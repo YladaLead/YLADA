@@ -7,7 +7,7 @@ import { validateProtectedAccess, isNutriPublicPath } from '@/lib/auth-server'
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
 
 // Mesma imagem OG do layout raiz (marca YLADA), para prévia no WhatsApp/redes não usar capa de vídeo
-const ogImageUrl = `${baseUrl}/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png`
+const ogImageUrl = `${baseUrl}/images/logo/ylada/novo/ylada-horizontal-claro.png`
 const nutriPageUrl = `${baseUrl}/pt/nutri`
 
 // Título e descrição para a prévia do link (WhatsApp, redes) — vídeo para assistir, foco em atrair pacientes certos

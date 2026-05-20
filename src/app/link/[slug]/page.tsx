@@ -169,7 +169,7 @@ export default function LinkPage({ params }: { params: Promise<{ slug: string }>
                 ? '/images/logo/nutri-horizontal.png'
                 : area === 'coach'
                 ? '/images/logo/coach-horizontal.png'
-                : '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
+                : '/images/logo/ylada/novo/ylada-horizontal-claro.png'
               }
               alt={area === 'wellness' 
                 ? 'WELLNESS - Your Leading Data System'

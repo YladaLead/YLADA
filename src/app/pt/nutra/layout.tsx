@@ -6,8 +6,8 @@ import { validateProtectedAccess } from '@/lib/auth-server'
 export const metadata: Metadata = {
   manifest: '/manifest-nutra.json',
   icons: {
-    icon: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
-    apple: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
+    icon: '/images/logo/ylada/novo/ylada-icon-512.png',
+    apple: '/images/logo/ylada/novo/ylada-icon-512.png',
   },
 }
 

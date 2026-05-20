@@ -45,7 +45,7 @@ export default async function EsteticaConsultoriaResponderPage({
             href="/pro-estetica"
             className="inline-flex min-h-[44px] min-w-[44px] touch-manipulation flex-col items-center justify-center gap-2 rounded-xl px-2 py-1"
           >
-            <Image src={YLADA_OG_FALLBACK_LOGO_PATH} alt="YLADA" width={100} height={32} className="h-8 w-auto" />
+            <Image src={YLADA_OG_FALLBACK_LOGO_PATH} alt="YLADA" width={122} height={32} className="h-8 w-auto" />
             <span className="text-xs font-medium text-blue-900/55 tracking-wide">
               {bandLine} · Confidencial
             </span>

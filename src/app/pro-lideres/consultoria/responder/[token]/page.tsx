@@ -73,7 +73,7 @@ export default async function ProLideresConsultoriaResponderPage({
       <div className="mx-auto max-w-lg">
         <div className="mb-8 flex flex-col items-center gap-2 text-center">
           <Link href="/pro-lideres" className="inline-flex flex-col items-center gap-2">
-            <Image src={YLADA_OG_FALLBACK_LOGO_PATH} alt="YLADA" width={100} height={32} className="h-8 w-auto" />
+            <Image src={YLADA_OG_FALLBACK_LOGO_PATH} alt="YLADA" width={122} height={32} className="h-8 w-auto" />
             <span className="text-xs font-medium text-gray-500">Pro Líderes · Consultoria</span>
           </Link>
         </div>

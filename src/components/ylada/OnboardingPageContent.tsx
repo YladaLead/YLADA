@@ -362,7 +362,7 @@ export function OnboardingPageContent({
   }
 
   /** Logo padrão YLADA (Ida) em todas as áreas. */
-  const logoSrc = '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
+  const logoSrc = '/images/logo/ylada/novo/ylada-horizontal-claro.png'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center px-4 py-12">
@@ -371,8 +371,8 @@ export function OnboardingPageContent({
           <Image
             src={logoSrc}
             alt={`YLADA ${areaLabel}`}
-            width={200}
-            height={60}
+            width={367}
+            height={96}
             className="h-12 w-auto mx-auto mb-6"
             priority
           />

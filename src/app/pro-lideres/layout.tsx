@@ -5,8 +5,8 @@ export const metadata: Metadata = {
   title: 'YLADA Pro Líderes',
   description: 'Sistema de expansão para equipes — área do líder',
   icons: {
-    icon: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png',
-    apple: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png',
+    icon: '/images/logo/ylada/novo/ylada-icon-512.png',
+    apple: '/images/logo/ylada/novo/ylada-icon-512.png',
   },
 }
 

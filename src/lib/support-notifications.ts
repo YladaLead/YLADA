@@ -349,8 +349,8 @@ async function sendPushNotificationForNewMessage(
     const payload = JSON.stringify({
       title: `💬 Nova mensagem de ${senderName}`,
       body: messagePreview,
-      icon: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
-      badge: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
+      icon: '/images/logo/ylada/novo/ylada-icon-512.png',
+      badge: '/images/logo/ylada/novo/ylada-icon-512.png',
       tag: `ticket-${ticketId}`,
       data: {
         url: openUrl,

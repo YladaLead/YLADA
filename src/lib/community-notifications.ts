@@ -119,8 +119,8 @@ async function sendPushNotification(
     const payload = JSON.stringify({
       title: data.title,
       body: data.body,
-      icon: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
-      badge: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
+      icon: '/images/logo/ylada/novo/ylada-icon-512.png',
+      badge: '/images/logo/ylada/novo/ylada-icon-512.png',
       tag: data.tag || 'community-notification',
       data: {
         url: data.url

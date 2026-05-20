@@ -433,7 +433,7 @@ function AdminDashboardContent() {
             <div className="flex items-center gap-3 min-w-0">
               <Link href="/" className="shrink-0">
                 <Image
-                  src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+                  src="/images/logo/ylada/novo/ylada-horizontal-claro.png"
                   alt="YLADA"
                   width={200}
                   height={70}

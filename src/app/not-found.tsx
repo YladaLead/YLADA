@@ -96,7 +96,7 @@ export default function NotFound() {
         ) : (
           <div className="mb-6 flex justify-center">
             <Image
-              src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
+              src="/images/logo/ylada/novo/ylada-horizontal-claro.png"
               alt="YLADA - Your Leading Advanced Data Assistant"
               width={280}
               height={84}

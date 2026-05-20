@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
 const OG_IMAGE =
-  'https://www.ylada.com/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
+  'https://www.ylada.com/images/logo/ylada/novo/ylada-horizontal-claro.png'
 
 const TITLE = 'Pesquisa de feedback · YLADA (v1)'
 const DESCRIPTION =

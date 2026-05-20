@@ -38,7 +38,7 @@ export default function SistemaConversasAtivasPage() {
       <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <Link href="/pt/nutri" className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors">
-            <Image src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png" alt="YLADA" width={100} height={32} />
+            <Image src="/images/logo/ylada/novo/ylada-horizontal-claro.png" alt="YLADA" width={100} height={32} />
             <span className="text-sm font-medium hidden sm:inline">Nutri</span>
           </Link>
           <Link
