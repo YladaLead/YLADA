@@ -2,6 +2,7 @@ import {
   NOEL_PRO_LIDERES_H_LIDER_PROFILE_ID,
   resolveProLideresNoelProfileId,
 } from '@/lib/pro-lideres-noel-prompt'
+import { sanitizeProLideresScriptCopy } from '@/lib/pro-lideres-script-copy-sanitize'
 
 /** Tipos de texto que o Noel pode montar (linguagem simples para o líder). */
 export const PRO_LIDERES_SCRIPT_PILLARS = [
@@ -113,10 +114,12 @@ ${audienceBlock}
 
 ${compactBlock}
 
-MODO SOCRÁTICO — PROVOCAR REFLEXÃO (OBRIGATÓRIO ONDE COUBER)
+PERGUNTAS CONCRETAS (OBRIGATÓRIO ONDE COUBER)
 - Em **cada** \`body\` relevante, o texto deve **convidar a pessoa a pensar**, não só **informar**: mistura **perguntas concretas** ao leitor (ex.: «Quem são os três primeiros nomes que já te vêm à cabeça?») com instruções e listas do original.
 - **Proibido** substituir o núcleo do treino por blocos genéricos do tipo «Reflita sobre…» / «Pense em como…» **sem** pergunta específica nem ligação ao passo do treino.
 - **how_to_use**: em **cada** entrada, use uma linha **operacional** (quando usar na prática) **e/ou** **uma pergunta curta** ao IC que reforce o hábito (ex.: «Depois de anotar os 10 nomes: qual contactas primeiro amanhã de manhã?»). **Não** deixes \`how_to_use\` só com cliché vago.
+- **Proibido** usar a palavra «socrático» (ou variações) em títulos ou corpo.
+- **Proibido** usar travessão longo (—); use vírgula, ponto ou dois-pontos.
 
 FILOSOFIA YLADA (APLICA À REESCRITA)
 - **Permissão** antes de pedidos sensíveis (lista, dados, link); **saída honrosa** onde fizer sentido.
@@ -188,8 +191,9 @@ CAMPOS
 - **body**: texto **literal** pronto a copiar (pode ter 2–3 parágrafos curtos ou mensagens numeradas dentro do mesmo body se for sequência muito curta).
 - **how_to_use**: só para o **consultor** saber **quando** usar (ex.: "Depois de ela responder ao story"); **não** use "envie isto ao grupo da equipe".
 
-PORTUGUÊS DO BRASIL — PROIBIÇÕES LEXICAIS
-- **Nunca** use no título nem no corpo anglicismos de jargão: **proibido** "follow-up", "follow up", "followup". Em qualquer situação equivalente use **"acompanhamento"** (ex.: título "Mensagem 3 — acompanhamento depois do cálculo", não "Follow-up…").
+PORTUGUÊS DO BRASIL, PROIBIÇÕES LEXICAIS
+- **Nunca** use no título nem no corpo anglicismos de jargão: **proibido** "follow-up", "follow up", "followup". Em qualquer situação equivalente use **"acompanhamento"** (ex.: título "Mensagem 3, acompanhamento depois do cálculo", não "Follow-up…").
+- **Proibido** «socrático», «socrática» e travessão (—). Títulos de mensagem: use vírgula ou numeração (ex.: "Mensagem 1, tema e reflexão").
 - Vocabulário de **campo** e **conversa humana**; evite termos que soem tradução literal do inglês.
 
 CHARTER DE COPY — LIGHT COPY (APLICA A **TODA** A SEQUÊNCIA, COM OU SEM LINK)
@@ -271,7 +275,7 @@ const REFINE_RASCUNHO_TAIL = `MODO ATUAL — REFINAR RASCUNHO (PRIORIDADE SOBRE 
 const REFINE_ADAPT_EXTRA = `MODO REFINAR — **ADAPTAÇÃO DE TREINO** (ATIVO)
 - Este rascunho veio do fluxo **Adaptar treino**: **não** invente passos, regras de negócio, números nem datas que não existam já nos \`body\`.
 - Mantenha o **destinatário** de cada entrada (líder→distribuidor vs campo) coerente com os \`subtitle\` / títulos, **salvo** o líder pedir explicitamente para mudar.
-- Preserve e **reforce** onde fizer sentido **perguntas concretas** nos \`body\` e \`how_to_use\` (modo socrático); **não** troque isso por parágrafos genéricos «reflita».
+- Preserve e **reforce** onde fizer sentido **perguntas concretas** nos \`body\` e \`how_to_use\`; **não** troque isso por parágrafos genéricos «reflita». **Sem** «socrático» nem travessão (—).
 - Se o pedido for "mais urgente" ou "mais duro", **não** introduza urgência falsa nem promessa de renda; pode manter **urgência de execução** que já exista no texto (fazer hoje, lista, 48h).`
 
 /** Prompt para o Noel **ajustar** um rascunho já gerado (o utilizador pede alterações em linguagem natural). */
@@ -312,15 +316,17 @@ ${REFINE_RASCUNHO_TAIL}`
 
 /** Remove anglicismos e harmoniza léxico com pt-BR (ex.: follow-up → acompanhamento). */
 export function sanitizeNoelScriptBrazilianCopy(s: string): string {
-  return s
-    .replace(/\bcontacto\b/gi, 'contato')
-    .replace(/\bContacto\b/g, 'Contato')
-    .replace(/\bFollow-up\b/g, 'Acompanhamento')
-    .replace(/\bFOLLOW-UP\b/g, 'ACOMPANHAMENTO')
-    .replace(/\bfollow-up\b/gi, 'acompanhamento')
-    .replace(/\bFollow up\b/g, 'Acompanhamento')
-    .replace(/\bfollow up\b/gi, 'acompanhamento')
-    .replace(/\bfollowup\b/gi, 'acompanhamento')
+  return sanitizeProLideresScriptCopy(
+    s
+      .replace(/\bcontacto\b/gi, 'contato')
+      .replace(/\bContacto\b/g, 'Contato')
+      .replace(/\bFollow-up\b/g, 'Acompanhamento')
+      .replace(/\bFOLLOW-UP\b/g, 'ACOMPANHAMENTO')
+      .replace(/\bfollow-up\b/gi, 'acompanhamento')
+      .replace(/\bFollow up\b/g, 'Acompanhamento')
+      .replace(/\bfollow up\b/gi, 'acompanhamento')
+      .replace(/\bfollowup\b/gi, 'acompanhamento')
+  )
 }
 
 export function extractJsonObject(raw: string): string {

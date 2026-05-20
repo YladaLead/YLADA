@@ -478,7 +478,7 @@ function ScriptsAdminContent() {
               {editingScript ? 'Editar script' : `Novo script — ${STAGES.find(s => s.key === activeStage)?.label}`}
             </h3>
             <p className="text-xs text-gray-400 mb-4">
-              Filosofia: pergunta socrática → reflexão → pedido de permissão. Copy leve com gatilhos mentais.
+              Filosofia: pergunta concreta, reflexão e pedido de permissão. Copy leve, sem travessão (—).
             </p>
             <div className="space-y-3">
               <input

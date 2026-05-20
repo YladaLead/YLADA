@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { sanitizeProLideresScriptCopy } from '@/lib/pro-lideres-script-copy-sanitize'
 
 const VALID_STAGES = ['gerar_contato', 'abordagem', 'followup', 'objecoes']
 type Params = { params: Promise<{ toolId: string }> }
@@ -84,8 +85,8 @@ export async function POST(request: NextRequest, { params }: Params) {
       stage,
       contexto,
       canal,
-      title: title || null,
-      content,
+      title: title ? sanitizeProLideresScriptCopy(title) : null,
+      content: sanitizeProLideresScriptCopy(content),
       display_order: (last?.display_order ?? 0) + 1,
       is_active: true,
     })

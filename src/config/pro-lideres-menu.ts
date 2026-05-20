@@ -32,7 +32,15 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
         path: 'catalogo',
         icon: '🛠️',
       },
-      { key: 'scripts', label: 'Scripts', path: 'scripts', icon: '📝' },
+      /** Equipe: só Y-Scripts (leitura + copiar). Líder: Y-Scripts + Scripts (editor) abaixo. */
+      {
+        key: 'y-scripts',
+        label: 'Y-Scripts',
+        path: 'y-scripts',
+        icon: '📲',
+        subtitle: 'Copiar no WhatsApp',
+      },
+      { key: 'scripts', label: 'Scripts', path: 'scripts', icon: '📝', leaderOnly: true },
       {
         key: 'noel-membro',
         label: 'Noel',

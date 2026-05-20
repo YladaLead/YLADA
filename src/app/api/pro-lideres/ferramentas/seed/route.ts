@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
+import { sanitizeProLideresScriptCopy } from '@/lib/pro-lideres-script-copy-sanitize'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 
@@ -968,8 +969,8 @@ export async function POST(request: NextRequest) {
       stage: s.stage,
       contexto: s.contexto ?? 'geral',
       canal: s.canal ?? 'geral',
-      title: s.title,
-      content: s.content,
+      title: sanitizeProLideresScriptCopy(s.title),
+      content: sanitizeProLideresScriptCopy(s.content),
       is_active: true,
       display_order: idx + 1,
     }))

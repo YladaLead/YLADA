@@ -1,5 +1,6 @@
-import { ProLideresScriptsClient } from '@/components/pro-lideres/ProLideresScriptsClient'
+import { redirect } from 'next/navigation'
 
+/** Equipe usa só Y-Scripts (copiar). Edição fica no painel do líder. */
 export default function ProLideresMembroScriptsPage() {
-  return <ProLideresScriptsClient />
+  redirect('/pro-lideres/membro/y-scripts')
 }

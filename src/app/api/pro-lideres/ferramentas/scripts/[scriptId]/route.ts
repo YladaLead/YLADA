@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { sanitizeProLideresScriptCopy } from '@/lib/pro-lideres-script-copy-sanitize'
 
 type Params = { params: Promise<{ scriptId: string }> }
 
@@ -22,8 +23,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   const VALID_PUBLICOS = ['geral', 'lista_quente', 'lista_fria', 'indicacao']
   const VALID_CANAIS   = ['geral', 'presencial', 'online']
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
-  if (body.title !== undefined) updates.title = body.title ? String(body.title).trim() : null
-  if (body.content !== undefined) updates.content = String(body.content).trim()
+  if (body.title !== undefined) {
+    updates.title = body.title ? sanitizeProLideresScriptCopy(String(body.title)) : null
+  }
+  if (body.content !== undefined) updates.content = sanitizeProLideresScriptCopy(String(body.content))
   if (body.is_active !== undefined) updates.is_active = Boolean(body.is_active)
   if (body.contexto !== undefined && VALID_PUBLICOS.includes(String(body.contexto))) {
     updates.contexto = String(body.contexto)
