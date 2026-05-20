@@ -66,6 +66,7 @@ const EXTERNAL_REFERENCE_MAX_LENGTH = 256
 export function toMercadoPagoExternalAreaSlug(area: string): string {
   if (area === 'pro_lideres_team') return 'prolideres'
   if (area === 'pro_lideres_noel_member') return 'plnoelmem'
+  if (area === 'pro_estetica_capilar') return 'pecapilar'
   return area
 }
 

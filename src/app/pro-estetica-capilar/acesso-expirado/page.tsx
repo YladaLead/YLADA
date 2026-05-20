@@ -10,8 +10,14 @@ export default function ProEsteticaCapilarAcessoExpiradoPage() {
           continuar a usar o painel, renova connosco.
         </p>
         <p className="text-sm text-gray-600">
-          Responde ao último e-mail da equipa ou contacta pelo canal habitual (WhatsApp / e-mail).
+          Podes renovar online com cartão (assinatura mensal) ou falar connosco pelo canal habitual.
         </p>
+        <Link
+          href="/pro-estetica-capilar/painel/assinatura"
+          className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-sky-700"
+        >
+          Renovar assinatura mensal
+        </Link>
         <Link
           href="/pro-estetica-capilar/entrar"
           className="inline-block text-sm font-semibold text-sky-700 underline hover:text-sky-900"

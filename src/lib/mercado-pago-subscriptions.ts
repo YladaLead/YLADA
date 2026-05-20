@@ -7,7 +7,14 @@ import { MercadoPagoConfig, PreApproval } from 'mercadopago'
 import { createMercadoPagoClient, buildExternalReference, toMercadoPagoExternalAreaSlug } from './mercado-pago'
 
 export interface CreateSubscriptionRequest {
-  area: 'wellness' | 'nutri' | 'coach' | 'nutra' | 'pro_lideres_team' | 'pro_lideres_noel_member'
+  area:
+    | 'wellness'
+    | 'nutri'
+    | 'coach'
+    | 'nutra'
+    | 'pro_lideres_team'
+    | 'pro_lideres_noel_member'
+    | 'pro_estetica_capilar'
   planType: 'monthly' | 'annual'
   productType?: 'platform_monthly' | 'platform_monthly_12x' | 'platform_annual' | 'formation_only'
   userId: string

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import ProEsteticaCapilarAreaShell from '@/components/pro-estetica-capilar/ProEsteticaCapilarAreaShell'
 import {
@@ -8,7 +9,12 @@ import {
 } from '@/lib/pro-estetica-capilar-server'
 
 export default async function ProEsteticaCapilarPainelLayout({ children }: { children: ReactNode }) {
-  const gate = await ensureEsteticaCapilarTenantAccess()
+  const pathname = (await headers()).get('x-pathname') || ''
+  const skipConsultoriaAccessCheck = pathname.includes('/assinatura')
+
+  const gate = await ensureEsteticaCapilarTenantAccess(
+    skipConsultoriaAccessCheck ? { skipConsultoriaAccessCheck: true } : undefined
+  )
   if (!gate.ok) redirect(gate.redirect)
 
   const operationLabel = gate.tenant.display_name?.trim() || gate.tenant.team_name?.trim() || null

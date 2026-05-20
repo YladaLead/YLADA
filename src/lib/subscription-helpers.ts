@@ -28,6 +28,8 @@ export type SubscriptionArea =
   | 'pro_lideres_team'
   /** Add-on: Noel campo no Pro Líderes (cobrado no user_id do membro). */
   | 'pro_lideres_noel_member'
+  /** Mensalidade Pro Estética Capilar (MP); painel usa também `ylada_estetica_consult_clients`. */
+  | 'pro_estetica_capilar'
 
 /** Mapeia perfil da matriz YLADA (lado /pt) para coluna `subscriptions.area`. */
 export function perfilMatrizToSubscriptionArea(perfil: string | null | undefined): SubscriptionArea | null {

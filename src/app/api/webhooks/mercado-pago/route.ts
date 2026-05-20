@@ -10,6 +10,12 @@ import {
   reverseLeaderTenantInviteQuotaTopupFromMercadoPago,
   tryHandleProLideresInviteQuotaTopupWebhook,
 } from '@/lib/pro-lideres-invite-quota-mp'
+import {
+  extendProEsteticaCapilarConsultAccess,
+  isProEsteticaCapilarSubscriptionArea,
+  PRO_ESTETICA_CAPILAR_MP_AREA_SLUG,
+  PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA,
+} from '@/lib/pro-estetica-capilar-subscription'
 
 function mercadoPagoReversalStatus(status: string | undefined): boolean {
   return status === 'refunded' || status === 'charged_back'
@@ -146,6 +152,10 @@ function determineFeatures(
 
   if (area === 'pro_lideres_noel_member') {
     return ['noel_campo_pro_lideres']
+  }
+
+  if (area === PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA) {
+    return ['painel_capilar']
   }
 
   if (area === 'nutri') {
@@ -560,11 +570,14 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
     }
     
     let area = metadata.area || (fullData.external_reference?.split('_')[0]) || ''
+    if (area === PRO_ESTETICA_CAPILAR_MP_AREA_SLUG) area = PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA
     let planType = metadata.plan_type || (fullData.external_reference?.split('_')[1]) || ''
     // Fallback: inferir área e plano pela descrição (ex: "YLADA WELLNESS - Plano Anual") quando referência vem truncada/errada
     const desc = (fullData.description || fullData.additional_info?.items?.[0]?.title || '').toUpperCase()
-    if (!area || !['wellness', 'nutri', 'coach', 'nutra'].includes(area)) {
-      if (desc.includes('WELLNESS')) area = 'wellness'
+    if (!area || !['wellness', 'nutri', 'coach', 'nutra', PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA].includes(area)) {
+      if (desc.includes('PRO ESTÉTICA CAPILAR') || desc.includes('PRO ESTETICA CAPILAR')) {
+        area = PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA
+      } else if (desc.includes('WELLNESS')) area = 'wellness'
       else if (desc.includes('NUTRI')) area = 'nutri'
       else if (desc.includes('COACH')) area = 'coach'
       else if (desc.includes('NUTRA')) area = 'nutra'
@@ -957,6 +970,23 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
       }
     }
 
+    if (isProEsteticaCapilarSubscriptionArea(area) && supabaseAdmin) {
+      try {
+        const ext = await extendProEsteticaCapilarConsultAccess(supabaseAdmin, {
+          userId,
+          userEmail: payerEmail,
+          months: planType === 'annual' ? 12 : 1,
+          paymentAmountBrl: amount,
+        })
+        console.log('✅ Pro Estética Capilar — access_valid_until estendido (payment):', ext)
+      } catch (pecErr: unknown) {
+        console.error(
+          '❌ Pro Estética Capilar — falha ao estender consultoria:',
+          pecErr instanceof Error ? pecErr.message : pecErr
+        )
+      }
+    }
+
     // 🆕 NOVO: Direcionar para suporte via WhatsApp (apenas para área nutri)
     if (area === 'nutri') {
       try {
@@ -1248,6 +1278,7 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     let area = metadata.area || (data.external_reference?.split('_')[0]) || ''
     if (area === 'prolideres') area = 'pro_lideres_team'
     if (area === 'plnoelmem') area = 'pro_lideres_noel_member'
+    if (area === PRO_ESTETICA_CAPILAR_MP_AREA_SLUG) area = PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA
     let planType = metadata.plan_type || (data.external_reference?.split('_')[1]) || ''
     const productType = metadata.product_type || metadata.productType
     // Sem ref na URL = matriz (ida); com ref=paula (etc) = esse vendedor
@@ -1282,9 +1313,22 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     const reasonUpper = (data.reason || '').toUpperCase()
     if (
       !area ||
-      !['wellness', 'nutri', 'coach', 'nutra', 'pro_lideres_team', 'pro_lideres_noel_member'].includes(area)
+      ![
+        'wellness',
+        'nutri',
+        'coach',
+        'nutra',
+        'pro_lideres_team',
+        'pro_lideres_noel_member',
+        PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA,
+      ].includes(area)
     ) {
       if (
+        reasonUpper.includes('PRO ESTÉTICA CAPILAR') ||
+        reasonUpper.includes('PRO ESTETICA CAPILAR')
+      ) {
+        area = PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA
+      } else if (
         reasonUpper.includes('NOEL CAMPO') ||
         reasonUpper.includes('NOEL MEMBRO') ||
         reasonUpper.includes('NOEL MEMBRO PRO')
@@ -1361,6 +1405,9 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     }
     if (area === 'pro_lideres_noel_member' && (!features || features.length === 0)) {
       features = ['noel_campo_pro_lideres']
+    }
+    if (area === PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA && (!features || features.length === 0)) {
+      features = ['painel_capilar']
     }
     console.log('🎯 Features determinadas (Subscription):', { area, planType, productType, features })
 
@@ -1467,7 +1514,8 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
       mappedStatus === 'active' &&
       payerEmail &&
       area !== 'pro_lideres_team' &&
-      area !== 'pro_lideres_noel_member'
+      area !== 'pro_lideres_noel_member' &&
+      area !== PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA
     ) {
       try {
         // Obter base URL
@@ -1508,6 +1556,27 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
       } catch (emailError: any) {
         // Não bloquear o fluxo se o e-mail falhar
         console.error('❌ Erro ao enviar e-mail de boas-vindas (recorrente):', emailError)
+      }
+    }
+
+    if (
+      mappedStatus === 'active' &&
+      isProEsteticaCapilarSubscriptionArea(area) &&
+      supabaseAdmin
+    ) {
+      try {
+        const ext = await extendProEsteticaCapilarConsultAccess(supabaseAdmin, {
+          userId,
+          userEmail: payerEmail,
+          months: planType === 'annual' ? 12 : 1,
+          paymentAmountBrl: amount,
+        })
+        console.log('✅ Pro Estética Capilar — access_valid_until estendido (preapproval):', ext)
+      } catch (pecErr: unknown) {
+        console.error(
+          '❌ Pro Estética Capilar — falha ao estender consultoria (preapproval):',
+          pecErr instanceof Error ? pecErr.message : pecErr
+        )
       }
     }
 
