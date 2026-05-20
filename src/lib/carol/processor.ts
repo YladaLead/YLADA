@@ -13,28 +13,54 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 function isAutoResponse(text: string): boolean {
   const t = text.toLowerCase()
   const patterns = [
+    // Variações de boas-vindas automáticas
     'seja bem-vindo',
+    'seja muito bem-vindo',
+    'seja muito bem-vinda',
     'bem-vindo(a)',
     'bem vindo(a)',
+    'bem-vinda!',
+    'bem vinda!',
+    'olá, seja',
+    // Atendimento encerrado / fora de horário
     'atendimento está encerrado',
     'atendimento encerrado',
     'fora do horário de atendimento',
     'fora de horário',
     'nosso horário de atendimento',
-    'assistente de atendimento',
-    'mensagem automática',
-    'resposta automática',
-    'este é um atendimento automático',
     'no momento, nosso atendimento',
     'em breve retornarei',
     'retornarei sua mensagem',
     'retornaremos em breve',
-    'deixe sua mensagem por aqui',
+    'voltarei assim que possível',
+    // Assistentes de atendimento
+    'assistente de atendimento',
+    'mensagem automática',
+    'resposta automática',
+    'este é um atendimento automático',
     'você entrou em contato com',
     'estamos fora do ar',
-    'voltarei assim que possível',
+    'deixe sua mensagem por aqui',
+    // Padrões de bot comercial
+    'aguardo sua mensagem',
+    'adorar conversar com você',
+    'pode responder com o nome',
+    'estou à disposição para tirar',
+    'estou a disposição para tirar',
+    'vagas deste mês estão',
+    'garantir seu horário',
   ]
-  return patterns.some(p => t.includes(p))
+  // Também detecta por estrutura: mensagem longa (>180 chars) com padrão de bot comercial
+  const isBotStructure = t.length > 180 && (
+    t.includes('especialista em') ||
+    t.includes('procedimento') ||
+    t.includes('horário disponível')
+  ) && (
+    t.includes('aguardo') ||
+    t.includes('disposição') ||
+    t.includes('adorar')
+  )
+  return patterns.some(p => t.includes(p)) || isBotStructure
 }
 
 // ── Delay humanizado antes de enviar resposta (~15 segundos) ────────────────
