@@ -9,13 +9,41 @@ export const PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA = 'pro_estetica_capilar' as 
 /** Slug curto no external_reference do Mercado Pago (ver `toMercadoPagoExternalAreaSlug`). */
 export const PRO_ESTETICA_CAPILAR_MP_AREA_SLUG = 'pecapilar'
 
-const DEFAULT_MONTHLY_BRL = 297
+/** Mensalidade avulsa (recorrente todo mês). */
+export const PRO_ESTETICA_CAPILAR_MONTHLY_BRL_DEFAULT = 300
+/** Anual: cobrança única a cada 12 meses = 12 × R$ 150. */
+export const PRO_ESTETICA_CAPILAR_ANNUAL_TOTAL_BRL_DEFAULT = 1800
+export const PRO_ESTETICA_CAPILAR_ANNUAL_MONTHLY_EQUIVALENT_BRL_DEFAULT = 150
+
+function parseEnvAmount(raw: string | undefined, fallback: number): number {
+  if (!raw?.trim()) return fallback
+  const n = Number(raw.trim().replace(',', '.'))
+  return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : fallback
+}
 
 export function proEsteticaCapilarMonthlyAmountBrl(): number {
-  const raw = process.env.PRO_ESTETICA_CAPILAR_MONTHLY_BRL?.trim()
-  if (!raw) return DEFAULT_MONTHLY_BRL
-  const n = Number(raw.replace(',', '.'))
-  return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : DEFAULT_MONTHLY_BRL
+  return parseEnvAmount(
+    process.env.PRO_ESTETICA_CAPILAR_MONTHLY_BRL,
+    PRO_ESTETICA_CAPILAR_MONTHLY_BRL_DEFAULT
+  )
+}
+
+export function proEsteticaCapilarAnnualTotalAmountBrl(): number {
+  return parseEnvAmount(
+    process.env.PRO_ESTETICA_CAPILAR_ANNUAL_TOTAL_BRL,
+    PRO_ESTETICA_CAPILAR_ANNUAL_TOTAL_BRL_DEFAULT
+  )
+}
+
+export function proEsteticaCapilarAnnualMonthlyEquivalentBrl(): number {
+  const total = proEsteticaCapilarAnnualTotalAmountBrl()
+  return Math.round((total / 12) * 100) / 100
+}
+
+export type ProEsteticaCapilarPlanType = 'monthly' | 'annual'
+
+export function proEsteticaCapilarCheckoutAmountBrl(planType: ProEsteticaCapilarPlanType): number {
+  return planType === 'annual' ? proEsteticaCapilarAnnualTotalAmountBrl() : proEsteticaCapilarMonthlyAmountBrl()
 }
 
 function toYmd(d: Date): string {

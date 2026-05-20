@@ -4,7 +4,8 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { createRecurringSubscription } from '@/lib/mercado-pago-subscriptions'
 import {
   PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA,
-  proEsteticaCapilarMonthlyAmountBrl,
+  proEsteticaCapilarCheckoutAmountBrl,
+  type ProEsteticaCapilarPlanType,
 } from '@/lib/pro-estetica-capilar-subscription'
 import {
   resolveEsteticaCapilarTenantContext,
@@ -49,18 +50,31 @@ export async function POST(request: NextRequest) {
   const failureUrl = `${baseUrl}/pro-estetica-capilar/painel/assinatura?mp=fail`
   const pendingUrl = `${baseUrl}/pro-estetica-capilar/painel/assinatura?mp=pending`
 
+  let body: { planType?: string } = {}
+  try {
+    body = await request.json()
+  } catch {
+    body = {}
+  }
+  const planRaw = String(body.planType ?? 'monthly').trim().toLowerCase()
+  const planType: ProEsteticaCapilarPlanType = planRaw === 'annual' ? 'annual' : 'monthly'
+
   const isTest = process.env.NODE_ENV !== 'production'
-  const amount = proEsteticaCapilarMonthlyAmountBrl()
+  const amount = proEsteticaCapilarCheckoutAmountBrl(planType)
+  const description =
+    planType === 'annual'
+      ? `YLADA Pro Estética Capilar — Plano anual (R$ ${amount.toFixed(2)}, equivalente a 12× de R$ 150)`
+      : `YLADA Pro Estética Capilar — Assinatura mensal (R$ ${amount.toFixed(2)})`
 
   try {
     const sub = await createRecurringSubscription(
       {
         area: PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA,
-        planType: 'monthly',
+        planType,
         userId: user.id,
         userEmail: email,
         amount,
-        description: `YLADA Pro Estética Capilar — Assinatura mensal (R$ ${amount.toFixed(2)})`,
+        description,
         successUrl,
         failureUrl,
         pendingUrl,

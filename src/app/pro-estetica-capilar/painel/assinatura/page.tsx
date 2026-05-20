@@ -24,6 +24,9 @@ function ProEsteticaCapilarAssinaturaContent() {
   const [accessOk, setAccessOk] = useState(false)
   const [accessValidUntil, setAccessValidUntil] = useState<string | null>(null)
   const [monthlyBrl, setMonthlyBrl] = useState<number | null>(null)
+  const [annualTotalBrl, setAnnualTotalBrl] = useState<number | null>(null)
+  const [annualMonthlyBrl, setAnnualMonthlyBrl] = useState<number | null>(null)
+  const [checkoutPlan, setCheckoutPlan] = useState<'monthly' | 'annual' | null>(null)
   const [isOwner, setIsOwner] = useState(true)
 
   const load = useCallback(async () => {
@@ -42,6 +45,8 @@ function ProEsteticaCapilarAssinaturaContent() {
       setAccessOk(ok)
       setAccessValidUntil((data as { accessValidUntil?: string | null }).accessValidUntil ?? null)
       setMonthlyBrl((data as { monthlyAmountBrl?: number }).monthlyAmountBrl ?? null)
+      setAnnualTotalBrl((data as { annualTotalBrl?: number }).annualTotalBrl ?? null)
+      setAnnualMonthlyBrl((data as { annualMonthlyEquivalentBrl?: number }).annualMonthlyEquivalentBrl ?? null)
       const ownerId = (data as { ownerUserId?: string }).ownerUserId
       if (ownerId && user?.id) {
         setIsOwner(user.id === ownerId)
@@ -76,7 +81,8 @@ function ProEsteticaCapilarAssinaturaContent() {
     }
   }, [searchParams, router, load])
 
-  async function startCheckout() {
+  async function startCheckout(planType: 'monthly' | 'annual') {
+    setCheckoutPlan(planType)
     setCheckoutLoading(true)
     setError(null)
     setMpNotice(null)
@@ -84,6 +90,8 @@ function ProEsteticaCapilarAssinaturaContent() {
       const res = await fetch('/api/pro-estetica-capilar/subscription/checkout', {
         method: 'POST',
         credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planType }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
@@ -100,7 +108,12 @@ function ProEsteticaCapilarAssinaturaContent() {
       setError('Erro de rede. Verifique a ligação e tente de novo.')
     } finally {
       setCheckoutLoading(false)
+      setCheckoutPlan(null)
     }
+  }
+
+  function fmtBrl(n: number) {
+    return n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   }
 
   const mpNoticeCopy =
@@ -111,11 +124,6 @@ function ProEsteticaCapilarAssinaturaContent() {
         : mpNotice === 'fail'
           ? 'O pagamento não foi concluído. Pode tentar de novo quando quiser.'
           : null
-
-  const priceLabel =
-    monthlyBrl != null
-      ? `R$ ${monthlyBrl.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mês`
-      : null
 
   return (
     <div className="mx-auto w-full max-w-lg px-4 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:py-12">
@@ -150,26 +158,56 @@ function ProEsteticaCapilarAssinaturaContent() {
         ) : (
           <>
             <p className="text-sm text-gray-600 text-left leading-relaxed">
-              Plano mensal com cobrança automática no cartão (Mercado Pago). Após a confirmação, o sistema renova o
-              seu acesso ao painel por mais um mês.
+              Cobrança no cartão via Mercado Pago. Após a confirmação, o acesso ao painel renova automaticamente
+              (1 mês no mensal ou 12 meses no anual).
             </p>
-            {priceLabel ? (
-              <p className="text-lg font-semibold text-sky-800 tabular-nums">{priceLabel}</p>
-            ) : null}
 
             {!isOwner ? (
               <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-left">
                 Apenas a líder da clínica pode contratar ou renovar a assinatura.
               </p>
             ) : (
-              <button
-                type="button"
-                onClick={() => void startCheckout()}
-                disabled={checkoutLoading}
-                className="w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-sky-700 disabled:opacity-60"
-              >
-                {checkoutLoading ? 'A abrir Mercado Pago…' : 'Assinar plano mensal'}
-              </button>
+              <div className="flex w-full flex-col gap-3 text-left">
+                <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                  <p className="text-sm font-semibold text-gray-900">Mensal</p>
+                  <p className="mt-1 text-2xl font-bold text-sky-800 tabular-nums">
+                    {monthlyBrl != null ? `R$ ${fmtBrl(monthlyBrl)}` : 'R$ 300,00'}
+                    <span className="text-sm font-medium text-gray-600">/mês</span>
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">Renovação automática todo mês.</p>
+                  <button
+                    type="button"
+                    onClick={() => void startCheckout('monthly')}
+                    disabled={checkoutLoading}
+                    className="mt-3 w-full rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-700 disabled:opacity-60"
+                  >
+                    {checkoutLoading && checkoutPlan === 'monthly'
+                      ? 'A abrir Mercado Pago…'
+                      : 'Assinar mensal'}
+                  </button>
+                </div>
+                <div className="rounded-xl border-2 border-sky-200 bg-sky-50/50 p-4 shadow-sm">
+                  <p className="text-sm font-semibold text-gray-900">Anual</p>
+                  <p className="mt-1 text-2xl font-bold text-sky-900 tabular-nums">
+                    {annualMonthlyBrl != null ? `12× de R$ ${fmtBrl(annualMonthlyBrl)}` : '12× de R$ 150,00'}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-600">
+                    Total{' '}
+                    {annualTotalBrl != null ? `R$ ${fmtBrl(annualTotalBrl)}` : 'R$ 1.800,00'} por ano — cobrança
+                    anual no cartão.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void startCheckout('annual')}
+                    disabled={checkoutLoading}
+                    className="mt-3 w-full rounded-lg bg-sky-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-900 disabled:opacity-60"
+                  >
+                    {checkoutLoading && checkoutPlan === 'annual'
+                      ? 'A abrir Mercado Pago…'
+                      : 'Assinar anual'}
+                  </button>
+                </div>
+              </div>
             )}
           </>
         )}

@@ -5,6 +5,8 @@ import { daysUntilEsteticaConsultAccessEnds } from '@/lib/estetica-consult-acces
 import { isEsteticaConsultPainelAccessExpiredForTenant } from '@/lib/estetica-consult-access'
 import {
   PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA,
+  proEsteticaCapilarAnnualMonthlyEquivalentBrl,
+  proEsteticaCapilarAnnualTotalAmountBrl,
   proEsteticaCapilarMonthlyAmountBrl,
 } from '@/lib/pro-estetica-capilar-subscription'
 import { resolveEsteticaCapilarTenantContext } from '@/lib/pro-estetica-capilar-server'
@@ -61,5 +63,7 @@ export async function GET(request: NextRequest) {
         }
       : null,
     monthlyAmountBrl: proEsteticaCapilarMonthlyAmountBrl(),
+    annualTotalBrl: proEsteticaCapilarAnnualTotalAmountBrl(),
+    annualMonthlyEquivalentBrl: proEsteticaCapilarAnnualMonthlyEquivalentBrl(),
   })
 }
