@@ -88,7 +88,74 @@ function buildShareText(fluxoNome: string, titulo: string): string {
   return `Acabei de fazer o diagnóstico "${fluxoNome}" e descobri: ${titulo}. Faça também! `
 }
 
+// ─── Scoring de arquétipo ─────────────────────────────────────────────────────
+
+type ArchetypeCode = 'leve' | 'moderado' | 'urgente'
+
+/**
+ * Calcula o arquétipo de risco com base nas respostas do usuário.
+ * Lógica:
+ *  - multipla_escolha: índice da opção escolhida / (qtd_opcoes - 1) → score 0..1
+ *  - sim_nao: "Sim" = 1 (sinal de risco), "Não" = 0
+ *  - escala: (valor - min) / (max - min) → score 0..1
+ *  - texto/numero: ignorado
+ * Média ponderada → 0-33%=leve, 34-66%=moderado, 67-100%=urgente
+ */
+function calcularArchetipo(
+  perguntas: PerguntaFluxoCliente[],
+  respostas: Record<string, string>,
+): ArchetypeCode {
+  let totalScore = 0
+  let totalMax = 0
+
+  for (const pergunta of perguntas) {
+    const resposta = respostas[pergunta.id]
+    if (!resposta) continue
+
+    if (pergunta.tipo === 'multipla_escolha' && Array.isArray(pergunta.opcoes) && pergunta.opcoes.length > 1) {
+      const idx = pergunta.opcoes.indexOf(resposta)
+      const max = pergunta.opcoes.length - 1
+      if (idx >= 0) {
+        totalScore += idx
+        totalMax += max
+      }
+    } else if (pergunta.tipo === 'sim_nao') {
+      totalScore += resposta === 'Sim' ? 1 : 0
+      totalMax += 1
+    } else if (pergunta.tipo === 'escala') {
+      const val = parseInt(resposta, 10)
+      const min = (pergunta as { escalaMin?: number }).escalaMin ?? 0
+      const max = (pergunta as { escalaMax?: number }).escalaMax ?? 10
+      if (!isNaN(val) && max > min) {
+        totalScore += val - min
+        totalMax += max - min
+      }
+    }
+    // tipo texto/numero: ignorado no scoring
+  }
+
+  if (totalMax === 0) return 'moderado'
+
+  const pct = totalScore / totalMax
+  if (pct <= 0.33) return 'leve'
+  if (pct <= 0.66) return 'moderado'
+  return 'urgente'
+}
+
 // ─── Tipos ───────────────────────────────────────────────────────────────────
+
+interface PackagedContent {
+  profile_title?: string
+  frase_identificacao?: string
+  profile_summary?: string
+  main_blocker?: string
+  consequence?: string
+  growth_potential?: string
+  dica_rapida?: string
+  cta_text?: string
+  whatsapp_prefill?: string
+  [key: string]: unknown
+}
 
 interface FluxoDiagnosticoCoachProps {
   fluxo: FluxoCliente
@@ -97,6 +164,35 @@ interface FluxoDiagnosticoCoachProps {
 }
 
 type Etapa = 'intro' | 'quiz' | 'resultado'
+
+// ─── Badges de arquétipo ──────────────────────────────────────────────────────
+
+const ARCHETYPE_CONFIG: Record<
+  ArchetypeCode,
+  { label: string; color: string; bg: string; border: string; bar: string }
+> = {
+  leve: {
+    label: 'Atenção Suave',
+    color: 'text-emerald-700',
+    bg: 'bg-emerald-50',
+    border: 'border-emerald-200',
+    bar: 'from-emerald-400 to-emerald-600',
+  },
+  moderado: {
+    label: 'Atenção Moderada',
+    color: 'text-amber-700',
+    bg: 'bg-amber-50',
+    border: 'border-amber-200',
+    bar: 'from-amber-400 to-amber-600',
+  },
+  urgente: {
+    label: 'Atenção Urgente',
+    color: 'text-red-700',
+    bg: 'bg-red-50',
+    border: 'border-red-200',
+    bar: 'from-red-400 to-red-600',
+  },
+}
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
@@ -110,6 +206,11 @@ export default function FluxoDiagnosticoCoach({
   const [respostas, setRespostas] = useState<Record<string, string>>({})
   const [inputAtual, setInputAtual] = useState('')
   const [mostrarAnaliseCompleta, setMostrarAnaliseCompleta] = useState(false)
+
+  // Resultado personalizado
+  const [archetypeCode, setArchetypeCode] = useState<ArchetypeCode | null>(null)
+  const [packedContent, setPackedContent] = useState<PackagedContent | null>(null)
+  const [loadingResult, setLoadingResult] = useState(false)
 
   const perguntas = fluxo.perguntas || []
   const total = perguntas.length
@@ -138,19 +239,41 @@ export default function FluxoDiagnosticoCoach({
   // ── Navegação ───────────────────────────────────────────────────────────────
 
   const avancar = useCallback(
-    (valor: string) => {
+    async (valor: string) => {
       if (!perguntaAtual) return
       const novasRespostas = { ...respostas, [perguntaAtual.id]: valor }
       setRespostas(novasRespostas)
       setInputAtual('')
 
       if (indiceAtual + 1 >= total) {
-        setEtapa('resultado')
+        // Última pergunta — calcular arquétipo e buscar conteúdo empacotado
+        const archetype = calcularArchetipo(perguntas, novasRespostas)
+        setArchetypeCode(archetype)
+        setLoadingResult(true)
+        setEtapa('resultado') // Mostra tela de resultado com spinner enquanto carrega
+
+        if (fluxo.id) {
+          try {
+            const res = await fetch(
+              `/api/wellness/coach/packaged-diagnosis?flow_id=${encodeURIComponent(fluxo.id)}&archetype_code=${archetype}`,
+            )
+            if (res.ok) {
+              const json = (await res.json()) as { content?: PackagedContent | null }
+              if (json.content && typeof json.content === 'object') {
+                setPackedContent(json.content)
+              }
+            }
+          } catch {
+            // Silencioso — fallback para resultado estático
+          }
+        }
+
+        setLoadingResult(false)
       } else {
         setIndiceAtual((i) => i + 1)
       }
     },
-    [perguntaAtual, respostas, indiceAtual, total],
+    [perguntaAtual, respostas, indiceAtual, total, perguntas, fluxo.id],
   )
 
   const voltarPergunta = () => {
@@ -163,11 +286,16 @@ export default function FluxoDiagnosticoCoach({
     setRespostas({})
     setInputAtual('')
     setMostrarAnaliseCompleta(false)
+    setArchetypeCode(null)
+    setPackedContent(null)
+    setLoadingResult(false)
     setEtapa('quiz')
   }
 
   const compartilhar = async () => {
-    const texto = buildShareText(nomeFluxo, diag.titulo)
+    const tituloCompartilhar =
+      (packedContent?.profile_title as string | undefined) ?? diag.titulo
+    const texto = buildShareText(nomeFluxo, tituloCompartilhar)
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({ text: texto, url: window.location.href })
@@ -275,7 +403,7 @@ export default function FluxoDiagnosticoCoach({
                 <button
                   key={opcao}
                   type="button"
-                  onClick={() => avancar(opcao)}
+                  onClick={() => void avancar(opcao)}
                   className="w-full text-left py-4 px-4 rounded-xl border-2 border-gray-100 hover:border-sky-300 hover:bg-sky-50 text-gray-700 font-medium transition-all duration-200"
                 >
                   {opcao}
@@ -291,7 +419,7 @@ export default function FluxoDiagnosticoCoach({
                 <button
                   key={i}
                   type="button"
-                  onClick={() => avancar(opcao)}
+                  onClick={() => void avancar(opcao)}
                   className="w-full text-left py-4 px-4 rounded-xl border-2 border-gray-100 hover:border-sky-300 hover:bg-sky-50 text-gray-700 transition-all duration-200"
                 >
                   <span className="flex items-center gap-3">
@@ -310,13 +438,13 @@ export default function FluxoDiagnosticoCoach({
             <div>
               <div className="flex flex-wrap gap-2 mb-2">
                 {Array.from(
-                  { length: perguntaAtual.escalaMax - perguntaAtual.escalaMin + 1 },
-                  (_, i) => perguntaAtual.escalaMin + i,
+                  { length: (perguntaAtual as { escalaMax?: number; escalaMin?: number }).escalaMax! - (perguntaAtual as { escalaMin?: number }).escalaMin! + 1 },
+                  (_, i) => (perguntaAtual as { escalaMin?: number }).escalaMin! + i,
                 ).map((valor) => (
                   <button
                     key={valor}
                     type="button"
-                    onClick={() => avancar(String(valor))}
+                    onClick={() => void avancar(String(valor))}
                     className="w-12 h-12 rounded-xl border-2 border-gray-100 hover:border-sky-400 hover:bg-sky-50 text-gray-700 font-semibold transition-all duration-200"
                   >
                     {valor}
@@ -359,9 +487,9 @@ export default function FluxoDiagnosticoCoach({
                   value={inputAtual}
                   onChange={(e) => setInputAtual(e.target.value)}
                   placeholder={perguntaAtual.placeholder ?? '0'}
-                  min={perguntaAtual.min}
-                  max={perguntaAtual.max}
-                  step={perguntaAtual.step ?? 1}
+                  min={(perguntaAtual as { min?: number }).min}
+                  max={(perguntaAtual as { max?: number }).max}
+                  step={(perguntaAtual as { step?: number }).step ?? 1}
                   className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:border-sky-400 focus:outline-none transition-colors"
                 />
               )}
@@ -369,7 +497,7 @@ export default function FluxoDiagnosticoCoach({
                 type="button"
                 onClick={() => {
                   if (!inputAtual.trim() && !('opcional' in perguntaAtual && perguntaAtual.opcional)) return
-                  avancar(inputAtual.trim())
+                  void avancar(inputAtual.trim())
                 }}
                 disabled={!inputAtual.trim() && !('opcional' in perguntaAtual && perguntaAtual.opcional)}
                 className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
@@ -379,7 +507,7 @@ export default function FluxoDiagnosticoCoach({
               {'opcional' in perguntaAtual && perguntaAtual.opcional && (
                 <button
                   type="button"
-                  onClick={() => avancar('')}
+                  onClick={() => void avancar('')}
                   className="w-full text-sm text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   Pular esta pergunta
@@ -395,6 +523,195 @@ export default function FluxoDiagnosticoCoach({
   // ── Tela de Resultado ───────────────────────────────────────────────────────
 
   if (etapa === 'resultado') {
+    // Loading enquanto busca diagnóstico personalizado
+    if (loadingResult) {
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-sky-600 mx-auto mb-4" />
+            <p className="text-sm text-gray-500 font-medium">Analisando suas respostas…</p>
+          </div>
+        </div>
+      )
+    }
+
+    // ── Resultado personalizado (diagnóstico empacotado) ──────────────────────
+    if (packedContent && archetypeCode) {
+      const arch = ARCHETYPE_CONFIG[archetypeCode]
+      const profileTitle = (packedContent.profile_title as string | undefined) ?? diag.titulo
+      const fraseId = packedContent.frase_identificacao as string | undefined
+      const summary = packedContent.profile_summary as string | undefined
+      const blocker = packedContent.main_blocker as string | undefined
+      const consequence = packedContent.consequence as string | undefined
+      const growth = packedContent.growth_potential as string | undefined
+      const dica = packedContent.dica_rapida as string | undefined
+      const ctaPacked = packedContent.cta_text as string | undefined
+      const whatsappPrefill = packedContent.whatsapp_prefill as string | undefined
+
+      const whatsappUrlPacked = buildWhatsAppUrl(
+        whatsappNumber,
+        whatsappPrefill || ctaPacked || ctaFluxo || `Olá! Fiz o diagnóstico "${nomeFluxo}" e quero saber mais.`,
+        countryCode,
+      )
+
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100/80 p-6 sm:p-8">
+            {/* Badge resultado + arquétipo */}
+            <div className="mb-4 flex items-center gap-2">
+              <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
+                Seu resultado
+              </span>
+              <span
+                className={`inline-block text-xs font-bold px-3 py-1.5 rounded-full border ${arch.color} ${arch.bg} ${arch.border}`}
+              >
+                {arch.label}
+              </span>
+            </div>
+
+            <p className="text-xs text-gray-500 mb-1">{nomeFluxo}</p>
+
+            {/* Frase de identificação */}
+            {fraseId && (
+              <p className="text-sm italic text-gray-500 mb-4 leading-relaxed">
+                &ldquo;{fraseId}&rdquo;
+              </p>
+            )}
+
+            {/* Card principal — título do perfil */}
+            <div className={`relative mb-5 overflow-hidden rounded-2xl border shadow-sm ${arch.bg} ${arch.border}`}>
+              <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${arch.bar} rounded-l-2xl`} />
+              <div className="pl-5 pr-5 py-5 sm:pl-6 sm:pr-6 sm:py-6">
+                <p className={`text-[10px] font-semibold uppercase tracking-wider mb-2 ${arch.color}`}>
+                  Diagnóstico
+                </p>
+                <p className="text-lg sm:text-xl font-bold text-gray-900 leading-snug">{profileTitle}</p>
+              </div>
+            </div>
+
+            {/* Resumo do perfil */}
+            {summary && (
+              <div className="mb-4 rounded-xl border border-slate-100 bg-slate-50/90 p-4">
+                <p className="text-sm leading-relaxed text-gray-800">{summary}</p>
+              </div>
+            )}
+
+            {/* Bloqueio principal + consequência */}
+            {(blocker || consequence) && (
+              <div className="mb-4 rounded-xl border border-orange-100 bg-orange-50/60 p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-orange-600 mb-2">
+                  O que está acontecendo
+                </p>
+                {blocker && (
+                  <p className="text-sm text-gray-800 leading-relaxed mb-1">{blocker}</p>
+                )}
+                {consequence && (
+                  <p className="text-sm text-gray-600 leading-relaxed">{consequence}</p>
+                )}
+              </div>
+            )}
+
+            {/* Toggle Ver análise completa */}
+            <button
+              type="button"
+              onClick={() => setMostrarAnaliseCompleta((v) => !v)}
+              className="w-full text-sm font-medium text-sky-600 hover:text-sky-700 border border-sky-100 hover:border-sky-200 bg-sky-50/60 hover:bg-sky-50 rounded-xl py-3 px-4 transition-colors mb-4"
+            >
+              {mostrarAnaliseCompleta ? '↑ Ocultar análise completa' : '↓ Ver análise completa'}
+            </button>
+
+            {/* Seção expandida */}
+            {mostrarAnaliseCompleta && (
+              <>
+                {/* Potencial de crescimento */}
+                {growth && (
+                  <div className="mb-4 rounded-xl border border-violet-100 bg-violet-50/60 p-4">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-600 mb-2">
+                      O que é possível transformar
+                    </p>
+                    <p className="text-sm text-gray-700 leading-relaxed">{growth}</p>
+                  </div>
+                )}
+
+                {/* Dica rápida */}
+                {dica && (
+                  <div className="mb-4 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 mb-2">
+                      Dica rápida
+                    </p>
+                    <p className="text-sm text-gray-700 leading-relaxed">{dica}</p>
+                  </div>
+                )}
+
+                {/* Próximo passo */}
+                <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
+                    Próximo passo
+                  </p>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Este diagnóstico é um ponto de partida. Com o acompanhamento certo, você pode ir muito
+                    além do que imagina. Fale com um especialista para aprofundar os resultados.
+                  </p>
+                </div>
+              </>
+            )}
+
+            {/* CTA WhatsApp */}
+            {whatsappUrlPacked && (
+              <div className="space-y-3">
+                <a
+                  href={whatsappUrlPacked}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                  </svg>
+                  {ctaPacked || ctaFluxo || 'Falar com especialista'}
+                </a>
+
+                {/* Botão compartilhar */}
+                <button
+                  type="button"
+                  onClick={() => void compartilhar()}
+                  className="w-full py-3 px-4 border-2 border-sky-200 hover:border-sky-300 text-sky-700 hover:bg-sky-50 font-medium rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                    />
+                  </svg>
+                  Compartilhar resultado
+                </button>
+              </div>
+            )}
+
+            {/* Refazer */}
+            <button
+              type="button"
+              onClick={comecar}
+              className="mt-4 w-full text-xs text-gray-400 hover:text-gray-600 transition-colors py-2"
+            >
+              ↺ Refazer diagnóstico
+            </button>
+
+            {/* Rodapé */}
+            <div className="mt-5 pt-4 border-t border-gray-100 text-center">
+              <p className="text-[10px] text-gray-400">
+                Diagnóstico gerado pelo{' '}
+                <span className="font-semibold text-sky-500">Ylada</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // ── Resultado estático (fallback — sem conteúdo empacotado no banco) ───────
     return (
       <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100/80 p-6 sm:p-8">
