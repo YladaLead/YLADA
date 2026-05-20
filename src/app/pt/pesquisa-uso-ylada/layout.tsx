@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 const OG_IMAGE =
-  'https://www.ylada.com/images/logo/ylada/novo/ylada-horizontal-claro.png'
+  'https://www.ylada.com/images/logo/ylada/novo/ylada-og-1200x630.png'
 
 const SURVEY_TITLE = 'Pesquisa de 1 minuto · YLADA'
 const SURVEY_SLOGAN = 'Ajude-nos a melhorar'

@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 const SHARE_TITLE = 'Explique menos. Venda mais.'
 const SHARE_DESCRIPTION = 'Explique menos. Venda mais.'
 
-const OG_IMAGE = 'https://www.ylada.com/images/logo/ylada/novo/ylada-horizontal-claro.png'
+const OG_IMAGE = 'https://www.ylada.com/images/logo/ylada/novo/ylada-og-1200x630.png'
 
 export const metadata: Metadata = {
   title: `${SHARE_TITLE} | YLADA`,

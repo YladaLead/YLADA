@@ -30,9 +30,10 @@ export const metadata = {
     siteName: 'YLADA',
     images: [
       {
-        url: 'https://www.ylada.com/images/logo/ylada/novo/ylada-horizontal-claro.png',
-        width: 1080,
-        height: 1080,
+        // OG image 1200×630 com fundo sólido — obrigatório para WhatsApp/Facebook/LinkedIn
+        url: 'https://www.ylada.com/images/logo/ylada/novo/ylada-og-1200x630.png',
+        width: 1200,
+        height: 630,
         alt: 'YLADA - Boas conversas começam com boas perguntas',
         type: 'image/png',
       },
@@ -44,7 +45,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'YLADA - Boas conversas começam com boas perguntas',
     description: 'Boas conversas começam com boas perguntas. Conecte-se através de links inteligentes.',
-    images: ['https://www.ylada.com/images/logo/ylada/novo/ylada-horizontal-claro.png'],
+    images: ['https://www.ylada.com/images/logo/ylada/novo/ylada-og-1200x630.png'],
     creator: '@ylada',
   },
   robots: {
