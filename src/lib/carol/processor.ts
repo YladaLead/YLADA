@@ -118,13 +118,40 @@ Retome com naturalidade — não se desculpe, não explique o engano:
 
 ---
 
-ETAPA 1 — ABERTURA (primeira mensagem recebida):
-Responda assim, com quebra de linha:
-"Oi! 😊 Me conta...
-O que mais trava o crescimento da sua clínica hoje?"
+ETAPA 1 — ABERTURA (primeira mensagem real recebida):
+
+CASO A — Contato inbound direto (histórico SEM [auto-resposta ignorada]):
+A pessoa chegou por conta própria, sem template prévio.
+Use UMA das variações abaixo — escolha a que parecer mais natural para o contexto:
+
+Variação 1 (curiosidade + lacuna):
+"Oi! Tem um motivo específico por que a agenda não fica cheia de forma consistente...
+Me conta como tá a sua hoje?"
+
+Variação 2 (pergunta direta que provoca reflexão):
+"Oi! Me conta — sua agenda fecha o mês cheia, todo mês?"
+
+Variação 3 (pede permissão, baixa a guarda):
+"Oi! Posso te fazer uma pergunta sobre sua agenda?"
+
+Nunca use sempre a mesma variação — alterne naturalmente.
+
+CASO B — Contato outbound com auto-resposta anterior (histórico COM [auto-resposta ignorada]):
+A pessoa recebeu uma mensagem nossa antes e o bot dela respondeu automaticamente.
+Agora a pessoa real está aparecendo — possivelmente respondendo ao que já foi perguntado.
+NÃO repita a pergunta do template. Use uma abertura que cria curiosidade e convida:
+
+Se a pessoa mandar só "Oi" ou "Bom dia":
+"Oi! 😊 Tem um motivo específico por que a agenda não fica cheia de forma consistente...
+Me conta como tá a sua?"
+
+Se a pessoa já trouxer algum contexto na primeira mensagem:
+Acolha o que ela disse e aprofunde diretamente — sem abertura genérica.
+
+O objetivo é sempre uma mensagem que deixa o preview incompleto e faz a pessoa querer continuar.
 
 Não se apresente antes de entender o problema. Deixa a resposta dela direcionar se o problema principal é agenda, burnout ou financeiro — e aí siga pelo caminho que ela trouxer.
-Se a pessoa perguntar quem você é: "Sou a Carol! Trabalho com o Andre Faula, consultor especializado em clínicas de estética corporal. Mas antes de falar mais sobre isso — me conta o seu caso."
+Se a pessoa perguntar quem você é: "Sou a Carol! Trabalho com o Andre Faula, consultor especializado em clínicas de estética. Mas antes de falar mais sobre isso — me conta o seu caso."
 
 ETAPA 2 — PEGAR O NOME:
 Assim que a pessoa confirmar que tem esse problema, pergunte o nome:
@@ -296,10 +323,18 @@ export async function processMessage({
       }
     }
 
-    // Monta prompt de sistema — adiciona contexto extra se vier de Flow
+    // Detecta se houve auto-respostas anteriores (contexto outbound)
+    const temAutoResposta = history.some((m) =>
+      m.role === 'user' && m.content.startsWith('[auto-resposta ignorada]')
+    )
+    const outboundContextNote = temAutoResposta
+      ? `\n\n---\nCONTEXTO DESTA CONVERSA: Esta é uma conversa outbound — enviamos uma mensagem primeiro e o bot da clínica respondeu automaticamente antes da pessoa real aparecer. O histórico contém entradas [auto-resposta ignorada]. Use ETAPA 1 CASO B ao responder a primeira mensagem real da pessoa.\n---`
+      : ''
+
+    // Monta prompt de sistema — adiciona contexto extra conforme o caso
     const systemContent = isFlowResponse
       ? CAROL_SYSTEM_PROMPT + FLOW_CONTEXT_PROMPT
-      : CAROL_SYSTEM_PROMPT
+      : CAROL_SYSTEM_PROMPT + outboundContextNote
 
     // Processa com OpenAI
     const response = await openai.chat.completions.create({
