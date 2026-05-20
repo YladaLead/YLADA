@@ -219,10 +219,10 @@ function ProEsteticaCapilarAssinaturaContent() {
         ) : null}
 
         <Link
-          href="/pro-estetica-capilar/entrar"
+          href="/pro-estetica-capilar/assinatura"
           className="text-sm font-medium text-sky-700 underline hover:text-sky-900"
         >
-          Voltar ao início de sessão
+          Abrir link de assinatura (se a sessão cair)
         </Link>
       </div>
     </div>

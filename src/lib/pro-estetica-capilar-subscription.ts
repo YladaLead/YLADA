@@ -9,6 +9,11 @@ export const PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA = 'pro_estetica_capilar' as 
 /** Slug curto no external_reference do Mercado Pago (ver `toMercadoPagoExternalAreaSlug`). */
 export const PRO_ESTETICA_CAPILAR_MP_AREA_SLUG = 'pecapilar'
 
+/** Link curto para enviar à cliente (login → checkout). */
+export const PRO_ESTETICA_CAPILAR_ASSINATURA_PUBLIC_PATH = '/pro-estetica-capilar/assinatura'
+export const PRO_ESTETICA_CAPILAR_ASSINATURA_PAINEL_PATH = '/pro-estetica-capilar/painel/assinatura'
+export const PRO_ESTETICA_CAPILAR_ENTRAR_ASSINATURA_PATH = `/pro-estetica-capilar/entrar?next=${encodeURIComponent(PRO_ESTETICA_CAPILAR_ASSINATURA_PAINEL_PATH)}`
+
 /** Mensalidade avulsa (recorrente todo mês). */
 export const PRO_ESTETICA_CAPILAR_MONTHLY_BRL_DEFAULT = 300
 /** Anual: cobrança única a cada 12 meses = 12 × R$ 150. */

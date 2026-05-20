@@ -603,6 +603,12 @@ export default function LoginForm({
               console.log(
                 '🔄 Login: dono Pro Estética corporal — redirecionando para /pro-estetica-corporal/painel (não onboarding /pt)'
               )
+            } else if (plTenant?.id && vc === 'estetica-capilar') {
+              baseRedirectPath = '/pro-estetica-capilar/painel'
+              skipYladaMatrixRedirect = true
+              console.log(
+                '🔄 Login: dono Pro Estética capilar — redirecionando para /pro-estetica-capilar/painel (não onboarding /pt)'
+              )
             }
           } catch (plErr) {
             console.warn('⚠️ Não foi possível verificar leader_tenants após login:', plErr)

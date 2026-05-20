@@ -15,7 +15,14 @@ export default async function ProEsteticaCapilarPainelLayout({ children }: { chi
   const gate = await ensureEsteticaCapilarTenantAccess(
     skipConsultoriaAccessCheck ? { skipConsultoriaAccessCheck: true } : undefined
   )
-  if (!gate.ok) redirect(gate.redirect)
+  if (!gate.ok) {
+    if (gate.redirect === '/pro-estetica-capilar/entrar' && pathname.includes('/assinatura')) {
+      redirect(
+        `/pro-estetica-capilar/entrar?next=${encodeURIComponent(pathname || '/pro-estetica-capilar/painel/assinatura')}`
+      )
+    }
+    redirect(gate.redirect)
+  }
 
   const operationLabel = gate.tenant.display_name?.trim() || gate.tenant.team_name?.trim() || null
   const verticalCode = (gate.tenant.vertical_code ?? PRO_ESTETICA_CAPILAR_VERTICAL_CODE).trim()

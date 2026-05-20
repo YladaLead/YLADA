@@ -13,10 +13,10 @@ export default function ProEsteticaCapilarAcessoExpiradoPage() {
           Podes renovar online com cartão (assinatura mensal) ou falar connosco pelo canal habitual.
         </p>
         <Link
-          href="/pro-estetica-capilar/painel/assinatura"
+          href="/pro-estetica-capilar/assinatura"
           className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-sky-700"
         >
-          Renovar assinatura mensal
+          Renovar ou assinar plano
         </Link>
         <Link
           href="/pro-estetica-capilar/entrar"

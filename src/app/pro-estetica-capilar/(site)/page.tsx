@@ -6,6 +6,9 @@ import { ensureEsteticaCapilarTenantAccess } from '@/lib/pro-estetica-capilar-se
 export default async function ProEsteticaCapilarHomePage() {
   const gate = await ensureEsteticaCapilarTenantAccess()
   if (gate.ok) redirect('/pro-estetica-capilar/painel')
+  if (gate.redirect === '/pro-estetica-capilar/acesso-expirado') {
+    redirect('/pro-estetica-capilar/assinatura')
+  }
   if (gate.redirect !== '/pro-estetica-capilar/entrar') redirect(gate.redirect)
 
   return <ProEsteticaCapilarHomeBody />
