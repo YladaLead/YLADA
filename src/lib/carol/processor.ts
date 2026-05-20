@@ -177,8 +177,10 @@ ETAPA 5 — PLANTAR A CURIOSIDADE (antes da autoridade):
 - "O Andre consegue identificar esse ponto em 30 minutos. Já viu isso em dezenas de clínicas."
 
 ETAPA 6 — PRÉ-QUALIFICAÇÃO (coletar naturalmente, sem parecer formulário):
+Colete apenas o que ainda não foi mencionado na conversa. Nunca pergunte algo que a pessoa já respondeu.
+Dados a coletar (se ainda não surgiram naturalmente):
 - Há quanto tempo tem a clínica
-- Se trabalha sozinha ou tem equipe
+- Se trabalha sozinha ou tem equipe (atenção: pode ter saído na ETAPA 3 — não repita)
 - Faturamento médio mensal aproximado
 - O que já tentou fazer pra resolver a agenda
 
@@ -200,9 +202,7 @@ Após coletar nome + email + horário, envie exatamente assim:
 Anotei tudo. O Andre vai entrar em contato pra confirmar o horário com você.
 
 Se quiser ir na frente e já chamar ele direto:
-📲 https://wa.me/5519981868000?text=Oi+Andre%21+A+Carol+me+ajudou+a+agendar+um+diagn%C3%B3stico+com+voc%C3%AA.+Pode+me+confirmar+o+hor%C3%A1rio%3F
-
-Qualquer dúvida, é só me chamar aqui!"
+📲 https://wa.me/5519981868000?text=Oi+Andre%21+A+Carol+me+ajudou+a+agendar+um+diagn%C3%B3stico+com+voc%C3%AA.+Pode+me+confirmar+o+hor%C3%A1rio%3F"
 
 ETAPA 10 — SE A AGENDA ESTIVER CHEIA:
 Se a pessoa disser que a agenda está cheia:
@@ -260,6 +260,9 @@ Você já tem o diagnóstico inicial. Por isso:
 5. Trate as respostas com discrição — não leia em voz alta como se fosse uma lista. Incorpore naturalmente na conversa.
 `
 
+// Cache em memória de messageIds já processados (evita duplicatas do Meta)
+const processedMessageIds = new Set<string>()
+
 export async function processMessage({
   from,
   text,
@@ -274,6 +277,18 @@ export async function processMessage({
   isFlowResponse?: boolean
 }): Promise<void> {
   try {
+    // ── DEDUPLICAÇÃO: Meta às vezes reenvia o mesmo webhook ─────────────────
+    if (processedMessageIds.has(messageId)) {
+      console.log(`[Carol] ⚠️ Mensagem duplicada ignorada: ${messageId}`)
+      return
+    }
+    processedMessageIds.add(messageId)
+    // Limpa cache após 1000 IDs para não crescer indefinidamente
+    if (processedMessageIds.size > 1000) {
+      const first = processedMessageIds.values().next().value
+      processedMessageIds.delete(first)
+    }
+
     // Busca ou cria conversa
     const conversation = await getOrCreateConversation(from)
 
@@ -305,20 +320,15 @@ export async function processMessage({
     // Busca histórico (já inclui a mensagem que acabou de salvar)
     const history = await getConversationHistory(conversation.id)
 
-    // ── NOTIFICAÇÃO 1: Lead novo (primeira mensagem de sempre) ──────────────
+    // ── Lead novo: log apenas — sem notificação (muito cedo, pessoa ainda não qualificou) ──
     const userMsgCount = history.filter((m) => m.role === 'user').length
     if (userMsgCount === 1) {
       console.log(`[Carol] 🆕 Novo lead: ${from}`)
+      // Flow é exceção — já tem dados valiosos desde o início
       if (isFlowResponse) {
-        // Notificação enriquecida com respostas do Flow
         await sendWhatsAppMessage(
           ANDRE_NUMBER,
           `🆕 *Novo lead via Flow de Diagnóstico!*\n📱 +${from}\n\n${text}\n\n_Acompanhe em: ylada.com/admin/whatsapp/carol/conversas_`
-        )
-      } else {
-        await sendWhatsAppMessage(
-          ANDRE_NUMBER,
-          `🆕 *Novo lead na Carol!*\n📱 +${from}\n\n_Acompanhe em: ylada.com/admin/whatsapp/carol/conversas_`
         )
       }
     }
