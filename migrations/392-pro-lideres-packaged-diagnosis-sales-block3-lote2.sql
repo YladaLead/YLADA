@@ -203,7 +203,7 @@ VALUES
       'frase_identificacao', 'Se você se identificou, talvez já sinta o dia “oscilar” conforme o que come.',
       'main_blocker', 'O bloqueio é aderência nutricional real: plano na teoria não vira constância na prática.',
       'consequence', 'Manter assim tende a repetir picos e quedas — trabalho, treino e descanso pagam o preço.',
-      'growth_potential', 'Conversar com quem te enviou ajuda a montar rota mais simples — nutrição funcional alinhada à tua semana.',
+      'growth_potential', 'Conversar com quem te enviou ajuda a montar rota mais simples — nutrição funcional alinhada à sua semana.',
       'dica_rapida', 'Quando água e ritmo falham, “fome emocional” às vezes é só label errado para falta de base.',
       'cta_text', 'Quero um plano nutricional mais fácil de manter',
       'whatsapp_prefill', 'Oi! Fiz o quiz de perfil nutricional e o resultado mostrou irregularidade que já me afeta. Quero falar com quem me enviou este link.'

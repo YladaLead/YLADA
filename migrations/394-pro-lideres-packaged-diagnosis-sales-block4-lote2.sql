@@ -26,7 +26,7 @@ VALUES
       'frase_identificacao', 'Se combina, você provavelmente já pensou se falta água, sal de cozinha “certo” ou pausa de verdade.',
       'main_blocker', 'A tensão é recuperação incompleta: rotina não sustenta hidratação e mineralização básicas de forma estável.',
       'consequence', 'Se vira hábito, desempenho e humor oscilam sem você saber o que calibrar primeiro.',
-      'growth_potential', 'Quem te enviou pode ajudar com rotina simples de hidratação e suporte nutricional alinhado ao teu dia — conversa prática.',
+      'growth_potential', 'Quem te enviou pode ajudar com rotina simples de hidratação e suporte nutricional alinhado ao seu dia — conversa prática.',
       'dica_rapida', 'Pequena consistência em líquidos e refeição que sustenta o trecho pesado do dia costuma mudar o jogo rápido.',
       'cta_text', 'Quero ajustar hidratação e disposição com apoio',
       'whatsapp_prefill', 'Oi! Fiz o questionário sobre equilíbrio e eletrólitos (bem-estar) e saiu um padrão leve. Quero conversar com quem me enviou este link.'
@@ -112,7 +112,7 @@ VALUES
       'frase_identificacao', 'Se isso é você, provavelmente já sentiu que o intestino “manda” no humor e na disposição.',
       'main_blocker', 'A tensão é alto impacto na qualidade de vida: sem plano, cada dia vira gestão de sintoma.',
       'consequence', 'Adiar apoio prolonga sofrimento desnecessário e decisões baseadas em medo ou achismo.',
-      'growth_potential', 'O melhor passo é falar com quem te enviou: organizar cuidado funcional, rotina e orientação adequada ao teu caso — sempre respeitando avaliação profissional quando preciso.',
+      'growth_potential', 'O melhor passo é falar com quem te enviou: organizar cuidado funcional, rotina e orientação adequada ao seu caso — sempre respeitando avaliação profissional quando preciso.',
       'dica_rapida', 'Neste patamar, combinar pessoa de confiança com critério profissional costuma ser o par certo.',
       'cta_text', 'Preciso de apoio para organizar esse quadro',
       'whatsapp_prefill', 'Oi! Fiz o questionário digestivo e o resultado ficou bem intenso. Quero conversar com quem me enviou este link para definir o melhor encaminhamento.'
@@ -128,7 +128,7 @@ VALUES
       'profile_title', 'Intestino um pouco fora do ritmo — dá para suavizar com estratégia',
       'profile_summary', 'Pelas respostas, estufamento ocasional, dias menos regulares ou sensibilidade a alguns gatilhos aparecem — patamar leve, mas já pedindo atenção.',
       'frase_identificacao', 'Se combina, você provavelmente já notou ligação entre stress e barriga.',
-      'main_blocker', 'A tensão é desconforto que some e volta: falta padrão de cuidado que estabilize o intestino no teu dia.',
+      'main_blocker', 'A tensão é desconforto que some e volta: falta padrão de cuidado que estabilize o intestino no seu dia.',
       'consequence', 'Sem ajuste, sintomas leves viram incômodo fixo e afetam disposição.',
       'growth_potential', 'Quem te enviou pode indicar plano simples — alimentação, ritmo e nutrição funcional — para reduzir sintomas com calma.',
       'dica_rapida', 'Mudança brusca costuma chacoalhar mais que ajudar; gradualidade com apoio costuma render melhor.',
@@ -182,8 +182,8 @@ VALUES
       'frase_identificacao', 'Se combina, você provavelmente já sabe que devia beber mais água — falta formato.',
       'main_blocker', 'A tensão é hábito de líquidos no automático: sem meta simples, o dia passa e a hidratação oscila.',
       'consequence', 'Pequeno déficit repetido puxa foco, pele, digestão e energia sem você nomear a causa.',
-      'growth_potential', 'Quem te enviou pode cruzar tua calculadora com rotina real e indicar próximo passo prático — conversa rápida.',
-      'dica_rapida', 'Meta que funciona costuma ser ridícula de simples — mas amarrada ao teu horário, não à culpa.',
+      'growth_potential', 'Quem te enviou pode cruzar sua calculadora com rotina real e indicar próximo passo prático — conversa rápida.',
+      'dica_rapida', 'Meta que funciona costuma ser ridícula de simples — mas amarrada ao seu horário, não à culpa.',
       'cta_text', 'Quero minha meta de hidratação com apoio',
       'whatsapp_prefill', 'Oi! Fiz a calculadora de água e quero cruzar o resultado com orientação. Quero conversar com quem me enviou este link.'
     )
@@ -199,7 +199,7 @@ VALUES
       'frase_identificacao', 'Se você se identificou, talvez já associe cefaleia leve, foco ruim ou sede tardia demais.',
       'main_blocker', 'O bloqueio é volume e consistência: o corpo pede líquido e ritmo, não só um copo quando lembrar.',
       'consequence', 'Manter assim tende a repetir queda de energia e sensação de corpo seco ao longo do dia.',
-      'growth_potential', 'Conversar com quem te enviou permite ajustar meta com teu peso, clima e expediente — referência que você consegue cumprir.',
+      'growth_potential', 'Conversar com quem te enviou permite ajustar meta com seu peso, clima e expediente — referência que você consegue cumprir.',
       'dica_rapida', 'Calculadora dá referência; vida real precisa de gatilhos (garrafa, lembretes humanos, rotina).',
       'cta_text', 'Quero organizar hidratação de verdade',
       'whatsapp_prefill', 'Oi! Fiz a calculadora de hidratação e o resultado mostrou que preciso melhorar com consistência. Quero falar com quem me enviou este link.'
@@ -232,7 +232,7 @@ VALUES
       'profile_title', 'Referência calórica pode dar mais clareza — você está no caminho certo',
       'profile_summary', 'Pelas respostas, idade, peso, atividade e objetivo sugerem que uma referência simples ajuda a decidir com menos achismo no dia a dia.',
       'frase_identificacao', 'Se combina, você provavelmente já comeu no feeling e sentiu que faltou critério.',
-      'main_blocker', 'A tensão é decisão alimentar sem bússola: referência existe, mas ainda não conversa com tua rotina.',
+      'main_blocker', 'A tensão é decisão alimentar sem bússola: referência existe, mas ainda não conversa com sua rotina.',
       'consequence', 'Sem bússola, oscila entre rigidez e improviso — nenhum dos dois sustenta.',
       'growth_potential', 'Quem te enviou pode traduzir o número da calculadora em prato e hábitos reais — conversa com quem te acompanha.',
       'dica_rapida', 'Caloria é ferramenta; consistência é objetivo — um não substitui o outro.',
@@ -249,7 +249,7 @@ VALUES
       'profile_title', 'Consumo e objetivo ainda não conversam — referência pede calibragem humana',
       'profile_summary', 'Pelas respostas, combinação de perfil e objetivo (energia, manutenção ou mudança de peso) indica incerteza ou ajustes sem critério na rotina.',
       'frase_identificacao', 'Se você se identificou, talvez já tenha tentado app ou plano genérico que não colou.',
-      'main_blocker', 'O bloqueio é falta de ponte: número na tela não vira refeição que cabe na tua semana.',
+      'main_blocker', 'O bloqueio é falta de ponte: número na tela não vira refeição que cabe na sua semana.',
       'consequence', 'Continuar sem calibragem tende a frustrar e reforçar o padrão “tudo ou nada”.',
       'growth_potential', 'Conversar com quem te enviou permite usar a calculadora como ponto de partida — não como prisão.',
       'dica_rapida', 'Boa referência calórica vem com contexto: sono, stress e movimento mudam o que faz sentido.',
@@ -265,7 +265,7 @@ VALUES
     jsonb_build_object(
       'profile_title', 'Alto desalinhamento entre referência e realidade — fala com quem te enviou',
       'profile_summary', 'Pelas respostas, perfil e objetivo indicam necessidade forte de clareza para não ficar preso em cortes aleatórios ou excessos sem direção.',
-      'frase_identificacao', 'Se isso é você, talvez já sinta que o “número certo” sozinho não resolve o teu caso.',
+      'frase_identificacao', 'Se isso é você, talvez já sinta que o “número certo” sozinho não resolve o seu caso.',
       'main_blocker', 'A tensão é alto impacto emocional com comida sem sistema: referência técnica precisa virar plano humano.',
       'consequence', 'Adiar apoio prolonga ciclo de tentativa frustrada e autocobrança.',
       'growth_potential', 'O melhor passo é conversar com quem te enviou: use a calculadora como entrada, construa estratégia com acompanhamento.',

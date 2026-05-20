@@ -22,7 +22,7 @@ VALUES
       'frase_identificacao', 'Se combina, você provavelmente já sentiu que “genética” virou desculpa e culpa ao mesmo tempo.',
       'main_blocker', 'A tensão é corpo que responde irregular: sono e stress mexem no que a balança e a disposição fazem no dia.',
       'consequence', 'Sem estratégia, esforço parece alto com retorno que não acompanha — frustração sobe.',
-      'growth_potential', 'Quem te enviou pode ajudar a montar plano mais alinhado ao teu perfil — nutrição funcional e rotina, conversa contínua.',
+      'growth_potential', 'Quem te enviou pode ajudar a montar plano mais alinhado ao seu perfil — nutrição funcional e rotina, conversa contínua.',
       'dica_rapida', 'Metabolismo na vida real é sistema: sono, stress, movimento e comida — conversa organiza a ordem.',
       'cta_text', 'Quero estratégia alinhada ao meu perfil',
       'whatsapp_prefill', 'Oi! Fiz a avaliação de perfil metabólico e saiu um padrão leve de oscilação. Quero conversar com quem me enviou este link.'
@@ -37,7 +37,7 @@ VALUES
       'profile_title', 'Resposta ao esforço ainda imprevisível — plano por perfil faz diferença',
       'profile_summary', 'Pelas respostas, energia oscila bastante, ritmo de mudança de peso frustrante ou interferência clara de sono e stress já são recorrentes.',
       'frase_identificacao', 'Se você se identificou, talvez já ache que “disciplina” não explica tudo — e tem razão.',
-      'main_blocker', 'O bloqueio é tático: o que funciona genérico não cola no teu corpo no teu dia.',
+      'main_blocker', 'O bloqueio é tático: o que funciona genérico não cola no seu corpo no seu dia.',
       'consequence', 'Continuar no genérico tende a aumentar desânimo e sensação de corpo “teimoso”.',
       'growth_potential', 'Conversar com quem te enviou permite personalizar prioridade — menos achismo, mais método.',
       'dica_rapida', 'Pequeno ajuste no que pesa mais (sono, refeição, stress) costuma abrir brecha antes da próxima fase.',

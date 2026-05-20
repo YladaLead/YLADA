@@ -133,7 +133,7 @@ VALUES
       'frase_identificacao', 'Se combina com você, provavelmente já sentiu que o dia “não fecha” sem custo de energia.',
       'main_blocker', 'A tensão é multitarefas sem folga: cuidar de tudo e todos puxa disposição e paciência o tempo todo.',
       'consequence', 'Se o padrão cresce, pequenos sinais de esgotamento viram pano de fundo — e o tempo para você some primeiro.',
-      'growth_potential', 'Quem te enviou pode ajudar com nutrição funcional e microhábitos que cabem na tua realidade — sem discurso de “mágica”, mas com direção.',
+      'growth_potential', 'Quem te enviou pode ajudar com nutrição funcional e microhábitos que cabem na sua realidade — sem discurso de “mágica”, mas com direção.',
       'dica_rapida', 'Mãe ocupada costuma precisar de energia estável, não só café; uma base simples no dia muda a sensação de peso.',
       'cta_text', 'Quero mais energia e leveza na minha rotina',
       'whatsapp_prefill', 'Oi! Fiz o quiz para mães com rotina intensa e saiu um padrão leve de cansaço. Quero conversar com quem me enviou este link sobre como me apoiar.'
@@ -150,7 +150,7 @@ VALUES
       'frase_identificacao', 'Se você se identificou, talvez já se sinta no modo “faço tudo, mas no limite”.',
       'main_blocker', 'O bloqueio é energia irregular: você até entrega, mas paga com irritação, falta de foco ou sensação de nunca alcançar o fim da lista.',
       'consequence', 'Manter assim tende a aumentar culpa, curto-circuito emocional e sensação de perder você no meio da rotina.',
-      'growth_potential', 'Conversar com quem te enviou permite montar plano gentil e possível — sustentação de energia para a tua rotina real.',
+      'growth_potential', 'Conversar com quem te enviou permite montar plano gentil e possível — sustentação de energia para a sua rotina real.',
       'dica_rapida', 'Neste contexto, o que mais ajuda é consistência pequena que cabe na vida — não mais exigência em cima de si.',
       'cta_text', 'Quero ajuda para não viver só no limite',
       'whatsapp_prefill', 'Oi! Fiz o quiz para mães ocupadas e o resultado mostrou que o cansaço já me incomoda bastante. Quero falar com quem me enviou este link.'
@@ -216,7 +216,7 @@ VALUES
     NULL,
     jsonb_build_object(
       'profile_title', 'Seu fim de tarde virou colapso energético — fala com quem te enviou',
-      'profile_summary', 'Pelas respostas, a queda de energia no final do dia é intensa e interfere de forma clara na tua vida pós-trabalho — com irritação, cansaço profundo ou impossibilidade de render à noite.',
+      'profile_summary', 'Pelas respostas, a queda de energia no final do dia é intensa e interfere de forma clara na sua vida pós-trabalho — com irritação, cansaço profundo ou impossibilidade de render à noite.',
       'frase_identificacao', 'Se isso é você, você provavelmente já sente que “o dia acaba antes de acabar”.',
       'main_blocker', 'A tensão é alto impacto: sem combustível no corpo, o resto do dia vira apenas recuperação — não vida.',
       'consequence', 'Adiar apoio mantém o ciclo de acumular responsabilidade sem energia para honrá-la com leveza.',
@@ -251,7 +251,7 @@ VALUES
     'moderado',
     NULL,
     jsonb_build_object(
-      'profile_title', 'Pouca movimentação já pesa na tua energia e no corpo',
+      'profile_title', 'Pouca movimentação já pesa na sua energia e no corpo',
       'profile_summary', 'Pelas respostas, sensação de corpo pesado, cansaço mesmo sem muito esforço ou dificuldade de começar mudanças já é recorrente.',
       'frase_identificacao', 'Se você se identificou, talvez já sinta que “parado demais” virou conforto e descrédito ao mesmo tempo.',
       'main_blocker', 'O bloqueio é atrito para iniciar: a energia não aparece para o primeiro movimento, e a rotina parada reforça o ciclo.',
@@ -273,7 +273,7 @@ VALUES
       'frase_identificacao', 'Se isso é você, talvez o tema já cause desconforto com a imagem que você tem do seu corpo e da sua energia.',
       'main_blocker', 'A tensão é alto impacto na motivação e no corpo: pouca movimentação e pouca disposição se alimentam mutuamente.',
       'consequence', 'Adiar apoio prolonga sensação de estar preso num ciclo difícil de sair sozinho.',
-      'growth_potential', 'Fala com quem te enviou: dá para desenhar plano com nutrição funcional e metas mínimas viáveis — respeitando o teu ritmo.',
+      'growth_potential', 'Fala com quem te enviou: dá para desenhar plano com nutrição funcional e metas mínimas viáveis — respeitando o seu ritmo.',
       'dica_rapida', 'Neste patamar, julgamento não move nada; estrutura e companhia na conversa sim.',
       'cta_text', 'Preciso de apoio para recuperar disposição',
       'whatsapp_prefill', 'Oi! Fiz o quiz sobre estilo de vida sedentário e o resultado ficou bem intenso na falta de energia e peso no corpo. Quero conversar com quem me enviou este link para um plano.'

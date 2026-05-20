@@ -3,6 +3,17 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { supabaseAdmin } from '@/lib/supabase'
 
+/** Nomes de cookies do header `Cookie` (sem valores — evita vazar tokens em log). */
+function parseCookieNamesFromHeader(cookieHeader: string): string[] {
+  return cookieHeader
+    .split(';')
+    .map((part) => part.trim().split('=')[0]?.trim() ?? '')
+    .filter(Boolean)
+}
+
+const isApiAuthDebug =
+  process.env.NODE_ENV === 'development' && process.env.DEBUG_API_AUTH === 'true'
+
 /**
  * Helper para proteger APIs - retorna erro JSON ao invés de redirect
  * Use para rotas de API (não páginas)
@@ -31,20 +42,12 @@ export async function requireApiAuth(
       console.warn('⚠️ cookies() falhou, usando apenas request headers')
     }
     
-    // Debug: log dos cookies (apenas em desenvolvimento)
-    if (process.env.NODE_ENV === 'development') {
-      const cookieNames: string[] = []
-      if (requestCookies) {
-        const matches = requestCookies.matchAll(/([^=]+)=/g)
-        for (const match of matches) {
-          cookieNames.push(match[1].trim())
-        }
-      }
+    if (isApiAuthDebug) {
       console.log('🔍 API Auth - Debug:', {
         requestCookieHeader: requestCookies ? 'present' : 'missing',
         requestCookieLength: requestCookies.length,
-        cookieNames: cookieNames,
-        cookieStoreAvailable: !!cookieStore
+        cookieNames: parseCookieNamesFromHeader(requestCookies),
+        cookieStoreAvailable: !!cookieStore,
       })
     }
     
@@ -115,7 +118,7 @@ export async function requireApiAuth(
             expires_at: Math.floor(Date.now() / 1000) + 3600,
             token_type: 'bearer'
           } as any
-          if (process.env.NODE_ENV === 'development') {
+          if (isApiAuthDebug) {
             console.log('✅ API Auth - Autenticado via Bearer (sem cookies)')
           }
         }
@@ -132,7 +135,9 @@ export async function requireApiAuth(
           session = cookieSession
           user = cookieSession.user
           sessionError = null
-          console.log('✅ API Auth (DEV) - Usuário autenticado via getSession() (cookie)')
+          if (isApiAuthDebug) {
+            console.log('✅ API Auth (DEV) - Usuário autenticado via getSession() (cookie)')
+          }
         }
       } catch (e: any) {
         // Se falhar aqui, seguimos o fluxo normal
@@ -153,7 +158,7 @@ export async function requireApiAuth(
         const { data: { session: fetchedSession } } = await supabase.auth.getSession()
         session = fetchedSession
 
-        if (process.env.NODE_ENV === 'development') {
+        if (isApiAuthDebug) {
           console.log('✅ API Auth - Usuário autenticado via getUser()')
         }
       } else {
@@ -173,7 +178,7 @@ export async function requireApiAuth(
               session = cookieSession
               user = cookieSession.user
               sessionError = null
-              if (process.env.NODE_ENV === 'development') {
+              if (isApiAuthDebug) {
                 console.log('✅ API Auth - Fallback getSession() (rede instável) - usuário autenticado via cookie')
               }
             } else {
@@ -202,7 +207,7 @@ export async function requireApiAuth(
               token_type: 'bearer'
             } as any
             
-            if (process.env.NODE_ENV === 'development') {
+            if (isApiAuthDebug) {
               console.log('✅ API Auth - Usuário autenticado via access token (fallback)')
             }
           } else {
@@ -211,7 +216,7 @@ export async function requireApiAuth(
         } catch (tokenErr) {
           // Se o token também falhar, continuar com o fluxo normal de erro
           sessionError = tokenErr as any
-          if (process.env.NODE_ENV === 'development') {
+          if (isApiAuthDebug) {
             console.warn('⚠️ Access token também falhou:', tokenErr)
           }
         }
@@ -222,8 +227,7 @@ export async function requireApiAuth(
       }
     }
     
-    // Debug: log da sessão (apenas em desenvolvimento)
-    if (process.env.NODE_ENV === 'development') {
+    if (isApiAuthDebug) {
       console.log('🔍 API Auth - Autenticação:', {
         hasUser: !!user,
         hasSession: !!session,
@@ -231,7 +235,7 @@ export async function requireApiAuth(
         error: sessionError?.message,
         errorCode: sessionError?.status,
         hasCookies: !!requestCookies,
-        usedAccessToken: !!accessToken && !!user
+        usedAccessToken: !!accessToken && !!user,
       })
     }
     
@@ -296,7 +300,9 @@ export async function requireApiAuth(
       }
 
       if (inferredProfile) {
-        console.log(`📝 Criando perfil automaticamente para usuário ${userId} com perfil: ${inferredProfile}`)
+        if (isApiAuthDebug) {
+          console.log(`📝 Criando perfil automaticamente para usuário ${userId} com perfil: ${inferredProfile}`)
+        }
 
         const email = user.email || ''
         const fullName = user.user_metadata?.full_name || user.user_metadata?.name || ''
@@ -324,7 +330,9 @@ export async function requireApiAuth(
               .maybeSingle()
             if (existingProfile) {
               profile = existingProfile
-              console.log('✅ Perfil já existia (duplicate key), usando registro encontrado com admin:', profile.id)
+              if (isApiAuthDebug) {
+                console.log('✅ Perfil já existia (duplicate key), usando registro encontrado com admin:', profile.id)
+              }
             } else {
               console.error('❌ Erro ao criar perfil (duplicate key mas não encontrou registro):', createError)
               return NextResponse.json(
@@ -356,7 +364,9 @@ export async function requireApiAuth(
           }
         } else {
           profile = newProfile
-          console.log('✅ Perfil criado automaticamente:', profile)
+          if (isApiAuthDebug) {
+            console.log('✅ Perfil criado automaticamente:', profile.id)
+          }
         }
       } else {
         return NextResponse.json(
@@ -369,7 +379,9 @@ export async function requireApiAuth(
     // Se o perfil existe mas não tem 'perfil' definido, atualizar usando supabaseAdmin
     if (profile && !profile.perfil && allowedProfiles && allowedProfiles.length > 0) {
       const inferredProfile = allowedProfiles[0]
-      console.log(`📝 Atualizando perfil ${profile.id} para ter perfil: ${inferredProfile}`)
+      if (isApiAuthDebug) {
+        console.log(`📝 Atualizando perfil ${profile.id} para ter perfil: ${inferredProfile}`)
+      }
       
       const { data: updatedProfile, error: updateError } = await supabaseAdmin
         .from('user_profiles')
@@ -380,7 +392,9 @@ export async function requireApiAuth(
 
       if (!updateError && updatedProfile) {
         profile = updatedProfile
-        console.log('✅ Perfil atualizado:', profile)
+        if (isApiAuthDebug) {
+          console.log('✅ Perfil atualizado:', profile.id)
+        }
       }
     }
 

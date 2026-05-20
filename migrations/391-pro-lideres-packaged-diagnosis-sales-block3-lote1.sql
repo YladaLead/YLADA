@@ -80,7 +80,7 @@ VALUES
       'frase_identificacao', 'Se faz sentido, você talvez já sinta que “vai sentindo”, sem saber sempre o que ajustar primeiro.',
       'main_blocker', 'A tensão é decisão no improviso: pequenos sinais existem, mas não viram mapa simples do que mudar.',
       'consequence', 'Sem clareza, constância oscila — você testa coisas, mas falta eixo para manter o que funciona.',
-      'growth_potential', 'Quem te enviou pode ajudar a traduzir sinais em plano prático — nutrição e hábitos alinhados à tua realidade.',
+      'growth_potential', 'Quem te enviou pode ajudar a traduzir sinais em plano prático — nutrição e hábitos alinhados à sua realidade.',
       'dica_rapida', 'Corpo que responde bem costuma ser corpo que tem rotina previsível; clareza acelera isso.',
       'cta_text', 'Quero mais clareza sobre o que ajustar',
       'whatsapp_prefill', 'Oi! Fiz o quiz “você conhece o seu corpo?” e saiu que tenho clareza parcial. Quero conversar com quem me enviou este link.'
@@ -186,7 +186,7 @@ VALUES
       'frase_identificacao', 'Se faz sentido, você talvez já sinta “cheio” mas não “disposto”.',
       'main_blocker', 'A tensão é alimentação que enche sem sustentar: falta equilíbrio que traduza em energia previsível.',
       'consequence', 'Sem pequenos ajustes, oscilação de energia vira normal e mascara o que seria ganho fácil.',
-      'growth_potential', 'Quem te enviou pode indicar trocas estratégicas simples — nutrição funcional alinhada ao teu dia.',
+      'growth_potential', 'Quem te enviou pode indicar trocas estratégicas simples — nutrição funcional alinhada ao seu dia.',
       'dica_rapida', 'Nutrir melhor não precisa ser revolução: muitas vezes são poucos eixos que faltam, não o prato inteiro.',
       'cta_text', 'Quero melhorar nutrindo melhor no dia a dia',
       'whatsapp_prefill', 'Oi! Fiz o quiz nutrido vs alimentado e saiu que tenho espaço para otimizar. Quero conversar com quem me enviou este link.'
@@ -220,7 +220,7 @@ VALUES
       'frase_identificacao', 'Se isso é você, talvez já sinta que “comer mais do mesmo” não resolve.',
       'main_blocker', 'A tensão é alto impacto na disposição: alimentação não sustenta o ritmo que a vida exige.',
       'consequence', 'Adiar calibragem prolonga oscilação e sensação de estar sempre recuperando energia.',
-      'growth_potential', 'Fala com quem te enviou: monte um plano de nutrição funcional e hábitos coerentes com o teu objetivo — passo a passo.',
+      'growth_potential', 'Fala com quem te enviou: monte um plano de nutrição funcional e hábitos coerentes com o seu objetivo — passo a passo.',
       'dica_rapida', 'Neste patamar, direção clara importa mais que acumular restrições.',
       'cta_text', 'Preciso melhorar o que me nutre de verdade',
       'whatsapp_prefill', 'Oi! Fiz o quiz nutrido vs alimentado e o resultado ficou bem intenso na energia e foco. Quero conversar com quem me enviou este link.'
@@ -239,7 +239,7 @@ VALUES
       'frase_identificacao', 'Se combina, você provavelmente já disse “hoje não deu” mais vezes do que gostaria.',
       'main_blocker', 'A tensão é desalinhamento: o plano na cabeça não conversa com o ritmo real — e a energia paga o preço.',
       'consequence', 'Se vira padrão, irregularidade alimentar vira pano de fundo e puxa irritação e cansaço.',
-      'growth_potential', 'Quem te enviou pode ajudar a desenhar encaixe realista — nutrição e hábitos que cabem no teu calendário.',
+      'growth_potential', 'Quem te enviou pode ajudar a desenhar encaixe realista — nutrição e hábitos que cabem no seu calendário.',
       'dica_rapida', 'Plano que não cabe na rotina não é plano — é lista de desejos; o ajuste é adaptar o formato.',
       'cta_text', 'Quero alinhar comida e rotina de verdade',
       'whatsapp_prefill', 'Oi! Fiz o quiz sobre alimentação conforme a rotina e saiu um desalinhamento leve. Quero conversar com quem me enviou este link.'
@@ -273,8 +273,8 @@ VALUES
       'frase_identificacao', 'Se isso é você, provavelmente já sentiu que “formato ideal” não existe nos teus dias — e precisa de versão real.',
       'main_blocker', 'A tensão é alto impacto: sem encaixe, cada semana vira reconstrução do zero — cansativo e improdutivo.',
       'consequence', 'Adiar apoio mantém ciclo de irregularidade que drena disposição e clareza.',
-      'growth_potential', 'Fala com quem te enviou: construa plano adaptado ao teu ritmo — nutrição funcional + microestrutura que aguente turbulência.',
-      'dica_rapida', 'Neste patamar, o foco é sustentar a rotina alimentar no dia a dia real, não perseguir um padrão que não cabe na tua vida.',
+      'growth_potential', 'Fala com quem te enviou: construa plano adaptado ao seu ritmo — nutrição funcional + microestrutura que aguente turbulência.',
+      'dica_rapida', 'Neste patamar, o foco é sustentar a rotina alimentar no dia a dia real, não perseguir um padrão que não cabe na sua vida.',
       'cta_text', 'Preciso encaixar alimentação na minha vida',
       'whatsapp_prefill', 'Oi! Fiz o quiz sobre alimentação conforme a rotina e o resultado ficou bem intenso. Quero conversar com quem me enviou este link para montar o próximo passo.'
     )

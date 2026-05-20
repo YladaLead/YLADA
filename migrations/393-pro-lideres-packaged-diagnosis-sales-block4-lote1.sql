@@ -147,7 +147,7 @@ VALUES
       'frase_identificacao', 'Se você se identificou, talvez tema “falhar no meio” já tenha aparecido antes.',
       'main_blocker', 'O bloqueio é aderência em janela longa: a vida aperta e o protocolo é a primeira coisa a sair.',
       'consequence', 'Sem ajuste, ciclo longo vira culpa em vez de resultado.',
-      'growth_potential', 'Conversar com quem te enviou permite calibrar desafio realista — o que cabe na tua semana, com checkpoint.',
+      'growth_potential', 'Conversar com quem te enviou permite calibrar desafio realista — o que cabe na sua semana, com checkpoint.',
       'dica_rapida', 'Desafio bom é desafio que você aceita sabendo onde vai falhar cedo — e já tem plano B.',
       'cta_text', 'Quero entrar no desafio com plano que caiba na minha vida',
       'whatsapp_prefill', 'Oi! Fiz o quiz desafio 21 dias e o resultado mostrou que preciso de apoio e protocolo claro. Quero falar com quem me enviou este link.'

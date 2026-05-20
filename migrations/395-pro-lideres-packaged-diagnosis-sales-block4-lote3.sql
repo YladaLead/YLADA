@@ -26,8 +26,8 @@ VALUES
       'frase_identificacao', 'Se combina, você provavelmente quer usar o indicador como bússola, não como veredito.',
       'main_blocker', 'A tensão é decisão sem referência: falta encaixar o “onde estou” com “o que faz sentido fazer agora”.',
       'consequence', 'Sem direção, cada tentativa vira achismo — e cansa antes de virar hábito.',
-      'growth_potential', 'Quem te enviou pode cruzar faixas com tua rotina real e montar plano sustentável — conversa com apoio.',
-      'dica_rapida', 'IMC é ferramenta populacional; teu caso vive no contexto (sono, stress, rotina) — conversa individual pesa mais.',
+      'growth_potential', 'Quem te enviou pode cruzar faixas com sua rotina real e montar plano sustentável — conversa com apoio.',
+      'dica_rapida', 'IMC é ferramenta populacional; seu caso vive no contexto (sono, stress, rotina) — conversa individual pesa mais.',
       'cta_text', 'Quero meu ponto de partida com orientação',
       'whatsapp_prefill', 'Oi! Fiz a calculadora de IMC (referência de bem-estar) e quero alinhar o que fazer a seguir. Quero conversar com quem me enviou este link.'
     )
@@ -38,7 +38,7 @@ VALUES
     'moderado',
     NULL,
     jsonb_build_object(
-      'profile_title', 'Referência corporal pede plano alinhado à tua vida — não só ao número',
+      'profile_title', 'Referência corporal pede plano alinhado à sua vida — não só ao número',
       'profile_summary', 'Pelas respostas, combinação de faixas com rotina ou energia abaixo do ideal indica que o próximo passo precisa de calibragem humana — hábitos, nutrição e consistência.',
       'frase_identificacao', 'Se você se identificou, talvez já tenha tentado mudar sem encaixe no calendário.',
       'main_blocker', 'O bloqueio é falta de sistema: indicador sozinho não vira ação que você mantenha na semana.',
@@ -56,7 +56,7 @@ VALUES
     NULL,
     jsonb_build_object(
       'profile_title', 'Grande distância entre referência e rotina sustentável — priorize conversa guiada',
-      'profile_summary', 'Pelas respostas, sinais de que ajuste de peso, energia ou consistência tem impacto alto no teu dia — tema que pede plano firme com quem te acompanha.',
+      'profile_summary', 'Pelas respostas, sinais de que ajuste de peso, energia ou consistência tem impacto alto no seu dia — tema que pede plano firme com quem te acompanha.',
       'frase_identificacao', 'Se isso é você, talvez já sinta que “saber” não basta — falta estrutura.',
       'main_blocker', 'A tensão é alto impacto emocional e físico sem trilha: cada semana recomeça no improviso.',
       'consequence', 'Adiar apoio prolonga desgaste e risco de medidas extremas que não duram.',
@@ -131,7 +131,7 @@ VALUES
       'main_blocker', 'A tensão é disciplina que ainda não virou sistema: pequenas quebras de rotina derrubam o ritmo.',
       'consequence', 'Sem formato certo, cada semana vira “recomeço” e consome motivação.',
       'growth_potential', 'Quem te enviou pode montar plano viável com acompanhamento — método, não culpa.',
-      'dica_rapida', 'Emagrecer com saúde costuma ser consistência chata que funciona — conversa ajuda a achar a tua versão.',
+      'dica_rapida', 'Emagrecer com saúde costuma ser consistência chata que funciona — conversa ajuda a achar a sua versão.',
       'cta_text', 'Quero começar com estratégia sustentável',
       'whatsapp_prefill', 'Oi! Fiz o quiz “pronto para emagrecer com saúde?” e fiquei com prontidão em evolução. Quero conversar com quem me enviou este link.'
     )
@@ -194,7 +194,7 @@ VALUES
     'moderado',
     NULL,
     jsonb_build_object(
-      'profile_title', 'Gatilhos emocionais comem espaço na tua consistência',
+      'profile_title', 'Gatilhos emocionais comem espaço na sua consistência',
       'profile_summary', 'Pelas respostas, comer para aliviar stress, sensação de perda de controle, culpa frequente ou confusão entre fome física e emocional já são recorrentes.',
       'frase_identificacao', 'Se você se identificou, talvez já sinta vergonha que pesa mais que o prato.',
       'main_blocker', 'O bloqueio é circuito emocional: impulso entra antes da clareza — e culpa fecha o loop.',
@@ -216,7 +216,7 @@ VALUES
       'frase_identificacao', 'Se isso é você, isso já não é “detalhe” — é tema de bem-estar sério.',
       'main_blocker', 'A tensão é alto impacto emocional: comida virou regulação de humor sem você querer.',
       'consequence', 'Adiar apoio prolonga sofrimento e pode reforçar isolamento com o problema.',
-      'growth_potential', 'O melhor passo é falar com quem te enviou: plano gentil, estrutura e linguagem de respeito ao teu ritmo.',
+      'growth_potential', 'O melhor passo é falar com quem te enviou: plano gentil, estrutura e linguagem de respeito ao seu ritmo.',
       'dica_rapida', 'Neste patamar, julgamento zero e método claro costumam ser o par certo.',
       'cta_text', 'Preciso de apoio para sair desse ciclo',
       'whatsapp_prefill', 'Oi! Fiz a avaliação de fome emocional e o resultado ficou bem intenso. Quero conversar com quem me enviou este link para um plano.'

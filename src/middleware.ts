@@ -18,9 +18,6 @@ const SEGMENT_V2_TO_PROGRESSIVE: Record<string, string> = {
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  // Debug: log da rota
-  console.log('Middleware - Rota:', pathname)
-
   const normalized =
     pathname.length > 1 && pathname.endsWith('/') ? pathname.replace(/\/+$/, '') : pathname
 
@@ -102,7 +99,6 @@ export function middleware(request: NextRequest) {
     pathname.includes('.') || // Qualquer arquivo com extensão
     pathname === '/favicon.ico'
   ) {
-    console.log('Middleware - Rota excluída (sem redirecionamento):', pathname)
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set('x-pathname', pathname)
     return NextResponse.next({
@@ -167,13 +163,11 @@ export function middleware(request: NextRequest) {
   
   // Se não tem idioma, redirecionar para português
   if (!hasLanguage) {
-    console.log('Middleware - Redirecionando para /pt:', pathname)
     const url = request.nextUrl.clone()
     url.pathname = `/pt${pathname}`
     return NextResponse.redirect(url)
   }
   
-  console.log('Middleware - Permitindo:', pathname)
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-pathname', pathname)
   return NextResponse.next({

@@ -28,7 +28,7 @@ VALUES
       'main_blocker', 'A tensão é perder leveza e disposição logo depois de comer — o corpo parece demorar a “encaixar” de novo na rotina.',
       'consequence', 'Se vira hábito, você pode começar a antecipar o incômodo e isso rouba prazer e energia do resto do dia.',
       'growth_potential', 'Quem te enviou este link pode ajudar com hábitos e nutrição funcional focados em conforto pós-refeição — conversa simples, próximo passo claro.',
-      'dica_rapida', 'Leveza após comer costuma melhorar quando ritmo e combinações alimentares conversam com o teu dia — não só “comer menos” no impulso.',
+      'dica_rapida', 'Leveza após comer costuma melhorar quando ritmo e combinações alimentares conversam com o seu dia — não só “comer menos” no impulso.',
       'cta_text', 'Quero falar sobre desconforto depois de comer',
       'whatsapp_prefill', 'Oi! Fiz o quiz sobre desconforto após refeições e saiu um padrão leve. Quero conversar com quem me enviou este link sobre como melhorar essa sensação.'
     )
@@ -92,13 +92,13 @@ VALUES
     'moderado',
     NULL,
     jsonb_build_object(
-      'profile_title', 'Manhã “pesada” ou inchada já é recorrente no teu acordar',
+      'profile_title', 'Manhã “pesada” ou inchada já é recorrente no seu acordar',
       'profile_summary', 'Pelas respostas, a sensação de inchaço ao levantar incomoda com frequência — em áreas que você já consegue identificar — e demora a melhorar.',
       'frase_identificacao', 'Se você se identificou, talvez já adapte rotina matinal ou roupas por causa disso.',
       'main_blocker', 'O bloqueio é pouca leveza nas primeiras horas: o dia começa com o corpo pedindo tempo que você nem sempre tem.',
       'consequence', 'Manter no improviso tende a repetir o ciclo e aumentar sensação de cansaço antes mesmo da rotina pesada começar.',
       'growth_potential', 'Conversar com quem te enviou ajuda a montar plano com hábitos e nutrição funcional voltados a reduzir retenção matinal.',
-      'dica_rapida', 'Quando só melhora depois de horas, vale olhar o que sustenta o teu “reset” noturno e o primeiro bloco do dia — com orientação.',
+      'dica_rapida', 'Quando só melhora depois de horas, vale olhar o que sustenta o seu “reset” noturno e o primeiro bloco do dia — com orientação.',
       'cta_text', 'Quero reduzir esse inchaço ao acordar',
       'whatsapp_prefill', 'Oi! Fiz o quiz sobre inchaço ao acordar e o resultado mostrou incômodo frequente pela manhã. Quero falar com quem me enviou este link.'
     )
@@ -151,7 +151,7 @@ VALUES
       'main_blocker', 'O bloqueio é estabilidade: o corpo ou o emocional pedem alívio rápido, e o padrão se repete.',
       'consequence', 'Continuar só na força de vontade tende a aumentar frustração e sensação de estar sempre negociando consigo mesmo.',
       'growth_potential', 'Conversar com quem te enviou abre espaço para plano gentil e prático — sustentação de energia e clareza — sem discurso de culpa.',
-      'dica_rapida', 'Controle de verdade costuma vir de base estável, não de regra rígida; quem te acompanha ajuda a achar o teu ritmo.',
+      'dica_rapida', 'Controle de verdade costuma vir de base estável, não de regra rígida; quem te acompanha ajuda a achar o seu ritmo.',
       'cta_text', 'Quero ajuda para sair desse ciclo com apoio',
       'whatsapp_prefill', 'Oi! Fiz o quiz sobre vontade de doce/fome emocional e o resultado mostrou que isso já me incomoda bastante. Quero falar com quem me enviou este link.'
     )
@@ -203,7 +203,7 @@ VALUES
       'frase_identificacao', 'Se você se identificou, talvez já associe multitarefas ou certas cargas de trabalho a esse estado.',
       'main_blocker', 'O bloqueio é rendimento mental que não acompanha a demanda: você se esforça, mas a sensação é de “travar”.',
       'consequence', 'Continuar assim tende a aumentar atrasos, irritação e sensação de estar sempre recuperando foco.',
-      'growth_potential', 'Conversar com quem te enviou ajuda a montar plano para sustentar energia e clareza — prático, adaptado à tua rotina.',
+      'growth_potential', 'Conversar com quem te enviou ajuda a montar plano para sustentar energia e clareza — prático, adaptado à sua rotina.',
       'dica_rapida', 'Quando a mente cansa antes do prazo, muitas vezes falta base de energia estável, não falta de esforço.',
       'cta_text', 'Quero ajuda para clareza e foco',
       'whatsapp_prefill', 'Oi! Fiz o quiz sobre mente cansada e o resultado mostrou que isso já afeta bastante minha produtividade. Quero falar com quem me enviou este link.'
@@ -273,7 +273,7 @@ VALUES
       'frase_identificacao', 'Se isso é você, talvez o treino já tenha virado fonte de frustração, não só de saúde.',
       'main_blocker', 'A tensão é alto impacto: sem combustível certo, movimento vira luta diária em vez de hábito sustentável.',
       'consequence', 'Adiar apoio costuma prolongar o ciclo de iniciar e parar — com desgaste emocional junto.',
-      'growth_potential', 'O melhor passo é falar com quem te enviou: plano prático para energia e rotina alinhados ao teu horário de treino.',
+      'growth_potential', 'O melhor passo é falar com quem te enviou: plano prático para energia e rotina alinhados ao seu horário de treino.',
       'dica_rapida', 'Neste nível, o foco é recuperar base antes de exigir performance; constância nasce de sustentação.',
       'cta_text', 'Preciso de apoio para voltar a treinar com energia',
       'whatsapp_prefill', 'Oi! Fiz o quiz sobre falta de disposição para treinar e o resultado ficou bem intenso. Quero conversar com quem me enviou este link para ver o melhor próximo passo.'
