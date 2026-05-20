@@ -1,11 +1,10 @@
--- Preparar conta Alexa (Pro Estética capilar) para o link de assinatura.
--- 1) Substituir o e-mail abaixo pelo e-mail real da conta dela.
--- 2) Executar no Supabase SQL Editor.
--- 3) Enviar: https://www.ylada.com/pro-estetica-capilar/assinatura
+-- Preparar conta Alexia Lima (Pro Estética capilar) — studioalexialima@gmail.com
+-- Executar no Supabase SQL Editor (service role / SQL admin).
+-- Depois enviar: https://www.ylada.com/pro-estetica-capilar/assinatura
 
 DO $$
 DECLARE
-  v_email CONSTANT TEXT := 'COLOQUE_EMAIL_ALEXA_AQUI@exemplo.com';
+  v_email CONSTANT TEXT := 'studioalexialima@gmail.com';
   v_user_id UUID;
   v_tenant_id UUID;
   v_client_id UUID;
@@ -35,7 +34,7 @@ BEGIN
     ) VALUES (
       v_user_id,
       'pecap-' || replace(v_user_id::text, '-', '')::text,
-      'Alexa',
+      'Alexia Lima',
       'estetica-capilar',
       lower(trim(v_email)),
       NOW(),
@@ -65,7 +64,7 @@ BEGIN
       business_name, segment, contact_email, leader_tenant_id,
       access_valid_until, admin_notes, created_at, updated_at
     ) VALUES (
-      'Alexa — Estética capilar',
+      'Studio Alexia Lima — Estética capilar',
       'capilar',
       lower(trim(v_email)),
       v_tenant_id,
