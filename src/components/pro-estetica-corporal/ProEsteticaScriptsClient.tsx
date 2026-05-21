@@ -185,7 +185,7 @@ export function ProEsteticaScriptsClient({
       <div className="max-w-2xl space-y-4 rounded-xl border border-sky-200 bg-sky-50/80 p-5 text-sm text-sky-950">
         <p className="font-semibold">Scripts guardados na base de dados</p>
         <p>
-          Em pré-visualização sem login não é possível gravar. Inicia sessão para criares e gerires os teus roteiros.
+          Em pré-visualização sem login não é possível salvar. Faça login para criar e gerenciar seus roteiros.
         </p>
         <Link
           href={entrarWithNextHref}

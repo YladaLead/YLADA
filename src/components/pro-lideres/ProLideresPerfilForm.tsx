@@ -36,7 +36,7 @@ const PERFIL_COPY: Record<
   },
   estetica_clinica: {
     readOnlyMessage:
-      'Só o dono ou a gestão da clínica altera estes dados. A tua conta entra como equipe neste espaço.',
+      'Só o dono ou a gestão da clínica altera estes dados. A sua conta entra como equipe neste espaço.',
     teamNameLabel: 'Nome da clínica ou equipe',
     teamNamePlaceholder: 'Ex.: Clínica Nome + cidade',
     displayNamePlaceholder: 'Como a equipe e os clientes veem o teu nome',
@@ -272,8 +272,8 @@ export function ProLideresPerfilForm({
           {c.readOnlyMessage}
           <span className="mt-2 block text-xs text-gray-600">
             {copyProfile === 'pro_lideres'
-              ? 'Nome, e-mail e WhatsApp são os da tua conta (cadastro no convite). Os outros campos são da operação do líder.'
-              : 'Nome, e-mail e WhatsApp são os da tua conta. Os outros campos são da clínica.'}
+              ? 'Nome, e-mail e WhatsApp são os da sua conta (cadastro no convite). Os outros campos são da operação do líder.'
+              : 'Nome, e-mail e WhatsApp são os da sua conta. Os outros campos são da clínica.'}
           </span>
         </p>
       ) : null}

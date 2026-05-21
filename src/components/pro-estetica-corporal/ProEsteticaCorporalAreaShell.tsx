@@ -55,7 +55,7 @@ export default function ProEsteticaCorporalAreaShell({
               role="status"
             >
               <strong className="font-semibold">Pré-visualização sem login</strong> — navegação e layout acessíveis para
-              construção. Links, Noel e perfil com dados reais exigem sessão (use &quot;Iniciar sessão&quot; no menu).
+              construção. Links, Noel e perfil com dados reais exigem login (use &quot;Fazer login&quot; no menu).
               Para exigir login de novo nesta rota:{' '}
               <code className="rounded bg-sky-100/90 px-1">PRO_ESTETICA_CORPORAL_PUBLIC_PREVIEW=false</code>.
             </div>

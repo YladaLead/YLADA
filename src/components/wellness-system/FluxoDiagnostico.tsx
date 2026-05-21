@@ -298,9 +298,9 @@ export default function FluxoDiagnostico({
                         return `Olá! Completei o diagnóstico "${fluxo.nome}" e gostaria de saber mais sobre o ${kit?.nome || 'kit recomendado'}.`
                       } else {
                         // Recrutamento (negócio / conversa — sem kit nem produto wellness)
-                        const herbalife =
-                          isProLideresRecruitment ? ' sobre a oportunidade com a equipe Herbalife' : ''
-                        return `Olá! Completei a avaliação "${fluxo.nome}" e queria saber mais${herbalife}.`
+                        const oportunidade =
+                          isProLideresRecruitment ? ' sobre a oportunidade de negócio' : ''
+                        return `Olá! Completei a avaliação "${fluxo.nome}" e queria saber mais${oportunidade}.`
                       }
                     })(),
                     template_slug: fluxo.id, // Passar ID do fluxo para identificar mensagem automática

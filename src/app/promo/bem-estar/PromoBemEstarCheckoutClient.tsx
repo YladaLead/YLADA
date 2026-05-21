@@ -286,7 +286,7 @@ export default function PromoBemEstarCheckoutClient() {
 
           {showConvertOffer && (
             <div className="mt-5 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-left text-sm text-slate-800">
-              <p className="font-semibold text-slate-900">Conta Wellness (Herbalife) encontrada</p>
+              <p className="font-semibold text-slate-900">Conta Wellness encontrada</p>
               <p className="mt-2 text-[13px] leading-relaxed text-slate-700">
                 Este e-mail já tem assinatura ativa na área <strong className="font-semibold">Wellness</strong>. O Coach
                 de bem-estar usa a <strong className="font-semibold">mesma assinatura</strong> — não é preciso pagar

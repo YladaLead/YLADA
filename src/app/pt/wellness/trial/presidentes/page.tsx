@@ -145,7 +145,7 @@ export default function TrialPresidentesPage() {
             Trial Exclusivo para Presidentes
           </h1>
           <p className="text-gray-600">
-            Ambiente exclusivo para Presidentes da Herbalife
+            Área exclusiva para líderes presidentes
           </p>
         </div>
 

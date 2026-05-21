@@ -147,7 +147,7 @@ export default function ProEsteticaCorporalSidebar({
                 className="flex min-h-[44px] w-full items-center gap-3 rounded-lg bg-blue-600 px-3 py-2.5 text-left text-sm font-semibold text-white transition-colors touch-manipulation hover:bg-blue-700"
               >
                 <span aria-hidden>🔐</span>
-                Iniciar sessão
+                Fazer login
               </Link>
             ) : (
               <button

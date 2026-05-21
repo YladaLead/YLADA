@@ -66,7 +66,7 @@ export default function ProEsteticaCorporalCyberLinkAnalyticsBar({
         className="border-b border-violet-300/40 bg-gradient-to-r from-slate-900 via-violet-950 to-slate-900 px-3 py-2 text-center text-[11px] text-violet-200 sm:px-4 sm:text-xs"
         role="status"
       >
-        Inicia sessão para veres aqui a análise dos teus links (aberturas e WhatsApp).
+        Faça login para ver aqui a análise dos seus links (aberturas e WhatsApp).
       </div>
     )
   }

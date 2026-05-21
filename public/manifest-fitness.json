@@ -1,0 +1,29 @@
+{
+  "id": "/pt/fitness/",
+  "name": "YLADA Fitness",
+  "short_name": "Fitness",
+  "description": "Ferramentas de diagnóstico e atendimento para profissionais de fitness — YLADA.",
+  "start_url": "/pt/fitness",
+  "scope": "/pt/fitness/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "icons": [
+    {
+      "src": "/images/logo/ylada/novo/ylada-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/logo/ylada/novo/ylada-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "sports"],
+  "lang": "pt-BR",
+  "dir": "ltr"
+}

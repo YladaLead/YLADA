@@ -3,11 +3,11 @@ import Link from 'next/link'
 export default function ProEsteticaCapilarContaOutraEdicaoPage() {
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Esta conta está noutra edição YLADA Pro</h1>
+      <h1 className="text-2xl font-bold text-gray-900">Esta conta está em outra edição YLADA Pro</h1>
       <p className="text-gray-700">
-        Este e-mail já está ligado a outro espaço YLADA Pro. Usa um <strong>e-mail dedicado</strong> para{' '}
+        Este e-mail já está vinculado a outro espaço YLADA Pro. Use um <strong>e-mail dedicado</strong> para{' '}
         <strong>Estética capilar</strong> ou
-        fala connosco para reorganizar o acesso.
+        fale conosco para reorganizar o acesso.
       </p>
       <div className="flex flex-col gap-3 sm:flex-row">
         <Link

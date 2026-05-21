@@ -9,7 +9,7 @@ export default function ProLideresMemberNoelLaboratorioPage() {
     <div className="mx-auto max-w-3xl space-y-6 pb-10">
       <div>
         <p className="text-sm font-medium text-emerald-700">Laboratório · Noel da equipe (membro)</p>
-        <h1 className="text-2xl font-bold text-gray-900">Testes de campo Herbalife</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Testes de campo</h1>
         <p className="mt-2 text-sm text-gray-600">
           Você entra como <strong>líder</strong> — não precisa de assinatura Noel membro. Ative{' '}
           <strong>Noel equipe</strong> na configuração antes.

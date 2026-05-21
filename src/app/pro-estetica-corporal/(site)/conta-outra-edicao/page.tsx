@@ -6,11 +6,11 @@ import Link from 'next/link'
 export default function ProEsteticaCorporalContaOutraEdicaoPage() {
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Esta conta está noutra edição YLADA Pro</h1>
+      <h1 className="text-2xl font-bold text-gray-900">Esta conta está em outra edição YLADA Pro</h1>
       <p className="text-gray-700">
-        O teu e-mail já está ligado a um espaço de <strong className="text-gray-900">outra linha</strong> (por exemplo
-        Pro Líderes). Por agora, cada conta tem <strong className="text-gray-900">um</strong> tenant — usa um e-mail
-        dedicado para <strong className="text-gray-900">Estética corporal</strong> ou fala connosco para
+        O seu e-mail já está vinculado a um espaço de <strong className="text-gray-900">outra linha</strong> (por exemplo
+        Pro Líderes). Por enquanto, cada conta tem <strong className="text-gray-900">um</strong> tenant — use um e-mail
+        dedicado para <strong className="text-gray-900">Estética corporal</strong> ou fale conosco para
         reorganizar o acesso.
       </p>
       <div className="flex flex-col gap-3 sm:flex-row">

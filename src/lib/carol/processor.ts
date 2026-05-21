@@ -49,6 +49,22 @@ function isAutoResponse(text: string): boolean {
     'estou a disposição para tirar',
     'vagas deste mês estão',
     'garantir seu horário',
+    // Respostas automáticas tipo "aguarde um momento" — muito comuns no WhatsApp Business BR
+    'aguarde um momento',
+    'aguarda um momento',
+    'aguarde um instante',
+    'já irei te responder',
+    'já vou te responder',
+    'logo irei te responder',
+    'logo te respondo',
+    'logo te atendo',
+    'logo estarei com você',
+    'já te atendo',
+    'em instantes te atendo',
+    'em instantes irei te atender',
+    'vou te responder em breve',
+    'responderei em breve',
+    'respondo em breve',
   ]
   // Também detecta por estrutura: mensagem longa (>180 chars) com padrão de bot comercial
   const isBotStructure = t.length > 180 && (

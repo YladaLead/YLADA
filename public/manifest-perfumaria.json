@@ -1,0 +1,29 @@
+{
+  "id": "/pt/perfumaria/",
+  "name": "YLADA Perfumaria",
+  "short_name": "Perfumaria",
+  "description": "Ferramentas de atendimento e diagnóstico para perfumarias e varejo de alto ticket — YLADA.",
+  "start_url": "/pt/perfumaria",
+  "scope": "/pt/perfumaria/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#ec4899",
+  "icons": [
+    {
+      "src": "/images/logo/ylada/novo/ylada-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/logo/ylada/novo/ylada-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "lifestyle"],
+  "lang": "pt-BR",
+  "dir": "ltr"
+}

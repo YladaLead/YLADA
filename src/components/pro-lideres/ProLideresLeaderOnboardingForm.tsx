@@ -203,7 +203,7 @@ export function ProLideresLeaderOnboardingForm({
             />
           </label>
           <label className="block sm:col-span-1">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Anos na Herbalife</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">Anos no setor</span>
             <input
               type="number"
               min={0}
@@ -217,7 +217,7 @@ export function ProLideresLeaderOnboardingForm({
             />
           </label>
           <label className="block sm:col-span-2">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Antes da Herbalife, o que fazia?</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">Antes disso, o que você fazia?</span>
             <input
               disabled={disabled}
               value={v.careerBeforeHerbalife}
