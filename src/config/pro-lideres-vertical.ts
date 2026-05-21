@@ -8,9 +8,10 @@
 export const PRO_LIDERES_VERTICAL_CODE =
   process.env.NEXT_PUBLIC_PRO_LIDERES_VERTICAL_CODE?.trim() || 'h-lider'
 
-/** Nome amigável do operador (ex.: parceria). */
+/** Nome amigável do operador (neutro para App Store; override via env). */
 export const PRO_LIDERES_VERTICAL_BRAND_LABEL =
-  process.env.NEXT_PUBLIC_PRO_LIDERES_VERTICAL_BRAND_LABEL?.trim() || 'Herbalife'
+  process.env.NEXT_PUBLIC_PRO_LIDERES_VERTICAL_BRAND_LABEL?.trim() ||
+  'Bem-estar e Nutrição'
 
 /**
  * Rótulo de segmento no catálogo (estilo ylada.com — ex.: pill "Nutrição").
