@@ -431,7 +431,7 @@ function ConversationDetail({
   const [currentStatus, setCurrentStatus] = useState(conversation.status)
   const [showStatusMenu, setShowStatusMenu] = useState(false)
   const [updatingStatus, setUpdatingStatus] = useState(false)
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const load = useCallback(async () => {
@@ -455,7 +455,13 @@ function ConversationDetail({
   }, [load])
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    window.scrollTo(0, 0)
+  }, [conversation.id])
+
+  useEffect(() => {
+    const el = messagesContainerRef.current
+    if (!el) return
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
   }, [messages])
 
   // Agrupa mensagens por data
@@ -535,9 +541,9 @@ function ConversationDetail({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#e5ddd5]">
-      {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-gray-200 bg-[#075e54] px-4 py-3">
+    <div className="flex h-[calc(100dvh-52px)] flex-col overflow-hidden bg-[#e5ddd5]">
+      {/* Header — fixo; scroll só na área de mensagens */}
+      <div className="shrink-0 border-b border-gray-200 bg-[#075e54] px-4 py-3">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -619,7 +625,7 @@ function ConversationDetail({
 
       {/* Aviso de pausa */}
       {paused && (
-        <div className="border-b border-orange-200 bg-orange-50 px-4 py-2">
+        <div className="shrink-0 border-b border-orange-200 bg-orange-50 px-4 py-2">
           <p className="text-xs font-semibold text-orange-700">
             ⏸ Carol pausada — você está no controle desta conversa. A Carol não vai responder automaticamente.
           </p>
@@ -627,7 +633,7 @@ function ConversationDetail({
       )}
 
       {/* Mensagens */}
-      <div className="flex-1 overflow-y-auto px-3 py-4">
+      <div ref={messagesContainerRef} className="min-h-0 flex-1 overflow-y-auto px-3 py-4">
         {loading && messages.length === 0 ? (
           <div className="flex justify-center py-10 text-gray-500">Carregando...</div>
         ) : messages.length === 0 ? (
@@ -683,12 +689,11 @@ function ConversationDetail({
             </div>
           ))
         )}
-        <div ref={bottomRef} />
       </div>
 
       {/* Info do lead (se agendado) */}
       {currentStatus === 'diagnostico_agendado' && (
-        <div className="border-t border-gray-200 bg-green-50 px-4 py-3">
+        <div className="shrink-0 border-t border-gray-200 bg-green-50 px-4 py-3">
           <p className="text-xs font-semibold text-green-700">✓ Diagnóstico agendado</p>
           {conversation.email && (
             <p className="text-xs text-green-600">📧 {conversation.email}</p>
@@ -697,7 +702,7 @@ function ConversationDetail({
       )}
 
       {/* Campo de resposta manual */}
-      <div className="border-t border-gray-200 bg-white px-3 py-2">
+      <div className="shrink-0 border-t border-gray-200 bg-white px-3 py-2">
         {!paused && (
           <p className="mb-1 text-center text-[10px] text-gray-400">
             Pause a Carol para responder manualmente
