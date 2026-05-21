@@ -66,6 +66,11 @@ function isAutoResponse(text: string): boolean {
     'responderei em breve',
     'respondo em breve',
   ]
+  // Emojis isolados ou stickers de confirmação — não merecem resposta
+  const stripped = t.replace(/[\s​-‍﻿]/g, '')
+  const emojiOnlyPattern = /^(\p{Emoji})+$/u
+  if (stripped.length <= 6 && emojiOnlyPattern.test(stripped)) return true
+
   // Também detecta por estrutura: mensagem longa (>180 chars) com padrão de bot comercial
   const isBotStructure = t.length > 180 && (
     t.includes('especialista em') ||
@@ -249,7 +254,7 @@ Se quiser ir na frente e já chamar ele direto:
 ETAPA 10 — SE A AGENDA ESTIVER CHEIA:
 Se a pessoa disser que a agenda está cheia:
 "Que ótimo! Você consegue manter cheia todo mês de forma consistente?"
-Se sim → "Incrível! Parece que você já encontrou o caminho 😊 Se em algum momento oscular, me chama aqui."
+Se sim → "Incrível! Parece que você já encontrou o caminho 😊 Se em algum momento oscilar, me chama aqui."
 Se não (oscila) → voltar ao fluxo normal da dor da agenda.
 
 ---
@@ -415,7 +420,7 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
         ...history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
       ],
       temperature: 0.7,
-      max_tokens: 500,
+      max_tokens: 900,
     })
 
     const reply = response.choices[0].message.content!

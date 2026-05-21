@@ -10,7 +10,7 @@ export async function sendWhatsAppTemplate(
     throw new Error('[Carol] WHATSAPP_PHONE_ID ou WHATSAPP_TOKEN não configurados')
   }
 
-  const url = `https://graph.facebook.com/v18.0/${phoneId}/messages`
+  const url = `https://graph.facebook.com/v21.0/${phoneId}/messages`
 
   const components =
     variables.length > 0
@@ -59,7 +59,7 @@ export async function sendWhatsAppMessage(to: string, text: string): Promise<voi
     throw new Error('[Carol] WHATSAPP_PHONE_ID ou WHATSAPP_TOKEN não configurados')
   }
 
-  const url = `https://graph.facebook.com/v18.0/${phoneId}/messages`
+  const url = `https://graph.facebook.com/v21.0/${phoneId}/messages`
 
   const response = await fetch(url, {
     method: 'POST',
