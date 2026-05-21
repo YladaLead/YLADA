@@ -30,11 +30,11 @@ export const metadata = {
     siteName: 'YLADA',
     images: [
       {
-        // OG image 1200×630 com fundo sólido — obrigatório para WhatsApp/Facebook/LinkedIn
+        // OG image quadrada 1200×1200 — formato ideal para WhatsApp (corta ao centro)
         url: 'https://www.ylada.com/images/logo/ylada/novo/ylada-og-1200x630.png',
         width: 1200,
-        height: 630,
-        alt: 'YLADA - Boas conversas começam com boas perguntas',
+        height: 1200,
+        alt: 'YLADA - Explique menos. Venda mais.',
         type: 'image/png',
       },
     ],
