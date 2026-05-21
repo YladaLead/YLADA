@@ -12,7 +12,7 @@ export function parseInteractiveMessage(interactive: {
   if (interactive.type === 'list_reply' && interactive.list_reply) {
     const { id, title, description } = interactive.list_reply
     const parts = [title, description].filter(Boolean)
-    if (parts.length > 0) return `[lista: ${parts.join(' — ')}]`
+    if (parts.length > 0) return `[lista: ${parts.join(', ')}]`
     return id ? `[lista id: ${id}]` : null
   }
 
