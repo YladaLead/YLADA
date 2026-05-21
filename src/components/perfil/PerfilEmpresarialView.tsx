@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
+import { DeleteAccountSection } from '@/components/shared/DeleteAccountSection'
 import {
   emptyFormData,
   profileToFormData,
@@ -1670,6 +1671,8 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
             </button>
           </div>
         </form>
+
+        <DeleteAccountSection redirectTo="/entrar" />
       </div>
     </YladaAreaShell>
   )

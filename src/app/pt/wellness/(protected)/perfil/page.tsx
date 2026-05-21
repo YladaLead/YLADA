@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 // REMOVIDO: ProtectedRoute e RequireSubscription - layout server-side cuida disso
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
+import { DeleteAccountSection } from '@/components/shared/DeleteAccountSection'
 
 interface PerfilCompleto {
   objetivo_principal?: string
@@ -616,6 +617,11 @@ function WellnessPerfilContent() {
           >
             ← Voltar para Home
           </button>
+        </div>
+
+        {/* Exclusão de conta — obrigatório App Store */}
+        <div className="mt-8">
+          <DeleteAccountSection redirectTo="/entrar" />
         </div>
       </main>
     </div>

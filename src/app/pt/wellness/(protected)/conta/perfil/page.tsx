@@ -7,6 +7,7 @@ import NoelOnboardingCompleto from '@/components/wellness/NoelOnboardingCompleto
 import { useAuth } from '@/contexts/AuthContext'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { WellnessConsultantProfile } from '@/types/wellness-system'
+import { DeleteAccountSection } from '@/components/shared/DeleteAccountSection'
 
 interface MetasConstrucao {
   id?: string
@@ -747,7 +748,14 @@ export default function ContaPerfilPage() {
               </div>
 
             </div>
+
+              {/* Exclusão de conta — obrigatório App Store */}
+              <div className="mt-8">
+                <DeleteAccountSection redirectTo="/entrar" />
+              </div>
+
           </div>
+        </div>
     </ConditionalWellnessSidebar>
   )
 }

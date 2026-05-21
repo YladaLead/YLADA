@@ -10,6 +10,7 @@ import {
   type EsteticaMessageToneId,
 } from '@/config/estetica-message-tone'
 import { ProLideresOpportunityPublicShareBlock } from '@/components/pro-lideres/ProLideresOpportunityPublicShareBlock'
+import { DeleteAccountSection } from '@/components/shared/DeleteAccountSection'
 
 export type ProLideresPerfilCopyProfile = 'pro_lideres' | 'estetica_clinica'
 
@@ -260,6 +261,7 @@ export function ProLideresPerfilForm({
   const personalFieldsEditable = canEditTenantProfile || isMemberTeamProfile
 
   return (
+    <>
     <form onSubmit={onSubmit} className="space-y-5">
       {error && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">{error}</div>
@@ -498,5 +500,8 @@ export function ProLideresPerfilForm({
         </button>
       )}
     </form>
+
+    <DeleteAccountSection redirectTo="/entrar" />
+    </>
   )
 }
