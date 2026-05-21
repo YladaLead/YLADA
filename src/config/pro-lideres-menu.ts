@@ -43,9 +43,10 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
       { key: 'scripts', label: 'Scripts', path: 'scripts', icon: '📝', leaderOnly: true },
       {
         key: 'noel-membro',
-        label: 'Noel',
+        label: 'Noel equipe',
         path: 'noel-membro',
         icon: '💬',
+        subtitle: 'Visão do membro',
         requireNoelMemberNav: true,
       },
       { key: 'tarefas', label: 'Tarefas diárias', path: 'tarefas', icon: '✅' },
