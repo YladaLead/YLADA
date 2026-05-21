@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback, useMemo, type ReactNode } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
@@ -1047,8 +1048,15 @@ export default function NoelChat({
         {showChatHeaderTitle && (
           <div className="min-w-0 flex flex-1 items-center gap-2 sm:gap-3">
             {showHeaderEmoji && (
-              <span className="text-lg shrink-0" aria-hidden>
-                🧠
+              <span className="shrink-0 flex items-center" aria-hidden>
+                <Image
+                  src="/images/logo/noel/noel-icon-48.png"
+                  alt="Noel"
+                  width={28}
+                  height={28}
+                  className="rounded-full"
+                  priority
+                />
               </span>
             )}
             <div className="min-w-0 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">

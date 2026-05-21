@@ -1,12 +1,15 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
 import { PRO_LIDERES_MENU_GROUPS, proLideresItemHrefWithBase, type ProLideresMenuItem } from '@/config/pro-lideres-menu'
 import { useAuth } from '@/hooks/useAuth'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
 import { setProLideresTeamViewPreviewCookie } from '@/lib/pro-lideres-team-preview'
+
+const NOEL_KEYS = ['noel', 'noel-membro', 'noel-equipe', 'noel-laboratorio', 'noel-membro-laboratorio']
 
 interface ProLideresSidebarProps {
   isMobileOpen?: boolean
@@ -86,8 +89,18 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
           isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
         }`}
       >
-        <span className="shrink-0" aria-hidden>
-          {item.icon}
+        <span className="shrink-0 flex items-center justify-center" aria-hidden>
+          {NOEL_KEYS.includes(item.key) ? (
+            <Image
+              src="/images/logo/noel/noel-icon-32.png"
+              alt="Noel"
+              width={22}
+              height={22}
+              className="rounded-full"
+            />
+          ) : (
+            item.icon
+          )}
         </span>
         <span className="flex min-w-0 flex-col gap-0 leading-snug">
           <span>{item.label}</span>
