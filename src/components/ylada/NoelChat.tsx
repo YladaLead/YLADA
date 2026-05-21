@@ -1080,6 +1080,23 @@ export default function NoelChat({
         </button>
       </div>
       <div className="flex-1 overflow-y-auto min-h-[380px] max-h-[70vh] p-4 sm:p-5 space-y-5 bg-gradient-to-b from-sky-50/50 to-white">
+        {/* Estado vazio — aparece antes da primeira mensagem real */}
+        {messages.filter(m => !(m.role === 'assistant' && m.id === 'welcome')).length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full min-h-[280px] gap-4 select-none">
+            <Image
+              src="/images/logo/noel/noel-icon-96.png"
+              alt="Noel"
+              width={80}
+              height={80}
+              className="rounded-full shadow-md opacity-90"
+              priority
+            />
+            <div className="text-center">
+              <p className="text-base font-semibold text-sky-900">{headerTitle ?? 'Noel'}</p>
+              <p className="text-sm text-sky-700/80 mt-1">{headerTagline ?? 'Seu mentor estratégico'}</p>
+            </div>
+          </div>
+        )}
         {messages.map((msg) => {
           if (msg.role === 'assistant' && msg.id === 'welcome' && !String(msg.content ?? '').trim()) {
             return null
