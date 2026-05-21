@@ -289,47 +289,66 @@ Você já tem o diagnóstico inicial. Por isso:
 // Cache em memória de messageIds já processados (evita duplicatas do Meta)
 const processedMessageIds = new Set<string>()
 
-export async function processMessage({
-  from,
-  text,
-  messageId,
-  timestamp,
-  isFlowResponse = false,
-}: {
+export type CarolInboundPayload = {
   from: string
   text: string
   messageId: string
   timestamp: string
   isFlowResponse?: boolean
-}): Promise<void> {
+}
+
+export type IngestInboundResult =
+  | { status: 'duplicate' }
+  | { status: 'saved_no_reply' }
+  | {
+      status: 'saved'
+      payload: CarolInboundPayload
+      conversationId: string
+      conversation: Awaited<ReturnType<typeof getOrCreateConversation>>
+    }
+
+/** Grava mensagem no Supabase de forma síncrona (antes de responder 200 ao Meta). */
+export async function ingestInboundMessage(
+  payload: CarolInboundPayload
+): Promise<IngestInboundResult> {
+  const { from, text, messageId } = payload
+
+  if (processedMessageIds.has(messageId)) {
+    console.log(`[Carol] ⚠️ Mensagem duplicada ignorada: ${messageId}`)
+    return { status: 'duplicate' }
+  }
+  processedMessageIds.add(messageId)
+  if (processedMessageIds.size > 1000) {
+    const first = processedMessageIds.values().next().value
+    processedMessageIds.delete(first)
+  }
+
+  const conversation = await getOrCreateConversation(from)
+
+  if (isAutoResponse(text)) {
+    console.log(`[Carol] 🤖 Auto-resposta detectada de ${from} — ignorando silenciosamente`)
+    await saveMessage(conversation.id, 'user', `[auto-resposta ignorada] ${text}`)
+    return { status: 'saved_no_reply' }
+  }
+
+  await saveMessage(conversation.id, 'user', text)
+  console.log(`[Carol] 📥 Mensagem salva de ${from}: ${text.slice(0, 80)}`)
+
+  return {
+    status: 'saved',
+    payload,
+    conversationId: conversation.id,
+    conversation,
+  }
+}
+
+/** Gera e envia resposta da Carol (pode rodar em background após ingest). */
+export async function generateCarolReply(ingest: Extract<IngestInboundResult, { status: 'saved' }>): Promise<void> {
+  const { payload, conversation } = ingest
+  const { from, text, isFlowResponse = false } = payload
+
   try {
-    // ── DEDUPLICAÇÃO: Meta às vezes reenvia o mesmo webhook ─────────────────
-    if (processedMessageIds.has(messageId)) {
-      console.log(`[Carol] ⚠️ Mensagem duplicada ignorada: ${messageId}`)
-      return
-    }
-    processedMessageIds.add(messageId)
-    // Limpa cache após 1000 IDs para não crescer indefinidamente
-    if (processedMessageIds.size > 1000) {
-      const first = processedMessageIds.values().next().value
-      processedMessageIds.delete(first)
-    }
-
-    // Busca ou cria conversa
-    const conversation = await getOrCreateConversation(from)
-
     const ANDRE_NUMBER = '5519981868000'
-
-    // ── AUTO-RESPOSTA: ignora bots de outras empresas ───────────────────────
-    if (isAutoResponse(text)) {
-      console.log(`[Carol] 🤖 Auto-resposta detectada de ${from} — ignorando silenciosamente`)
-      // Salva no histórico para contexto, mas não responde
-      await saveMessage(conversation.id, 'user', `[auto-resposta ignorada] ${text}`)
-      return
-    }
-
-    // Salva mensagem recebida
-    await saveMessage(conversation.id, 'user', text)
 
     // ── PAUSA: Se Andre assumiu a conversa, Carol não responde ──────────────
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -458,7 +477,7 @@ export async function processMessage({
 
     console.log(`[Carol] Resposta enviada para ${from}`)
   } catch (error) {
-    console.error(`[Carol] Erro ao processar mensagem de ${from}:`, error)
+    console.error(`[Carol] Erro ao gerar resposta para ${from}:`, error)
     try {
       await sendWhatsAppMessage(
         from,
@@ -468,4 +487,10 @@ export async function processMessage({
       console.error('[Carol] Erro no fallback:', fallbackError)
     }
   }
+}
+
+export async function processMessage(payload: CarolInboundPayload): Promise<void> {
+  const ingest = await ingestInboundMessage(payload)
+  if (ingest.status === 'duplicate' || ingest.status === 'saved_no_reply') return
+  await generateCarolReply(ingest)
 }
