@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { sendWhatsAppTemplate } from '@/lib/carol/sender'
-import { getOrCreateConversation, saveMessage } from '@/lib/carol/conversation'
+import { registerOutboundSend, normalizeCarolPhone } from '@/lib/carol/register-outbound'
 
 // Templates disponíveis para envio outbound
 export const AVAILABLE_TEMPLATES = [
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Normaliza número (remove +, espaços, traços)
-  const phoneClean = phone.replace(/\D/g, '')
+  const phoneClean = normalizeCarolPhone(phone)
   if (phoneClean.length < 10) {
     return NextResponse.json({ error: 'Número de telefone inválido' }, { status: 400 })
   }
@@ -62,14 +62,12 @@ export async function POST(request: NextRequest) {
     // Envia o template via WhatsApp API
     await sendWhatsAppTemplate(phoneClean, template, [nome])
 
-    // Registra no Supabase como primeiro contato
-    const conversation = await getOrCreateConversation(phoneClean)
-    const templateInfo = AVAILABLE_TEMPLATES.find((t) => t.name === template)
-    await saveMessage(
-      conversation.id,
-      'assistant',
-      `[TEMPLATE OUTBOUND: ${templateInfo?.label}] Enviado para ${nome}`
-    )
+    await registerOutboundSend({
+      phone: phoneClean,
+      template,
+      nome,
+      source: 'admin',
+    })
 
     return NextResponse.json({
       success: true,
