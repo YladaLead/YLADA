@@ -168,45 +168,17 @@ function ProEsteticaCapilarAssinaturaContent() {
               </p>
             ) : (
               <div className="flex w-full flex-col gap-3 text-left">
-                <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <p className="text-sm font-semibold text-gray-900">Mensal</p>
-                  <p className="mt-1 text-2xl font-bold text-sky-800 tabular-nums">
-                    {monthlyBrl != null ? `R$ ${fmtBrl(monthlyBrl)}` : 'R$ 300,00'}
-                    <span className="text-sm font-medium text-gray-600">/mês</span>
-                  </p>
-                  <p className="mt-1 text-xs text-gray-500">Renovação automática todo mês.</p>
-                  <button
-                    type="button"
-                    onClick={() => void startCheckout('monthly')}
-                    disabled={checkoutLoading}
-                    className="mt-3 w-full rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-700 disabled:opacity-60"
-                  >
-                    {checkoutLoading && checkoutPlan === 'monthly'
-                      ? 'A abrir Mercado Pago…'
-                      : 'Assinar mensal'}
-                  </button>
-                </div>
-                <div className="rounded-xl border-2 border-sky-200 bg-sky-50/50 p-4 shadow-sm">
-                  <p className="text-sm font-semibold text-gray-900">Anual</p>
-                  <p className="mt-1 text-2xl font-bold text-sky-900 tabular-nums">
-                    {annualMonthlyBrl != null ? `12× de R$ ${fmtBrl(annualMonthlyBrl)}` : '12× de R$ 150,00'}
-                  </p>
-                  <p className="mt-1 text-xs text-gray-600">
-                    Total{' '}
-                    {annualTotalBrl != null ? `R$ ${fmtBrl(annualTotalBrl)}` : 'R$ 1.800,00'} por ano — cobrança
-                    anual no cartão.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => void startCheckout('annual')}
-                    disabled={checkoutLoading}
-                    className="mt-3 w-full rounded-lg bg-sky-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-900 disabled:opacity-60"
-                  >
-                    {checkoutLoading && checkoutPlan === 'annual'
-                      ? 'A abrir Mercado Pago…'
-                      : 'Assinar anual'}
-                  </button>
-                </div>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Para renovar ou contratar, acesse o site pelo navegador:
+                </p>
+                <a
+                  href="https://ylada.com/renovar"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full rounded-lg bg-sky-600 px-4 py-3 text-sm font-semibold text-white text-center hover:bg-sky-700"
+                >
+                  Renovar em ylada.com →
+                </a>
               </div>
             )}
           </>

@@ -140,19 +140,18 @@ function ProLideresAssinaturaEquipeContent() {
             estiver regularizada, você volta a entrar normalmente.
           </p>
         ) : (
-          <div className="flex w-full flex-col items-stretch gap-6 sm:items-center">
+          <div className="flex w-full flex-col items-stretch gap-4 sm:items-center">
             <p className="w-full text-left text-sm leading-relaxed text-gray-700 sm:text-center">
-              Comece a convidar sua equipe e construa um{' '}
-              <strong className="text-gray-900">crescimento organizado e previsível</strong> com clareza para orientar.
+              Para ativar ou renovar sua assinatura, acesse o site pelo navegador:
             </p>
-            <button
-              type="button"
-              onClick={() => void startCheckout()}
-              disabled={checkoutLoading}
-              className="touch-manipulation inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-8 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-60 sm:max-w-[13.5rem]"
+            <a
+              href="https://ylada.com/renovar"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="touch-manipulation inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-8 text-sm font-semibold text-white hover:bg-blue-700 sm:max-w-[13.5rem]"
             >
-              {checkoutLoading ? 'A abrir…' : 'Ativar'}
-            </button>
+              Ativar em ylada.com →
+            </a>
           </div>
         )}
       </div>
