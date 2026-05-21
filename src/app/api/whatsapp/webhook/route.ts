@@ -2,6 +2,7 @@ import { NextRequest, NextResponse, unstable_after as after } from 'next/server'
 import { processMessage } from '@/lib/carol/processor'
 import { sendWhatsAppMessage } from '@/lib/carol/sender'
 import { transcribeWhatsAppAudio } from '@/lib/carol/transcriber'
+import { parseInteractiveMessage } from '@/lib/carol/parse-interactive'
 
 // Interpreta as respostas do WhatsApp Flow e retorna texto legível para a Carol
 function parseFlowResponse(responseJson: string): string {
@@ -138,6 +139,24 @@ export async function POST(request: NextRequest) {
                     timestamp: message.timestamp,
                     isFlowResponse: true,
                   })
+
+                } else if (
+                  message.type === 'interactive' &&
+                  (message.interactive?.type === 'button_reply' ||
+                    message.interactive?.type === 'list_reply')
+                ) {
+                  const parsed = parseInteractiveMessage(message.interactive)
+                  if (parsed) {
+                    console.log(`[Carol] Interativo (${message.interactive.type}) de ${from}: ${parsed}`)
+                    await processMessage({
+                      from,
+                      text: parsed,
+                      messageId: message.id,
+                      timestamp: message.timestamp,
+                    })
+                  } else {
+                    console.log(`[Carol] Interativo vazio de ${from} — ignorando`)
+                  }
 
                 } else if (['image', 'video', 'document'].includes(message.type)) {
                   console.log(`[Carol] Arquivo (${message.type}) recebido de ${from}`)

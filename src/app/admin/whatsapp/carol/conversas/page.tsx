@@ -16,7 +16,20 @@ type Conversation = {
   created_at: string
   updated_at: string
   last_message: { content: string; role: string; created_at: string } | null
+  has_user_reply?: boolean
+  has_outbound?: boolean
+  follow_up_sent?: boolean
+  awaiting_reply?: boolean
 }
+
+type ConversationStats = {
+  total: number
+  responded: number
+  awaiting_reply: number
+  follow_up_sent: number
+}
+
+type ReplyFilter = 'all' | 'responded' | 'awaiting' | 'follow_up'
 
 type Message = {
   id: string
@@ -87,6 +100,31 @@ function StatusBadge({ status }: { status: string }) {
       {cfg.label}
     </span>
   )
+}
+
+function ReplyBadge({ conversation: c }: { conversation: Conversation }) {
+  if (c.has_user_reply) {
+    return (
+      <span className="inline-block rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-800">
+        Respondeu
+      </span>
+    )
+  }
+  if (c.follow_up_sent) {
+    return (
+      <span className="inline-block rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-800">
+        Follow-up ✓
+      </span>
+    )
+  }
+  if (c.awaiting_reply || c.has_outbound) {
+    return (
+      <span className="inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900">
+        Sem resposta
+      </span>
+    )
+  }
+  return null
 }
 
 // ─── Modal: Enviar Template ───────────────────────────────────────────────────
@@ -215,16 +253,26 @@ function SendTemplateModal({ onClose }: { onClose: () => void }) {
 
 function ConversationList({
   conversations,
+  stats,
   loading,
   onSelect,
   onRefresh,
 }: {
   conversations: Conversation[]
+  stats: ConversationStats | null
   loading: boolean
   onSelect: (c: Conversation) => void
   onRefresh: () => void
 }) {
   const [showModal, setShowModal] = useState(false)
+  const [filter, setFilter] = useState<ReplyFilter>('all')
+
+  const filtered = conversations.filter((c) => {
+    if (filter === 'responded') return c.has_user_reply
+    if (filter === 'awaiting') return c.awaiting_reply && !c.has_user_reply
+    if (filter === 'follow_up') return c.follow_up_sent
+    return true
+  })
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -233,7 +281,16 @@ function ConversationList({
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-lg font-bold text-gray-900">Conversas da Carol</h1>
-            <p className="text-xs text-gray-500">{conversations.length} lead{conversations.length !== 1 ? 's' : ''}</p>
+            <p className="text-xs text-gray-500">
+              {filtered.length} de {conversations.length} lead{conversations.length !== 1 ? 's' : ''}
+              {stats ? (
+                <span className="text-gray-400">
+                  {' '}
+                  · {stats.responded} respondeu · {stats.awaiting_reply} sem resposta
+                  {stats.follow_up_sent > 0 ? ` · ${stats.follow_up_sent} follow-up` : ''}
+                </span>
+              ) : null}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -251,6 +308,30 @@ function ConversationList({
             </button>
           </div>
         </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {(
+            [
+              ['all', 'Todos'],
+              ['responded', 'Respondeu'],
+              ['awaiting', 'Sem resposta'],
+              ['follow_up', 'Follow-up'],
+            ] as const
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setFilter(key)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                filter === key
+                  ? 'bg-[#075e54] text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {label}
+              {key === 'awaiting' && stats ? ` (${stats.awaiting_reply})` : ''}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Lista */}
@@ -259,11 +340,17 @@ function ConversationList({
           <div className="flex items-center justify-center py-20 text-gray-400">
             Carregando...
           </div>
-        ) : conversations.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center text-gray-400">
             <p className="text-4xl mb-2">💬</p>
-            <p className="font-medium">Nenhuma conversa ainda</p>
-            <p className="text-sm mt-1">Quando alguém falar com a Carol aparece aqui</p>
+            <p className="font-medium">
+              {conversations.length === 0 ? 'Nenhuma conversa ainda' : 'Nenhuma neste filtro'}
+            </p>
+            <p className="text-sm mt-1">
+              {conversations.length === 0
+                ? 'Quando alguém falar com a Carol aparece aqui'
+                : 'Tente outro filtro acima'}
+            </p>
             <button
               onClick={() => setShowModal(true)}
               className="mt-4 rounded-xl bg-[#075e54] px-5 py-2.5 text-sm font-semibold text-white"
@@ -272,7 +359,7 @@ function ConversationList({
             </button>
           </div>
         ) : (
-          conversations.map((c) => (
+          filtered.map((c) => (
             <button
               key={c.id}
               onClick={() => onSelect(c)}
@@ -294,15 +381,16 @@ function ConversationList({
                 {c.nome && (
                   <p className="text-xs text-gray-400">{formatPhone(c.phone)}</p>
                 )}
-                <div className="mt-1 flex items-center justify-between gap-2">
-                  <p className="truncate text-sm text-gray-500">
-                    {c.last_message
-                      ? (c.last_message.role === 'assistant' ? '🤖 ' : '👤 ') +
-                        c.last_message.content.slice(0, 60)
-                      : 'Sem mensagens'}
-                  </p>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  <ReplyBadge conversation={c} />
                   <StatusBadge status={c.status} />
                 </div>
+                <p className="mt-1 truncate text-sm text-gray-500">
+                  {c.last_message
+                    ? (c.last_message.role === 'assistant' ? '🤖 ' : '👤 ') +
+                      c.last_message.content.slice(0, 60)
+                    : 'Sem mensagens'}
+                </p>
               </div>
 
               <span className="shrink-0 text-gray-300">›</span>
@@ -655,6 +743,7 @@ function ConversationDetail({
 
 function CarolConversasContent() {
   const [conversations, setConversations] = useState<Conversation[]>([])
+  const [stats, setStats] = useState<ConversationStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Conversation | null>(null)
 
@@ -664,6 +753,7 @@ function CarolConversasContent() {
       const res = await fetch('/api/admin/carol/conversations', { credentials: 'include' })
       const data = await res.json()
       setConversations(data.conversations ?? [])
+      setStats(data.stats ?? null)
     } finally {
       setLoading(false)
     }
@@ -688,6 +778,7 @@ function CarolConversasContent() {
   return (
     <ConversationList
       conversations={conversations}
+      stats={stats}
       loading={loading}
       onSelect={setSelected}
       onRefresh={loadConversations}

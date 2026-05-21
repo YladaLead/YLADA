@@ -14,6 +14,7 @@ export async function registerOutboundSend(params: {
   template: string
   nome?: string
   source?: 'ylada_outbound' | 'admin'
+  isFollowUp?: boolean
 }): Promise<{ conversationId: string; phone: string }> {
   const phoneClean = normalizeCarolPhone(params.phone)
   if (phoneClean.length < 10) {
@@ -26,10 +27,11 @@ export async function registerOutboundSend(params: {
   const sourceTag =
     params.source === 'ylada_outbound' ? 'Ylada Outbound' : 'Admin'
 
+  const followTag = params.isFollowUp ? ' (Follow-up)' : ''
   await saveMessage(
     conversation.id,
     'assistant',
-    `[TEMPLATE OUTBOUND: ${label}] Enviado para ${nome ?? 'lead'} · ${sourceTag}`
+    `[TEMPLATE OUTBOUND: ${label}]${followTag} Enviado para ${nome ?? 'lead'} · ${sourceTag}`
   )
 
   if (nome && !conversation.nome) {
