@@ -747,15 +747,13 @@ export default function ContaPerfilPage() {
                 </div>
               </div>
 
-            </div>
-
               {/* Exclusão de conta — obrigatório App Store */}
               <div className="mt-8">
                 <DeleteAccountSection redirectTo="/entrar" />
               </div>
 
+            </div>
           </div>
-        </div>
     </ConditionalWellnessSidebar>
   )
 }

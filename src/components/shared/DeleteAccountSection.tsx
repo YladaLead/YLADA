@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase-client'
 
 /**
  * DeleteAccountSection — Seção de exclusão de conta (obrigatória Apple App Store)
@@ -17,7 +17,7 @@ interface DeleteAccountSectionProps {
 
 export function DeleteAccountSection({ redirectTo = '/entrar' }: DeleteAccountSectionProps) {
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [step, setStep] = useState<'idle' | 'confirm' | 'deleting' | 'done' | 'error'>('idle')
   const [error, setError] = useState('')
 

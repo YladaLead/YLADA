@@ -1,9 +1,9 @@
 {
-  "name": "YLADA - Boas conversas começam com boas perguntas",
+  "name": "YLADA",
   "short_name": "YLADA",
-  "description": "Boas conversas começam com boas perguntas. Conecte-se através de links inteligentes.",
+  "description": "Diagnostique seu negócio em 15 minutos com IA.",
   "id": "/",
-  "start_url": "/pt",
+  "start_url": "/entrar",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { supabaseAdmin } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 /**
  * DELETE /api/auth/delete-account
@@ -19,7 +19,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 export async function DELETE() {
   try {
     // 1. Pegar sessão atual
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createServerSupabaseClient()
     const {
       data: { session },
       error: sessionError,
