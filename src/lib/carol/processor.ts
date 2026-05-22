@@ -1,6 +1,17 @@
 import OpenAI from 'openai'
 import { sendWhatsAppMessage } from './sender'
 import {
+  CAROL_INBOUND_MINI_PROMPT,
+  getCarolReplyModel,
+  resolveCarolChannel,
+} from './carol-reply-profile'
+import {
+  classifyInboundMessage,
+  inboundKindContextNote,
+  shouldClassifyWithAi,
+  type InboundKind,
+} from './inbound-classifier'
+import {
   getOrCreateConversation,
   saveMessage,
   getConversationHistory,
@@ -65,11 +76,38 @@ function isAutoResponse(text: string): boolean {
     'vou te responder em breve',
     'responderei em breve',
     'respondo em breve',
+    'em breve entrarei em contato',
+    'em breve entraremos em contato',
+    'fico feliz por entrar em contato',
+    'feliz por entrar em contato',
+    'informe seu nome completo',
+    'melhor data e horário',
+    'melhor data e horario',
+    'método exclusivo',
+    'metodo exclusivo',
+    'jornada de saúde',
+    'jornada de saude',
+    'descubra como é',
+    'ansiosa por essa transformação',
+    'ansioso por essa transformação',
+    'retornar. em breve',
+    'te retornar',
   ]
   // Emojis isolados ou stickers de confirmação — não merecem resposta
   const stripped = t.replace(/[\s​-‍﻿]/g, '')
   const emojiOnlyPattern = /^(\p{Emoji})+$/u
   if (stripped.length <= 6 && emojiOnlyPattern.test(stripped)) return true
+
+  // Bot de outro negócio: link + boas-vindas genéricas (comum após outbound em número compartilhado)
+  const hasLink = t.includes('http') || t.includes('www.') || t.includes('.com.br')
+  const foreignWelcomeBot =
+    hasLink &&
+    (t.includes('método exclusivo') ||
+      t.includes('metodo exclusivo') ||
+      t.includes('jornada de') ||
+      t.includes('informe seu nome') ||
+      t.includes('em breve entrarei') ||
+      t.includes('fico feliz por entrar em contato'))
 
   // Também detecta por estrutura: mensagem longa (>180 chars) com padrão de bot comercial
   const isBotStructure = t.length > 180 && (
@@ -81,7 +119,7 @@ function isAutoResponse(text: string): boolean {
     t.includes('disposição') ||
     t.includes('adorar')
   )
-  return patterns.some(p => t.includes(p)) || isBotStructure
+  return patterns.some(p => t.includes(p)) || isBotStructure || foreignWelcomeBot
 }
 
 // ── Delay humanizado antes de enviar resposta (~15 segundos) ────────────────
@@ -207,10 +245,11 @@ SE NÃO FICOU CLARO SE TEM NEGÓCIO PRÓPRIO:
 Pergunte de forma neutra: "Você tem espaço próprio de atendimento?" ou "Você atende por conta própria ou trabalha pra alguém?"
 Só descarte depois de confirmar que claramente não tem negócio próprio.
 
-DESCARTE DEFINITIVO (casos evidentes):
+DESCARTE DEFINITIVO (casos evidentes, só após a pessoa responder de verdade — nunca após [auto-resposta ignorada]):
 Cliente buscando tratamento pra si, quem procura emprego, número errado, vendedor.
 "Oi! Aqui a gente atende quem tem espaço próprio de atendimento em estética. Não é o seu caso, né? 😊"
 Se confirmar que não é: "Entendido! Obrigada pelo contato 😊"
+PROIBIDO após outbound: mensagem genérica tipo "focamos em donas de clínicas, se não for o caso obrigada" sem antes perguntar se tem espaço próprio.
 
 SE A PESSOA CORRIGIR ("Tenho espaço sim" / "Trabalho por conta própria"):
 "Perfeito! Me conta, o que mais trava sua agenda hoje?"
@@ -236,6 +275,8 @@ PROIBIDO: "Oi! Posso te fazer uma pergunta sobre sua agenda?" (soa robótico e i
 
 CASO B: outbound com [auto-resposta ignorada] no histórico
 NÃO repita a pergunta do template outbound.
+NÃO mande "Se não for o caso, obrigada" nem descarte na primeira troca: foi bot/WhatsApp automático da clínica, não a dona.
+Aguarde mensagem humana. Se vier só outra auto-resposta, não responda (o sistema ignora).
 
 Se mandar só "Oi" ou "Bom dia":
 "Oi! 😊 Tem um motivo específico por que a agenda não fica cheia de forma consistente...
@@ -358,6 +399,8 @@ export type IngestInboundResult =
       payload: CarolInboundPayload
       conversationId: string
       conversation: Awaited<ReturnType<typeof getOrCreateConversation>>
+      /** Classificação IA (quando outbound/ambíguo); ausente = humano implícito */
+      inboundKind?: InboundKind
     }
 
 /** Grava mensagem no Supabase de forma síncrona (antes de responder 200 ao Meta). */
@@ -379,25 +422,40 @@ export async function ingestInboundMessage(
   const conversation = await getOrCreateConversation(from)
 
   if (isAutoResponse(text)) {
-    console.log(`[Carol] 🤖 Auto-resposta detectada de ${from} — ignorando silenciosamente`)
+    console.log(`[Carol] 🤖 Auto-resposta (regras) de ${from} — ignorando silenciosamente`)
     await saveMessage(conversation.id, 'user', `[auto-resposta ignorada] ${text}`)
     return { status: 'saved_no_reply' }
   }
 
+  const history = await getConversationHistory(conversation.id, 12)
+  let inboundKind: InboundKind | undefined
+
+  if (shouldClassifyWithAi(text, history)) {
+    inboundKind = await classifyInboundMessage(text, history)
+    if (inboundKind === 'auto_resposta') {
+      console.log(`[Carol] 🤖 Auto-resposta (IA) de ${from} — ignorando silenciosamente`)
+      await saveMessage(conversation.id, 'user', `[auto-resposta ignorada] ${text}`)
+      return { status: 'saved_no_reply' }
+    }
+  }
+
   await saveMessage(conversation.id, 'user', text)
-  console.log(`[Carol] 📥 Mensagem salva de ${from}: ${text.slice(0, 80)}`)
+  console.log(
+    `[Carol] 📥 Mensagem salva de ${from}${inboundKind ? ` [${inboundKind}]` : ''}: ${text.slice(0, 80)}`
+  )
 
   return {
     status: 'saved',
     payload,
     conversationId: conversation.id,
     conversation,
+    inboundKind,
   }
 }
 
 /** Gera e envia resposta da Carol (pode rodar em background após ingest). */
 export async function generateCarolReply(ingest: Extract<IngestInboundResult, { status: 'saved' }>): Promise<void> {
-  const { payload, conversation } = ingest
+  const { payload, conversation, inboundKind } = ingest
   const { from, text, isFlowResponse = false } = payload
 
   try {
@@ -439,9 +497,16 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       ? `\n\nCONTEXTO: conversa outbound. Enviamos template antes; o bot da clínica respondeu ([auto-resposta ignorada]). Use ETAPA 1 CASO B na primeira mensagem real, ou ETAPA 0 se for CTA de anúncio.\n`
       : ''
 
+    const channel = resolveCarolChannel({ history, isFlowResponse })
+
     const isAdLead =
-      isMetaAdLeadMessage(text) || conversationHasAdLeadIntent(history)
-    const adLeadNote = isAdLead ? AD_LEAD_CONTEXT_PROMPT : ''
+      inboundKind === 'lead_anuncio' ||
+      isMetaAdLeadMessage(text) ||
+      conversationHasAdLeadIntent(history)
+    // Inbound já traz trilha de anúncio no prompt mini — evita duplicar tokens
+    const adLeadNote =
+      isAdLead && channel !== 'inbound' ? AD_LEAD_CONTEXT_PROMPT : ''
+    const classifierNote = inboundKindContextNote(inboundKind)
 
     const duplicateCtaNote =
       isAdLead &&
@@ -449,16 +514,20 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       isMetaAdLeadMessage(text)
         ? `\nA pessoa reenviou o mesmo CTA do anúncio. NÃO repita a abertura. Continue a conversa ou retome a última pergunta em 1 linha.\n`
         : ''
+    const basePrompt =
+      channel === 'inbound' ? CAROL_INBOUND_MINI_PROMPT : CAROL_SYSTEM_PROMPT
+    const replyModel = getCarolReplyModel(channel)
 
     const systemContent =
-      CAROL_SYSTEM_PROMPT +
+      basePrompt +
       (isFlowResponse
         ? FLOW_CONTEXT_PROMPT
-        : adLeadNote + outboundContextNote + duplicateCtaNote)
+        : adLeadNote + outboundContextNote + classifierNote + duplicateCtaNote)
 
-    // Processa com OpenAI
+    console.log(`[Carol] Canal=${channel} modelo=${replyModel} de ${from}`)
+
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: replyModel,
       messages: [
         { role: 'system', content: systemContent },
         ...history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
