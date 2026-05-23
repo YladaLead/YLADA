@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { FluxoCliente, RespostaFluxo } from '@/types/wellness-system'
 import { getKitByTipo } from '@/lib/wellness-system/produtos'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
@@ -9,6 +9,58 @@ import DiagnosisDisclaimer, {
   type DisclaimerVariant,
 } from '@/components/ylada/DiagnosisDisclaimer'
 import PoweredByYlada from '@/components/ylada/PoweredByYlada'
+
+// ── Analytics anônimo de funil ────────────────────────────────────────────────
+// Sem dados pessoais. session_id gerado localmente, não vinculado à conta.
+function getOrCreateSessionId(): string {
+  if (typeof window === 'undefined') return 'ssr'
+  const key = 'ylada_fsid'
+  let sid = sessionStorage.getItem(key)
+  if (!sid) {
+    sid = crypto.randomUUID()
+    sessionStorage.setItem(key, sid)
+  }
+  return sid
+}
+
+function getDispositivo(): 'mobile' | 'tablet' | 'desktop' {
+  if (typeof window === 'undefined') return 'desktop'
+  const w = window.innerWidth
+  if (w < 768) return 'mobile'
+  if (w < 1024) return 'tablet'
+  return 'desktop'
+}
+
+type AnalyticsEvento = 'iniciou' | 'respondeu' | 'voltou' | 'resultado_visto' | 'cta_clicado'
+
+interface AnalyticsPayload {
+  fluxo_id: string
+  fluxo_nome?: string
+  session_id: string
+  evento: AnalyticsEvento
+  pergunta_idx?: number
+  pergunta_id?: string
+  resposta?: string
+  perfil?: string
+  tempo_s?: number
+  dispositivo?: 'mobile' | 'tablet' | 'desktop'
+  hora_local?: number
+}
+
+async function trackEvento(payload: AnalyticsPayload) {
+  try {
+    await fetch('/api/analytics/fluxo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      // keepalive garante envio mesmo se o usuário navegar para fora
+      keepalive: true,
+    })
+  } catch {
+    // analytics nunca deve quebrar o fluxo
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface FluxoDiagnosticoProps {
   fluxo: FluxoCliente
@@ -30,6 +82,36 @@ export default function FluxoDiagnostico({
   const [respostaSelecionada, setRespostaSelecionada] = useState<string | number | null>(null)
   const [entradaAberta, setEntradaAberta] = useState('')
 
+  // Analytics refs — não causam re-render
+  const sessionIdRef = useRef<string>('')
+  const startTimeRef = useRef<number>(Date.now())
+
+  const elapsedS = useCallback(() =>
+    Math.round((Date.now() - startTimeRef.current) / 1000), [])
+
+  const track = useCallback((
+    evento: AnalyticsEvento,
+    extras?: Partial<AnalyticsPayload>
+  ) => {
+    trackEvento({
+      fluxo_id:   fluxo.id,
+      fluxo_nome: fluxo.nome,
+      session_id: sessionIdRef.current,
+      evento,
+      tempo_s:    elapsedS(),
+      dispositivo: getDispositivo(),
+      hora_local: new Date().getHours(),
+      ...extras,
+    })
+  }, [fluxo.id, fluxo.nome, elapsedS])
+
+  // Evento: iniciou — dispara uma vez ao montar
+  useEffect(() => {
+    sessionIdRef.current = getOrCreateSessionId()
+    startTimeRef.current = Date.now()
+    track('iniciou')
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   const pergunta = fluxo.perguntas[perguntaAtual]
 
   useEffect(() => {
@@ -42,6 +124,13 @@ export default function FluxoDiagnostico({
     setRespostaSelecionada(valor)
     const novasRespostas = { ...respostas, [pergunta.id]: valor }
     setRespostas(novasRespostas)
+
+    // Rastrear resposta (anônima — só índice + valor)
+    track('respondeu', {
+      pergunta_idx: perguntaAtual,
+      pergunta_id:  pergunta.id,
+      resposta:     String(valor),
+    })
 
     // Aguardar um pouco para mostrar o feedback antes de mudar de pergunta
     setTimeout(() => {
@@ -57,6 +146,7 @@ export default function FluxoDiagnostico({
 
   const handleVoltar = () => {
     if (perguntaAtual > 0) {
+      track('voltou', { pergunta_idx: perguntaAtual })
       setPerguntaAtual(perguntaAtual - 1)
     }
   }
@@ -188,9 +278,12 @@ export default function FluxoDiagnostico({
       : 'recrutamento'
     : 'wellness'
 
-  // Salvar diagnóstico quando mostrar resultado
+  // Salvar diagnóstico e rastrear resultado_visto quando mostrar resultado
   useEffect(() => {
     if (mostrarResultado && !diagnosticoId && Object.keys(respostas).length === fluxo.perguntas.length) {
+      // Rastrear visualização do resultado (com o perfil identificado)
+      track('resultado_visto', { perfil: fluxo.diagnostico.titulo })
+
       salvarDiagnostico(false).then((id) => {
         if (id) {
           setDiagnosticoId(id)
@@ -274,7 +367,9 @@ export default function FluxoDiagnostico({
           <div className="text-center">
             {whatsappNumber ? (
               <div onClick={async () => {
-                // Rastrear conversão quando clicar no botão
+                // Rastrear clique no CTA (analytics anônimo)
+                track('cta_clicado', { perfil: fluxo.diagnostico.titulo })
+                // Rastrear conversão na tabela de diagnósticos (existente)
                 if (diagnosticoId) {
                   await rastrearConversao(diagnosticoId)
                 }

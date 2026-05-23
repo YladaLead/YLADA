@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import { sendWhatsAppMessage } from './sender'
+import { sendWhatsAppMessage, sendPainButtons } from './sender'
 import {
   CAROL_INBOUND_MINI_PROMPT,
   getCarolReplyModel,
@@ -26,6 +26,7 @@ function isAutoResponse(text: string): boolean {
   const patterns = [
     // Variações de boas-vindas automáticas
     'seja bem-vindo',
+    'seja bem-vinda',       // captura "seja bem-vinda(o)" e variações femininas
     'seja muito bem-vindo',
     'seja muito bem-vinda',
     'bem-vindo(a)',
@@ -33,6 +34,15 @@ function isAutoResponse(text: string): boolean {
     'bem-vinda!',
     'bem vinda!',
     'olá, seja',
+    // Respostas automáticas de WhatsApp Business (bots de clínicas)
+    'recebemos sua mensagem',
+    'nossa equipe retornará',
+    'nossa equipe entrará em contato',
+    'assim que possível, nossa equipe',
+    'assim que possível nossa equipe',
+    'retornará para te atender',
+    'retornaremos para te atender',
+    'nossa equipe vai retornar',
     // Atendimento encerrado / fora de horário
     'atendimento está encerrado',
     'atendimento encerrado',
@@ -175,16 +185,16 @@ CONTEXTO OBRIGATÓRIO: LEAD DE ANÚNCIO (Meta Ads / Click to WhatsApp).
 A pessoa clicou no anúncio e pediu informações ou demonstrou interesse. Prioridade máxima sobre ETAPA 1 genérica.
 
 TRILHA CURTA (2 a 3 trocas até convite ao diagnóstico com o Andre, não espere 5 a 6 trocas):
-1) Primeira resposta sua: acolha o pedido de informação + explique em 1 linha (agenda que não fica cheia de forma consistente) + 1 pergunta de qualificação.
-   Use este modelo (adapte, sem travessão, uma bolha só):
-   "Oi! Vi que você quer saber mais 😊
-   A gente ajuda quem tem clínica ou espaço de estética quando a agenda não fica cheia de um jeito consistente.
-   Você atende no seu próprio espaço ou trabalha pra alguém?"
-   PROIBIDO na 1ª resposta: "Posso te fazer uma pergunta sobre sua agenda?" sem antes responder o interesse.
+1) Primeira resposta — pergunta aberta sobre a dor principal. Modelo:
+   "Oi! 😊 Me conta — qual é seu maior desafio hoje na clínica?"
+   PROIBIDO: "Vi que você quer saber mais", "A gente ajuda quem tem clínica", pitch de serviço, qualificação prematura.
 
-2) Se confirmar espaço próprio: pergunte se a agenda fecha o mês cheia ou oscila.
+2) Se a resposta for vaga, ofereça 3 opções em texto corrido (sem lista, sem bullet):
+   "Muitas donas de clínica me contam uma dessas três coisas: agenda que oscila todo mês, cansaço de fazer tudo sozinha, ou faturamento que não cresce mesmo com a agenda cheia. Qual mais parece o seu caso?"
 
-3) Se confirmar dor de agenda: convide ao diagnóstico de 30 min gratuito com o Andre. Pergunte se quer que você anote o horário ou se prefere chamar ele direto no WhatsApp.
+3) A partir da escolha dela, aprofunde naquela dor específica. Nunca salte para outra dor.
+
+4) Se confirmar dor: convide ao diagnóstico de 30 min gratuito com o Andre. Pergunte se quer que você anote o horário ou se prefere chamar ele direto no WhatsApp.
 
 4) Coleta mínima antes da ETAPA 9: nome completo + melhor horário. Email se ela quiser informar; não trave o fluxo se não quiser.
 
@@ -265,11 +275,15 @@ CASO A: inbound direto (histórico SEM [auto-resposta ignorada])
 Use UMA variação (alterne, nunca repita a mesma abertura na conversa):
 
 Variação 1:
-"Oi! Tem um motivo específico por que a agenda não fica cheia de forma consistente...
-Me conta como tá a sua hoje?"
+"Oi! 😊 Me conta — qual é seu maior desafio hoje na clínica?"
 
 Variação 2:
-"Oi! Me conta: sua agenda fecha o mês cheia, todo mês?"
+"Oi! Me conta — o que mais te preocupa hoje no seu negócio de estética?"
+
+Se a resposta for vaga, ofereça em texto corrido (nunca lista com traço ou bullet):
+"Muitas donas de clínica me contam uma dessas três coisas: agenda que oscila todo mês, cansaço de fazer tudo sozinha, ou faturamento que não cresce mesmo com a agenda cheia. Qual mais parece o seu caso?"
+
+A partir da escolha dela, aprofunde naquela dor específica. Nunca salte para outra dor.
 
 PROIBIDO: "Oi! Posso te fazer uma pergunta sobre sua agenda?" (soa robótico e ignora quem pediu informação)
 
@@ -503,6 +517,26 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       inboundKind === 'lead_anuncio' ||
       isMetaAdLeadMessage(text) ||
       conversationHasAdLeadIntent(history)
+
+    // ── BOTÕES INTERATIVOS: primeiro contato de lead de anúncio genérico ─────
+    // Se a mensagem é o CTA padrão do Meta ("Tenho interesse", "mais informações")
+    // e Carol ainda não respondeu nesta conversa → envia botões das 3 dores.
+    // Não usa OpenAI: resposta é determinística e engajamento com botões é 3x maior.
+    const isFirstAdLeadCta =
+      !isFlowResponse &&
+      isAdLead &&
+      isMetaAdLeadMessage(text) &&
+      !assistantAlreadyReplied(history)
+
+    if (isFirstAdLeadCta) {
+      console.log(`[Carol] 🎯 Lead de anúncio — enviando botões de dor para ${from}`)
+      await humanDelay()
+      await sendPainButtons(from)
+      await saveMessage(conversation.id, 'assistant', '[botões enviados: Agenda oscila | Faço tudo sozinha | Lucro não cresce]')
+      return
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     // Inbound já traz trilha de anúncio no prompt mini — evita duplicar tokens
     const adLeadNote =
       isAdLead && channel !== 'inbound' ? AD_LEAD_CONTEXT_PROMPT : ''

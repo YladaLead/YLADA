@@ -208,8 +208,8 @@ export default function TermosUsoPage() {
               </p>
               <ul className="list-disc pl-6 space-y-2 mt-4">
                 <li>Seu uso ou mau uso da plataforma</li>
-                <li>Violation destes Termos de Uso</li>
-                <li>Violation de direitos de terceiros</li>
+                <li>Violação destes Termos de Uso</li>
+                <li>Violação de direitos de terceiros</li>
                 <li>Conteúdo que você cria ou compartilha</li>
               </ul>
             </section>
@@ -315,10 +315,10 @@ export default function TermosUsoPage() {
                 Para questões sobre estes Termos de Uso, entre em contato:
               </p>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p><strong>Email:</strong> suporte@ylada.com</p>
-                <p className="mt-2"><strong>Empresa:</strong> Portal Solutions Tech & Innovation LTDA</p>
+                <p><strong>Email:</strong> <a href="mailto:suporte@ylada.com" className="text-blue-600 underline">suporte@ylada.com</a></p>
+                <p className="mt-2"><strong>Empresa:</strong> Portal Solutions Tech &amp; Innovation Ltda</p>
                 <p><strong>CNPJ:</strong> 63.447.492/0001-88</p>
-                <p className="mt-2"><strong>Endereço:</strong> São Paulo, SP, Brasil</p>
+                <p className="mt-2"><strong>Endereço:</strong> R. Dona Eugênia, 345, Apto 92 — Jardim Europa, Piracicaba/SP — CEP 13.416-401</p>
               </div>
             </section>
           </div>
