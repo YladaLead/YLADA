@@ -11,6 +11,7 @@ import {
   type ProLideresDailyTaskRow,
 } from '@/types/pro-lideres-daily-tasks'
 import type { ProLideresMemberListItem } from '@/lib/pro-lideres-members-enriched'
+import { proLideresTodayYmdBr, proLideresYesterdayYmdBr } from '@/lib/pro-lideres-dates-br'
 
 type ApiGet = {
   tasks: ProLideresDailyTaskRow[]
@@ -43,6 +44,27 @@ function endOfWeek(d: Date): Date {
   const e = new Date(s)
   e.setDate(e.getDate() + 6)
   return e
+}
+
+type PeriodPreset = 'yesterday' | 'week' | 'month' | 'custom'
+
+function detectPeriodPreset(from: string, to: string, yesterdayYmd: string): PeriodPreset {
+  if (from === yesterdayYmd && to === yesterdayYmd) return 'yesterday'
+  const n = new Date()
+  const weekStart = localIsoDate(startOfWeek(n))
+  const weekEnd = localIsoDate(endOfWeek(n))
+  if (from === weekStart && to === weekEnd) return 'week'
+  const monthStart = localIsoDate(new Date(n.getFullYear(), n.getMonth(), 1))
+  const monthEnd = localIsoDate(new Date(n.getFullYear(), n.getMonth() + 1, 0))
+  if (from === monthStart && to === monthEnd) return 'month'
+  return 'custom'
+}
+
+function periodPresetClass(active: boolean): string {
+  const base = 'min-h-[2.125rem] flex-1 rounded-lg border px-2 py-1.5 text-sm transition-colors'
+  return active
+    ? `${base} border-blue-600 bg-blue-100 font-semibold text-blue-900 shadow-sm`
+    : `${base} border-blue-200 bg-blue-50/80 font-medium text-blue-900 hover:bg-blue-100`
 }
 
 type TaskRowEdit = {
@@ -347,42 +369,11 @@ export function ProLideresDailyTasksClient() {
     }
   }
 
-  const presets = (
-    <div className="flex flex-wrap gap-2">
-      <button
-        type="button"
-        className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
-        onClick={() => {
-          const t = localIsoDate(new Date())
-          setFrom(t)
-          setTo(t)
-        }}
-      >
-        Hoje
-      </button>
-      <button
-        type="button"
-        className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
-        onClick={() => {
-          const n = new Date()
-          setFrom(localIsoDate(startOfWeek(n)))
-          setTo(localIsoDate(endOfWeek(n)))
-        }}
-      >
-        Esta semana
-      </button>
-      <button
-        type="button"
-        className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
-        onClick={() => {
-          const n = new Date()
-          setFrom(localIsoDate(new Date(n.getFullYear(), n.getMonth(), 1)))
-          setTo(localIsoDate(new Date(n.getFullYear(), n.getMonth() + 1, 0)))
-        }}
-      >
-        Este mês
-      </button>
-    </div>
+  const yesterdayYmd = proLideresYesterdayYmdBr()
+  const maxDateYmd = proLideresTodayYmdBr()
+  const activePeriodPreset = useMemo(
+    () => detectPeriodPreset(from, to, yesterdayYmd),
+    [from, to, yesterdayYmd]
   )
 
   const applicableToday =
@@ -546,35 +537,68 @@ export function ProLideresDailyTasksClient() {
       )}
 
       {!isLeader && (
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <p className="mb-2 text-sm font-semibold text-gray-900">Relatório</p>
-          <p className="mb-2 text-xs text-gray-500">
-            Vê os teus pontos no dia, na semana ou no mês — usa os atalhos ou escolhe as datas.
-          </p>
-          {presets}
-          <div className="mt-3 flex flex-wrap items-end gap-3">
-            <label className="block">
-              <span className="mb-1 block text-xs font-medium text-gray-600">De</span>
+        <div className="rounded-xl border border-gray-200 bg-white p-2.5 shadow-sm sm:p-3">
+          <p className="mb-1.5 text-xs font-semibold text-gray-800">Relatório de pontos</p>
+          <div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Atalhos de período">
+            <button
+              type="button"
+              className={periodPresetClass(activePeriodPreset === 'yesterday')}
+              onClick={() => {
+                setFrom(yesterdayYmd)
+                setTo(yesterdayYmd)
+              }}
+            >
+              Ontem
+            </button>
+            <button
+              type="button"
+              className={periodPresetClass(activePeriodPreset === 'week')}
+              onClick={() => {
+                const n = new Date()
+                setFrom(localIsoDate(startOfWeek(n)))
+                setTo(localIsoDate(endOfWeek(n)))
+              }}
+            >
+              Esta semana
+            </button>
+            <button
+              type="button"
+              className={periodPresetClass(activePeriodPreset === 'month')}
+              onClick={() => {
+                const n = new Date()
+                setFrom(localIsoDate(new Date(n.getFullYear(), n.getMonth(), 1)))
+                setTo(localIsoDate(new Date(n.getFullYear(), n.getMonth() + 1, 0)))
+              }}
+            >
+              Este mês
+            </button>
+          </div>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5 border-t border-gray-100 pt-1.5">
+            <label className="flex min-w-0 flex-1 items-center gap-1 sm:flex-none sm:gap-1.5">
+              <span className="shrink-0 text-[10px] font-medium text-gray-400">De</span>
               <input
                 type="date"
                 value={from}
+                max={to || maxDateYmd}
                 onChange={(e) => setFrom(e.target.value)}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                className="min-w-0 flex-1 rounded-md border border-gray-200 bg-gray-50/80 px-1.5 py-1 text-xs text-gray-700 sm:w-[7.25rem] sm:flex-none"
               />
             </label>
-            <label className="block">
-              <span className="mb-1 block text-xs font-medium text-gray-600">Até</span>
+            <label className="flex min-w-0 flex-1 items-center gap-1 sm:flex-none sm:gap-1.5">
+              <span className="shrink-0 text-[10px] font-medium text-gray-400">Até</span>
               <input
                 type="date"
                 value={to}
+                min={from}
+                max={maxDateYmd}
                 onChange={(e) => setTo(e.target.value)}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                className="min-w-0 flex-1 rounded-md border border-gray-200 bg-gray-50/80 px-1.5 py-1 text-xs text-gray-700 sm:w-[7.25rem] sm:flex-none"
               />
             </label>
             <button
               type="button"
               onClick={() => void load()}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              className="shrink-0 rounded-md border border-gray-300 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 sm:ml-auto"
             >
               Atualizar
             </button>
