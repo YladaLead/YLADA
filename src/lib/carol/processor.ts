@@ -162,6 +162,20 @@ export function isMetaAdLeadMessage(text: string): boolean {
     'vim do anuncio',
     'quero informações',
     'quero informacoes',
+    // Perguntas frequentes (FAQ chips) configuradas no anúncio Meta
+    'minha agenda oscila',
+    'agenda oscila todo',
+    'faço tudo sozinha',
+    'faz tudo sozinha',
+    'cansa demais',
+    'trabalho muito e não sobra',
+    'trabalho muito e nao sobra',
+    'não sobra dinheiro',
+    'nao sobra dinheiro',
+    'meu faturamento não cresce',
+    'meu faturamento nao cresce',
+    'faturamento não cresce',
+    'faturamento nao cresce',
   ]
   return patterns.some((p) => t.includes(p))
 }
