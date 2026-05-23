@@ -16,7 +16,6 @@ import { proLideresTodayYmdBr, proLideresYesterdayYmdBr } from '@/lib/pro-lidere
 type ApiGet = {
   tasks: ProLideresDailyTaskRow[]
   completions: ProLideresDailyTaskCompletionRow[]
-  fullDayBonusPoints: number
   pointsByUserId: Record<string, number>
   myPointsInRange: number
   members: ProLideresMemberListItem[]
@@ -106,8 +105,6 @@ export function ProLideresDailyTasksClient() {
   const [savingToday, setSavingToday] = useState(false)
   const [todayDraft, setTodayDraft] = useState<Set<string>>(() => new Set())
   const [todaySaveOk, setTodaySaveOk] = useState(true)
-  const [bonusPts, setBonusPts] = useState('10')
-  const [savingBonus, setSavingBonus] = useState(false)
 
   const now = new Date()
   const todayStr = localIsoDate(now)
@@ -129,7 +126,6 @@ export function ProLideresDailyTasksClient() {
       }
       const payload = json as ApiGet
       setData(payload)
-      setBonusPts(String(payload.fullDayBonusPoints ?? 10))
     } catch {
       setError('Erro de rede.')
       setData(null)
@@ -143,7 +139,7 @@ export function ProLideresDailyTasksClient() {
   }, [load])
 
   const loadTodayChecklist = useCallback(async () => {
-    if (isLeader || !myUserId) return
+    if (!myUserId) return
     try {
       const res = await fetch(
         `/api/pro-lideres/daily-tasks?from=${encodeURIComponent(todayStr)}&to=${encodeURIComponent(todayStr)}`,
@@ -160,7 +156,7 @@ export function ProLideresDailyTasksClient() {
     } catch {
       /* mantém rascunho local */
     }
-  }, [isLeader, myUserId, todayStr])
+  }, [myUserId, todayStr])
 
   useEffect(() => {
     void loadTodayChecklist()
@@ -208,35 +204,8 @@ export function ProLideresDailyTasksClient() {
     }
   }
 
-  async function saveFullDayBonus() {
-    if (!isLeader) return
-    setSavingBonus(true)
-    setError(null)
-    try {
-      const n = Math.min(100000, Math.max(0, Math.floor(Number(bonusPts) || 0)))
-      const res = await fetch('/api/pro-lideres/tenant', {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ daily_tasks_full_day_bonus_points: n }),
-      })
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setError((json as { error?: string }).error || 'Erro ao guardar bónus.')
-        return
-      }
-      setBonusPts(String(n))
-      router.refresh()
-      await load()
-    } catch {
-      setError('Erro de rede.')
-    } finally {
-      setSavingBonus(false)
-    }
-  }
-
   async function saveTodayExecution(completedIds: Set<string>): Promise<boolean> {
-    if (isLeader || !myUserId) return false
+    if (!myUserId) return false
     setSavingToday(true)
     setError(null)
     try {
@@ -398,9 +367,8 @@ export function ProLideresDailyTasksClient() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Tarefas diárias</h1>
             <p className="mt-1 max-w-xl text-sm text-gray-600">
-              Preenche as linhas como o teu time vai ver: pontos, tarefa e texto extra opcional (aparece em destaque
-              azul para eles). Para análises e quem executou, usa <strong className="font-semibold text-gray-800">Ver
-              execução do time</strong>.
+              Marca as tuas tarefas do dia e define o que a equipe vê. Para análise da equipe, usa{' '}
+              <strong className="font-semibold text-gray-800">Ver execução do time</strong>.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:shrink-0 sm:items-end">
@@ -426,8 +394,8 @@ export function ProLideresDailyTasksClient() {
       {isLeader && (
         <details className="group rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
           <summary className="cursor-pointer list-none text-sm font-semibold text-gray-900 marker:hidden [&::-webkit-details-marker]:hidden">
-            <span className="group-open:hidden">Definições da equipe e bónus</span>
-            <span className="hidden group-open:inline">Definições da equipe e bónus (fechar)</span>
+            <span className="group-open:hidden">Definições da equipe</span>
+            <span className="hidden group-open:inline">Definições da equipe (fechar)</span>
           </summary>
           <div className="mt-4 space-y-4 border-t border-gray-100 pt-4">
             <label className="flex cursor-pointer items-start gap-3">
@@ -445,47 +413,20 @@ export function ProLideresDailyTasksClient() {
                 </p>
               </div>
             </label>
-            <div className="border-t border-gray-100 pt-4">
-              <p className="text-sm font-semibold text-gray-900">Bónus de dia completo</p>
-              <p className="mt-0.5 text-xs text-gray-600">
-                Pontos extra quando alguém marca todas as tarefas do dia (uma vez por dia civil).
-              </p>
-              <div className="mt-3 flex flex-wrap items-end gap-2">
-                <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-gray-600">Pontos do bónus</span>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100000}
-                    value={bonusPts}
-                    onChange={(e) => setBonusPts(e.target.value)}
-                    className="w-28 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  />
-                </label>
-                <button
-                  type="button"
-                  disabled={savingBonus}
-                  onClick={() => void saveFullDayBonus()}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-                >
-                  {savingBonus ? 'A guardar…' : 'Guardar bónus'}
-                </button>
-              </div>
-            </div>
           </div>
         </details>
       )}
 
-      {!isLeader && data && (
+      {data && myUserId && (
         <div className="overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-md">
           <div className="px-4 pb-2 pt-5 sm:px-5">
-            <p className="text-[15px] leading-snug text-gray-900">
-              Marque o que você fez (cada item vale os pontos ao lado).
+            <p className="text-sm font-semibold text-gray-900">
+              {isLeader ? 'Minhas tarefas de hoje' : 'Tarefas de hoje'}
             </p>
-            <p className="mt-2 text-[15px] leading-snug text-gray-900">
-              <span className="font-bold">Marcando tudo:</span>{' '}
-              <span className="font-bold text-blue-800">+{data.fullDayBonusPoints ?? 0} pts</span> bônus de dia
-              completo.
+            <p className="mt-1 text-[15px] leading-snug text-gray-900">
+              {isLeader
+                ? 'Marque o que você fez — seus pontos entram no ranking junto com a equipe.'
+                : 'Marque o que você fez (cada item vale os pontos ao lado).'}
             </p>
             <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
               <span>Hoje · {todayStr}</span>
@@ -536,9 +477,11 @@ export function ProLideresDailyTasksClient() {
         </div>
       )}
 
-      {!isLeader && (
+      {data && (
         <div className="rounded-xl border border-gray-200 bg-white p-2.5 shadow-sm sm:p-3">
-          <p className="mb-1.5 text-xs font-semibold text-gray-800">Relatório de pontos</p>
+          <p className="mb-1.5 text-xs font-semibold text-gray-800">
+            {isLeader ? 'Meus pontos no período' : 'Relatório de pontos'}
+          </p>
           <div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Atalhos de período">
             <button
               type="button"
@@ -606,11 +549,11 @@ export function ProLideresDailyTasksClient() {
         </div>
       )}
 
-      {!isLeader && data && (
+      {data && myUserId && (
         <div className="rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-4 text-center">
           <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Total no período</p>
           <p className="mt-1 text-3xl font-semibold tabular-nums text-gray-900">{data.myPointsInRange}</p>
-          <p className="text-xs text-gray-500">pontos · inclui bónus quando completas tudo num dia</p>
+          <p className="text-xs text-gray-500">pontos das tarefas marcadas</p>
         </div>
       )}
 

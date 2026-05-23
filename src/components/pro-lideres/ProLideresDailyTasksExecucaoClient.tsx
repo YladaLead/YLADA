@@ -22,7 +22,6 @@ type MemberSortMode = 'points_desc' | 'points_asc' | 'name_asc' | 'name_desc' | 
 type ApiGet = {
   tasks: ProLideresDailyTaskRow[]
   completions: ProLideresDailyTaskCompletionRow[]
-  fullDayBonusPoints: number
   pointsByUserId: Record<string, number>
   myPointsInRange: number
   members: ProLideresMemberListItem[]
@@ -81,7 +80,8 @@ function periodPresetClass(active: boolean): string {
 }
 
 function memberDisplayName(m: ProLideresMemberListItem): string {
-  return m.displayName?.trim() || m.email?.trim() || m.userId.slice(0, 8)
+  const base = m.displayName?.trim() || m.email?.trim() || m.userId.slice(0, 8)
+  return m.role === 'leader' ? `${base} · líder` : base
 }
 
 function buildMemberRows(data: ApiGet): MemberRow[] {
@@ -395,7 +395,6 @@ export function ProLideresDailyTasksExecucaoClient() {
                     to={data.to}
                     tasks={data.tasks}
                     completions={data.completions ?? []}
-                    fullDayBonusPoints={data.fullDayBonusPoints ?? 0}
                     onClose={() => setFocusUserId(null)}
                   />
                 ) : (

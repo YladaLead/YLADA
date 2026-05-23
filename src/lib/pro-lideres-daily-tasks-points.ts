@@ -6,48 +6,23 @@ export function weekdayFromYmd(ymd: string): number {
   return new Date(y, m - 1, d).getDay()
 }
 
-/**
- * Soma pontos das conclusões no intervalo + bónus de «dia completo» (uma vez por dia em que todas as tarefas
- * aplicáveis a esse dia da semana estão concluídas).
- */
+/** Soma pontos das tarefas concluídas no intervalo (sem bónus extra). */
 export function pointsForUserInRange(
   userId: string,
   tasks: ProLideresDailyTaskRow[],
   completions: ProLideresDailyTaskCompletionRow[],
   from: string,
-  to: string,
-  fullDayBonusPerDay: number
+  to: string
 ): number {
   const taskById = new Map(tasks.map((t) => [t.id, t]))
 
-  const inRange = (c: ProLideresDailyTaskCompletionRow) =>
-    c.member_user_id === userId && c.completed_on >= from && c.completed_on <= to
-
-  let base = 0
-  const datesWithActivity = new Set<string>()
+  let total = 0
   for (const c of completions) {
-    if (!inRange(c)) continue
-    datesWithActivity.add(c.completed_on)
+    if (c.member_user_id !== userId) continue
+    if (c.completed_on < from || c.completed_on > to) continue
     const t = taskById.get(c.task_id)
-    if (t) base += t.points
+    if (t) total += t.points
   }
 
-  if (fullDayBonusPerDay <= 0) return base
-
-  let bonus = 0
-  for (const dateStr of datesWithActivity) {
-    const dow = weekdayFromYmd(dateStr)
-    const applicable = tasks.filter((t) => (t.execution_weekdays ?? []).includes(dow))
-    if (applicable.length === 0) continue
-    const doneIds = new Set(
-      completions
-        .filter((c) => c.member_user_id === userId && c.completed_on === dateStr)
-        .map((c) => c.task_id)
-    )
-    if (applicable.every((t) => doneIds.has(t.id))) {
-      bonus += fullDayBonusPerDay
-    }
-  }
-
-  return base + bonus
+  return total
 }

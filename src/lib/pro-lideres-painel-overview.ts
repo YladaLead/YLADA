@@ -615,17 +615,6 @@ export async function fetchProLideresPainelOverview(opts: {
     (c) => c.completed_on >= prevFrom && c.completed_on <= prevTo
   )
 
-  const { data: tenantRow } = await supabaseAdmin
-    .from('leader_tenants')
-    .select('daily_tasks_full_day_bonus_points')
-    .eq('id', tenantId)
-    .maybeSingle()
-
-  const fullDayBonusPoints = Math.min(
-    100000,
-    Math.max(0, Math.floor(Number(tenantRow?.daily_tasks_full_day_bonus_points ?? 10)))
-  )
-
   const memberPoints: PainelOverviewMemberPoints[] = []
   let totalPointsInRange = 0
   let totalCompletionsInRange = 0
@@ -646,7 +635,7 @@ export async function fetchProLideresPainelOverview(opts: {
   }
 
   for (const uid of allUserIds) {
-    const pts = pointsForUserInRange(uid, tasks, complAll, rangeFrom, rangeTo, fullDayBonusPoints)
+    const pts = pointsForUserInRange(uid, tasks, complAll, rangeFrom, rangeTo)
     const myCompl = complAll.filter((c) => c.member_user_id === uid)
     totalPointsInRange += pts
     totalCompletionsInRange += myCompl.length

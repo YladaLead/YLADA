@@ -32,7 +32,7 @@ function normalizeExecutionWeekdays(raw: unknown): number[] | null {
 }
 
 /**
- * GET: tarefas do tenant + conclusões no intervalo [from, to] + pontos (incl. bónus de dia completo).
+ * GET: tarefas do tenant + conclusões no intervalo [from, to] + pontos.
  * POST: criar tarefa (só líder) com dias da semana em que se executa.
  */
 export async function GET(request: NextRequest) {
@@ -102,28 +102,24 @@ export async function GET(request: NextRequest) {
   }
 
   const complAll = (complRows ?? []) as ProLideresDailyTaskCompletionRow[]
-  const fullDayBonusPoints = Math.min(
-    100000,
-    Math.max(0, Math.floor(Number(ctx.tenant.daily_tasks_full_day_bonus_points ?? 10)))
-  )
 
   const members = isOwner ? await fetchProLideresMembersEnriched(tenantId) : []
 
   const pointsByUserId: Record<string, number> = {}
   if (isOwner) {
     const ids = new Set<string>(members.map((m) => m.userId))
+    ids.add(ctx.tenant.owner_user_id)
     for (const c of complAll) ids.add(c.member_user_id)
     for (const uid of ids) {
-      pointsByUserId[uid] = pointsForUserInRange(uid, tasks, complAll, from, to, fullDayBonusPoints)
+      pointsByUserId[uid] = pointsForUserInRange(uid, tasks, complAll, from, to)
     }
   }
 
-  const myPointsInRange = pointsForUserInRange(user.id, tasks, complAll, from, to, fullDayBonusPoints)
+  const myPointsInRange = pointsForUserInRange(user.id, tasks, complAll, from, to)
 
   return NextResponse.json({
     tasks,
     completions,
-    fullDayBonusPoints,
     pointsByUserId,
     myPointsInRange,
     members,

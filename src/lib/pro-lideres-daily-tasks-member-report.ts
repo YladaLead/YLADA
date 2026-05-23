@@ -29,8 +29,7 @@ export function buildMemberExecutionReport(
   tasks: ProLideresDailyTaskRow[],
   completions: ProLideresDailyTaskCompletionRow[],
   from: string,
-  to: string,
-  fullDayBonusPoints: number
+  to: string
 ): MemberExecutionReport {
   const days: MemberDayReport[] = []
   let totalDone = 0
@@ -73,7 +72,7 @@ export function buildMemberExecutionReport(
     })
   }
 
-  const points = pointsForUserInRange(userId, tasks, completions, from, to, fullDayBonusPoints)
+  const points = pointsForUserInRange(userId, tasks, completions, from, to)
 
   return { days, totalDone, totalPending, points }
 }

@@ -13,7 +13,6 @@ type Props = {
   to: string
   tasks: ProLideresDailyTaskRow[]
   completions: ProLideresDailyTaskCompletionRow[]
-  fullDayBonusPoints: number
   onClose: () => void
 }
 
@@ -28,7 +27,7 @@ function DayCard({ day }: { day: MemberDayReport }) {
           <p className="text-sm font-semibold text-gray-900">{day.label}</p>
           <p className="text-[11px] text-gray-500">
             {day.doneCount} de {day.applicableCount} tarefas
-            {day.fullDayComplete ? ' · dia completo' : ''}
+            {day.fullDayComplete ? ' · tudo feito' : ''}
           </p>
         </div>
         <div className="flex w-20 shrink-0 flex-col items-end gap-1">
@@ -140,14 +139,13 @@ export function ProLideresMemberExecutionDetail({
   to,
   tasks,
   completions,
-  fullDayBonusPoints,
   onClose,
 }: Props) {
   const panelRef = useRef<HTMLDivElement>(null)
 
   const report = useMemo(
-    () => buildMemberExecutionReport(userId, tasks, completions, from, to, fullDayBonusPoints),
-    [userId, tasks, completions, from, to, fullDayBonusPoints]
+    () => buildMemberExecutionReport(userId, tasks, completions, from, to),
+    [userId, tasks, completions, from, to]
   )
 
   const periodLabel =
