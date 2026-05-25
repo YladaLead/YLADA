@@ -73,6 +73,14 @@ type TaskRowEdit = {
   description: string
 }
 
+function taskIdSetsEqual(a: Set<string>, b: Set<string>): boolean {
+  if (a.size !== b.size) return false
+  for (const id of a) {
+    if (!b.has(id)) return false
+  }
+  return true
+}
+
 export function ProLideresDailyTasksClient() {
   const router = useRouter()
   const { isLeaderWorkspace: isLeader, dailyTasksVisibleToTeam, painelBasePath } = useProLideresPainel()
@@ -104,6 +112,7 @@ export function ProLideresDailyTasksClient() {
   const [savingEdits, setSavingEdits] = useState(false)
   const [savingToday, setSavingToday] = useState(false)
   const [todayDraft, setTodayDraft] = useState<Set<string>>(() => new Set())
+  const [todaySaved, setTodaySaved] = useState<Set<string>>(() => new Set())
   const [todaySaveOk, setTodaySaveOk] = useState(true)
 
   const now = new Date()
@@ -152,6 +161,7 @@ export function ProLideresDailyTasksClient() {
         completions.filter((c) => c.member_user_id === myUserId).map((c) => c.task_id)
       )
       setTodayDraft(done)
+      setTodaySaved(new Set(done))
       setTodaySaveOk(true)
     } catch {
       /* mantém rascunho local */
@@ -220,11 +230,12 @@ export function ProLideresDailyTasksClient() {
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError((json as { error?: string }).error || 'Erro ao guardar.')
+        setError((json as { error?: string }).error || 'Erro ao salvar.')
         setTodaySaveOk(false)
         await loadTodayChecklist()
         return false
       }
+      setTodaySaved(new Set(completedIds))
       setTodaySaveOk(true)
       void load()
       return true
@@ -238,14 +249,19 @@ export function ProLideresDailyTasksClient() {
     }
   }
 
-  async function toggleTodayTask(taskId: string) {
+  function toggleTodayTask(taskId: string) {
     if (savingToday) return
     const next = new Set(todayDraft)
     if (next.has(taskId)) next.delete(taskId)
     else next.add(taskId)
     setTodayDraft(next)
-    setTodaySaveOk(false)
-    await saveTodayExecution(next)
+    if (taskIdSetsEqual(next, todaySaved)) {
+      setTodaySaveOk(true)
+    }
+  }
+
+  async function saveTodayDraft() {
+    await saveTodayExecution(todayDraft)
   }
 
   async function createTask(e: React.FormEvent) {
@@ -313,7 +329,7 @@ export function ProLideresDailyTasksClient() {
         })
         const j = await res.json().catch(() => ({}))
         if (!res.ok) {
-          setError((j as { error?: string }).error || 'Erro ao guardar uma tarefa.')
+          setError((j as { error?: string }).error || 'Erro ao salvar uma tarefa.')
           return
         }
       }
@@ -348,6 +364,11 @@ export function ProLideresDailyTasksClient() {
   const applicableToday =
     data?.tasks.filter((t) => (t.execution_weekdays ?? []).includes(todayDow)) ?? []
 
+  const todayHasUnsavedChanges = useMemo(
+    () => !taskIdSetsEqual(todayDraft, todaySaved),
+    [todayDraft, todaySaved]
+  )
+
   const execucaoHref = `${painelBasePath.replace(/\/$/, '')}/tarefas/execucao`
 
   const navPill =
@@ -367,7 +388,7 @@ export function ProLideresDailyTasksClient() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Tarefas diárias</h1>
             <p className="mt-1 max-w-xl text-sm text-gray-600">
-              Marca as tuas tarefas do dia e define o que a equipe vê. Para análise da equipe, usa{' '}
+              Marque suas tarefas do dia e defina o que a equipe vê. Para análise da equipe, use{' '}
               <strong className="font-semibold text-gray-800">Ver execução do time</strong>.
             </p>
           </div>
@@ -386,7 +407,7 @@ export function ProLideresDailyTasksClient() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Tarefas diárias</h1>
           <p className="mt-1 max-w-xl text-sm text-gray-500">
-            Marca o que fizeste hoje — cada alteração guarda-se sozinha. Abaixo vês o teu relatório de pontos.
+            Marque o que você fez hoje e toque em Salvar. Abaixo você vê seu relatório de pontos.
           </p>
         </div>
       )}
@@ -409,7 +430,7 @@ export function ProLideresDailyTasksClient() {
               <div>
                 <p className="text-sm font-semibold text-gray-900">Mostrar Tarefas diárias à equipe</p>
                 <p className="mt-1 text-xs text-gray-600">
-                  Quando desligas, os membros deixam de ver esta área no menu e na visão geral do painel.
+                  Quando você desliga, os membros deixam de ver esta área no menu e na visão geral do painel.
                 </p>
               </div>
             </label>
@@ -431,11 +452,13 @@ export function ProLideresDailyTasksClient() {
             <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
               <span>Hoje · {todayStr}</span>
               {savingToday ? (
-                <span className="font-medium text-blue-700">A guardar…</span>
-              ) : todaySaveOk ? (
-                <span className="text-gray-400">Guardado automaticamente</span>
+                <span className="font-medium text-blue-700">Salvando…</span>
+              ) : !todaySaveOk ? (
+                <span className="font-medium text-red-600">Não foi possível salvar. Tente novamente.</span>
+              ) : todayHasUnsavedChanges ? (
+                <span className="font-medium text-amber-700">Alterações não salvas</span>
               ) : (
-                <span className="font-medium text-red-600">Não foi possível guardar — tenta outra vez</span>
+                <span className="text-gray-400">Salvo</span>
               )}
             </p>
           </div>
@@ -468,11 +491,19 @@ export function ProLideresDailyTasksClient() {
               })
             )}
           </ul>
-          <div className="border-t border-gray-100 p-4 sm:p-5">
+          <div className="space-y-3 border-t border-gray-100 p-4 sm:p-5">
             <p className="text-center text-xs text-gray-500">
-              Cada marcação ou desmarcação é guardada na hora — podes atualizar a página sem perder o que
-              escolheste.
+              Marque o que você fez e toque em Salvar. Você pode marcar só parte das tarefas — não precisa
+              preencher tudo.
             </p>
+            <button
+              type="button"
+              disabled={savingToday || applicableToday.length === 0 || !todayHasUnsavedChanges}
+              onClick={() => void saveTodayDraft()}
+              className="w-full min-h-[48px] rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {savingToday ? 'Salvando…' : 'Salvar execução de hoje'}
+            </button>
           </div>
         </div>
       )}
@@ -562,7 +593,7 @@ export function ProLideresDailyTasksClient() {
       )}
 
       {loading ? (
-        <p className="text-gray-600">A carregar…</p>
+        <p className="text-gray-600">Carregando…</p>
       ) : (
         <>
           {isLeader && (
@@ -570,15 +601,15 @@ export function ProLideresDailyTasksClient() {
               <div className="border-b border-gray-100 px-4 py-4 sm:px-5">
                 <p className="text-sm font-semibold text-gray-900">Criar tarefas diárias</p>
                 <p className="mt-1 text-xs text-gray-500">
-                  Cada linha é uma tarefa no cartão do membro. Edita à vontade e guarda as alterações; usa + para
-                  acrescentar e ✕ para apagar.
+                  Cada linha é uma tarefa no cartão do membro. Edite à vontade e salve as alterações; use + para
+                  adicionar e ✕ para remover.
                 </p>
               </div>
 
               <ul className="divide-y divide-gray-100">
                 {taskRows.length === 0 ? (
                   <li className="px-4 py-8 text-center text-sm text-gray-500 sm:px-5">
-                    Ainda não há tarefas. Adiciona a primeira linha em baixo.
+                    Ainda não há tarefas. Adicione a primeira linha abaixo.
                   </li>
                 ) : (
                   taskRows.map((row) => (
@@ -642,7 +673,7 @@ export function ProLideresDailyTasksClient() {
                     onClick={() => void flushTaskRowEdits()}
                     className="rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {savingEdits ? 'A guardar…' : 'Guardar alterações nas tarefas'}
+                    {savingEdits ? 'Salvando…' : 'Salvar alterações nas tarefas'}
                   </button>
                 </div>
 
