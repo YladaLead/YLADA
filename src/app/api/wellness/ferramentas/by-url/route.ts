@@ -130,8 +130,9 @@ export async function GET(request: NextRequest) {
       'calculadora-agua': ['calc-hidratacao', 'calc-agua', 'agua'],
       'calc-agua': ['calc-hidratacao', 'calculadora-agua', 'agua'],
       'agua': ['calc-hidratacao', 'calculadora-agua', 'calc-agua'],
-      'calc-hidratacao': ['calculadora-agua', 'calc-agua', 'agua'],
-      'calculadora-hidratacao': ['calc-hidratacao', 'calculadora-agua'],
+      'calc-hidratacao': ['calculadora-agua', 'calc-agua', 'agua', 'hidratacao'],
+      'calculadora-hidratacao': ['calc-hidratacao', 'calculadora-agua', 'hidratacao'],
+      hidratacao: ['calc-hidratacao', 'calculadora-agua', 'calculadora-hidratacao', 'agua'],
       // Calculadoras coach-bem-estar: URL usa nome longo, banco usa slug curto
       'calculadora-imc': ['calc-imc'],
       'calc-imc': ['calculadora-imc'],
@@ -351,8 +352,9 @@ export async function GET(request: NextRequest) {
           'calculadora-agua': ['calc-hidratacao', 'calc-agua', 'agua'],
           'calc-agua': ['calc-hidratacao', 'calculadora-agua', 'agua'],
           agua: ['calc-hidratacao', 'calculadora-agua', 'calc-agua'],
-          'calc-hidratacao': ['calculadora-agua', 'calc-agua', 'agua'],
-          'calculadora-hidratacao': ['calc-hidratacao', 'calculadora-agua'],
+          'calc-hidratacao': ['calculadora-agua', 'calc-agua', 'agua', 'hidratacao'],
+          'calculadora-hidratacao': ['calc-hidratacao', 'calculadora-agua', 'hidratacao'],
+          hidratacao: ['calc-hidratacao', 'calculadora-agua', 'calculadora-hidratacao', 'agua'],
           // Calculadoras coach-bem-estar
           'calculadora-imc': ['calc-imc'],
           'calc-imc': ['calculadora-imc'],
@@ -536,6 +538,26 @@ export async function GET(request: NextRequest) {
             emoji: '💧'
           },
           'calculadora-agua': {
+            title: 'Calculadora de Hidratação',
+            description: 'Descubra a quantidade ideal de água que você deve beber por dia',
+            emoji: '💧'
+          },
+          hidratacao: {
+            title: 'Calculadora de Hidratação',
+            description: 'Descubra a quantidade ideal de água que você deve beber por dia',
+            emoji: '💧'
+          },
+          'calc-hidratacao': {
+            title: 'Calculadora de Hidratação',
+            description: 'Descubra a quantidade ideal de água que você deve beber por dia',
+            emoji: '💧'
+          },
+          agua: {
+            title: 'Calculadora de Hidratação',
+            description: 'Descubra a quantidade ideal de água que você deve beber por dia',
+            emoji: '💧'
+          },
+          'calc-agua': {
             title: 'Calculadora de Hidratação',
             description: 'Descubra a quantidade ideal de água que você deve beber por dia',
             emoji: '💧'

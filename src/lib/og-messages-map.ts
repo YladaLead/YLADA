@@ -1,3 +1,5 @@
+import { normalizeTemplateSlug } from './template-slug-map'
+
 /**
  * Mapeamento de mensagens estimulantes para Open Graph
  * Mensagens personalizadas por tipo de ferramenta para incentivar o clique
@@ -306,10 +308,8 @@ export function getOGMessages(templateSlug: string | null | undefined): { title:
     }
   }
   
-  // Normalizar o slug
-  const normalized = templateSlug.toLowerCase().trim()
+  const normalized = normalizeTemplateSlug(templateSlug)
   
-  // Tentar encontrar no mapeamento
   if (OG_MESSAGES_MAP[normalized]) {
     return OG_MESSAGES_MAP[normalized]
   }

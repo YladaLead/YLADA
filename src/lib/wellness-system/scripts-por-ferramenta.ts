@@ -15,6 +15,8 @@ export interface ScriptFerramenta {
   dica?: string
 }
 
+import { normalizeTemplateSlug } from '@/lib/template-slug-map'
+
 export interface ScriptsFerramentaConfig {
   ferramenta: string // nome da ferramenta
   slugs: string[] // slugs que correspondem a esta ferramenta
@@ -31,7 +33,16 @@ export const scriptsPorFerramenta: ScriptsFerramentaConfig[] = [
   // =====================================================
   {
     ferramenta: 'Calculadora de Água',
-    slugs: ['calculadora-agua', 'calculadora-de-agua', 'agua'],
+    slugs: [
+      'calculadora-agua',
+      'calculadora-de-agua',
+      'calculadora-hidratacao',
+      'calculadora-de-hidratacao',
+      'calc-hidratacao',
+      'calc-agua',
+      'hidratacao',
+      'agua',
+    ],
     icon: '💧',
     scripts: [
       {
@@ -557,17 +568,32 @@ Compartilhe com seus amigos e familiares que você gosta! Assim a gente ajuda ma
  */
 export function getScriptsPorSlug(slug: string): ScriptsFerramentaConfig | null {
   const slugNormalizado = slug.toLowerCase().trim()
-  
-  // Buscar ferramenta que contenha o slug
-  const config = scriptsPorFerramenta.find(f => 
-    f.slugs.some(s => slugNormalizado.includes(s) || s.includes(slugNormalizado))
+  const slugCanonico = normalizeTemplateSlug(slugNormalizado)
+
+  const matchExato = scriptsPorFerramenta.find(
+    (f) =>
+      !f.slugs.includes('default') &&
+      f.slugs.some(
+        (s) =>
+          slugNormalizado === s ||
+          slugCanonico === s ||
+          slugNormalizado === normalizeTemplateSlug(s)
+      )
   )
-  
-  // Se não encontrou, retornar scripts gerais
+  if (matchExato) return matchExato
+
+  const config = scriptsPorFerramenta.find(
+    (f) =>
+      !f.slugs.includes('default') &&
+      f.slugs.some(
+        (s) => slugNormalizado.includes(s) || s.includes(slugNormalizado)
+      )
+  )
+
   if (!config) {
-    return scriptsPorFerramenta.find(f => f.slugs.includes('default')) || null
+    return scriptsPorFerramenta.find((f) => f.slugs.includes('default')) || null
   }
-  
+
   return config
 }
 

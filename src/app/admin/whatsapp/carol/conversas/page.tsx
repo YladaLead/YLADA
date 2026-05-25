@@ -13,6 +13,7 @@ type Conversation = {
   status: string
   hipotese: string | null
   paused: boolean
+  nota_andre: string | null
   created_at: string
   updated_at: string
   last_message: { content: string; role: string; created_at: string } | null
@@ -431,6 +432,10 @@ function ConversationDetail({
   const [currentStatus, setCurrentStatus] = useState(conversation.status)
   const [showStatusMenu, setShowStatusMenu] = useState(false)
   const [updatingStatus, setUpdatingStatus] = useState(false)
+  const [notaAndre, setNotaAndre] = useState(conversation.nota_andre ?? '')
+  const [savingNota, setSavingNota] = useState(false)
+  const [showNota, setShowNota] = useState(!!(conversation.nota_andre))
+  const notaTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -515,6 +520,26 @@ function ConversationDetail({
     }
   }
 
+  async function handleSaveNota(text: string) {
+    setSavingNota(true)
+    try {
+      await fetch('/api/admin/carol/update-note', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId: conversation.id, nota: text }),
+      })
+    } finally {
+      setSavingNota(false)
+    }
+  }
+
+  function handleNotaChange(text: string) {
+    setNotaAndre(text)
+    if (notaTimer.current) clearTimeout(notaTimer.current)
+    notaTimer.current = setTimeout(() => void handleSaveNota(text), 1200)
+  }
+
   async function handleUpdateStatus(newStatus: string) {
     setUpdatingStatus(true)
     try {
@@ -578,6 +603,17 @@ function ConversationDetail({
               {paused ? '⏸ Pausada' : '🤖 Carol ativa'}
             </button>
             <button
+              onClick={() => setShowNota(v => !v)}
+              title="Nota de contexto para a Carol"
+              className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                notaAndre
+                  ? 'bg-yellow-400 text-yellow-900 hover:bg-yellow-300'
+                  : 'bg-white/20 text-white hover:bg-white/30'
+              }`}
+            >
+              📝 Nota
+            </button>
+            <button
               onClick={() => setShowModal(true)}
               className="rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold text-white hover:bg-white/30"
             >
@@ -628,6 +664,30 @@ function ConversationDetail({
         <div className="shrink-0 border-b border-orange-200 bg-orange-50 px-4 py-2">
           <p className="text-xs font-semibold text-orange-700">
             ⏸ Carol pausada — você está no controle desta conversa. A Carol não vai responder automaticamente.
+          </p>
+        </div>
+      )}
+
+      {/* Nota do Andre */}
+      {showNota && (
+        <div className="shrink-0 border-b border-yellow-200 bg-yellow-50 px-4 py-3">
+          <div className="flex items-center justify-between mb-1.5">
+            <p className="text-xs font-semibold text-yellow-800">
+              📝 Nota de contexto para a Carol
+            </p>
+            <p className="text-[10px] text-yellow-600">
+              {savingNota ? 'Salvando...' : notaAndre ? '✓ Salvo' : ''}
+            </p>
+          </div>
+          <textarea
+            value={notaAndre}
+            onChange={e => handleNotaChange(e.target.value)}
+            placeholder="Ex: Ela atende em casa mas quer ter espaço próprio. Já contatei pelo meu pessoal. Reativar Carol com foco no sonho do espaço próprio."
+            rows={3}
+            className="w-full resize-none rounded-lg border border-yellow-300 bg-white px-3 py-2 text-xs text-gray-800 outline-none focus:border-yellow-500 placeholder-yellow-400"
+          />
+          <p className="mt-1 text-[10px] text-yellow-600">
+            A Carol lê essa nota antes de responder — use para dar contexto da conversa que você teve no seu pessoal.
           </p>
         </div>
       )}

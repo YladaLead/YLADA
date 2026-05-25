@@ -300,14 +300,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       }
     }
 
-    // Verificar se é um fluxo de recrutamento
-    const isFluxoRecrutamento = tool.is_fluxo && (
-      tool.fluxo_tipo === 'recrutamento' || 
-      (tool.content?.tipo === 'recrutamento')
-    )
-    
-    // Normalizar template_slug
-    const normalizedSlug = normalizeTemplateSlug(tool.template_slug)
+    const slugCanonico = normalizeTemplateSlug(tool.template_slug || toolSlug)
+
+    const isFluxoRecrutamento =
+      tool.is_fluxo &&
+      (tool.fluxo_tipo === 'recrutamento' || tool.content?.tipo === 'recrutamento') &&
+      /potencial|recrutamento|maes|renda|trabalhar/i.test(slugCanonico)
+
+    const normalizedSlug = slugCanonico
     
     // Debug: log para verificar normalização
     console.log('[OG Metadata] ✅ Tool found:', {
@@ -375,10 +375,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           hasFluxo: !!tool.content?.fluxo
         })
       } else {
-        // Usar o slug da URL para a imagem OG, para a prévia bater com o endereço compartilhado
-        // (ex.: /quiz-bem-estar deve mostrar quiz-wellness-profile.jpg, não fallback)
-        const slugParaImagem = normalizeTemplateSlug(toolSlug)
-        ogImageUrl = getFullOGImageUrl(slugParaImagem, baseUrl, area)
+        ogImageUrl = getFullOGImageUrl(slugCanonico, baseUrl, area)
       }
       
       // Garantir que a URL seja absoluta

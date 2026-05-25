@@ -588,11 +588,17 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       channel === 'inbound' ? CAROL_INBOUND_MINI_PROMPT : CAROL_SYSTEM_PROMPT
     const replyModel = getCarolReplyModel(channel)
 
+    // Nota do Andre — contexto manual para esta conversa
+    const notaAndreContext = (conversation as any).nota_andre
+      ? `\n\n⚠️ CONTEXTO DO ANDRE (leia antes de responder):\n"${(conversation as any).nota_andre}"\nUse esse contexto para personalizar sua resposta. Não mencione que recebeu essa nota.\n`
+      : ''
+
     const systemContent =
       basePrompt +
       (isFlowResponse
         ? FLOW_CONTEXT_PROMPT
-        : adLeadNote + outboundContextNote + classifierNote + duplicateCtaNote)
+        : adLeadNote + outboundContextNote + classifierNote + duplicateCtaNote) +
+      notaAndreContext
 
     console.log(`[Carol] Canal=${channel} modelo=${replyModel} de ${from}`)
 
