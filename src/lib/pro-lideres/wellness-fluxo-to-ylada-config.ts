@@ -290,6 +290,7 @@ export function wellnessFluxoToYladaConfigJson(
       // Hidratação: sem vertical pro_lideres — evita copy de “líder/negócio”; usa variantes RISK genéricas + tema do link.
       ...(isAguaCalculadoraPreset ? {} : { diagnosis_vertical: 'pro_lideres' }),
       ...(invertRiskMcqScore ? { invert_risk_mcq_score: true } : {}),
+      ...(fluxo.id === 'avaliacao-perfil-metabolico' ? { wellness_metabolic_profile: true } : {}),
     },
     form: {
       fields,

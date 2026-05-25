@@ -11,6 +11,7 @@ import { getProLideresHypeCalculadoraPresetFluxos } from '@/lib/pro-lideres/pro-
 import { ensureWellnessNutritionMirrorsAsProLideresLinks } from '@/lib/pro-lideres/wellness-nutrition-mirror-ensure'
 import { getProLideresLegacyAguaPresetFluxo } from '@/lib/pro-lideres/pro-lideres-wellness-calculadoras-basicas-preset-fluxos'
 import { buildProLideresPresetOgDescription } from '@/lib/pro-lideres/pro-lideres-preset-og-description'
+import { archiveProLideresExcludedPresetLinks } from '@/lib/pro-lideres/archive-pro-lideres-excluded-preset-links'
 import type { FluxoCliente } from '@/types/wellness-system'
 
 /** Template biblioteca YLADA: calculadora IMC (peso, altura cm, idade, sexo → IMC). */
@@ -50,6 +51,8 @@ function attachProLideresOgToPresetConfig(
  */
 export async function ensureProLideresPresetYladaLinks(ownerUserId: string): Promise<void> {
   if (!supabaseAdmin || !ownerUserId) return
+
+  await archiveProLideresExcludedPresetLinks(ownerUserId)
 
   const packs: PresetPack[] = [
     {

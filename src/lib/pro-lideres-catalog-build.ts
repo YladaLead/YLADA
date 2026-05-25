@@ -5,7 +5,8 @@ import {
   type ProLideresFlowCatalogKind,
   inferProLideresFlowCatalogKindFromHref,
 } from '@/lib/pro-lideres-flow-catalog-kind'
-import { sortProLideresCatalogForDisplay } from '@/lib/pro-lideres/pro-lideres-catalog-display-order'
+import { sortProLideresCatalogForDisplay, extractProLideresPresetFluxoIdFromSlug } from '@/lib/pro-lideres/pro-lideres-catalog-display-order'
+import { isProLideresSalesExcludedFluxoId } from '@/lib/pro-lideres/pro-lideres-sales-excluded-fluxo-ids'
 
 /** Tipos em ylada_link_templates que entram no catálogo (ferramentas com resultado / diagnóstico). */
 const YLADA_CATALOG_TEMPLATE_TYPES = new Set(['calculator', 'diagnostico', 'quiz', 'triagem'])
@@ -415,7 +416,17 @@ export async function buildProLideresCatalog(
         const tid = row.template_id as string | null
         if (!tid) return false
         const ty = templatesMap[tid]?.type
-        return ty ? YLADA_CATALOG_TEMPLATE_TYPES.has(ty) : false
+        if (!ty || !YLADA_CATALOG_TEMPLATE_TYPES.has(ty)) return false
+        const slugStr = String(row.slug ?? '')
+        const cfgMeta =
+          row.config_json && typeof row.config_json === 'object' && !Array.isArray(row.config_json)
+            ? ((row.config_json as Record<string, unknown>).meta as Record<string, unknown> | undefined)
+            : undefined
+        const fluxoFromMeta =
+          typeof cfgMeta?.pro_lideres_fluxo_id === 'string' ? cfgMeta.pro_lideres_fluxo_id.trim() : ''
+        const fluxoFromSlug = extractProLideresPresetFluxoIdFromSlug(slugStr) ?? ''
+        if (isProLideresSalesExcludedFluxoId(fluxoFromMeta || fluxoFromSlug)) return false
+        return true
       })
 
       const linkIds = filtered.map((l) => l.id as string)

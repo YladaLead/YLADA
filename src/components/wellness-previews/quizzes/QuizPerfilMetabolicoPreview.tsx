@@ -128,9 +128,13 @@ export default function QuizPerfilMetabolicoPreview({ etapa, onEtapaChange }: Qu
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <p className="text-blue-800 font-semibold mb-2">📋 O que acontece na ferramenta real:</p>
               <p className="text-sm text-blue-700 mb-2">
-                A pessoa que preencher verá o diagnóstico abaixo correspondente às respostas dela.
+                No <strong>app Wellness</strong>, a pessoa vê um dos três blocos abaixo (pontos 0–7 / 8–11 / 12–15).
               </p>
-              <p className="text-sm text-blue-700">Em seguida, virá a seguinte mensagem:</p>
+              <p className="text-sm text-blue-700 mb-2">
+                No <strong>link inteligente Pro Líderes</strong> (<code className="text-xs">avaliacao-perfil-metabolico</code>),
+                as mesmas faixas viram perfil <em>rápido / moderado / lento</em> com recomendações na análise expandida e CTA no WhatsApp — não use o fluxo antigo <em>Metabolismo lento / Inchaço</em> na biblioteca de vendas.
+              </p>
+              <p className="text-sm text-blue-700">Em seguida, no Wellness, virá a seguinte mensagem:</p>
             </div>
 
             {/* CTA Simulado */}

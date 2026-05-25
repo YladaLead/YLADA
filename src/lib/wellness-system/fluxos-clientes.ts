@@ -374,6 +374,7 @@ export const fluxosClientes: FluxoCliente[] = [
   {
     id: 'metabolismo-lento',
     nome: 'Metabolismo Lento / Inchaço',
+    /** Mantido no Wellness interno; excluído dos presets Pro Líderes — ver `pro-lideres-sales-excluded-fluxo-ids.ts`. */
     objetivo: 'Identificar pessoas com sinais de metabolismo desacelerado, retenção e sensação de inchaço — direcionando-as ao kit Acelera.',
     perguntas: [
       {
@@ -435,19 +436,19 @@ export const fluxosClientes: FluxoCliente[] = [
       opcoes: [...q.opcoes],
     })),
     diagnostico: {
-      titulo: 'Perfil metabólico (visão geral)',
+      titulo: 'Seu perfil metabólico',
       descricao:
-        'Questionário de autopercepção (energia, fome, corpo, sono/rotina); o diagnóstico ajuda a pessoa a se reconhecer antes de falar com quem enviou o link.',
+        'Pelas respostas, a pessoa vê um de três perfis (mais favorável, no meio ou pedindo mais apoio) — o mesmo recorte do quiz Wellness, com passos práticos antes de falar com quem enviou o link.',
       sintomas: [
-        'Como sente que o corpo “queima” energia no dia a dia',
-        'Energia, fome, sensação corporal e regularidade da rotina',
+        'Como o corpo parece “gastar” energia no dia a dia',
+        'Energia, fome, corpo e sono/rotina na vivência',
       ],
       beneficios: [
-        'Perguntas centradas na vivência: energia, fome, corpo e rotina',
-        'Mesmo fluxo do app Wellness — continuidade natural no WhatsApp',
+        'Três leituras possíveis alinhadas ao template Wellness (rápido / moderado / lento)',
+        'Recomendações objetivas na entrega do link + convite ao WhatsApp',
       ],
       mensagemPositiva:
-        'Quando a pessoa enxerga o próprio padrão, fica muito mais fácil alinhar o que faz sentido na conversa com o líder.',
+        'Quando a pessoa enxerga o próprio padrão, fica muito mais fácil alinhar o que faz sentido na conversa com quem enviou o link.',
     },
     kitRecomendado: 'acelera',
     cta: 'Falar agora com o Especialista',

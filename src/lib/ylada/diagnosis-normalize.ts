@@ -115,6 +115,8 @@ type CalcGenericScoreOpts = {
   /** Quizzes espelhados do Wellness: índice alto = “melhor” no template, mas no Pro Líderes queremos maior pontuação = mais abertura/urgência nos outcomes. */
   invertMcqScore?: boolean
   formFields?: FormFieldForNormalize[]
+  /** Faixas fixas (ex.: perfil metabólico 8/12 em 15 pts) em vez de terços do máximo. */
+  riskScoreBands?: { medioMin: number; altoMin: number }
 }
 
 /** Score genérico: soma das contribuições por pergunta (qN ou pN). Faixas: terços do máximo possível. */
@@ -137,6 +139,13 @@ function calcGenericScoreAndLevel(
     count++
   }
   if (count === 0) return null
+  const bands = opts?.riskScoreBands
+  if (bands) {
+    let level: RiskLevel = 'baixo'
+    if (sum >= bands.altoMin) level = 'alto'
+    else if (sum >= bands.medioMin) level = 'medio'
+    return { score: sum, level }
+  }
   const third = Math.ceil(maxPossible / 3)
   const twoThirds = Math.ceil((2 * maxPossible) / 3)
   let level: RiskLevel = 'baixo'
@@ -170,7 +179,12 @@ function mapOptionToText(
 export function normalizeVisitorAnswers(
   answers: Record<string, unknown>,
   architecture: DiagnosisArchitecture,
-  options?: { themeRaw?: string; formFields?: FormFieldForNormalize[]; invertRiskMcqScore?: boolean }
+  options?: {
+    themeRaw?: string
+    formFields?: FormFieldForNormalize[]
+    invertRiskMcqScore?: boolean
+    riskScoreBands?: { medioMin: number; altoMin: number }
+  }
 ): Record<string, unknown> {
   const formFields = options?.formFields
   const q1Raw = answers.q1 ?? answers.Q1 ?? answers.p1 ?? answers.P1
@@ -199,6 +213,7 @@ export function normalizeVisitorAnswers(
         const generic = calcGenericScoreAndLevel(answers, {
           invertMcqScore: options?.invertRiskMcqScore === true,
           formFields,
+          riskScoreBands: options?.riskScoreBands,
         })
         if (generic) {
           out.generic_score = generic.score

@@ -1,6 +1,7 @@
 import type { FluxoCliente } from '@/types/wellness-system'
 import { fluxosClientes } from '@/lib/wellness-system/fluxos-clientes'
 import { getProLideresWellnessCalculadorasBasicasPresetFluxos } from '@/lib/pro-lideres/pro-lideres-wellness-calculadoras-basicas-preset-fluxos'
+import { isProLideresSalesExcludedFluxoId } from '@/lib/pro-lideres/pro-lideres-sales-excluded-fluxo-ids'
 
 /**
  * Biblioteca base de Vendas no Pro Líderes.
@@ -8,5 +9,6 @@ import { getProLideresWellnessCalculadorasBasicasPresetFluxos } from '@/lib/pro-
  * (presets TS alinhados ao preview iOS); links /l/ são criados por líder em `ensureProLideresPresetYladaLinks`.
  */
 export function getProLideresSalesPresetFluxos(): FluxoCliente[] {
-  return [...getProLideresWellnessCalculadorasBasicasPresetFluxos(), ...fluxosClientes]
+  const vendas = fluxosClientes.filter((f) => !isProLideresSalesExcludedFluxoId(f.id))
+  return [...getProLideresWellnessCalculadorasBasicasPresetFluxos(), ...vendas]
 }

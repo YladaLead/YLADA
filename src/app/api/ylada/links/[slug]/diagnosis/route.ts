@@ -32,6 +32,10 @@ import { fetchPackagedDiagnosisOutcome } from '@/lib/ylada/fetch-packaged-diagno
 import type { DiagnosisDecisionOutput } from '@/lib/ylada/diagnosis-types'
 import { resolveDiagnosisContentContext } from '@/lib/ylada/diagnosis-content-context'
 import { normalizeDiagnosisDecisionForVisitor } from '@/lib/ylada/diagnosis-visitor-copy-normalize'
+import {
+  AVALIACAO_PERFIL_METABOLICO_FLOW_ID,
+  AVALIACAO_PERFIL_METABOLICO_RISK_BANDS,
+} from '@/lib/wellness/avaliacao-perfil-metabolico-risk-bands'
 
 const ARCHITECTURES: DiagnosisArchitecture[] = [
   'RISK_DIAGNOSIS',
@@ -447,12 +451,22 @@ export async function POST(
 
     const formFields = extractFormFieldsFromConfig(config)
 
+    const flow_id_early = resolveCatalogFlowId(metaRaw)
+    const isMetabolicProfileQuiz = flow_id_early === AVALIACAO_PERFIL_METABOLICO_FLOW_ID
+
     const themeForCache =
       typeof metaRaw.theme_raw === 'string'
         ? metaRaw.theme_raw
         : ((metaRaw.theme as Record<string, unknown>)?.raw as string | undefined) ?? ''
     const linkTitleForCache = (config.title as string) || ''
-    const scoringSalt = metaRaw.invert_risk_mcq_score === true ? 'invert_mcq' : ''
+    const scoringSalt = [
+      metaRaw.invert_risk_mcq_score === true ? 'invert_mcq' : '',
+      isMetabolicProfileQuiz
+        ? `metabolic_bands_${AVALIACAO_PERFIL_METABOLICO_RISK_BANDS.medioMin}_${AVALIACAO_PERFIL_METABOLICO_RISK_BANDS.altoMin}`
+        : '',
+    ]
+      .filter(Boolean)
+      .join('|')
 
     // Cache: v27 — restante do produto (ex. Nutri, presets gerais).
     // v28 — só `diagnosis_vertical` capilar|corporal: backfill meta + OG; invalidação focada (mig. 424).
@@ -464,8 +478,13 @@ export async function POST(
       scoringSalt
     )
     // v29: corrige whatsapp_prefill substituído erroneamente em diagnósticos pacotados (fromPackaged guard).
+    // v30: perfil metabólico Pro Líderes — faixas 8/12 + pacotes alinhados ao Wellness (mig. 436).
     const TEMPLATE_VERSION =
-      diagnosisVertical === 'capilar' || diagnosisVertical === 'corporal' ? 28 : 29
+      diagnosisVertical === 'capilar' || diagnosisVertical === 'corporal'
+        ? 28
+        : isMetabolicProfileQuiz
+          ? 30
+          : 29
     const { data: cached } = await supabaseAdmin
       .from('ylada_diagnosis_cache')
       .select('diagnosis_json')
@@ -543,7 +562,7 @@ export async function POST(
       ? (metaRaw.area_profissional as AreaProfissional)
       : 'geral'
 
-    const flow_id = resolveCatalogFlowId(metaRaw)
+    const flow_id = flow_id_early ?? resolveCatalogFlowId(metaRaw)
     const objectiveMeta = typeof metaRaw.objective === 'string' ? metaRaw.objective : null
 
     // Bloco 2: normalizar q1,q2... para chaves esperadas pelo motor
@@ -551,7 +570,12 @@ export async function POST(
     const normalizedAnswers = normalizeVisitorAnswers(
       visitor_answers,
       architecture as DiagnosisArchitecture,
-      { themeRaw: themeRaw ?? '', formFields, invertRiskMcqScore }
+      {
+        themeRaw: themeRaw ?? '',
+        formFields,
+        invertRiskMcqScore,
+        ...(isMetabolicProfileQuiz ? { riskScoreBands: AVALIACAO_PERFIL_METABOLICO_RISK_BANDS } : {}),
+      }
     )
 
     if (architecture === 'PROJECTION_CALCULATOR') {
