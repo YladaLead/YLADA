@@ -8,7 +8,10 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { createClient } from '@/lib/supabase-client'
 
-const ATIVACAO_PATH = '/pro-lideres/membro/ativacao'
+import {
+  PRO_LIDERES_MEMBRO_ATIVACAO_PATH,
+  stashProLideresAtivacaoPaymentSession,
+} from '@/lib/pro-lideres-membro-ativacao'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
@@ -48,7 +51,18 @@ export default function ProLideresConviteTokenPage() {
    * Após cadastro: entra na conta na hora e vai para pagamento/ativação (evita logout + tela extra).
    * Se o login automático falhar, cai na página de link manual (como-acessar).
    */
-  const signInAndGoToAtivacao = async (emailNorm: string, pwd: string) => {
+  const signInAndGoToAtivacao = async (
+    emailNorm: string,
+    pwd: string,
+    payment?: { spaceName?: string; cardUrl?: string | null; pixUrl?: string | null }
+  ) => {
+    if (payment && (payment.cardUrl || payment.pixUrl)) {
+      stashProLideresAtivacaoPaymentSession({
+        spaceName: payment.spaceName,
+        cardUrl: payment.cardUrl ?? null,
+        pixUrl: payment.pixUrl ?? null,
+      })
+    }
     const supabase = createClient()
     const { error: signInErr } = await supabase.auth.signInWithPassword({
       email: emailNorm.trim(),
@@ -57,11 +71,12 @@ export default function ProLideresConviteTokenPage() {
     if (signInErr) {
       const qs = new URLSearchParams()
       qs.set('email', emailNorm.trim())
-      qs.set('next', ATIVACAO_PATH)
+      qs.set('next', PRO_LIDERES_MEMBRO_ATIVACAO_PATH)
       window.location.assign(`/pro-lideres/membro/como-acessar?${qs.toString()}`)
       return
     }
-    window.location.assign(ATIVACAO_PATH)
+    await supabase.auth.getSession()
+    window.location.assign(PRO_LIDERES_MEMBRO_ATIVACAO_PATH)
   }
 
   const validate = useCallback(async () => {
@@ -161,7 +176,15 @@ export default function ProLideresConviteTokenPage() {
         setRegisterError('Conta criada. Use o e-mail do convite para entrar na próxima página.')
         return
       }
-      await signInAndGoToAtivacao(email, password)
+      const reg = data as {
+        teamBankPaymentUrl?: string | null
+        teamBankPixPaymentUrl?: string | null
+      }
+      await signInAndGoToAtivacao(email, password, {
+        spaceName: valid?.spaceName,
+        cardUrl: reg.teamBankPaymentUrl ?? null,
+        pixUrl: reg.teamBankPixPaymentUrl ?? null,
+      })
     } catch {
       setRegisterError('Erro de rede.')
     } finally {
@@ -201,7 +224,16 @@ export default function ProLideresConviteTokenPage() {
         setAcceptError('Não foi possível identificar o e-mail. Acesse /pro-lideres/entrar manualmente.')
         return
       }
-      window.location.assign(ATIVACAO_PATH)
+      const acc = data as {
+        teamBankPaymentUrl?: string | null
+        teamBankPixPaymentUrl?: string | null
+      }
+      stashProLideresAtivacaoPaymentSession({
+        spaceName: valid?.spaceName,
+        cardUrl: acc.teamBankPaymentUrl ?? null,
+        pixUrl: acc.teamBankPixPaymentUrl ?? null,
+      })
+      window.location.assign(PRO_LIDERES_MEMBRO_ATIVACAO_PATH)
     } catch {
       setAcceptError('Erro de rede.')
     } finally {

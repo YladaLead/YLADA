@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { readProLideresAtivacaoPaymentSession } from '@/lib/pro-lideres-membro-ativacao'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 
 function publicOrigin(): string {
@@ -25,7 +26,20 @@ export function ProLideresMembroComoAcessarClient({
   nextPath: string
 }) {
   const [copied, setCopied] = useState(false)
+  const [payment, setPayment] = useState<{ cardUrl: string | null; pixUrl: string | null }>({
+    cardUrl: null,
+    pixUrl: null,
+  })
   const origin = publicOrigin()
+
+  useEffect(() => {
+    const stash = readProLideresAtivacaoPaymentSession()
+    if (!stash) return
+    const cardUrl =
+      typeof stash.cardUrl === 'string' && stash.cardUrl.trim() ? stash.cardUrl.trim() : null
+    const pixUrl = typeof stash.pixUrl === 'string' && stash.pixUrl.trim() ? stash.pixUrl.trim() : null
+    if (cardUrl || pixUrl) setPayment({ cardUrl, pixUrl })
+  }, [])
   const loginPath = '/pro-lideres/entrar'
   const fullLoginUrl = `${origin}${loginPath}?next=${encodeURIComponent(nextPath)}&email=${encodeURIComponent(email)}`
 
@@ -58,6 +72,35 @@ export function ProLideresMembroComoAcessarClient({
           Guarde este acesso no celular: use sempre o <strong className="text-gray-900">mesmo e-mail</strong> e a{' '}
           <strong className="text-gray-900">mesma senha</strong> que acabou de criar.
         </p>
+
+        {payment.cardUrl || payment.pixUrl ? (
+          <div className="mt-6 space-y-3">
+            <p className="text-center text-sm font-semibold text-gray-900">Pagamento da equipe</p>
+            <p className="text-center text-xs text-gray-600">
+              Você já pode pagar agora. Depois use o botão abaixo para entrar e concluir a ativação.
+            </p>
+            {payment.pixUrl ? (
+              <a
+                href={payment.pixUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800"
+              >
+                Pix
+              </a>
+            ) : null}
+            {payment.cardUrl ? (
+              <a
+                href={payment.cardUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-amber-700 px-4 text-sm font-semibold text-white hover:bg-amber-800"
+              >
+                Cartão ou Mercado Pago
+              </a>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="mt-6 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Link para entrar</p>
