@@ -37,6 +37,21 @@ export function perfilMatrizToSubscriptionArea(perfil: string | null | undefined
   return perfil as SubscriptionArea
 }
 
+/** Produto Herbalife / Coach de bem-estar — assinatura em `subscriptions.area = wellness`. */
+export function isWellnessProductPerfil(perfil: string | null | undefined): boolean {
+  return perfil === 'wellness' || perfil === 'coach-bem-estar'
+}
+
+/**
+ * Assinatura wellness paga/trial/cortesia vigente (prazo de `current_period_end`).
+ * Usada para liberar links/Noel YLADA em contas migradas Coach de bem-estar.
+ */
+export async function getWellnessProductCommercialSubscription(userId: string) {
+  const sub = await getActiveSubscription(userId, 'wellness')
+  if (!sub) return null
+  return subscriptionRowIsMatrixSegmentCommercialUnlimited(sub) ? sub : null
+}
+
 function activeYladaRowIsUnlimited(sub: {
   plan_type?: string | null
   stripe_subscription_id?: string | null
@@ -148,7 +163,8 @@ export async function requiresManualRenewal(
  * Obtém assinatura ativa do usuário para uma área específica
  */
 /**
- * Assinatura ativa exibida em Configurações da matriz YLADA: prioriza `ylada`, senão o segmento do perfil (nutri, med, …).
+ * Assinatura ativa exibida em Configurações / APIs YLADA:
+ * prioriza `ylada`, depois wellness vigente (coach-bem-estar / wellness migrados), senão segmento da matriz.
  */
 export async function getActiveSubscriptionForYladaConfig(userId: string) {
   const ylada = await getActiveSubscription(userId, 'ylada')
@@ -158,7 +174,12 @@ export async function getActiveSubscriptionForYladaConfig(userId: string) {
     .select('perfil')
     .eq('user_id', userId)
     .maybeSingle()
-  const area = perfilMatrizToSubscriptionArea(profile?.perfil as string | undefined)
+  const perfil = profile?.perfil as string | undefined
+  if (isWellnessProductPerfil(perfil)) {
+    const wellnessCommercial = await getWellnessProductCommercialSubscription(userId)
+    if (wellnessCommercial) return wellnessCommercial
+  }
+  const area = perfilMatrizToSubscriptionArea(perfil)
   if (!area) return null
   return getActiveSubscription(userId, area)
 }
@@ -293,10 +314,10 @@ export function emailHasYladaCommercialUnlimitedByEsteticaOrEnv(email: string | 
 
 /**
  * Verifica se usuário tem benefícios “sem limite freemium” na matriz YLADA (links, Noel, WhatsApp).
- * Inclui: **admin ou suporte** (contas demo e equipe, ex. `demo.nutri@ylada.com` com `is_support`);
- * **emails `demo.*@ylada.app` (e `@ylada.com`)** usados em gravações — mesmo sem linha em `subscriptions`;
- * ylada mensal/anual/trial ou free cortesia; **ou** assinatura ativa no **segmento do perfil** (nutri, med, coach, …) equivalente a pago/trial/cortesia.
- * Wellness não entra aqui. Não inclui: free migração/legado no segmento.
+ * Inclui: **admin ou suporte**; **demo.*@ylada**; ylada mensal/anual/trial/cortesia;
+ * **wellness / coach-bem-estar** com assinatura `wellness` vigente (mensal/anual/trial) ou equipa Pró Líderes;
+ * **ou** segmento da matriz (nutri, med, coach, …) com plano comercial equivalente.
+ * Não inclui: free migração/legado sem prazo pago vigente.
  * @see docs/SPEC-FREEMIUM-YLADA.md
  */
 export async function hasYladaProPlan(userId: string): Promise<boolean> {
@@ -315,7 +336,13 @@ export async function hasYladaProPlan(userId: string): Promise<boolean> {
     const yladaSub = await getActiveSubscription(userId, 'ylada')
     if (yladaSub && activeYladaRowIsUnlimited(yladaSub)) return true
 
-    const area = perfilMatrizToSubscriptionArea(profile?.perfil as string | undefined)
+    const perfil = profile?.perfil as string | undefined
+    if (isWellnessProductPerfil(perfil)) {
+      if (await getWellnessProductCommercialSubscription(userId)) return true
+      if (await proLideresContextUnlocksYladaMatrixApis(userId)) return true
+    }
+
+    const area = perfilMatrizToSubscriptionArea(perfil)
     if (!area) return false
 
     const segSub = await getActiveSubscription(userId, area)

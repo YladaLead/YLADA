@@ -26,8 +26,8 @@ const ADMIN_MANUAL_SUBSCRIPTION_AREAS = [
  * Usado quando o pagamento foi aprovado no MP mas o webhook não criou a assinatura.
  * Apenas admin pode criar.
  *
- * Para liberar Pro da **matriz** (links, Noel, limites em /pt/links): use **area: "ylada"**.
- * Plano em nutri/wellness/etc. não substitui assinatura ylada em `hasYladaProPlan`.
+ * Para liberar Pro da **matriz** (links, Noel): use **area: "ylada"** ou wellness mensal/anual/trial
+ * vigente em perfil **wellness** / **coach-bem-estar** (ver `hasYladaProPlan`).
  */
 export async function POST(request: NextRequest) {
   try {
