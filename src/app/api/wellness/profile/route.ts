@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
 import { translateError } from '@/lib/error-messages'
+import { ensureUserSlugSaved } from '@/lib/user-slug-generator'
 
 // GET - Buscar perfil do usuário
 export async function GET(request: NextRequest) {
@@ -123,6 +124,22 @@ export async function GET(request: NextRequest) {
         profile_type: profile?.profile_type || null
       },
       profile_type: profile?.profile_type || null // Incluir também no nível raiz para compatibilidade
+    }
+
+    // Slug automático (Wellness + Coach de bem-estar): mesmo padrão do Nutri — sem passo manual na configuração
+    if (!responseData.profile.userSlug?.trim()) {
+      try {
+        const slugGerado = await ensureUserSlugSaved(
+          user.id,
+          responseData.profile.nome?.trim() || '',
+          responseData.profile.email?.trim() || authUser?.user?.email || ''
+        )
+        if (slugGerado) {
+          responseData.profile.userSlug = slugGerado
+        }
+      } catch (e) {
+        console.warn('⚠️ Falha ao gerar/salvar user_slug automaticamente (wellness):', e)
+      }
     }
 
     console.log('📤 Retornando dados do perfil:', {

@@ -66,16 +66,35 @@ async function isSlugAvailable(slug: string): Promise<boolean> {
 }
 
 /**
- * Gera um user_slug disponível baseado no nome completo
- * Tenta várias variações até encontrar uma disponível
+ * Nome usado para montar o slug: prioriza nome completo; senão parte local do e-mail (ex.: paulo.eribe → paulo eribe).
  */
-export async function generateAvailableUserSlug(nomeCompleto: string): Promise<string | null> {
-  if (!nomeCompleto || nomeCompleto.trim().length < 3) {
+export function nameHintForUserSlug(nomeCompleto: string, email?: string): string {
+  const nome = (nomeCompleto || '').trim()
+  if (nome.length >= 3) return nome
+
+  const local = (email || '').split('@')[0]?.trim() ?? ''
+  if (!local) return nome
+
+  const fromEmail = local.replace(/[._+-]+/g, ' ').trim()
+  const hint = fromEmail.length >= 3 ? fromEmail : nome || local
+  return hint.trim()
+}
+
+/**
+ * Gera um user_slug disponível baseado no nome completo (ou e-mail como fallback).
+ * Tenta várias variações até encontrar uma disponível.
+ */
+export async function generateAvailableUserSlug(
+  nomeCompleto: string,
+  email?: string
+): Promise<string | null> {
+  const hint = nameHintForUserSlug(nomeCompleto, email)
+  if (!hint || hint.length < 3) {
     return null
   }
 
   // Extrair primeiro nome
-  const partesNome = nomeCompleto.trim().split(/\s+/)
+  const partesNome = hint.split(/\s+/)
   const primeiroNome = partesNome[0]
   
   if (!primeiroNome || primeiroNome.length < 2) {
@@ -122,6 +141,45 @@ export async function generateAvailableUserSlug(nomeCompleto: string): Promise<s
   }
 
   // Se nenhuma tentativa funcionou, retornar null
-  console.warn(`⚠️ Não foi possível gerar um slug disponível para: ${nomeCompleto}`)
+  console.warn(`⚠️ Não foi possível gerar um slug disponível para: ${hint}`)
   return null
+}
+
+/**
+ * Garante user_slug no perfil (lê o existente ou gera, persiste e retorna).
+ */
+export async function ensureUserSlugSaved(
+  userId: string,
+  nomeCompleto: string,
+  email?: string
+): Promise<string | null> {
+  if (!supabaseAdmin) return null
+
+  const { data: row } = await supabaseAdmin
+    .from('user_profiles')
+    .select('user_slug, nome_completo')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  const atual = row?.user_slug?.trim()
+  if (atual) return atual
+
+  const slugGerado = await generateAvailableUserSlug(
+    nomeCompleto || row?.nome_completo || '',
+    email
+  )
+  if (!slugGerado) return null
+
+  const { error } = await supabaseAdmin
+    .from('user_profiles')
+    .update({ user_slug: slugGerado, updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+
+  if (error) {
+    console.error('Erro ao salvar user_slug automático:', error)
+    return null
+  }
+
+  console.log(`✅ user_slug automático salvo: ${slugGerado} (user_id=${userId})`)
+  return slugGerado
 }

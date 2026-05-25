@@ -100,7 +100,9 @@ export async function GET(
       }
 
       // Construir URL completa baseada na profissão
-      if (tool.profession === 'wellness' && userSlug) {
+      if (tool.profession === 'coach-bem-estar' && userSlug) {
+        redirectUrl = `/pt/coach-bem-estar/${userSlug}/${tool.slug}`
+      } else if (tool.profession === 'wellness' && userSlug) {
         redirectUrl = `/pt/wellness/${userSlug}/${tool.slug}`
       } else if (tool.profession === 'nutri' && userSlug) {
         redirectUrl = `/pt/nutri/${userSlug}/${tool.slug}`

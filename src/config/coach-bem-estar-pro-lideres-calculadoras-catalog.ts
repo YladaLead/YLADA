@@ -54,24 +54,26 @@ export function isHypeCalculadoraFluxoProLideres(fluxoId: string): boolean {
   return HYPE_CALC_SLUGS.has(id)
 }
 
-/** Página pública de modelo (sem slug do profissional). */
+/** Página pública de modelo (sem slug do profissional) — sempre na área Coach de bem-estar. */
 export function coachBemEstarCatalogUrlParaFluxoProLideres(fluxoId: string, baseUrl: string): string {
   const base = baseUrl.replace(/\/$/, '')
   const id = normalizeTemplateSlug(fluxoId) || fluxoId
 
   if (HYPE_CALC_SLUGS.has(id)) {
-    return `${base}/pt/wellness/templates/hype-drink/${id}`
+    return `${base}/pt/coach-bem-estar/links/novo?template=${encodeURIComponent(id)}`
   }
 
-  const wellnessTemplatePath: Record<string, string> = {
-    'calc-imc': '/pt/wellness/templates/imc',
-    'calc-hidratacao': '/pt/wellness/templates/hidratacao',
-    'calc-calorias': '/pt/wellness/templates/calorias',
-    'calc-proteina': '/pt/wellness/templates/proteina',
+  const calculadorasBasicas = new Set([
+    'calc-imc',
+    'calc-hidratacao',
+    'calc-calorias',
+    'calc-proteina',
+    'hidratacao',
+    'agua',
+  ])
+  if (calculadorasBasicas.has(id)) {
+    return `${base}/pt/coach-bem-estar/links/novo?template=${encodeURIComponent(id)}`
   }
 
-  const path = wellnessTemplatePath[id]
-  if (path) return `${base}${path}`
-
-  return `${base}/pt/wellness/ferramentas/nova?template=${encodeURIComponent(id)}`
+  return `${base}/pt/coach-bem-estar/links/novo?template=${encodeURIComponent(id)}`
 }

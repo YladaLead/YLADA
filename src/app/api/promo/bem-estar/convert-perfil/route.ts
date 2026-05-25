@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
+import { ensureUserSlugSaved } from '@/lib/user-slug-generator'
 
 /**
  * POST /api/promo/bem-estar/convert-perfil
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     const { data: prof, error: readErr } = await supabaseAdmin
       .from('user_profiles')
-      .select('perfil')
+      .select('perfil, nome_completo, user_slug')
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -74,7 +75,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Não foi possível atualizar o perfil.' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true })
+    let userSlug = prof?.user_slug?.trim() || null
+    if (!userSlug) {
+      userSlug = await ensureUserSlugSaved(
+        user.id,
+        prof?.nome_completo || user.user_metadata?.full_name || user.user_metadata?.name || '',
+        sessionEmail
+      )
+    }
+
+    return NextResponse.json({ success: true, userSlug })
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : 'Erro ao converter'
     return NextResponse.json({ error: message }, { status: 500 })

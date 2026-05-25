@@ -13,7 +13,6 @@ import { getAppUrl, buildWellnessToolUrl } from '@/lib/url-utils'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
 import {
   getCoachBemEstarCalculadorasEspelhoProLideres,
-  coachBemEstarCatalogUrlParaFluxoProLideres,
   isHypeCalculadoraFluxoProLideres,
 } from '@/config/coach-bem-estar-pro-lideres-calculadoras-catalog'
 import {
@@ -163,13 +162,23 @@ export function WellnessLinksUnificadosContent({
   } | null>(null)
 
   const baseUrl = getAppUrl()
+  const buildLinkFerramenta = (userSlug: string, toolSlug: string) =>
+    coachBemEstarEmbed
+      ? buildCoachBemEstarToolUrl(userSlug, toolSlug)
+      : buildWellnessToolUrl(userSlug, toolSlug)
+
   const linkNovaFerramentaComTemplate = (templateSlug: string) => {
     const s = normalizeTemplateSlug(templateSlug)
     if (!s) return ''
-    return `${baseUrl}/pt/wellness/ferramentas/nova?template=${encodeURIComponent(s)}`
+    const path = coachBemEstarEmbed
+      ? '/pt/coach-bem-estar/links/novo'
+      : '/pt/wellness/ferramentas/nova'
+    return `${baseUrl}${path}?template=${encodeURIComponent(s)}`
   }
   const linkCatalogoHypeDrink = (hypeSlug: string) =>
-    `${baseUrl}/pt/wellness/templates/hype-drink/${encodeURIComponent(hypeSlug)}`
+    coachBemEstarEmbed
+      ? `${baseUrl}/pt/coach-bem-estar/links/novo?template=${encodeURIComponent(hypeSlug)}`
+      : `${baseUrl}/pt/wellness/templates/hype-drink/${encodeURIComponent(hypeSlug)}`
 
   const whatsappGroupInviteUrl = (
     process.env.NEXT_PUBLIC_WELLNESS_WHATSAPP_GROUP_INVITE_URL ||
@@ -260,13 +269,22 @@ export function WellnessLinksUnificadosContent({
       if (!profile?.userSlug) return
 
       try {
-        const response = await fetch('/api/wellness/ferramentas?profession=wellness', {
-          credentials: 'include'
-        })
-
-        if (!response.ok) return
-        const data = await response.json()
-        const tools = data.tools || []
+        const professions = coachBemEstarEmbed
+          ? ['coach-bem-estar', 'wellness']
+          : ['wellness']
+        const responses = await Promise.all(
+          professions.map((profession) =>
+            fetch(`/api/wellness/ferramentas?profession=${encodeURIComponent(profession)}`, {
+              credentials: 'include',
+            })
+          )
+        )
+        const tools: Array<Record<string, unknown>> = []
+        for (const response of responses) {
+          if (!response.ok) continue
+          const data = await response.json()
+          if (Array.isArray(data.tools)) tools.push(...data.tools)
+        }
 
         const mapa: Record<string, string> = {}
         const statsMap: Record<string, { views: number; leads: number; conversions: number }> = {}
@@ -287,8 +305,9 @@ export function WellnessLinksUnificadosContent({
         const linkIds = tools.map((t: any) => t.id).filter(Boolean)
         if (linkIds.length > 0) {
           try {
+            const statsArea = coachBemEstarEmbed ? 'coach-bem-estar' : 'wellness'
             const statsRes = await fetch(
-              `/api/link-events/stats?area=wellness&link_source=user_template&link_ids=${linkIds.join(',')}`,
+              `/api/link-events/stats?area=${statsArea}&link_source=user_template&link_ids=${linkIds.join(',')}`,
               { credentials: 'include' }
             )
             if (statsRes.ok) {
@@ -331,7 +350,7 @@ export function WellnessLinksUnificadosContent({
     }
 
     carregarFerramentasUsuario()
-  }, [profile?.userSlug])
+  }, [profile?.userSlug, coachBemEstarEmbed])
 
   // Gerar link para template (usando buildWellnessToolUrl)
   const gerarLinkTemplate = (template: Template): string | null => {
@@ -350,7 +369,7 @@ export function WellnessLinksUnificadosContent({
     // Verificar se o usuário já criou uma ferramenta baseada neste template
     const toolSlug = ferramentasUsuario[template.slug] || template.slug
 
-    const link = buildWellnessToolUrl(profile.userSlug, toolSlug)
+    const link = buildLinkFerramenta(profile.userSlug, toolSlug)
     console.log('✅ Link gerado para template:', { 
       nome: template.nome, 
       templateSlug: template.slug,
@@ -366,14 +385,14 @@ export function WellnessLinksUnificadosContent({
   const gerarLinkFluxoRecrutamento = (fluxo: FluxoCliente): string | null => {
     if (!profile?.userSlug) return null
     const slug = gerarSlugFluxo(fluxo.nome)
-    return buildWellnessToolUrl(profile.userSlug, slug)
+    return buildLinkFerramenta(profile.userSlug, slug)
   }
 
   // Gerar link para fluxo de vendas (URL simples: user_slug + slug)
   const gerarLinkFluxoVendas = (fluxo: FluxoCliente): string | null => {
     if (!profile?.userSlug) return null
     const slug = gerarSlugFluxo(fluxo.nome)
-    return buildWellnessToolUrl(profile.userSlug, slug)
+    return buildLinkFerramenta(profile.userSlug, slug)
   }
 
   // Gerar link próprio da HOM (como as ferramentas)
@@ -381,7 +400,7 @@ export function WellnessLinksUnificadosContent({
     if (!profile?.userSlug) {
       return null
     }
-    return buildWellnessToolUrl(profile.userSlug, 'hom')
+    return buildLinkFerramenta(profile.userSlug, 'hom')
   }
 
   // Remover duplicatas: prioridade slug canônico (imc / calc-imc / calculadora-imc → um só), depois nome
@@ -468,7 +487,7 @@ export function WellnessLinksUnificadosContent({
       ...t,
       categoria: 'HYPE',
       link: profile?.userSlug
-        ? buildWellnessToolUrl(profile.userSlug, t.slug)
+        ? buildLinkFerramenta(profile.userSlug, t.slug)
         : linkCatalogoHypeDrink(t.slug),
     }))
   }, [profile?.userSlug, coachBemEstarEmbed, baseUrl])
@@ -691,18 +710,14 @@ export function WellnessLinksUnificadosContent({
 
       let link = ''
       if (profile?.userSlug) {
-        if (templateMatch?.slug) {
-          const toolSlug =
-            ferramentasUsuario[templateMatch.slug] || ferramentasUsuario[slugN] || templateMatch.slug
-          link = buildCoachBemEstarToolUrl(profile.userSlug, toolSlug)
-        } else if (isHypeCalc) {
-          link = buildCoachBemEstarToolUrl(profile.userSlug, slugN)
-        } else {
-          link = coachBemEstarCatalogUrlParaFluxoProLideres(f.id, baseUrl)
-        }
-      } else {
-        link = coachBemEstarCatalogUrlParaFluxoProLideres(f.id, baseUrl)
+        const toolSlug =
+          ferramentasUsuario[slugN] ||
+          (templateMatch?.slug &&
+            (ferramentasUsuario[templateMatch.slug] || templateMatch.slug)) ||
+          slugN
+        link = buildCoachBemEstarToolUrl(profile.userSlug, toolSlug)
       }
+      // Sem user_slug: não montar link de demo Wellness — usuário configura em Configurações
 
       const toolSlugStats =
         templateMatch && profile?.userSlug
@@ -871,8 +886,19 @@ export function WellnessLinksUnificadosContent({
         console.error('❌ Link vazio para item:', id)
         showWarning('Link não disponível', {
           message: coachBemEstarEmbed
-            ? 'Não foi possível montar o link deste item.'
+            ? 'Configure seu link personalizado em Configurações para gerar URLs com seu nome (ex.: ylada.com/pt/coach-bem-estar/seu-nome/calc-imc).'
             : 'Configure seu user_slug no perfil primeiro para gerar links.',
+        })
+        return
+      }
+
+      if (
+        coachBemEstarEmbed &&
+        (link.includes('/pt/wellness/templates/') || link.includes('/pt/wellness/ferramentas/'))
+      ) {
+        showWarning('Link incorreto para Coach de bem-estar', {
+          message:
+            'Este item ainda aponta para a área Wellness. Configure seu link em Configurações e copie de novo, ou atualize a página após o deploy.',
         })
         return
       }
@@ -1460,10 +1486,11 @@ Você vai adorar! 😊`
                 <span className="text-xl">🔗</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-amber-900">
-                    Configure seu link personalizado para ativar estas ferramentas
+                    Estamos gerando seu link personalizado
                   </p>
                   <p className="text-xs text-amber-700 mt-0.5">
-                    Sem o link, não é possível gerar URLs com seus dados de contato.
+                    Ele é criado automaticamente a partir do seu nome (ex.: paulo → ylada.com/pt/coach-bem-estar/paulo/…).
+                    Se não aparecer em alguns segundos, atualize a página ou complete seu nome em Configurações.
                   </p>
                 </div>
                 <a
@@ -1499,7 +1526,7 @@ Você vai adorar! 😊`
 
             return (
               <div className="max-w-7xl mx-auto">
-                {renderSection('Calculadoras', '🧮', calcItems, false)}
+                {renderSection('Calculadoras', '🧮', calcItems, true)}
                 {renderSection('Ferramentas de venda', '💚', vendasItems, true)}
                 {/* Recrutamento foi movido para a aba EXTRA → /pt/coach-bem-estar/recrutamento */}
               </div>
