@@ -4,8 +4,20 @@ import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
 import { yScriptCategoryFromStage } from '@/lib/pro-lideres-y-scripts-meta'
+import {
+  PROLIDER_SCRIPT_CANAIS,
+  PROLIDER_SCRIPT_PUBLICOS,
+  PROLIDER_SCRIPT_STAGES,
+  proLiderScriptCanalInfo,
+  proLiderScriptMatchesFilters,
+  proLiderScriptPublicoInfo,
+  type ProliderScriptCanalFilter,
+  type ProliderScriptPublicoFilter,
+  type ProliderScriptStageFilter,
+  type ProliderScriptStage,
+} from '@/lib/pro-lideres-y-scripts-filters'
 import { copyTextToClipboard } from '@/lib/clipboard'
-import { sanitizeProLideresScriptCopy } from '@/lib/pro-lideres-script-copy-sanitize'
+import { sanitizeNoelScriptBrazilianCopy } from '@/lib/pro-lideres-scripts-noel'
 import type { ProliderScriptRow, ProliderToolRow, YScriptsFolderPayload } from '@/app/api/pro-lideres/y-scripts/route'
 
 const COPY_FEEDBACK_MS = 2500
@@ -20,12 +32,55 @@ async function fetchYScripts(): Promise<YScriptsFolderPayload[]> {
 }
 
 function scriptDisplayTitle(script: ProliderScriptRow): string {
-  const t = sanitizeProLideresScriptCopy(script.title)
+  const t = sanitizeNoelScriptBrazilianCopy(script.title ?? '')
   return t ? t.toUpperCase() : 'SCRIPT'
 }
 
 function scriptBody(script: ProliderScriptRow): string {
-  return sanitizeProLideresScriptCopy(script.content)
+  return sanitizeNoelScriptBrazilianCopy(script.content)
+}
+
+function FilterChipRow<T extends string>({
+  label,
+  options,
+  active,
+  onToggle,
+  countFor,
+}: {
+  label: string
+  options: { key: T; label: string }[]
+  active: T | 'todos'
+  onToggle: (key: T) => void
+  countFor?: (key: T) => number
+}) {
+  return (
+    <div className="flex items-start gap-2">
+      <span className="mt-1.5 w-12 shrink-0 text-[10px] font-bold uppercase tracking-wide text-gray-400 sm:w-14">
+        {label}
+      </span>
+      <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
+        {options.map((opt) => {
+          const selected = active === opt.key
+          const count = countFor?.(opt.key)
+          return (
+            <button
+              key={opt.key}
+              type="button"
+              onClick={() => onToggle(opt.key)}
+              className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition touch-manipulation sm:px-3 sm:text-xs ${
+                selected
+                  ? 'border-[#7F77DD] bg-[#7F77DD] text-white'
+                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              {opt.label}
+              {count != null ? <span className={`ml-1 ${selected ? 'opacity-80' : 'opacity-50'}`}>{count}</span> : null}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 function matchesSearch(script: ProliderScriptRow, query: string): boolean {
@@ -84,6 +139,8 @@ function ScriptGridCard({
 }) {
   const category = yScriptCategoryFromStage(script.stage)
   const preview = scriptBody(script)
+  const pub = proLiderScriptPublicoInfo(script.contexto)
+  const canal = proLiderScriptCanalInfo(script.canal)
 
   return (
     <article
@@ -99,11 +156,27 @@ function ScriptGridCard({
       />
       <div className="relative z-10 pointer-events-none flex min-h-0 flex-1 flex-col">
         <div className="mb-1 flex items-start justify-between gap-1 sm:mb-1.5 sm:gap-2">
-          <span
-            className={`inline-flex max-w-[85%] truncate rounded px-1.5 py-px text-[8px] font-bold uppercase leading-tight tracking-wide sm:max-w-none sm:rounded-md sm:px-2 sm:py-0.5 sm:text-[10px] ${category.bg} ${category.text}`}
-          >
-            {category.label}
-          </span>
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+            <span
+              className={`inline-flex max-w-full truncate rounded px-1.5 py-px text-[8px] font-bold uppercase leading-tight tracking-wide sm:rounded-md sm:px-2 sm:py-0.5 sm:text-[10px] ${category.bg} ${category.text}`}
+            >
+              {category.label}
+            </span>
+            {pub && script.contexto && script.contexto !== 'geral' ? (
+              <span
+                className={`inline-flex truncate rounded px-1.5 py-px text-[8px] font-bold uppercase leading-tight sm:text-[10px] ${pub.badge}`}
+              >
+                {pub.label.replace(/^[^\s]+\s/, '')}
+              </span>
+            ) : null}
+            {canal && script.canal && script.canal !== 'geral' ? (
+              <span
+                className={`inline-flex truncate rounded px-1.5 py-px text-[8px] font-bold uppercase leading-tight sm:text-[10px] ${canal.badge}`}
+              >
+                {canal.label.replace(/^[^\s]+\s/, '')}
+              </span>
+            ) : null}
+          </div>
           {copied ? (
             <span className="shrink-0 text-[9px] font-bold text-emerald-600 sm:text-xs">✓</span>
           ) : null}
@@ -208,6 +281,9 @@ export function YScriptsContent() {
   const [error, setError] = useState<string | null>(null)
   const [selectedToolId, setSelectedToolId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [filterStage, setFilterStage] = useState<ProliderScriptStageFilter>('todos')
+  const [filterPublico, setFilterPublico] = useState<ProliderScriptPublicoFilter>('todos')
+  const [filterCanal, setFilterCanal] = useState<ProliderScriptCanalFilter>('todos')
   const [mobileScreen, setMobileScreen] = useState<MobileScreen>('pastas')
   const [previewScript, setPreviewScript] = useState<ProliderScriptRow | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
@@ -242,8 +318,43 @@ export function YScriptsContent() {
 
   const filteredScripts = useMemo(() => {
     if (!selectedFolder) return []
-    return selectedFolder.scripts.filter((s) => matchesSearch(s, search))
-  }, [selectedFolder, search])
+    return selectedFolder.scripts.filter(
+      (s) =>
+        matchesSearch(s, search) &&
+        proLiderScriptMatchesFilters(s, {
+          stage: filterStage,
+          publico: filterPublico,
+          canal: filterCanal,
+        })
+    )
+  }, [selectedFolder, search, filterStage, filterPublico, filterCanal])
+
+  const hasActiveFilters =
+    filterStage !== 'todos' || filterPublico !== 'todos' || filterCanal !== 'todos'
+
+  const countScriptsForStage = useCallback(
+    (stage: ProliderScriptStage) => {
+      if (!selectedFolder) return 0
+      return selectedFolder.scripts.filter((s) => s.stage === stage).length
+    },
+    [selectedFolder]
+  )
+
+  const countScriptsForPublico = useCallback(
+    (publico: Exclude<ProliderScriptPublicoFilter, 'todos'>) => {
+      if (!selectedFolder) return 0
+      return selectedFolder.scripts.filter((s) => (s.contexto ?? 'geral') === publico).length
+    },
+    [selectedFolder]
+  )
+
+  const countScriptsForCanal = useCallback(
+    (canal: Exclude<ProliderScriptCanalFilter, 'todos'>) => {
+      if (!selectedFolder) return 0
+      return selectedFolder.scripts.filter((s) => (s.canal ?? 'geral') === canal).length
+    },
+    [selectedFolder]
+  )
 
   const totalScripts = useMemo(
     () => folders.reduce((n, f) => n + f.scripts.length, 0),
@@ -270,6 +381,9 @@ export function YScriptsContent() {
   const openFolder = (toolId: string) => {
     setSelectedToolId(toolId)
     setSearch('')
+    setFilterStage('todos')
+    setFilterPublico('todos')
+    setFilterCanal('todos')
     setMobileScreen('conteudo')
   }
 
@@ -388,6 +502,42 @@ export function YScriptsContent() {
             autoComplete="off"
           />
         </div>
+        <div className="mt-3 space-y-2 rounded-xl bg-[#fafafa] p-3">
+          <FilterChipRow
+            label="Etapa"
+            options={PROLIDER_SCRIPT_STAGES.map((s) => ({ key: s.key, label: s.shortLabel }))}
+            active={filterStage}
+            onToggle={(key) => setFilterStage((prev) => (prev === key ? 'todos' : key))}
+            countFor={countScriptsForStage}
+          />
+          <FilterChipRow
+            label="Quem"
+            options={PROLIDER_SCRIPT_PUBLICOS.map((p) => ({ key: p.key, label: p.label }))}
+            active={filterPublico}
+            onToggle={(key) => setFilterPublico((prev) => (prev === key ? 'todos' : key))}
+            countFor={countScriptsForPublico}
+          />
+          <FilterChipRow
+            label="Como"
+            options={PROLIDER_SCRIPT_CANAIS.map((c) => ({ key: c.key, label: c.label }))}
+            active={filterCanal}
+            onToggle={(key) => setFilterCanal((prev) => (prev === key ? 'todos' : key))}
+            countFor={countScriptsForCanal}
+          />
+          {hasActiveFilters ? (
+            <button
+              type="button"
+              onClick={() => {
+                setFilterStage('todos')
+                setFilterPublico('todos')
+                setFilterCanal('todos')
+              }}
+              className="text-[11px] font-semibold text-[#534AB7] hover:underline"
+            >
+              Limpar filtros
+            </button>
+          ) : null}
+        </div>
       </div>
     </header>
   ) : null
@@ -398,7 +548,9 @@ export function YScriptsContent() {
         <p className="py-12 text-center text-sm text-gray-500">Selecione uma pasta ao lado.</p>
       ) : filteredScripts.length === 0 ? (
         <p className="rounded-2xl bg-[#f4f4f6] px-4 py-12 text-center text-sm text-gray-500">
-          {search.trim() ? 'Nenhuma mensagem com essa busca.' : 'Esta pasta ainda não tem mensagens.'}
+          {search.trim() || hasActiveFilters
+            ? 'Nenhuma mensagem com essa busca ou filtro.'
+            : 'Esta pasta ainda não tem mensagens.'}
         </p>
       ) : (
         <ul className="grid grid-cols-2 gap-2 sm:gap-3 lg:gap-4">

@@ -227,7 +227,7 @@ Fico à disposição 😊`,
         stage: 'followup',
         contexto: 'geral',
         canal: 'online',
-        title: 'Follow-up após conversa ou delivery — 48h',
+        title: 'Acompanhamento após conversa ou delivery — 48h',
         content: `Oi [nome]! Tudo bem?
 
 Fiquei pensando na nossa conversa. Você conseguiu refletir um pouco sobre o que conversamos?
@@ -541,7 +541,7 @@ Uma pergunta direta: o que faria você querer experimentar?`,
         stage: 'followup',
         contexto: 'geral',
         canal: 'presencial',
-        title: 'Follow-up após mostrar pessoalmente',
+        title: 'Acompanhamento após mostrar pessoalmente',
         content: `Oi [nome]! Passando rapidinho.
 
 Ficou com alguma dúvida depois que a gente conversou — às vezes a gente vai embora e a dúvida aparece só depois 😄
@@ -552,7 +552,7 @@ Tem alguma coisa que ficou na sua cabeça?`,
         stage: 'followup',
         contexto: 'geral',
         canal: 'online',
-        title: 'Follow-up 48h — DM ou WhatsApp',
+        title: 'Acompanhamento 48h — DM ou WhatsApp',
         content: `Oi [nome]! Passando rapidinho.
 
 Você conseguiu pensar um pouco no que conversamos sobre o Reset? Tem alguma coisa que ficou na cabeça — boa ou ruim?
@@ -837,7 +837,7 @@ Fico aqui pra qualquer dúvida — o começo é a parte mais importante 😊`,
         stage: 'followup',
         contexto: 'geral',
         canal: 'presencial',
-        title: 'Follow-up após reunião presencial',
+        title: 'Acompanhamento após reunião presencial',
         content: `Oi [nome]! Passando rapidinho.
 
 Ficou com alguma dúvida depois que a gente se viu — às vezes a pessoa vai embora e a dúvida aparece depois 😄
@@ -848,7 +848,7 @@ Tem alguma coisa que ficou na sua cabeça?`,
         stage: 'followup',
         contexto: 'geral',
         canal: 'online',
-        title: 'Follow-up 48h após conversa online',
+        title: 'Acompanhamento 48h após conversa online',
         content: `Oi [nome]! Passando rapidinho.
 
 Você conseguiu pensar um pouco no que conversamos? Tem alguma coisa que ficou na cabeça — boa ou ruim?

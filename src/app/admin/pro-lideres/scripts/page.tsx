@@ -28,7 +28,7 @@ type Stage = 'gerar_contato' | 'abordagem' | 'followup' | 'objecoes'
 const STAGES: { key: Stage; label: string }[] = [
   { key: 'gerar_contato', label: '📣 Gerar Contato' },
   { key: 'abordagem',     label: '💬 Abordagem' },
-  { key: 'followup',      label: '🔁 Follow-up' },
+  { key: 'followup',      label: '🔁 Acompanhamento' },
   { key: 'objecoes',      label: '🛡️ Objeções' },
 ]
 

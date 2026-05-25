@@ -31,7 +31,7 @@ const CATEGORY_BY_STAGE: Record<ProLiderScriptStage, YScriptCategoryStyle> = {
   },
   followup: {
     key: 'followup',
-    label: 'Follow-up',
+    label: 'Acompanhamento',
     bg: 'bg-amber-50',
     text: 'text-amber-900',
   },

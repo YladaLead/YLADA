@@ -1,6 +1,16 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import {
+  PROLIDER_SCRIPT_CANAIS,
+  PROLIDER_SCRIPT_PUBLICOS,
+  PROLIDER_SCRIPT_STAGES,
+  proLiderScriptCanalInfo,
+  proLiderScriptPublicoInfo,
+  type ProliderScriptCanal,
+  type ProliderScriptPublico,
+  type ProliderScriptStage,
+} from '@/lib/pro-lideres-y-scripts-filters'
 
 /* ─── Tipos ──────────────────────────────────────────────────────────── */
 type Tool = {
@@ -12,45 +22,30 @@ type Tool = {
   display_order: number
 }
 
-type Publico = 'geral' | 'lista_quente' | 'lista_fria' | 'indicacao'
-type Canal   = 'geral' | 'presencial' | 'online'
+type Publico = ProliderScriptPublico
+type Canal = ProliderScriptCanal
+type Stage = ProliderScriptStage
 
 type Script = {
   id: string
   tool_id: string
   stage: Stage
-  contexto: Publico  // quem: tipo de contato
-  canal: Canal       // como: canal de comunicação
+  contexto: Publico
+  canal: Canal
   title: string | null
   content: string
   is_active: boolean
 }
 
-type Stage = 'gerar_contato' | 'abordagem' | 'followup' | 'objecoes'
-
-export const STAGES: { key: Stage; label: string; desc: string }[] = [
-  { key: 'gerar_contato', label: '📣 Gerar Contato',    desc: 'Primeira mensagem — desperta curiosidade e pede permissão' },
-  { key: 'abordagem',     label: '💬 Primeiro Contato', desc: 'Quando a pessoa responde — aprofunde e entenda a situação' },
-  { key: 'followup',      label: '🔁 Acompanhamento',   desc: 'Após visita, experimentação ou silêncio prolongado' },
-  { key: 'objecoes',      label: '🛡️ Objeções',         desc: 'Respostas para dúvidas e resistências comuns' },
-]
-
-const PUBLICOS: { key: Publico; label: string; badge: string }[] = [
-  { key: 'lista_quente', label: '🔥 Lista Quente', badge: 'bg-orange-100 text-orange-700' },
-  { key: 'lista_fria',   label: '❄️ Lista Fria',   badge: 'bg-sky-100 text-sky-700' },
-  { key: 'indicacao',    label: '🤝 Indicação',    badge: 'bg-purple-100 text-purple-700' },
-]
-
-const CANAIS: { key: Canal; label: string; badge: string }[] = [
-  { key: 'presencial', label: '🏠 Presencial',   badge: 'bg-green-100 text-green-700' },
-  { key: 'online',     label: '📱 Online/DM',    badge: 'bg-indigo-100 text-indigo-700' },
-]
+const STAGES = PROLIDER_SCRIPT_STAGES
+const PUBLICOS = PROLIDER_SCRIPT_PUBLICOS
+const CANAIS = PROLIDER_SCRIPT_CANAIS
 
 function publicoInfo(c?: Publico | null) {
-  return PUBLICOS.find(x => x.key === (c ?? 'geral')) ?? null
+  return proLiderScriptPublicoInfo(c)
 }
 function canalInfo(c?: Canal | null) {
-  return CANAIS.find(x => x.key === (c ?? 'geral')) ?? null
+  return proLiderScriptCanalInfo(c)
 }
 
 async function apiFetch(url: string, options?: RequestInit) {
@@ -567,12 +562,12 @@ export function ProLideresFerramentasTab() {
                       {script.title && (
                         <span className="text-xs font-bold text-gray-800 mr-1">{script.title}</span>
                       )}
-                      {pub && pub.key !== 'todos' && pub.key !== 'geral' && (
+                      {pub && pub.key !== 'geral' && (
                         <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${pub.badge}`}>
                           {pub.label}
                         </span>
                       )}
-                      {can && can.key !== 'todos' && can.key !== 'geral' && (
+                      {can && can.key !== 'geral' && (
                         <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${can.badge}`}>
                           {can.label}
                         </span>
