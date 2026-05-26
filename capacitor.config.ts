@@ -10,7 +10,10 @@ const config: CapacitorConfig = {
     allowNavigation: ['*.ylada.com']
   },
   ios: {
-    contentInset: 'automatic'
+    contentInset: 'automatic',
+    // User agent customizado para identificar o app nativo
+    // Usado para desabilitar cookie banners e outros comportamentos web-only
+    appendUserAgent: 'YladaApp/iOS Capacitor'
   }
 };
 

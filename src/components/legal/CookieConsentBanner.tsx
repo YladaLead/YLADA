@@ -4,6 +4,18 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { X, Cookie, Settings } from 'lucide-react'
 
+// Detecta se está rodando dentro do app nativo (Capacitor iOS/Android)
+// Nesse caso, não mostramos o banner de cookies pois o app não rastreia via cookies
+function isNativeApp(): boolean {
+  if (typeof window === 'undefined') return false
+  // Capacitor expõe window.Capacitor quando rodando em app nativo
+  const hasCapacitor = !!(window as unknown as Record<string, unknown>)['Capacitor']
+  // User agent do Capacitor contém "Capacitor" ou pode ser detectado por ausência de navegador
+  const ua = navigator.userAgent || ''
+  const isCapacitorUA = ua.includes('Capacitor') || ua.includes('capacitor') || ua.includes('YladaApp')
+  return hasCapacitor || isCapacitorUA
+}
+
 type CookiePreferences = {
   essential: boolean
   functional: boolean
@@ -62,7 +74,15 @@ export default function CookieConsentBanner() {
   useEffect(() => {
     // Garantir que só executa no cliente
     setMounted(true)
-    
+
+    // Se rodando em app nativo (iOS/Android via Capacitor), não mostrar banner
+    // A Apple rejeita apps que exibem banner de cookies sem implementar ATT
+    if (isNativeApp()) {
+      setHasConsentState(true)
+      setShowBanner(false)
+      return
+    }
+
     // Verificar se já tem consentimento salvo (localStorage + cookie HTTP)
     if (typeof window === 'undefined') return
 
