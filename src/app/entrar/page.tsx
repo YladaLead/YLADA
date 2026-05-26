@@ -58,9 +58,6 @@ export default function EntrarPage() {
         {step === 'landing' && (
           <div className="w-full max-w-sm text-center space-y-6">
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-blue-600 uppercase tracking-wide">
-                Método socrático com IA
-              </p>
               <h1 className="text-2xl font-bold text-gray-900 leading-tight">
                 Diagnostique seu negócio em 15 minutos
               </h1>
