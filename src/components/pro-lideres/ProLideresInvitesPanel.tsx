@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { proLideresInviteSlotsBlockedMessage } from '@/lib/pro-lideres-invite-slots'
 import type { LeaderTenantInviteListItem } from '@/types/leader-tenant'
 
 function statusLabel(s: string): string {
@@ -20,7 +21,16 @@ function statusLabel(s: string): string {
   }
 }
 
-type QuotaInfo = { pendingLimit: number; pendingUsed: number; totalListed: number }
+type QuotaInfo = {
+  slotsPurchased: number
+  teamMembersCount: number
+  remaining: number
+  invitesBlocked: boolean
+  packSize: number
+  packPriceBrl: number
+  pendingUsed: number
+  totalListed: number
+}
 
 type YladaTeamSubHint = { monthlyAmountBrl: number; pendingInviteQuota: number }
 
@@ -114,11 +124,14 @@ export function ProLideresInvitesPanel() {
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         if (res.status === 402) {
-          setSubscriptionAccessOk(false)
-          setYladaSubHint(null)
-          setInvites([])
-          setQuota(null)
-          return
+          const code = (data as { code?: string }).code
+          if (code !== 'pro_lideres_invite_slots_exhausted') {
+            setSubscriptionAccessOk(false)
+            setYladaSubHint(null)
+            setInvites([])
+            setQuota(null)
+            return
+          }
         }
         setError((data as { error?: string }).error || 'Não foi possível carregar convites.')
         setInvites([])
@@ -168,9 +181,13 @@ export function ProLideresInvitesPanel() {
     lastCreatedInviteIdRef.current = lastCreatedInviteId
   }, [lastCreatedInviteId])
 
+  const invitesSlotsBlocked = Boolean(quota?.invitesBlocked)
+  const inviteFormDisabled =
+    creating || subscriptionAccessOk !== true || subscriptionAccessOk === null || invitesSlotsBlocked
+
   async function onCreate(e: React.FormEvent) {
     e.preventDefault()
-    if (subscriptionAccessOk === false) return
+    if (subscriptionAccessOk === false || invitesSlotsBlocked) return
     setCreating(true)
     setError(null)
     setLastCreatedUrl(null)
@@ -187,6 +204,13 @@ export function ProLideresInvitesPanel() {
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         if (res.status === 402) {
+          const code = (data as { code?: string }).code
+          const q = (data as { quota?: QuotaInfo }).quota
+          if (code === 'pro_lideres_invite_slots_exhausted' && q) {
+            setQuota(q)
+            setError((data as { error?: string }).error || proLideresInviteSlotsBlockedMessage(q))
+            return
+          }
           setSubscriptionAccessOk(false)
           setError((data as { error?: string }).error || 'Ative a assinatura YLADA deste espaço para gerar convites.')
           return
@@ -338,6 +362,35 @@ export function ProLideresInvitesPanel() {
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">{error}</div>
       )}
 
+      {subscriptionAccessOk === true && invitesSlotsBlocked && quota ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-950 shadow-sm">
+          <p className="font-semibold text-red-950">Convites bloqueados</p>
+          <p className="mt-2 leading-relaxed text-red-900/95">{proLideresInviteSlotsBlockedMessage(quota)}</p>
+          <p className="mt-2 text-xs text-red-800/90">
+            Cadastros na equipe: <strong>{quota.teamMembersCount}</strong> de <strong>{quota.slotsPurchased}</strong>
+            {quota.remaining < 0 ? (
+              <>
+                {' '}
+                · <strong>{Math.abs(quota.remaining)}</strong> acima do limite
+              </>
+            ) : quota.remaining > 0 ? (
+              <>
+                {' '}
+                · restam <strong>{quota.remaining}</strong>
+              </>
+            ) : null}
+          </p>
+          <button
+            type="button"
+            disabled={quotaTopupLoading}
+            onClick={() => void startInviteQuotaTopupCheckout()}
+            className="mt-4 min-h-[44px] w-full rounded-xl bg-red-800 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-900 disabled:opacity-60 sm:w-auto"
+          >
+            {quotaTopupLoading ? 'A abrir pagamento…' : `Liberar mais 50 convites — R$ ${quota.packPriceBrl}`}
+          </button>
+        </div>
+      ) : null}
+
       <form onSubmit={onCreate} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <p className="text-sm font-semibold text-gray-900">Novo convite</p>
         <p className="text-sm text-gray-600">
@@ -353,19 +406,25 @@ export function ProLideresInvitesPanel() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900"
+              disabled={inviteFormDisabled}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
               placeholder="nome@empresa.com"
               autoComplete="off"
             />
           </label>
           <button
             type="submit"
-            disabled={creating || subscriptionAccessOk === false || subscriptionAccessOk === null}
+            disabled={inviteFormDisabled}
             className="min-h-[44px] shrink-0 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
           >
             {creating ? 'A gerar…' : 'Gerar link'}
           </button>
         </div>
+        {invitesSlotsBlocked ? (
+          <p className="text-xs text-red-800/90">
+            O botão fica desativado até adquirir mais 50 vagas na equipe (Mercado Pago, R$ 750). Links antigos podem ser substituídos; o limite é por pessoa cadastrada.
+          </p>
+        ) : null}
       </form>
 
       {lastCreatedUrl && lastCreatedInviteId && (
@@ -454,7 +513,7 @@ export function ProLideresInvitesPanel() {
           <p className="font-semibold text-emerald-950">Assinatura YLADA (equipe)</p>
           <p className="mt-1 leading-relaxed text-emerald-900/95">
             <strong className="text-emerald-950">Ativa.</strong> Referência do plano: até{' '}
-            <strong>{yladaSubHint.pendingInviteQuota} convites pendentes</strong> no ciclo ·{' '}
+            até <strong>{yladaSubHint.pendingInviteQuota} cadastros na equipe</strong> por pacote ·{' '}
             <strong>R$ {yladaSubHint.monthlyAmountBrl.toLocaleString('pt-BR')}/mês</strong> na YLADA. Se o plano
             expirar, o aviso laranja volta acima com o botão para regularizar o pagamento.
           </p>
@@ -463,11 +522,16 @@ export function ProLideresInvitesPanel() {
 
       {quota && subscriptionAccessOk !== false && (
         <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm">
-          <span className="font-semibold text-gray-900">Cota de convites pendentes:</span>{' '}
+          <span className="font-semibold text-gray-900">Pacote da equipe:</span>{' '}
           <span>
-            {quota.pendingUsed} / {quota.pendingLimit} ativos
+            {quota.teamMembersCount} / {quota.slotsPurchased} cadastros
           </span>
-          <span className="text-gray-500"> · {quota.totalListed} linhas no histórico (todos os estados)</span>
+          {quota.remaining < 0 ? (
+            <span className="text-red-700 font-medium"> · {quota.remaining} (acima do limite)</span>
+          ) : (
+            <span className="text-gray-600"> · restam {quota.remaining}</span>
+          )}
+          <span className="text-gray-500"> · {quota.pendingUsed} pendentes ativos agora</span>
         </div>
       )}
 

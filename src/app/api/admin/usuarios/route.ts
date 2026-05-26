@@ -9,6 +9,10 @@ import {
   fetchAdminProProductBadgesByUserId,
   fetchAdminProLideresUserIds,
 } from '@/lib/admin-usuarios-pro-product-badge'
+import {
+  fetchAdminProLideresLeaderContextByUserId,
+  fetchUserIdsForProLideresTenant,
+} from '@/lib/admin-usuarios-pro-lideres-leader'
 import { batchProLideresContextUnlocksYladaMatrixApis } from '@/lib/pro-lideres-server'
 import { fetchProEsteticaConsultoriaAccessUntilByUserId } from '@/lib/admin-usuarios-pro-estetica-consultoria-access'
 import { toYmdInTimeZone } from '@/lib/date-utils'
@@ -31,6 +35,7 @@ import { toYmdInTimeZone } from '@/lib/date-utils'
  * - presidente?: string - Filtrar por nome do presidente (equipe do presidente)
  * - busca?: string - Buscar por nome, email (user_profiles ou Auth) ou WhatsApp
  * - ordenacao_cadastro?: 'recente' | 'antigo' — ordena pela data de criação do perfil (`user_profiles.created_at`); omitido = ordem do banco
+ * - pro_lideres_tenant?: uuid — só dono + membros do tenant Pro Líderes (h-lider)
  */
 function sanitizeBuscaIlike(raw: string) {
   // Vírgula quebra o operador .or() do PostgREST; %/_ em e-mail são raros
@@ -59,6 +64,22 @@ function sortAdminSubsByPeriodEndDesc(a: AdminUsuarioSubRow, b: AdminUsuarioSubR
  * A query vem ordenada por `current_period_end` desc — um trial com fim “mais tarde” que o anual
  * fazia o `.find()` mostrar Trial no admin em vez do plano pago. Preferimos mensal/anual, depois free, depois trial.
  */
+const PRO_LIDERES_BILLING_AREAS = ['pro_lideres_noel_member', 'pro_lideres_team'] as const
+
+function mergeAdminSubs(...groups: AdminUsuarioSubRow[][]): AdminUsuarioSubRow[] {
+  const seen = new Set<string>()
+  const out: AdminUsuarioSubRow[] = []
+  for (const group of groups) {
+    for (const s of group) {
+      if (!seen.has(s.id)) {
+        seen.add(s.id)
+        out.push(s)
+      }
+    }
+  }
+  return out
+}
+
 function pickActiveSubscriptionForAdminList(
   userSubscriptions: AdminUsuarioSubRow[],
   now: Date
@@ -97,6 +118,7 @@ export async function GET(request: NextRequest) {
     const presidenteFiltro = searchParams.get('presidente') || ''
     const busca = searchParams.get('busca') || ''
     const ordenacaoCadastro = (searchParams.get('ordenacao_cadastro') || '').trim().toLowerCase()
+    const proLideresTenantFiltro = (searchParams.get('pro_lideres_tenant') || '').trim()
 
     // Buscar todos os perfis de usuários
     const LEGADO_AREAS = ['nutri', 'coach', 'nutra']
@@ -110,6 +132,18 @@ export async function GET(request: NextRequest) {
       profilesQuery = profilesQuery.in('perfil', [...PERFIS_MATRIZ_YLADA])
     } else if (blocoFiltro === 'wellness') {
       profilesQuery = profilesQuery.in('perfil', ['wellness', 'coach-bem-estar'])
+    }
+
+    if (proLideresTenantFiltro) {
+      const tenantUserIds = await fetchUserIdsForProLideresTenant(supabaseAdmin, proLideresTenantFiltro)
+      if (tenantUserIds.length === 0) {
+        return NextResponse.json({
+          success: true,
+          usuarios: [],
+          stats: { total: 0, ativos: 0, inativos: 0 },
+        })
+      }
+      profilesQuery = profilesQuery.in('user_id', tenantUserIds)
     }
 
     // Segmento exato (coluna Área) — `pro_lideres` = filtro por vínculo em leader_tenants / members (não é user_profiles.perfil)
@@ -252,6 +286,7 @@ export async function GET(request: NextRequest) {
     // Buscar assinaturas (ativas e vencidas) para todos os usuários
     const userIds = profiles.map(p => p.user_id)
     const proProductBadgesByUser = await fetchAdminProProductBadgesByUserId(supabaseAdmin, userIds)
+    const proLideresLeaderByUser = await fetchAdminProLideresLeaderContextByUserId(supabaseAdmin, userIds)
 
     const userIdToEmailPro = new Map<string, string>()
     for (const p of profiles) {
@@ -401,34 +436,48 @@ export async function GET(request: NextRequest) {
       )
       const subsMesmaArea = todasSubsUsuario.filter((s) => s.area === userArea)
       const subsYlada = todasSubsUsuario.filter((s) => s.area === 'ylada')
+      const subsProLideresBilling = todasSubsUsuario.filter((s) =>
+        PRO_LIDERES_BILLING_AREAS.includes(s.area as (typeof PRO_LIDERES_BILLING_AREAS)[number])
+      )
 
       const isSubVigente = (sub: { status: string; current_period_end: string | null }) => {
         if (!sub.current_period_end || String(sub.status).toLowerCase() !== 'active') return false
         return new Date(sub.current_period_end).getTime() > now.getTime()
       }
 
+      const isPaidPlan = (sub: { plan_type: string }) =>
+        sub.plan_type === 'monthly' || sub.plan_type === 'annual'
+
       // Se existir linha "do segmento" mas só vencida/cancelada, não esconder ylada ativa (ex.: Med + free matriz)
       const mesmaAreaTemVigente = subsMesmaArea.some(isSubVigente)
+      const proLideresBillingTemVigente = subsProLideresBilling.some(isSubVigente)
+      const proLideresBillingTemVigentePago = subsProLideresBilling.some(
+        (s) => isSubVigente(s) && isPaidPlan(s)
+      )
       const yladaTemVigente = subsYlada.some(isSubVigente)
-      // Prioridade: assinatura ativa no segmento do perfil; senão free matriz ativa; senão linhas do segmento (ex.: mensal vencido); depois ylada
+      // Prioridade: segmento do perfil (+ billing Pro Líderes); senão só billing PL; senão ylada; senão histórico segmento
       const userSubscriptions = mesmaAreaTemVigente
-        ? subsMesmaArea
-        : yladaTemVigente
-          ? subsYlada
-          : subsMesmaArea.length > 0
-            ? subsMesmaArea
-            : subsYlada.length > 0
-              ? subsYlada
-              : todasSubsUsuario
+        ? mergeAdminSubs(subsMesmaArea, subsProLideresBilling)
+        : proLideresBillingTemVigente
+          ? subsProLideresBilling
+          : yladaTemVigente
+            ? subsYlada
+            : subsMesmaArea.length > 0
+              ? mergeAdminSubs(subsMesmaArea, subsProLideresBilling)
+              : subsProLideresBilling.length > 0
+                ? subsProLideresBilling
+                : subsYlada.length > 0
+                  ? subsYlada
+                  : todasSubsUsuario
       const activeSubscription = pickActiveSubscriptionForAdminList(
         userSubscriptions as AdminUsuarioSubRow[],
         now
       )
       const latestSubscription = userSubscriptions[0] ?? null
 
-      /** Último mensal/anual na área do perfil (para relatório: não deixar trial/free “esconder” histórico pago). */
-      const paidMesmaAreaDesc = subsMesmaArea
-        .filter((s) => s.plan_type === 'monthly' || s.plan_type === 'annual')
+      /** Último mensal/anual no perfil ou billing Pro Líderes (Noel membro / equipe). */
+      const paidMesmaAreaDesc = mergeAdminSubs(subsMesmaArea, subsProLideresBilling)
+        .filter((s) => isPaidPlan(s))
         .sort((a, b) => {
           const ta = a.current_period_end ? new Date(a.current_period_end).getTime() : 0
           const tb = b.current_period_end ? new Date(b.current_period_end).getTime() : 0
@@ -562,7 +611,13 @@ export async function GET(request: NextRequest) {
         (s) => s.area === 'wellness' && isSubVigente(s)
       )
       let acessoWellnessViaProLideres = false
-      if (perfilWellnessBlock && !implicitMatrizFree && !vigenteWellnessSub && proLideresUnlockUserIds.has(profile.user_id)) {
+      if (
+        perfilWellnessBlock &&
+        !implicitMatrizFree &&
+        !vigenteWellnessSub &&
+        !proLideresBillingTemVigentePago &&
+        proLideresUnlockUserIds.has(profile.user_id)
+      ) {
         acessoWellnessViaProLideres = true
         isAtivo = true
         status = 'ativo'
@@ -605,6 +660,7 @@ export async function GET(request: NextRequest) {
         (profile.whatsapp && profile.whatsapp.trim()) || whatsappDoAuth.get(profile.user_id) || null
 
       const proConsultoria = proConsultoriaByUser.get(profile.user_id)
+      const plLeader = proLideresLeaderByUser.get(profile.user_id)
 
       return {
         id: profile.user_id,
@@ -616,6 +672,7 @@ export async function GET(request: NextRequest) {
         status,
         assinatura: assinaturaTipo,
         assinaturaId: subscriptionToEdit?.id || null,
+        assinaturaBillingArea: subscriptionForPlanDisplay?.area ?? null,
         assinaturaVencimento: acessoWellnessViaProLideres
           ? null
           : assinaturaVencimento
@@ -653,6 +710,10 @@ export async function GET(request: NextRequest) {
         assinaturaCategoria,
         /** Acesso à app wellness/coach apenas via tenant Pro Líderes (sem subscription wellness YLADA vigente). */
         acessoWellnessViaProLideres,
+        proLideresTenantId: plLeader?.tenantId ?? null,
+        proLideresLeaderLabel: plLeader?.leaderLabel ?? null,
+        proLideresTeamLabel: plLeader?.tenantDisplayName ?? null,
+        proLideresIsTeamOwner: plLeader?.isOwner ?? false,
         /** Já existiu registro mensal ou anual (qualquer área); ver query `historico` */
         everHadPaid,
         isContaTeste: isAdminTestAccountEmail(emailExibicao),

@@ -10,6 +10,10 @@ import {
   isValidInviteEmail,
   normalizeInviteEmail,
 } from '@/lib/pro-lideres-invite-helpers'
+import {
+  loadProLideresInviteSlotsStatus,
+  proLideresInviteSlotsBlockedMessage,
+} from '@/lib/pro-lideres-invite-slots'
 import type { LeaderTenantInviteListItem, LeaderTenantInviteRow } from '@/types/leader-tenant'
 
 function requestOrigin(request: NextRequest): string {
@@ -53,10 +57,11 @@ export async function GET(request: NextRequest) {
     .eq('id', tenantId)
     .maybeSingle()
 
-  const pendingQuota =
-    typeof tenantRow?.team_invite_pending_quota === 'number' && tenantRow.team_invite_pending_quota > 0
-      ? tenantRow.team_invite_pending_quota
-      : 50
+  const slotStatus = await loadProLideresInviteSlotsStatus(
+    supabaseAdmin,
+    tenantId,
+    tenantRow?.team_invite_pending_quota
+  )
 
   const { data: rows, error } = await supabaseAdmin
     .from('leader_tenant_invites')
@@ -147,7 +152,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     invites,
     quota: {
-      pendingLimit: pendingQuota,
+      ...slotStatus,
       pendingUsed: pendingValidCount,
       totalListed: baseRows.length,
     },
@@ -180,27 +185,20 @@ export async function POST(request: NextRequest) {
     .eq('id', tenantId)
     .maybeSingle()
 
-  const pendingQuota =
-    typeof tenantRow?.team_invite_pending_quota === 'number' && tenantRow.team_invite_pending_quota > 0
-      ? tenantRow.team_invite_pending_quota
-      : 50
+  const slotStatus = await loadProLideresInviteSlotsStatus(
+    supabaseAdmin,
+    tenantId,
+    tenantRow?.team_invite_pending_quota
+  )
 
-  const nowIso = new Date().toISOString()
-  const { count: pendingCount, error: countErr } = await supabaseAdmin
-    .from('leader_tenant_invites')
-    .select('id', { count: 'exact', head: true })
-    .eq('leader_tenant_id', tenantId)
-    .eq('status', 'pending')
-    .gt('expires_at', nowIso)
-
-  if (countErr) {
-    console.error('[pro-lideres/invites POST count]', countErr)
-  } else if ((pendingCount ?? 0) >= pendingQuota) {
+  if (slotStatus.invitesBlocked) {
     return NextResponse.json(
       {
-        error: `Limite de convites pendentes atingido (${pendingQuota}). Revogue convites antigos ou aguarde a expiração.`,
+        error: proLideresInviteSlotsBlockedMessage(slotStatus),
+        code: 'pro_lideres_invite_slots_exhausted',
+        quota: slotStatus,
       },
-      { status: 400 }
+      { status: 402 }
     )
   }
 

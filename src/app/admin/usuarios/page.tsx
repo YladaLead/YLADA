@@ -18,6 +18,7 @@ interface Usuario {
   status: 'ativo' | 'inativo'
   assinatura: 'mensal' | 'anual' | 'gratuita' | 'trial' | 'sem assinatura'
   assinaturaId: string | null
+  assinaturaBillingArea?: string | null
   assinaturaVencimento: string | null
   dataCadastro: string | null
   leadsGerados: number
@@ -57,6 +58,10 @@ interface Usuario {
     | 'pro_lideres_equipa'
   /** Acesso wellness/coach coberto pelo tenant Pro Líderes (sem mensalidade YLADA) — ver API */
   acessoWellnessViaProLideres?: boolean
+  proLideresTenantId?: string | null
+  proLideresLeaderLabel?: string | null
+  proLideresTeamLabel?: string | null
+  proLideresIsTeamOwner?: boolean
   /** E-mail em domínio de teste (@ylada.com etc.) — stats de produção excluem */
   isContaTeste?: boolean
   /** Já existiu assinatura mensal ou anual (qualquer área), ver API `everHadPaid` */
@@ -104,6 +109,7 @@ export default function AdminUsuarios() {
   /** Ordenação por `user_profiles.created_at` (coluna Cadastro); API: `ordenacao_cadastro`. Padrão: ordem do banco (Todos). */
   const [filtroOrdenacaoCadastro, setFiltroOrdenacaoCadastro] = useState<'padrao' | 'recente' | 'antigo'>('padrao')
   const [filtroPresidente, setFiltroPresidente] = useState<string>('todos')
+  const [filtroProLideresLider, setFiltroProLideresLider] = useState('todos')
   const [busca, setBusca] = useState('')
   /** Painel de filtros recolhido por padrão — mais espaço para a lista. */
   const [filtrosAbertos, setFiltrosAbertos] = useState(false)
@@ -219,6 +225,7 @@ export default function AdminUsuarios() {
     if (filtroHistorico !== 'todos') n++
     if (filtroOrdenacaoCadastro !== 'padrao') n++
     if (filtroBloco === 'todos' && filtroPresidente !== 'todos') n++
+    if (filtroProLideresLider !== 'todos') n++
     if (!ocultarContasTeste) n++
     return n
   }, [
@@ -230,6 +237,7 @@ export default function AdminUsuarios() {
     filtroHistorico,
     filtroOrdenacaoCadastro,
     filtroPresidente,
+    filtroProLideresLider,
     ocultarContasTeste,
   ])
 
@@ -327,6 +335,9 @@ export default function AdminUsuarios() {
       }
       if (busca) params.append('busca', busca)
       if (filtroSegmento !== 'todos') params.append('perfil', filtroSegmento)
+      if (filtroProLideresLider !== 'todos') {
+        params.append('pro_lideres_tenant', filtroProLideresLider)
+      }
 
       const url = `/api/admin/usuarios?${params.toString()}`
       const response = await fetch(url, {
@@ -375,6 +386,7 @@ export default function AdminUsuarios() {
     filtroHistorico,
     filtroOrdenacaoCadastro,
     filtroPresidente,
+    filtroProLideresLider,
     busca,
   ])
 
@@ -396,6 +408,10 @@ export default function AdminUsuarios() {
       /* ignore */
     }
   }
+
+  useEffect(() => {
+    void carregarProLideresTenants()
+  }, [])
 
   const carregarProLideresDetail = async (userId: string) => {
     setProLideresDetailLoading(true)
@@ -949,6 +965,11 @@ export default function AdminUsuarios() {
 
   const getAssinaturaRowTitle = (u: Usuario): string => {
     const lines = [getAssinaturaListLabel(u), getPaymentHistoryLabel(u)]
+    if (u.assinaturaBillingArea === 'pro_lideres_noel_member') {
+      lines.push('Plano: Noel membro Pro Líderes (mensalidade do membro)')
+    } else if (u.assinaturaBillingArea === 'pro_lideres_team') {
+      lines.push('Plano: assinatura equipe Pro Líderes (líder)')
+    }
     if (u.implicitMatrizFree && !u.yladaFreeSubscriptionId) lines.push(t.table.matrizNoSubRowHint)
     if (
       u.assinatura === 'gratuita' &&
@@ -1114,6 +1135,27 @@ export default function AdminUsuarios() {
                 {opcoesSegmento.map((o) => (
                   <option key={o.value} value={o.value}>
                     {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-2 xl:col-span-2">
+              <label
+                className="block text-[11px] font-medium text-gray-600 mb-0.5 cursor-help"
+                title={t.filters.proLideresLeaderHint}
+              >
+                {t.filters.proLideresLeader}
+              </label>
+              <select
+                value={filtroProLideresLider}
+                onChange={(e) => setFiltroProLideresLider(e.target.value)}
+                disabled={loading}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+              >
+                <option value="todos">{t.filters.all}</option>
+                {proLideresTenants.map((tenant) => (
+                  <option key={tenant.id} value={tenant.id}>
+                    {tenant.displayName}
                   </option>
                 ))}
               </select>
@@ -1342,7 +1384,7 @@ export default function AdminUsuarios() {
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
                 <table
-                  className={`w-full divide-y divide-gray-200 ${mostrarColunasPresidente ? 'min-w-[780px]' : 'min-w-[620px]'}`}
+                  className={`w-full divide-y divide-gray-200 ${mostrarColunasPresidente ? 'min-w-[900px]' : 'min-w-[740px]'}`}
                 >
                   <thead className="bg-gray-50 sticky top-0 z-10 shadow-[inset_0_-1px_0_0_rgb(229,231,235)]">
                     <tr>
@@ -1356,6 +1398,9 @@ export default function AdminUsuarios() {
                         </>
                       )}
                       <th className="w-[6.5rem] sm:w-24 px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.subscription}</th>
+                      <th className="w-[7.5rem] max-w-[9rem] px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {t.table.proLideresLeader}
+                      </th>
                       <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[6.25rem]" title={`${t.table.enrollmentSub}\n\n${t.table.enrollmentConsultoriaHint}`}>
                         {t.table.enrollment}
                       </th>
@@ -1494,6 +1539,37 @@ export default function AdminUsuarios() {
                               </div>
                             )
                           })()
+                          )}
+                        </td>
+                        <td className="px-2 py-2 align-top w-[7.5rem] max-w-[9rem]">
+                          {usuario.proLideresLeaderLabel ? (
+                            <div
+                              className="min-w-0"
+                              title={
+                                usuario.proLideresTeamLabel &&
+                                usuario.proLideresTeamLabel !== usuario.proLideresLeaderLabel
+                                  ? usuario.proLideresTeamLabel
+                                  : undefined
+                              }
+                            >
+                              <p className="text-xs font-medium text-gray-900 truncate leading-tight">
+                                {usuario.proLideresLeaderLabel}
+                                {usuario.proLideresIsTeamOwner ? (
+                                  <span className="text-[10px] font-normal text-violet-800">
+                                    {' '}
+                                    ({t.table.proLideresLeaderOwnerSuffix})
+                                  </span>
+                                ) : null}
+                              </p>
+                              {usuario.proLideresTeamLabel &&
+                              usuario.proLideresTeamLabel !== usuario.proLideresLeaderLabel ? (
+                                <p className="text-[10px] text-gray-500 truncate leading-tight">
+                                  {usuario.proLideresTeamLabel}
+                                </p>
+                              ) : null}
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-xs">—</span>
                           )}
                         </td>
                         <td

@@ -20,7 +20,7 @@ export type LeaderTenantRow = {
   message_tone_notes?: string | null
   /** Operador / vertical (ex. h-lider = Herbalife). */
   vertical_code?: string
-  /** Máximo de convites pending (não expirados) em simultâneo. */
+  /** Total de cadastros na equipe permitidos (50 por pacote pago; soma +50 a cada top-up MP). */
   team_invite_pending_quota?: number
   /** Se true, membros elegíveis podem aderir ao Noel campo (pago à parte). */
   noel_member_offer_enabled?: boolean

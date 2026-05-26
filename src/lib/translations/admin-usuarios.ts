@@ -49,6 +49,9 @@ export interface AdminUsuariosTranslations {
     sortDefault: string
     sortRecentFirst: string
     sortOldestFirst: string
+    /** Filtro por tenant / líder Pro Líderes */
+    proLideresLeader: string
+    proLideresLeaderHint: string
   }
   areas: {
     nutri: string
@@ -101,6 +104,9 @@ export interface AdminUsuariosTranslations {
     /** Coluna Assinatura — utilizador wellness/coach só com acesso Pro Líderes */
     proLideresAccessBadge: string
     proLideresAccessSub: string
+    /** Coluna: líder / equipe Pro Líderes */
+    proLideresLeader: string
+    proLideresLeaderOwnerSuffix: string
     enrollment: string
     /** Subtítulo no cabeçalho da coluna — evita confundir com vencimento do plano */
     enrollmentSub: string
@@ -315,6 +321,8 @@ const pt: AdminUsuariosTranslations = {
     sortDefault: 'Padrão (banco)',
     sortRecentFirst: 'Últimos que entraram',
     sortOldestFirst: 'Mais antigos primeiro',
+    proLideresLeader: 'Líder Pro Líderes',
+    proLideresLeaderHint: 'Lista só dono e membros da equipe escolhida',
   },
   areas: {
     nutri: 'Nutricionistas',
@@ -364,6 +372,8 @@ const pt: AdminUsuariosTranslations = {
     subscription: 'Assinatura',
     proLideresAccessBadge: 'Equipa Pro Líderes',
     proLideresAccessSub: 'Sem mensalidade wellness YLADA (acesso pelo líder)',
+    proLideresLeader: 'Líder',
+    proLideresLeaderOwnerSuffix: 'líder',
     enrollment: 'Cadastro',
     enrollmentSub:
       'Criação da conta no sistema (signup). Não é fim do plano nem “perfil todo preenchido”.',
@@ -578,6 +588,8 @@ const es: AdminUsuariosTranslations = {
     sortDefault: 'Predeterminado (BD)',
     sortRecentFirst: 'Últimos en entrar',
     sortOldestFirst: 'Más antiguos primero',
+    proLideresLeader: 'Líder Pro Líderes',
+    proLideresLeaderHint: 'Solo dueño y miembros del equipo elegido',
   },
   areas: {
     nutri: 'Nutricionistas',
@@ -627,6 +639,8 @@ const es: AdminUsuariosTranslations = {
     subscription: 'Suscripción',
     proLideresAccessBadge: 'Equipo Pro Líderes',
     proLideresAccessSub: 'Sin mensualidad wellness YLADA (acceso vía líder)',
+    proLideresLeader: 'Líder',
+    proLideresLeaderOwnerSuffix: 'líder',
     enrollment: 'Registro',
     enrollmentSub:
       'Creación de la cuenta en el sistema (registro). No es fin del plan ni “perfil completo”.',
@@ -841,6 +855,8 @@ const en: AdminUsuariosTranslations = {
     sortDefault: 'Default (database)',
     sortRecentFirst: 'Latest signups first',
     sortOldestFirst: 'Oldest first',
+    proLideresLeader: 'Pro Leaders leader',
+    proLideresLeaderHint: 'Only owner and members of the selected team',
   },
   areas: {
     nutri: 'Nutritionists',
@@ -890,6 +906,8 @@ const en: AdminUsuariosTranslations = {
     subscription: 'Subscription',
     proLideresAccessBadge: 'Pro Leaders team',
     proLideresAccessSub: 'No YLADA wellness subscription (access via leader)',
+    proLideresLeader: 'Leader',
+    proLideresLeaderOwnerSuffix: 'leader',
     enrollment: 'Signed up',
     enrollmentSub:
       'Account created in the system (signup). Not plan end nor “fully completed profile”.',
