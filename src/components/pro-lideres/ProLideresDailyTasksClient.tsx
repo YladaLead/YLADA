@@ -127,10 +127,11 @@ async function generateShareImage(
   const SCALE = 2
   const W = 600
   const ROW_H = 56
-  const HEADER_H = 100
+  const LABEL_H = 32   // faixa de label "PRO LÍDERES · YLADA" no topo
+  const HEADER_H = 110 // cabeçalho principal abaixo do label
   const FOOTER_H = 64
   const PADDING = 20
-  const H = HEADER_H + tasks.length * ROW_H + FOOTER_H + PADDING
+  const H = LABEL_H + HEADER_H + tasks.length * ROW_H + FOOTER_H + PADDING
 
   const canvas = document.createElement('canvas')
   canvas.width = W * SCALE
@@ -145,24 +146,32 @@ async function generateShareImage(
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, W, H)
 
-  // Header — azul suave
-  const grad = ctx.createLinearGradient(0, 0, W, HEADER_H)
+  // Faixa de label topo — azul escuro
+  ctx.fillStyle = '#1e3a5f'
+  ctx.fillRect(0, 0, W, LABEL_H)
+  ctx.fillStyle = '#ffffff'
+  ctx.font = font(11, 'bold')
+  ctx.textAlign = 'center'
+  ctx.fillText('P R O  L Í D E R E S   ·   Y L A D A', W / 2, LABEL_H / 2 + 4)
+  ctx.textAlign = 'left'
+
+  // Header — azul suave (abaixo do label)
+  const grad = ctx.createLinearGradient(0, LABEL_H, W, LABEL_H + HEADER_H)
   grad.addColorStop(0, '#60a5fa') // blue-400
   grad.addColorStop(1, '#3b82f6') // blue-500
   ctx.fillStyle = grad
-  ctx.fillRect(0, 0, W, HEADER_H)
+  ctx.fillRect(0, LABEL_H, W, HEADER_H)
 
-  // Título
+  // Título principal
   ctx.fillStyle = '#ffffff'
-  ctx.font = font(20, 'bold')
-  ctx.fillText('Minhas tarefas do dia', PADDING, 36)
+  ctx.font = font(22, 'bold')
+  ctx.fillText('Minhas tarefas do dia', PADDING, LABEL_H + 40)
 
   const d = new Date(`${dateStr}T12:00:00`)
   const dateBr = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })
   ctx.font = font(13)
   ctx.fillStyle = 'rgba(255,255,255,0.85)'
-  // capitaliza primeira letra
-  ctx.fillText(dateBr.charAt(0).toUpperCase() + dateBr.slice(1), PADDING, 58)
+  ctx.fillText(dateBr.charAt(0).toUpperCase() + dateBr.slice(1), PADDING, LABEL_H + 62)
 
   // Badge de pontos (canto direito do header)
   const completedTasks = tasks.filter((t) => completedIds.has(t.id))
@@ -170,16 +179,16 @@ async function generateShareImage(
   const maxPts = tasks.reduce((s, t) => s + t.points, 0)
 
   ctx.fillStyle = 'rgba(255,255,255,0.18)'
-  canvasRoundRect(ctx, W - 104, 12, 88, 76, 14)
+  canvasRoundRect(ctx, W - 104, LABEL_H + 12, 88, 76, 14)
   ctx.fill()
 
   ctx.fillStyle = '#ffffff'
   ctx.font = font(30, 'bold')
   ctx.textAlign = 'center'
-  ctx.fillText(String(totalPts), W - 60, 56)
+  ctx.fillText(String(totalPts), W - 60, LABEL_H + 56)
   ctx.font = font(11)
   ctx.fillStyle = 'rgba(255,255,255,0.80)'
-  ctx.fillText(`de ${maxPts} pts`, W - 60, 74)
+  ctx.fillText(`de ${maxPts} pts`, W - 60, LABEL_H + 74)
   ctx.textAlign = 'left'
 
   // Linha separadora leve
@@ -187,7 +196,7 @@ async function generateShareImage(
   ctx.lineWidth = 1
 
   // Linhas de tarefas
-  let y = HEADER_H
+  let y = LABEL_H + HEADER_H
   for (const t of tasks) {
     const done = completedIds.has(t.id)
 
@@ -463,7 +472,7 @@ export function ProLideresDailyTasksClient() {
       ) {
         await navigator.share({ files: [file], title: 'Minhas tarefas do dia' })
       } else {
-        // Fallback: download direto no desktop
+        // Fallback desktop: baixa a imagem + abre WhatsApp com texto
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
@@ -473,6 +482,9 @@ export function ProLideresDailyTasksClient() {
         a.click()
         document.body.removeChild(a)
         setTimeout(() => URL.revokeObjectURL(url), 10_000)
+        // Abre WhatsApp com o resumo em texto
+        const text = buildWhatsAppShareMessage(applicableToday, todaySaved, todayStr)
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
       }
     } catch (err) {
       if (err instanceof Error && err.name !== 'AbortError') {
