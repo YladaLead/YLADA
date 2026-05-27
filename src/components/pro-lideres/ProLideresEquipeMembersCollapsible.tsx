@@ -320,10 +320,13 @@ function isoToDateInputValue(iso: string | null | undefined): string {
 export function ProLideresEquipeMembersCollapsible({
   members,
   canManageMembers = false,
+  currentUserId,
 }: {
   members: ProLideresMemberListItem[]
   /** Só o líder no painel real (não preview) altera pausa / remoção. */
   canManageMembers?: boolean
+  /** ID do utilizador logado — mostra badge "Você" e métricas próprias do líder. */
+  currentUserId?: string
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(true)
@@ -712,6 +715,7 @@ export function ProLideresEquipeMembersCollapsible({
               filtered.map((m) => {
                 const title = m.displayName?.trim() || m.email?.trim() || 'Conta sem nome no perfil YLADA'
                 const subtitle = m.email && m.displayName ? m.email : m.userId
+                const isCurrentUser = currentUserId != null && m.userId === currentUserId
                 const showActions = canManageMembers && m.role === 'member'
                 const isBusy = busyUserId === m.userId
                 const vText = validadeResumo(m)
@@ -730,6 +734,11 @@ export function ProLideresEquipeMembersCollapsible({
                           {m.role === 'leader' ? (
                             <span className="inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
                               {roleLabel(m.role)}
+                            </span>
+                          ) : null}
+                          {isCurrentUser ? (
+                            <span className="inline-flex w-fit rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-800">
+                              Você
                             </span>
                           ) : null}
                           {m.role === 'member' && m.teamAccessState === 'paused' ? (
@@ -760,6 +769,11 @@ export function ProLideresEquipeMembersCollapsible({
                           {m.role === 'leader' ? (
                             <span className="inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
                               {roleLabel(m.role)}
+                            </span>
+                          ) : null}
+                          {isCurrentUser ? (
+                            <span className="inline-flex w-fit rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-800">
+                              Você
                             </span>
                           ) : null}
                           {m.role === 'member' && m.teamAccessState === 'paused' ? (
@@ -862,10 +876,13 @@ export function ProLideresEquipeMembersCollapsible({
                       </div>
                     </div>
 
-                    {canManageMembers && m.role === 'member' && m.teamAccessState === 'active' ? (
+                    {canManageMembers && (
+                      (m.role === 'member' && m.teamAccessState === 'active') ||
+                      isCurrentUser
+                    ) ? (
                       <MemberToolsDiagBlock
                         memberUserId={m.userId}
-                        memberLabel={title}
+                        memberLabel={isCurrentUser ? `${title} (você)` : title}
                         tabulatorName={m.tabulatorName}
                       />
                     ) : null}

@@ -81,6 +81,191 @@ function taskIdSetsEqual(a: Set<string>, b: Set<string>): boolean {
   return true
 }
 
+function buildWhatsAppShareMessage(
+  tasks: ProLideresDailyTaskRow[],
+  completedIds: Set<string>,
+  dateStr: string
+): string {
+  const completed = tasks.filter((t) => completedIds.has(t.id))
+  const totalPts = completed.reduce((sum, t) => sum + t.points, 0)
+  const lines = completed.map((t) => `✔️ ${t.title} (+${t.points} pt${t.points !== 1 ? 's' : ''})`)
+  const d = new Date(`${dateStr}T12:00:00`)
+  const dateBr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  return [
+    `✅ *Tarefas de hoje — ${dateBr}*`,
+    '',
+    lines.join('\n'),
+    '',
+    `🏆 Total: *${totalPts} pontos*`,
+  ].join('\n')
+}
+
+/** Polyfill para roundRect — compatível com todos os browsers. */
+function canvasRoundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number, y: number, w: number, h: number, r: number
+) {
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.lineTo(x + w - r, y)
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+  ctx.lineTo(x + w, y + h - r)
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+  ctx.lineTo(x + r, y + h)
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+  ctx.lineTo(x, y + r)
+  ctx.quadraticCurveTo(x, y, x + r, y)
+  ctx.closePath()
+}
+
+/** Gera um PNG com o card de resultado do dia (tarefas feitas + não feitas). */
+async function generateShareImage(
+  tasks: ProLideresDailyTaskRow[],
+  completedIds: Set<string>,
+  dateStr: string
+): Promise<Blob> {
+  const SCALE = 2
+  const W = 600
+  const ROW_H = 56
+  const HEADER_H = 100
+  const FOOTER_H = 64
+  const PADDING = 20
+  const H = HEADER_H + tasks.length * ROW_H + FOOTER_H + PADDING
+
+  const canvas = document.createElement('canvas')
+  canvas.width = W * SCALE
+  canvas.height = H * SCALE
+  const ctx = canvas.getContext('2d')!
+  ctx.scale(SCALE, SCALE)
+
+  const font = (size: number, weight: string = 'normal') =>
+    `${weight} ${size}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+
+  // Fundo branco
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, W, H)
+
+  // Header — azul suave
+  const grad = ctx.createLinearGradient(0, 0, W, HEADER_H)
+  grad.addColorStop(0, '#60a5fa') // blue-400
+  grad.addColorStop(1, '#3b82f6') // blue-500
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, W, HEADER_H)
+
+  // Título
+  ctx.fillStyle = '#ffffff'
+  ctx.font = font(20, 'bold')
+  ctx.fillText('Minhas tarefas do dia', PADDING, 36)
+
+  const d = new Date(`${dateStr}T12:00:00`)
+  const dateBr = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })
+  ctx.font = font(13)
+  ctx.fillStyle = 'rgba(255,255,255,0.85)'
+  // capitaliza primeira letra
+  ctx.fillText(dateBr.charAt(0).toUpperCase() + dateBr.slice(1), PADDING, 58)
+
+  // Badge de pontos (canto direito do header)
+  const completedTasks = tasks.filter((t) => completedIds.has(t.id))
+  const totalPts = completedTasks.reduce((s, t) => s + t.points, 0)
+  const maxPts = tasks.reduce((s, t) => s + t.points, 0)
+
+  ctx.fillStyle = 'rgba(255,255,255,0.18)'
+  canvasRoundRect(ctx, W - 104, 12, 88, 76, 14)
+  ctx.fill()
+
+  ctx.fillStyle = '#ffffff'
+  ctx.font = font(30, 'bold')
+  ctx.textAlign = 'center'
+  ctx.fillText(String(totalPts), W - 60, 56)
+  ctx.font = font(11)
+  ctx.fillStyle = 'rgba(255,255,255,0.80)'
+  ctx.fillText(`de ${maxPts} pts`, W - 60, 74)
+  ctx.textAlign = 'left'
+
+  // Linha separadora leve
+  ctx.strokeStyle = '#e5e7eb'
+  ctx.lineWidth = 1
+
+  // Linhas de tarefas
+  let y = HEADER_H
+  for (const t of tasks) {
+    const done = completedIds.has(t.id)
+
+    // Fundo da linha
+    ctx.fillStyle = done ? '#f0fdf4' : '#f9fafb'
+    ctx.fillRect(0, y, W, ROW_H - 1)
+    ctx.strokeStyle = '#f3f4f6'
+    ctx.strokeRect(0, y + ROW_H - 1, W, 1)
+
+    const cy = y + ROW_H / 2
+
+    // Círculo indicador
+    ctx.beginPath()
+    ctx.arc(PADDING + 14, cy, 14, 0, Math.PI * 2)
+    ctx.fillStyle = done ? '#22c55e' : '#d1d5db'
+    ctx.fill()
+
+    // Ícone dentro do círculo
+    ctx.strokeStyle = '#ffffff'
+    ctx.lineWidth = 2.2
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    if (done) {
+      // checkmark
+      ctx.beginPath()
+      ctx.moveTo(PADDING + 7, cy)
+      ctx.lineTo(PADDING + 13, cy + 6)
+      ctx.lineTo(PADDING + 22, cy - 6)
+      ctx.stroke()
+    } else {
+      // x
+      ctx.beginPath()
+      ctx.moveTo(PADDING + 7, cy - 6)
+      ctx.lineTo(PADDING + 21, cy + 6)
+      ctx.moveTo(PADDING + 21, cy - 6)
+      ctx.lineTo(PADDING + 7, cy + 6)
+      ctx.stroke()
+    }
+
+    // Título da tarefa
+    ctx.fillStyle = done ? '#111827' : '#9ca3af'
+    ctx.font = done ? font(15, '500') : font(15)
+    ctx.fillText(t.title, PADDING + 36, cy + 5)
+
+    // Pontos (direita)
+    ctx.fillStyle = done ? '#16a34a' : '#d1d5db'
+    ctx.font = font(13, 'bold')
+    ctx.textAlign = 'right'
+    ctx.fillText(`+${t.points} pts`, W - PADDING, cy + 5)
+    ctx.textAlign = 'left'
+
+    y += ROW_H
+  }
+
+  // Footer
+  ctx.fillStyle = '#f8fafc'
+  ctx.fillRect(0, y, W, FOOTER_H + PADDING)
+  ctx.strokeStyle = '#e5e7eb'
+  ctx.strokeRect(0, y, W, 1)
+
+  ctx.fillStyle = '#6b7280'
+  ctx.font = font(13)
+  ctx.textAlign = 'center'
+  ctx.fillText(
+    `${completedTasks.length} de ${tasks.length} tarefas concluídas · ${totalPts} de ${maxPts} pontos`,
+    W / 2,
+    y + 28
+  )
+  ctx.fillStyle = '#93c5fd'
+  ctx.font = font(11, 'bold')
+  ctx.fillText('Pro Líderes · YLADA', W / 2, y + 48)
+  ctx.textAlign = 'left'
+
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('canvas toBlob failed'))), 'image/png')
+  })
+}
+
 export function ProLideresDailyTasksClient() {
   const router = useRouter()
   const { isLeaderWorkspace: isLeader, dailyTasksVisibleToTeam, painelBasePath } = useProLideresPainel()
@@ -111,6 +296,7 @@ export function ProLideresDailyTasksClient() {
   const [taskRows, setTaskRows] = useState<TaskRowEdit[]>([])
   const [savingEdits, setSavingEdits] = useState(false)
   const [savingToday, setSavingToday] = useState(false)
+  const [generatingShare, setGeneratingShare] = useState(false)
   const [todayDraft, setTodayDraft] = useState<Set<string>>(() => new Set())
   const [todaySaved, setTodaySaved] = useState<Set<string>>(() => new Set())
   const [todaySaveOk, setTodaySaveOk] = useState(true)
@@ -264,6 +450,40 @@ export function ProLideresDailyTasksClient() {
     await saveTodayExecution(todayDraft)
   }
 
+  async function handleShare() {
+    if (generatingShare || applicableToday.length === 0) return
+    setGeneratingShare(true)
+    try {
+      const blob = await generateShareImage(applicableToday, todaySaved, todayStr)
+      const file = new File([blob], 'tarefas-do-dia.png', { type: 'image/png' })
+      if (
+        typeof navigator !== 'undefined' &&
+        navigator.share &&
+        navigator.canShare?.({ files: [file] })
+      ) {
+        await navigator.share({ files: [file], title: 'Minhas tarefas do dia' })
+      } else {
+        // Fallback: download direto no desktop
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'tarefas-do-dia.png'
+        a.style.display = 'none'
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        setTimeout(() => URL.revokeObjectURL(url), 10_000)
+      }
+    } catch (err) {
+      if (err instanceof Error && err.name !== 'AbortError') {
+        console.error('handleShare error', err)
+        setError('Não foi possível gerar a imagem. Tente novamente.')
+      }
+    } finally {
+      setGeneratingShare(false)
+    }
+  }
+
   async function createTask(e: React.FormEvent) {
     e.preventDefault()
     if (!isLeader) return
@@ -369,6 +589,15 @@ export function ProLideresDailyTasksClient() {
     [todayDraft, todaySaved]
   )
 
+  // Progresso ao vivo: pontos e contagem das tarefas marcadas no draft
+  const todayDraftCount = applicableToday.filter((t) => todayDraft.has(t.id)).length
+  const todayDraftPoints = applicableToday
+    .filter((t) => todayDraft.has(t.id))
+    .reduce((s, t) => s + t.points, 0)
+  const todayMaxPoints = applicableToday.reduce((s, t) => s + t.points, 0)
+  const todayProgressPct =
+    applicableToday.length > 0 ? Math.round((todayDraftCount / applicableToday.length) * 100) : 0
+
   const execucaoHref = `${painelBasePath.replace(/\/$/, '')}/tarefas/execucao`
 
   const navPill =
@@ -439,50 +668,84 @@ export function ProLideresDailyTasksClient() {
       )}
 
       {data && myUserId && (
-        <div className="overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-md">
-          <div className="px-4 pb-2 pt-5 sm:px-5">
-            <p className="text-sm font-semibold text-gray-900">
-              {isLeader ? 'Minhas tarefas de hoje' : 'Tarefas de hoje'}
-            </p>
-            <p className="mt-1 text-[15px] leading-snug text-gray-900">
-              {isLeader
-                ? 'Marque o que você fez — seus pontos entram no ranking junto com a equipe.'
-                : 'Marque o que você fez (cada item vale os pontos ao lado).'}
-            </p>
-            <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
-              <span>Hoje · {todayStr}</span>
-              {savingToday ? (
-                <span className="font-medium text-blue-700">Salvando…</span>
-              ) : !todaySaveOk ? (
-                <span className="font-medium text-red-600">Não foi possível salvar. Tente novamente.</span>
-              ) : todayHasUnsavedChanges ? (
-                <span className="font-medium text-amber-700">Alterações não salvas</span>
-              ) : (
-                <span className="text-gray-400">Salvo</span>
+        <div className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-md">
+          {/* Cabeçalho com progresso */}
+          <div className="bg-gradient-to-br from-blue-400 to-blue-500 px-4 pb-4 pt-5 sm:px-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-base font-bold text-white">
+                  {isLeader ? 'Minhas tarefas de hoje' : 'Tarefas de hoje'}
+                </p>
+                <p className="mt-0.5 text-sm text-blue-200">
+                  {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
+                </p>
+              </div>
+              {/* Placar ao vivo */}
+              {applicableToday.length > 0 && (
+                <div className="shrink-0 rounded-xl bg-white/15 px-3 py-2 text-center backdrop-blur-sm">
+                  <p className="text-xl font-black tabular-nums leading-none text-white">
+                    {todayDraftPoints}
+                  </p>
+                  <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-200">
+                    de {todayMaxPoints} pts
+                  </p>
+                </div>
               )}
-            </p>
+            </div>
+            {/* Barra de progresso */}
+            {applicableToday.length > 0 && (
+              <div className="mt-3">
+                <div className="flex items-center justify-between text-xs text-blue-200 mb-1.5">
+                  <span>{todayDraftCount} de {applicableToday.length} tarefas</span>
+                  <span className="font-semibold">{todayProgressPct}%</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-white/20">
+                  <div
+                    className="h-full rounded-full bg-white transition-all duration-500 ease-out"
+                    style={{ width: `${todayProgressPct}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
-          <ul className="divide-y divide-gray-100 border-t border-gray-100">
+
+          {/* Lista de tarefas */}
+          <ul className="divide-y divide-gray-100">
             {applicableToday.length === 0 ? (
               <li className="px-4 py-10 text-center text-sm text-gray-500 sm:px-5">Sem tarefas para hoje.</li>
             ) : (
               applicableToday.map((t) => {
                 const checked = todayDraft.has(t.id)
                 return (
-                  <li key={t.id} className="flex gap-3 px-4 py-4 sm:px-5">
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      disabled={savingToday}
-                      onChange={() => void toggleTodayTask(t.id)}
-                      className="mt-0.5 h-[18px] w-[18px] shrink-0 rounded border-gray-400 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
-                    />
+                  <li
+                    key={t.id}
+                    onClick={() => !savingToday && void toggleTodayTask(t.id)}
+                    className={`flex cursor-pointer gap-3 px-4 py-4 transition-colors sm:px-5 ${
+                      checked ? 'bg-green-50' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    {/* Checkbox custom */}
+                    <div className={`mt-0.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border-2 transition-all ${
+                      checked
+                        ? 'border-green-500 bg-green-500'
+                        : 'border-gray-300 bg-white'
+                    }`}>
+                      {checked && (
+                        <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
+                        </svg>
+                      )}
+                    </div>
                     <div className="flex min-w-0 flex-1 gap-3">
-                      <span className="shrink-0 text-[15px] font-bold text-blue-700">{t.points} pts</span>
+                      <span className={`shrink-0 text-[15px] font-bold transition-colors ${checked ? 'text-green-600' : 'text-blue-700'}`}>
+                        {t.points} pts
+                      </span>
                       <div className="min-w-0">
-                        <p className="text-[15px] leading-snug text-gray-900">{t.title}</p>
-                        {t.description ? (
-                          <p className="mt-1.5 text-sm leading-relaxed text-blue-700">{t.description}</p>
+                        <p className={`text-[15px] leading-snug transition-colors ${checked ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                          {t.title}
+                        </p>
+                        {t.description && !checked ? (
+                          <p className="mt-1.5 text-sm leading-relaxed text-blue-600">{t.description}</p>
                         ) : null}
                       </div>
                     </div>
@@ -491,19 +754,59 @@ export function ProLideresDailyTasksClient() {
               })
             )}
           </ul>
+
+          {/* Rodapé: status + botões */}
           <div className="space-y-3 border-t border-gray-100 p-4 sm:p-5">
-            <p className="text-center text-xs text-gray-500">
-              Marque o que você fez e toque em Salvar. Você pode marcar só parte das tarefas — não precisa
-              preencher tudo.
+            {/* Status de salvamento */}
+            <p className="text-center text-xs">
+              {savingToday ? (
+                <span className="text-blue-600 font-medium">Salvando…</span>
+              ) : !todaySaveOk ? (
+                <span className="text-red-600 font-medium">Não foi possível salvar. Tente novamente.</span>
+              ) : todayHasUnsavedChanges ? (
+                <span className="text-amber-600 font-medium">Alterações não salvas</span>
+              ) : todaySaved.size > 0 ? (
+                <span className="text-green-600 font-medium">✓ Salvo com sucesso</span>
+              ) : (
+                <span className="text-gray-400">Marque as tarefas e salve</span>
+              )}
             </p>
+
             <button
               type="button"
               disabled={savingToday || applicableToday.length === 0 || !todayHasUnsavedChanges}
               onClick={() => void saveTodayDraft()}
-              className="w-full min-h-[48px] rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full min-h-[48px] rounded-xl bg-blue-500 px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {savingToday ? 'Salvando…' : 'Salvar execução de hoje'}
             </button>
+
+            {/* Botão compartilhar — gera imagem PNG e usa Web Share API / download */}
+            {todaySaved.size > 0 && todaySaveOk && (
+              <button
+                type="button"
+                disabled={generatingShare || applicableToday.length === 0}
+                onClick={() => void handleShare()}
+                className="flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {generatingShare ? (
+                  <>
+                    <svg className="h-4 w-4 animate-spin shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                    </svg>
+                    Gerando imagem…
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                    </svg>
+                    Compartilhar tarefas
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       )}

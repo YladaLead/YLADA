@@ -25,7 +25,11 @@ export default async function ProLideresEquipePage() {
     <div className="max-w-6xl space-y-4">
       <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Análise da equipe</h1>
 
-      <ProLideresEquipeMembersCollapsible members={members} canManageMembers={isLeader} />
+      <ProLideresEquipeMembersCollapsible
+        members={members}
+        canManageMembers={isLeader}
+        currentUserId={gate.tenant.owner_user_id}
+      />
 
       {isLeader ? <ProLideresEquipeAttributionPanel /> : null}
     </div>
