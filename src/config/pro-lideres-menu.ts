@@ -28,10 +28,10 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
       { key: 'catalogo', label: 'Meus links', path: 'catalogo', icon: '🛠️' },
       {
         key: 'y-scripts',
-        label: 'Y-Scripts',
+        label: 'Ylada Boards',
         path: 'y-scripts',
         icon: '📲',
-        subtitle: 'Scripts prontos p/ WhatsApp',
+        subtitle: 'Mensagens prontas p/ WhatsApp',
       },
       { key: 'tarefas', label: 'Tarefas diárias', path: 'tarefas', icon: '✅' },
       { key: 'noel', label: 'Noel líder', path: 'noel', icon: '💬', leaderOnly: true },

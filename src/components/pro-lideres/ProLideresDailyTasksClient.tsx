@@ -118,161 +118,193 @@ function canvasRoundRect(
   ctx.closePath()
 }
 
-/** Gera um PNG com o card de resultado do dia (tarefas feitas + não feitas). */
-async function generateShareImage(
+/** Estrela de 5 pontas no canvas. */
+function drawStar(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, color: string) {
+  ctx.beginPath()
+  for (let i = 0; i < 10; i++) {
+    const angle = (i * Math.PI) / 5 - Math.PI / 2
+    const radius = i % 2 === 0 ? r : r * 0.42
+    const x = cx + Math.cos(angle) * radius
+    const y = cy + Math.sin(angle) * radius
+    if (i === 0) ctx.moveTo(x, y)
+    else ctx.lineTo(x, y)
+  }
+  ctx.closePath()
+  ctx.fillStyle = color
+  ctx.fill()
+}
+
+/** Classifica o desempenho por % de pontos atingidos. */
+function diplomaLabel(pct: number): string {
+  if (pct >= 100) return 'Dia perfeito!'
+  if (pct >= 80)  return 'Excelente!'
+  if (pct >= 60)  return 'Muito bem!'
+  if (pct >= 40)  return 'Em progresso'
+  return 'Começando'
+}
+
+/** Gera um PNG compacto com logo YLADA + diploma de pontos + lista de tarefas.
+ *  Sem carregar imagens externas — logo desenhado diretamente no canvas. */
+function generateShareImage(
   tasks: ProLideresDailyTaskRow[],
   completedIds: Set<string>,
   dateStr: string
 ): Promise<Blob> {
-  const SCALE = 2
-  const W = 600
-  const ROW_H = 56
-  const LABEL_H = 32   // faixa de label "PRO LÍDERES · YLADA" no topo
-  const HEADER_H = 110 // cabeçalho principal abaixo do label
-  const FOOTER_H = 64
-  const PADDING = 20
-  const H = LABEL_H + HEADER_H + tasks.length * ROW_H + FOOTER_H + PADDING
+  const SCALE     = 2
+  const W         = 480
+  const PAD       = 16
+  const LOGO_H    = 54
+  const DIPLOMA_H = 112
+  const ROW_H     = 44
+  const FOOTER_H  = 36
+  const H = LOGO_H + DIPLOMA_H + tasks.length * ROW_H + FOOTER_H
 
   const canvas = document.createElement('canvas')
-  canvas.width = W * SCALE
+  canvas.width  = W * SCALE
   canvas.height = H * SCALE
-  const ctx = canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return Promise.reject(new Error('Canvas não disponível'))
   ctx.scale(SCALE, SCALE)
 
-  const font = (size: number, weight: string = 'normal') =>
+  const f = (size: number, weight = 'normal') =>
     `${weight} ${size}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+
+  const completedTasks = tasks.filter((t) => completedIds.has(t.id))
+  const totalPts = completedTasks.reduce((s, t) => s + t.points, 0)
+  const maxPts   = tasks.reduce((s, t) => s + t.points, 0)
+  const pct      = maxPts > 0 ? Math.round((totalPts / maxPts) * 100) : 0
+  const d        = new Date(`${dateStr}T12:00:00`)
+  const dateFull = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })
+  const dateShort = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 
   // Fundo branco
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, W, H)
 
-  // Faixa de label topo — azul escuro
+  // ── Logo ──────────────────────────────────────────────────────────────────
+  const lY = LOGO_H / 2
+  const r  = 10
+  // Círculo esquerdo (azul claro)
+  ctx.beginPath(); ctx.arc(PAD + r, lY, r, 0, Math.PI * 2)
+  ctx.fillStyle = '#60a5fa'; ctx.fill()
+  // Círculo direito sobreposto (azul escuro)
+  ctx.beginPath(); ctx.arc(PAD + r + r * 1.15, lY, r, 0, Math.PI * 2)
+  ctx.fillStyle = '#1d4ed8'; ctx.fill()
+  // Texto YLADA
   ctx.fillStyle = '#1e3a5f'
-  ctx.fillRect(0, 0, W, LABEL_H)
-  ctx.fillStyle = '#ffffff'
-  ctx.font = font(11, 'bold')
-  ctx.textAlign = 'center'
-  ctx.fillText('P R O  L Í D E R E S   ·   Y L A D A', W / 2, LABEL_H / 2 + 4)
-  ctx.textAlign = 'left'
-
-  // Header — azul suave (abaixo do label)
-  const grad = ctx.createLinearGradient(0, LABEL_H, W, LABEL_H + HEADER_H)
-  grad.addColorStop(0, '#60a5fa') // blue-400
-  grad.addColorStop(1, '#3b82f6') // blue-500
-  ctx.fillStyle = grad
-  ctx.fillRect(0, LABEL_H, W, HEADER_H)
-
-  // Título principal
-  ctx.fillStyle = '#ffffff'
-  ctx.font = font(22, 'bold')
-  ctx.fillText('Minhas tarefas do dia', PADDING, LABEL_H + 40)
-
-  const d = new Date(`${dateStr}T12:00:00`)
-  const dateBr = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })
-  ctx.font = font(13)
-  ctx.fillStyle = 'rgba(255,255,255,0.85)'
-  ctx.fillText(dateBr.charAt(0).toUpperCase() + dateBr.slice(1), PADDING, LABEL_H + 62)
-
-  // Badge de pontos (canto direito do header)
-  const completedTasks = tasks.filter((t) => completedIds.has(t.id))
-  const totalPts = completedTasks.reduce((s, t) => s + t.points, 0)
-  const maxPts = tasks.reduce((s, t) => s + t.points, 0)
-
-  ctx.fillStyle = 'rgba(255,255,255,0.18)'
-  canvasRoundRect(ctx, W - 104, LABEL_H + 12, 88, 76, 14)
+  ctx.font = f(16, 'bold')
+  ctx.fillText('YLADA', PAD + r * 2.3 + 10, lY + 6)
+  // Badge Pro Líderes
+  ctx.fillStyle = '#eff6ff'
+  canvasRoundRect(ctx, W - 96, lY - 11, 80, 22, 6)
   ctx.fill()
+  ctx.fillStyle = '#1d4ed8'; ctx.font = f(9, 'bold')
+  ctx.textAlign = 'right'
+  ctx.fillText('Pro Líderes', W - PAD, lY + 4)
+  ctx.textAlign = 'left'
+  // Linha separadora
+  ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1
+  ctx.beginPath(); ctx.moveTo(0, LOGO_H); ctx.lineTo(W, LOGO_H); ctx.stroke()
 
-  ctx.fillStyle = '#ffffff'
-  ctx.font = font(30, 'bold')
+  // ── Diploma ───────────────────────────────────────────────────────────────
+  const DY = LOGO_H
+  ctx.fillStyle = '#fffbeb'
+  ctx.fillRect(0, DY, W, DIPLOMA_H)
+
+  const bp = 10 // border padding
+  ctx.strokeStyle = '#d97706'; ctx.lineWidth = 1.5
+  ctx.strokeRect(bp, DY + bp, W - bp * 2, DIPLOMA_H - bp * 2)
+  ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 0.75
+  ctx.strokeRect(bp + 5, DY + bp + 5, W - (bp + 5) * 2, DIPLOMA_H - (bp + 5) * 2)
+
+  // Título do diploma
+  ctx.fillStyle = '#92400e'; ctx.font = f(9, 'bold')
   ctx.textAlign = 'center'
-  ctx.fillText(String(totalPts), W - 60, LABEL_H + 56)
-  ctx.font = font(11)
-  ctx.fillStyle = 'rgba(255,255,255,0.80)'
-  ctx.fillText(`de ${maxPts} pts`, W - 60, LABEL_H + 74)
+  ctx.fillText('C O N Q U I S T A  D O  D I A', W / 2, DY + bp + 20)
+
+  // Score — mede largura para posicionar "pts" corretamente
+  const scoreY = DY + 70
+  ctx.font = f(44, 'bold')
+  ctx.fillStyle = '#92400e'
+  const scoreW = ctx.measureText(String(totalPts)).width
+  ctx.fillText(String(totalPts), W / 2 - scoreW / 2, scoreY)
+  ctx.font = f(13)
+  ctx.fillStyle = '#b45309'
+  ctx.fillText('pts', W / 2 + scoreW / 2 + 4, scoreY - 4)
+
+  // Estrelas ao lado do score
+  drawStar(ctx, W / 2 - scoreW / 2 - 18, scoreY - 14, 7, '#f59e0b')
+  drawStar(ctx, W / 2 + scoreW / 2 + 24, scoreY - 14, 7, '#f59e0b')
+
+  // Sub-linha
+  ctx.font = f(10)
+  ctx.fillStyle = '#b45309'
+  ctx.textAlign = 'center'
+  ctx.fillText(`de ${maxPts} pts · ${diplomaLabel(pct)}`, W / 2, DY + DIPLOMA_H - bp - 10)
   ctx.textAlign = 'left'
 
-  // Linha separadora leve
-  ctx.strokeStyle = '#e5e7eb'
-  ctx.lineWidth = 1
-
-  // Linhas de tarefas
-  let y = LABEL_H + HEADER_H
+  // ── Tarefas ───────────────────────────────────────────────────────────────
+  let y = DY + DIPLOMA_H
   for (const t of tasks) {
     const done = completedIds.has(t.id)
-
-    // Fundo da linha
     ctx.fillStyle = done ? '#f0fdf4' : '#f9fafb'
-    ctx.fillRect(0, y, W, ROW_H - 1)
-    ctx.strokeStyle = '#f3f4f6'
-    ctx.strokeRect(0, y + ROW_H - 1, W, 1)
+    ctx.fillRect(0, y, W, ROW_H)
+    ctx.strokeStyle = '#f3f4f6'; ctx.lineWidth = 1
+    ctx.beginPath(); ctx.moveTo(0, y + ROW_H - 1); ctx.lineTo(W, y + ROW_H - 1); ctx.stroke()
 
     const cy = y + ROW_H / 2
+    ctx.beginPath(); ctx.arc(PAD + 11, cy, 11, 0, Math.PI * 2)
+    ctx.fillStyle = done ? '#22c55e' : '#e5e7eb'; ctx.fill()
 
-    // Círculo indicador
-    ctx.beginPath()
-    ctx.arc(PADDING + 14, cy, 14, 0, Math.PI * 2)
-    ctx.fillStyle = done ? '#22c55e' : '#d1d5db'
-    ctx.fill()
-
-    // Ícone dentro do círculo
-    ctx.strokeStyle = '#ffffff'
-    ctx.lineWidth = 2.2
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'
     if (done) {
-      // checkmark
       ctx.beginPath()
-      ctx.moveTo(PADDING + 7, cy)
-      ctx.lineTo(PADDING + 13, cy + 6)
-      ctx.lineTo(PADDING + 22, cy - 6)
+      ctx.moveTo(PAD + 6, cy); ctx.lineTo(PAD + 10, cy + 4); ctx.lineTo(PAD + 17, cy - 4)
       ctx.stroke()
     } else {
-      // x
       ctx.beginPath()
-      ctx.moveTo(PADDING + 7, cy - 6)
-      ctx.lineTo(PADDING + 21, cy + 6)
-      ctx.moveTo(PADDING + 21, cy - 6)
-      ctx.lineTo(PADDING + 7, cy + 6)
+      ctx.moveTo(PAD + 6, cy - 4); ctx.lineTo(PAD + 16, cy + 4)
+      ctx.moveTo(PAD + 16, cy - 4); ctx.lineTo(PAD + 6, cy + 4)
       ctx.stroke()
     }
 
-    // Título da tarefa
     ctx.fillStyle = done ? '#111827' : '#9ca3af'
-    ctx.font = done ? font(15, '500') : font(15)
-    ctx.fillText(t.title, PADDING + 36, cy + 5)
+    ctx.font = done ? f(13, '500') : f(13)
+    ctx.fillText(t.title, PAD + 28, cy + 5)
 
-    // Pontos (direita)
     ctx.fillStyle = done ? '#16a34a' : '#d1d5db'
-    ctx.font = font(13, 'bold')
+    ctx.font = f(11, 'bold')
     ctx.textAlign = 'right'
-    ctx.fillText(`+${t.points} pts`, W - PADDING, cy + 5)
+    ctx.fillText(`+${t.points}pts`, W - PAD, cy + 5)
     ctx.textAlign = 'left'
 
     y += ROW_H
   }
 
-  // Footer
+  // ── Footer ────────────────────────────────────────────────────────────────
   ctx.fillStyle = '#f8fafc'
-  ctx.fillRect(0, y, W, FOOTER_H + PADDING)
-  ctx.strokeStyle = '#e5e7eb'
-  ctx.strokeRect(0, y, W, 1)
+  ctx.fillRect(0, y, W, FOOTER_H)
+  ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1
+  ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke()
 
-  ctx.fillStyle = '#6b7280'
-  ctx.font = font(13)
+  ctx.fillStyle = '#9ca3af'; ctx.font = f(10)
   ctx.textAlign = 'center'
   ctx.fillText(
-    `${completedTasks.length} de ${tasks.length} tarefas concluídas · ${totalPts} de ${maxPts} pontos`,
-    W / 2,
-    y + 28
+    `${completedTasks.length}/${tasks.length} tarefas · ${dateFull.charAt(0).toUpperCase() + dateFull.slice(1)} · ${dateShort} · ylada.com`,
+    W / 2, y + FOOTER_H / 2 + 4
   )
-  ctx.fillStyle = '#93c5fd'
-  ctx.font = font(11, 'bold')
-  ctx.fillText('Pro Líderes · YLADA', W / 2, y + 48)
   ctx.textAlign = 'left'
 
-  return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('canvas toBlob failed'))), 'image/png')
-  })
+  // toDataURL é síncrono e mais confiável em produção do que toBlob
+  const dataUrl = canvas.toDataURL('image/png')
+  if (!dataUrl || dataUrl === 'data:,') {
+    return Promise.reject(new Error('Canvas toDataURL retornou vazio'))
+  }
+  const byteStr = atob(dataUrl.split(',')[1])
+  const u8 = new Uint8Array(byteStr.length)
+  for (let i = 0; i < byteStr.length; i++) u8[i] = byteStr.charCodeAt(i)
+  return Promise.resolve(new Blob([u8], { type: 'image/png' }))
 }
 
 export function ProLideresDailyTasksClient() {
@@ -466,7 +498,6 @@ export function ProLideresDailyTasksClient() {
     if (shareImageUrl) {
       URL.revokeObjectURL(shareImageUrl)
       setShareImageUrl(null)
-      setShareImageBlob(null)
     }
     setGeneratingShare(true)
     setError(null)
@@ -498,7 +529,6 @@ export function ProLideresDailyTasksClient() {
   function dismissSharePreview() {
     if (shareImageUrl) URL.revokeObjectURL(shareImageUrl)
     setShareImageUrl(null)
-    setShareImageBlob(null)
   }
 
   function downloadShareImage() {
