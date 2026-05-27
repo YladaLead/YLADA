@@ -34,6 +34,34 @@ type QuotaInfo = {
 
 type YladaTeamSubHint = { monthlyAmountBrl: number; pendingInviteQuota: number }
 
+type MpQuotaReceipt = {
+  paymentId: string
+  amountBrl: number
+  slotsAdded: number
+  createdAt: string
+  checkoutAccountEmail: string | null
+  mpLoginEmail: string | null
+  mpPayerName: string | null
+  cardholderName: string | null
+  cardLastFour: string | null
+  mpLoginDiffersFromCheckout: boolean
+}
+
+function formatMpReceiptDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch {
+    return iso
+  }
+}
+
 export function ProLideresInvitesPanel() {
   const [email, setEmail] = useState('')
   const [invites, setInvites] = useState<LeaderTenantInviteListItem[]>([])
@@ -58,6 +86,7 @@ export function ProLideresInvitesPanel() {
 
   const [quotaTopupMsg, setQuotaTopupMsg] = useState<string | null>(null)
   const [quotaTopupLoading, setQuotaTopupLoading] = useState(false)
+  const [mpQuotaReceipts, setMpQuotaReceipts] = useState<MpQuotaReceipt[]>([])
 
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -141,6 +170,7 @@ export function ProLideresInvitesPanel() {
       setSubscriptionAccessOk(true)
       setInvites((data as { invites: LeaderTenantInviteListItem[] }).invites ?? [])
       setQuota((data as { quota?: QuotaInfo }).quota ?? null)
+      setMpQuotaReceipts((data as { mpQuotaReceipts?: MpQuotaReceipt[] }).mpQuotaReceipts ?? [])
     } catch {
       setError('Erro de rede.')
       setInvites([])
@@ -161,7 +191,7 @@ export function ProLideresInvitesPanel() {
     if (!v) return
     if (v === 'ok') {
       setQuotaTopupMsg(
-        'Concluído. Os +50 convites entram em breve — atualiza a página daqui a instantes se a cota ainda não tiver subido.'
+        'Pagamento concluído. Os +50 convites entram em breve — atualiza a página se a cota ainda não tiver subido. O pagador registado no Mercado Pago aparece na lista abaixo.'
       )
     } else if (v === 'fail') {
       setQuotaTopupMsg('Não foi possível concluir. Podes tentar outra vez quando quiseres.')
@@ -706,6 +736,10 @@ export function ProLideresInvitesPanel() {
       {subscriptionAccessOk === true && (
         <section className="space-y-3 rounded-xl border border-indigo-200 bg-indigo-50/80 p-4 text-sm text-indigo-950 shadow-sm">
           <p className="text-base font-semibold text-indigo-950">Adquirir mais 50 convites</p>
+          <p className="text-xs leading-relaxed text-indigo-900/90">
+            O checkout abre com os dados da sua conta Ylada (líder). Quem passar o cartão no Mercado Pago fica
+            registado como pagador — pode ser outra pessoa.
+          </p>
           {quotaTopupMsg && (
             <p className="rounded-lg border border-indigo-200 bg-white/90 px-3 py-2 text-sm text-indigo-900">
               {quotaTopupMsg}
@@ -719,6 +753,52 @@ export function ProLideresInvitesPanel() {
           >
             {quotaTopupLoading ? 'A carregar…' : 'Adquirir mais 50 convites'}
           </button>
+
+          {mpQuotaReceipts.length > 0 ? (
+            <div className="space-y-2 rounded-lg border border-indigo-200/90 bg-white/95 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-800">
+                Pagamentos Mercado Pago (+50 convites)
+              </p>
+              <ul className="space-y-2">
+                {mpQuotaReceipts.map((rec) => (
+                  <li
+                    key={rec.paymentId}
+                    className="rounded-md border border-indigo-100 bg-indigo-50/40 px-3 py-2 text-xs text-indigo-950"
+                  >
+                    <p className="font-medium">
+                      R$ {rec.amountBrl.toFixed(2)} · +{rec.slotsAdded} convites ·{' '}
+                      {formatMpReceiptDate(rec.createdAt)}
+                    </p>
+                    <p className="mt-1">
+                      <span className="font-semibold">Quem pagou (cartão):</span>{' '}
+                      {rec.cardholderName || rec.mpPayerName || '—'}
+                      {rec.cardLastFour ? (
+                        <span className="text-indigo-800/85"> · •••• {rec.cardLastFour}</span>
+                      ) : null}
+                    </p>
+                    <p className="mt-0.5 text-indigo-900/85">
+                      <span className="font-semibold">Conta Ylada (2.º lote / checkout):</span>{' '}
+                      {rec.checkoutAccountEmail || 'midiaseua@icloud.com (líder da equipa)'}
+                    </p>
+                    {rec.mpLoginEmail ? (
+                      <p className="mt-0.5 text-indigo-900/80">
+                        <span className="font-semibold">Login Mercado Pago no ato:</span> {rec.mpLoginEmail}
+                        {rec.mpLoginDiffersFromCheckout ? (
+                          <span className="text-indigo-800/75">
+                            {' '}
+                            — pode ser outra conta MP aberta no navegador; o cartão acima é o que vale.
+                          </span>
+                        ) : null}
+                      </p>
+                    ) : null}
+                    <p className="mt-0.5 font-mono text-[10px] text-indigo-800/75">
+                      Transação MP: {rec.paymentId}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </section>
       )}
     </div>

@@ -1,4 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import {
+  extractMercadoPagoPayerFromPayment,
+  type MercadoPagoPayerSnapshot,
+} from '@/lib/mercado-pago-payer'
+
+export type { MercadoPagoPayerSnapshot }
+export { extractMercadoPagoPayerFromPayment }
 
 /** Prefixo em external_reference da Preference (tenant UUID após os dois underscores). */
 export const PRO_LIDERES_INVITE_QUOTA_MP_REF_PREFIX = 'yl_pl_inv50__'
@@ -37,17 +44,35 @@ export async function applyLeaderTenantInviteQuotaTopupFromMercadoPago(
     leaderTenantId: string
     ownerUserIdFromCheckout: string
     transactionAmount: number
+    checkoutAccountEmail?: string | null
+    mpPayer?: MercadoPagoPayerSnapshot | null
   }
 ): Promise<ApplyInviteQuotaTopupResult> {
-  const { paymentId, leaderTenantId, ownerUserIdFromCheckout, transactionAmount } = params
+  const { paymentId, leaderTenantId, ownerUserIdFromCheckout, transactionAmount, checkoutAccountEmail, mpPayer } =
+    params
 
   const { data: existing } = await admin
     .from('pro_lideres_invite_quota_mp_receipts')
-    .select('mercado_pago_payment_id')
+    .select('mercado_pago_payment_id, mp_payer_email, mp_cardholder_name')
     .eq('mercado_pago_payment_id', paymentId)
     .maybeSingle()
 
   if (existing?.mercado_pago_payment_id) {
+    if (mpPayer && (!existing.mp_payer_email || !existing.mp_cardholder_name)) {
+      await admin
+        .from('pro_lideres_invite_quota_mp_receipts')
+        .update({
+          mp_payer_email: mpPayer.email,
+          mp_payer_name: mpPayer.name,
+          mp_payer_id: mpPayer.id,
+          mp_cardholder_name: mpPayer.cardholderName,
+          mp_card_last_four: mpPayer.cardLastFour,
+          ...(checkoutAccountEmail
+            ? { checkout_account_email: checkoutAccountEmail.trim().toLowerCase() }
+            : {}),
+        })
+        .eq('mercado_pago_payment_id', paymentId)
+    }
     return { ok: true, alreadyProcessed: true }
   }
 
@@ -78,12 +103,23 @@ export async function applyLeaderTenantInviteQuotaTopupFromMercadoPago(
       : 50
   const newQuota = current + slots
 
+  const checkoutEmail =
+    typeof checkoutAccountEmail === 'string' && checkoutAccountEmail.trim()
+      ? checkoutAccountEmail.trim().toLowerCase()
+      : null
+
   const { error: insErr } = await admin.from('pro_lideres_invite_quota_mp_receipts').insert({
     mercado_pago_payment_id: paymentId,
     leader_tenant_id: leaderTenantId,
     owner_user_id: ownerUserIdFromCheckout,
     amount_brl: Number(transactionAmount.toFixed(2)),
     slots_added: slots,
+    checkout_account_email: checkoutEmail,
+    mp_payer_email: mpPayer?.email ?? null,
+    mp_payer_name: mpPayer?.name ?? null,
+    mp_payer_id: mpPayer?.id ?? null,
+    mp_cardholder_name: mpPayer?.cardholderName ?? null,
+    mp_card_last_four: mpPayer?.cardLastFour ?? null,
   })
 
   if (insErr) {
@@ -159,7 +195,11 @@ export async function reverseLeaderTenantInviteQuotaTopupFromMercadoPago(
  */
 export async function tryHandleProLideresInviteQuotaTopupWebhook(
   admin: SupabaseClient,
-  fullData: { external_reference?: string | null; metadata?: Record<string, unknown> | null; transaction_amount?: number },
+  fullData: Parameters<typeof extractMercadoPagoPayerFromPayment>[0] & {
+    external_reference?: string | null
+    metadata?: Record<string, unknown> | null
+    transaction_amount?: number
+  },
   paymentId: string
 ): Promise<boolean> {
   const tenantId = parseLeaderTenantIdFromInviteQuotaMpRef(fullData.external_reference ?? undefined)
@@ -177,11 +217,19 @@ export async function tryHandleProLideresInviteQuotaTopupWebhook(
   }
 
   const amount = Number(fullData.transaction_amount ?? 0)
+  const mpPayer = extractMercadoPagoPayerFromPayment(fullData)
+  const checkoutEmail =
+    typeof fullData.metadata?.checkout_account_email === 'string'
+      ? fullData.metadata.checkout_account_email
+      : null
+
   const result = await applyLeaderTenantInviteQuotaTopupFromMercadoPago(admin, {
     paymentId,
     leaderTenantId: tenantId,
     ownerUserIdFromCheckout: ownerUserId,
     transactionAmount: amount,
+    checkoutAccountEmail: checkoutEmail,
+    mpPayer,
   })
 
   if (!result.ok) {

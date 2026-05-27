@@ -149,6 +149,34 @@ export async function GET(request: NextRequest) {
     (r) => r.status === 'pending' && new Date(r.expires_at).getTime() >= now
   ).length
 
+  const { data: receiptRows } = await supabaseAdmin
+    .from('pro_lideres_invite_quota_mp_receipts')
+    .select(
+      'mercado_pago_payment_id, amount_brl, slots_added, created_at, checkout_account_email, mp_payer_email, mp_payer_name, mp_cardholder_name, mp_card_last_four'
+    )
+    .eq('leader_tenant_id', tenantId)
+    .order('created_at', { ascending: false })
+    .limit(12)
+
+  const mpQuotaReceipts = (receiptRows ?? []).map((row) => {
+    const checkout = (row.checkout_account_email as string | null)?.trim().toLowerCase() || null
+    const mpLogin = (row.mp_payer_email as string | null)?.trim().toLowerCase() || null
+    const cardholder = (row.mp_cardholder_name as string | null)?.trim() || null
+    const cardLastFour = (row.mp_card_last_four as string | null)?.trim() || null
+    return {
+      paymentId: String(row.mercado_pago_payment_id),
+      amountBrl: Number(row.amount_brl),
+      slotsAdded: Number(row.slots_added) || 50,
+      createdAt: String(row.created_at),
+      checkoutAccountEmail: checkout,
+      mpLoginEmail: mpLogin,
+      mpPayerName: (row.mp_payer_name as string | null)?.trim() || null,
+      cardholderName: cardholder,
+      cardLastFour,
+      mpLoginDiffersFromCheckout: Boolean(checkout && mpLogin && checkout !== mpLogin),
+    }
+  })
+
   return NextResponse.json({
     invites,
     quota: {
@@ -156,6 +184,7 @@ export async function GET(request: NextRequest) {
       pendingUsed: pendingValidCount,
       totalListed: baseRows.length,
     },
+    mpQuotaReceipts,
   })
 }
 

@@ -22,51 +22,75 @@ export type ProLideresMenuItem = {
 
 export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem[] }[] = [
   {
-    label: 'Principal',
+    label: 'Meu trabalho',
     items: [
       { key: 'visao', label: 'Visão geral', path: '', icon: '📊' },
-      { key: 'noel', label: 'Noel', path: 'noel', icon: '💬', leaderOnly: true },
-      {
-        key: 'catalogo',
-        label: 'Meus links',
-        path: 'catalogo',
-        icon: '🛠️',
-      },
-      /** Equipe: só Y-Scripts (leitura + copiar). Líder: Y-Scripts + Scripts (editor) abaixo. */
+      { key: 'catalogo', label: 'Meus links', path: 'catalogo', icon: '🛠️' },
       {
         key: 'y-scripts',
-        label: 'Y-Scripts',
+        label: 'Abordagens',
         path: 'y-scripts',
         icon: '📲',
-        subtitle: 'Copiar no WhatsApp',
+        subtitle: 'Scripts prontos p/ WhatsApp',
       },
-      { key: 'scripts', label: 'Scripts', path: 'scripts', icon: '📝', leaderOnly: true },
+      { key: 'tarefas', label: 'Tarefas diárias', path: 'tarefas', icon: '✅' },
+      { key: 'noel', label: 'Noel líder', path: 'noel', icon: '💬', leaderOnly: true },
+    ],
+  },
+  {
+    label: 'Minha equipe',
+    items: [
+      { key: 'equipe', label: 'Análise da equipe', path: 'equipe', icon: '👥', leaderOnly: true },
+      {
+        key: 'links',
+        label: 'Adicionar à equipe',
+        path: 'links',
+        icon: '🔗',
+        leaderOnly: true,
+        subtitle: 'Gerenciar acessos',
+      },
+      {
+        key: 'scripts',
+        label: 'Scripts da equipe',
+        path: 'scripts',
+        icon: '📝',
+        leaderOnly: true,
+        subtitle: 'Criar e editar',
+      },
+      { key: 'tabuladores', label: 'Tabuladores', path: 'tabuladores', icon: '📋', leaderOnly: true },
+      {
+        key: 'cobranca-equipe',
+        label: 'Cobranças',
+        path: 'cobranca-equipe',
+        icon: '🧾',
+        leaderOnly: true,
+      },
+    ],
+  },
+  {
+    label: 'Configurações',
+    items: [
       {
         key: 'noel-membro',
-        label: 'Noel equipe',
+        label: 'Noel para equipe',
         path: 'noel-membro',
         icon: '💬',
         subtitle: 'Visão do membro',
         requireNoelMemberNav: true,
       },
-      { key: 'tarefas', label: 'Tarefas diárias', path: 'tarefas', icon: '✅' },
-      { key: 'equipe', label: 'Análise da equipe', path: 'equipe', icon: '👥', leaderOnly: true },
-      { key: 'links', label: 'Convites equipe', path: 'links', icon: '🔗', leaderOnly: true },
-      { key: 'tabuladores', label: 'Tabuladores', path: 'tabuladores', icon: '📋', leaderOnly: true },
-      {
-        key: 'cobranca-equipe',
-        label: 'Cobrança da equipe',
-        path: 'cobranca-equipe',
-        icon: '🧾',
-        leaderOnly: true,
-      },
       {
         key: 'configuracao',
-        label: 'Noel equipe',
+        label: 'Configurar Noel equipe',
         path: 'configuracao',
         icon: '⚙️',
         leaderOnly: true,
       },
+    ],
+  },
+  {
+    /** Sem label — fica solto no final, sempre visível */
+    label: '',
+    items: [
       { key: 'como-usar', label: 'Como usar', path: 'como-usar', icon: '📖' },
     ],
   },

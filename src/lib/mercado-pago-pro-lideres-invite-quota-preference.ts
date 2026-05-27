@@ -1,5 +1,6 @@
 import { Preference } from 'mercadopago'
 import { createMercadoPagoClient } from '@/lib/mercado-pago'
+import { splitDisplayNameForMercadoPagoPayer } from '@/lib/mercado-pago-payer'
 import { buildProLideresInviteQuotaMpExternalReference } from '@/lib/pro-lideres-invite-quota-mp'
 
 const PACK_BRL = 750
@@ -7,6 +8,8 @@ const PACK_BRL = 750
 export type CreateProLideresInviteQuotaPreferenceParams = {
   userId: string
   userEmail: string
+  /** Nome da conta líder (ex.: display_name do tenant) — pré-preenche o pagador no MP. */
+  userDisplayName?: string | null
   leaderTenantId: string
   successUrl: string
   failureUrl: string
@@ -29,6 +32,8 @@ export async function createProLideresInviteQuotaPreference(
   const preference = new Preference(client)
 
   const external_reference = buildProLideresInviteQuotaMpExternalReference(params.leaderTenantId)
+  const { firstName, lastName } = splitDisplayNameForMercadoPagoPayer(params.userDisplayName)
+  const checkoutEmail = params.userEmail.trim().toLowerCase()
 
   const body = {
     items: [
@@ -43,12 +48,15 @@ export async function createProLideresInviteQuotaPreference(
       },
     ],
     payer: {
-      email: params.userEmail,
+      email: checkoutEmail,
+      first_name: firstName,
+      last_name: lastName,
     },
     metadata: {
       user_id: params.userId,
       leader_tenant_id: params.leaderTenantId,
       ylada_product: 'pro_lideres_invite_quota_50',
+      checkout_account_email: checkoutEmail,
     },
     back_urls: {
       success: params.successUrl,

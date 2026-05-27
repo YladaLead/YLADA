@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { resolveProLideresTenantContext, resolvedUserEmail } from '@/lib/pro-lideres-server'
+import {
+  resolveProLideresTenantContext,
+  resolvedUserEmail,
+  resolveProLideresViewerDisplayName,
+} from '@/lib/pro-lideres-server'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import { createProLideresInviteQuotaPreference } from '@/lib/mercado-pago-pro-lideres-invite-quota-preference'
 
@@ -48,10 +52,15 @@ export async function POST(request: NextRequest) {
   const isTest = process.env.NODE_ENV !== 'production'
 
   try {
+    const displayName = resolveProLideresViewerDisplayName(user, {
+      nomeCompleto: ctx.tenant.display_name,
+    })
+
     const pref = await createProLideresInviteQuotaPreference(
       {
         userId: user.id,
         userEmail: email,
+        userDisplayName: displayName,
         leaderTenantId: ctx.tenant.id,
         successUrl,
         failureUrl,
