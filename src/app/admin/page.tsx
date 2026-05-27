@@ -177,6 +177,15 @@ function AdminDashboardContent() {
       destaque: true,
     },
     {
+      id: 'pro-joias',
+      title: 'Pro Joias',
+      description: 'Tenants, seed de scripts e gestão de redes de joias/bijuterias',
+      icon: '💍',
+      link: '/admin/pro-joias',
+      color: 'bg-amber-700',
+      destaque: true,
+    },
+    {
       id: 'consultorias-hub',
       title: 'Consultorias',
       description: 'Pró Líderes, estética corporal e estética capilar',

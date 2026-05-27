@@ -1,4 +1,4 @@
-import { YScriptsContent } from '@/components/pro-lideres/YScriptsContent'
+import YladaBoardsContent from '@/components/ylada-boards/YladaBoardsContent'
 
 export const metadata = {
   title: 'Ylada Boards | Pro Líderes',
@@ -6,5 +6,5 @@ export const metadata = {
 }
 
 export default function ProLideresYScriptsPage() {
-  return <YScriptsContent />
+  return <YladaBoardsContent area="pro-lideres" />
 }

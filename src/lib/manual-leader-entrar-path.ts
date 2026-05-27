@@ -5,6 +5,7 @@ export function manualLeaderEntrarPathForVerticalCode(segmentCode: string): stri
   const s = segmentCode.trim().toLowerCase()
   if (s === 'estetica-corporal') return '/pro-estetica-corporal/entrar'
   if (s === 'estetica-capilar') return '/pro-estetica-capilar/entrar'
+  if (s === 'joias') return '/pro-joias/entrar'
   return '/pro-lideres/entrar'
 }
 
@@ -12,5 +13,6 @@ export function manualLeaderHandoutTitleForVerticalCode(segmentCode: string): st
   const s = segmentCode.trim().toLowerCase()
   if (s === 'estetica-corporal') return 'Pro Estética corporal'
   if (s === 'estetica-capilar') return 'Pro Estética capilar'
+  if (s === 'joias') return 'Pro Joias'
   return 'Pro Líderes'
 }

@@ -12,6 +12,7 @@ const VERTICAL_PRESETS = [
   { value: 'h-lider', label: 'Pró Líderes (equipe / Herbalife)' },
   { value: 'estetica-corporal', label: 'Pro Estética corporal' },
   { value: 'estetica-capilar', label: 'Pro Estética capilar' },
+  { value: 'joias', label: 'Pro Joias (redes de joias / bijuterias)' },
 ] as const
 
 const VERTICAL_PRESET_VALUES = new Set<string>(VERTICAL_PRESETS.map((p) => p.value))
