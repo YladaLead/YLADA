@@ -14,7 +14,7 @@ export async function PUT(request: NextRequest, ctx: Ctx) {
   const body = await request.json() as { nome?: string; emoji?: string; ordem?: number }
 
   const { data, error } = await supabaseAdmin
-    .from('yscripts_boards')
+    .from('ylada_boards')
     .update({ ...body, atualizado_em: new Date().toISOString() })
     .eq('id', id)
     .select()
@@ -33,7 +33,7 @@ export async function DELETE(request: NextRequest, ctx: Ctx) {
   const { id } = await ctx.params
 
   const { error } = await supabaseAdmin
-    .from('yscripts_boards')
+    .from('ylada_boards')
     .delete()
     .eq('id', id)
 

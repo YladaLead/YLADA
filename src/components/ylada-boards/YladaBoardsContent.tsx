@@ -10,7 +10,7 @@ type Board = {
   nome: string
   emoji: string
   ordem: number
-  yscripts_cards?: { count: number }[]
+  ylada_board_cards?: { count: number }[]
 }
 
 type Card = {
@@ -32,7 +32,7 @@ type Props = {
    UTILITÁRIOS
 ───────────────────────────────────────────── */
 function cardCount(board: Board): number {
-  return board.yscripts_cards?.[0]?.count ?? 0
+  return board.ylada_board_cards?.[0]?.count ?? 0
 }
 
 async function copyText(text: string): Promise<boolean> {

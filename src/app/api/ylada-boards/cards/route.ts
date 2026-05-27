@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   if (!board_id) return NextResponse.json({ error: 'board_id obrigatório' }, { status: 400 })
 
   const { data, error } = await supabaseAdmin
-    .from('yscripts_cards')
+    .from('ylada_board_cards')
     .select('*')
     .eq('board_id', board_id)
     .order('ordem', { ascending: true })
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
   const variaveis = [...body.conteudo.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1])
 
   const { data, error } = await supabaseAdmin
-    .from('yscripts_cards')
+    .from('ylada_board_cards')
     .insert({
       board_id: body.board_id,
       tenant_id: body.tenant_id,

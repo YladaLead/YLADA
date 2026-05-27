@@ -12,8 +12,8 @@ export async function GET(request: NextRequest) {
   const area = searchParams.get('area') ?? 'geral'
 
   const { data, error } = await supabaseAdmin
-    .from('yscripts_boards')
-    .select('*, yscripts_cards(count)')
+    .from('ylada_boards')
+    .select('*, ylada_board_cards(count)')
     .eq('tenant_id', `${auth.user.id}:${area}`)
     .order('ordem', { ascending: true })
 
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
   const area = body.area ?? 'geral'
 
   const { data, error } = await supabaseAdmin
-    .from('yscripts_boards')
+    .from('ylada_boards')
     .insert({
       tenant_id: `${auth.user.id}:${area}`,
       nome: body.nome,

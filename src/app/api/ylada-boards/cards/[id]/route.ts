@@ -26,7 +26,7 @@ export async function PUT(request: NextRequest, ctx: Ctx) {
   }
 
   const { data, error } = await supabaseAdmin
-    .from('yscripts_cards')
+    .from('ylada_board_cards')
     .update(updates)
     .eq('id', id)
     .select()
@@ -45,7 +45,7 @@ export async function DELETE(request: NextRequest, ctx: Ctx) {
   const { id } = await ctx.params
 
   const { error } = await supabaseAdmin
-    .from('yscripts_cards')
+    .from('ylada_board_cards')
     .delete()
     .eq('id', id)
 
