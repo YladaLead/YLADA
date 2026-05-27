@@ -28,7 +28,7 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
       { key: 'catalogo', label: 'Meus links', path: 'catalogo', icon: '🛠️' },
       {
         key: 'y-scripts',
-        label: 'Abordagens',
+        label: 'Y-Scripts',
         path: 'y-scripts',
         icon: '📲',
         subtitle: 'Scripts prontos p/ WhatsApp',
