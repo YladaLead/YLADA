@@ -491,38 +491,18 @@ export function ProLideresDailyTasksClient() {
     await saveTodayExecution(todayDraft)
   }
 
-  async function handleShare() {
+  function handleShare() {
     if (generatingShare || applicableToday.length === 0) return
     setShareImageUrl(null)
+    setShareError(null)
     setGeneratingShare(true)
-    setError(null)
     try {
-      // Gera dataUrl diretamente — síncrono, sem conversão para Blob em desktop
       const dataUrl = generateShareImage(applicableToday, todaySaved, todayStr)
-
-      // Mobile com suporte a share nativo de arquivos
-      if (
-        typeof navigator !== 'undefined' &&
-        navigator.share &&
-        navigator.canShare
-      ) {
-        // Converte dataUrl → Blob → File apenas para o share nativo
-        const res = await fetch(dataUrl)
-        const blob = await res.blob()
-        const file = new File([blob], 'tarefas-do-dia.png', { type: 'image/png' })
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: 'Minhas tarefas do dia' })
-          return
-        }
-      }
-      // Desktop / fallback: mostra preview inline com dataUrl diretamente
       setShareImageUrl(dataUrl)
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
-      if (!(err instanceof Error) || err.name !== 'AbortError') {
-        console.error('handleShare error', err)
-        setShareError(msg || 'Não foi possível gerar a imagem.')
-      }
+      console.error('handleShare error', err)
+      setShareError(msg || 'Não foi possível gerar a imagem.')
     } finally {
       setGeneratingShare(false)
     }
@@ -846,7 +826,7 @@ export function ProLideresDailyTasksClient() {
               <button
                 type="button"
                 disabled={generatingShare || applicableToday.length === 0}
-                onClick={() => void handleShare()}
+                onClick={handleShare}
                 className="flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {generatingShare ? (
