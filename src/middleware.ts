@@ -72,6 +72,12 @@ export function middleware(request: NextRequest) {
 
   // Rotas que NUNCA devem ser redirecionadas (verificar PRIMEIRO)
   if (
+    pathname === '/suporte' || // Página de suporte pública — não redirecionar para /pt/suporte
+    pathname.startsWith('/suporte/') ||
+    pathname === '/privacidade' || // Política de privacidade pública
+    pathname.startsWith('/privacidade/') ||
+    pathname === '/termos' || // Termos de uso públicos
+    pathname.startsWith('/termos/') ||
     pathname === '/migrado' || // Página de acesso migrado - não redirecionar
     pathname === '/uso-wellness-v1' ||
     pathname.startsWith('/uso-wellness-v1/') ||

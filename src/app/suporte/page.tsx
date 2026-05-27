@@ -1,13 +1,25 @@
 export const metadata = {
-  title: 'Suporte | Ylada',
-  description: 'Central de suporte da plataforma Ylada — tire suas dúvidas, entre em contato e encontre ajuda.',
+  title: 'Support / Suporte | Ylada',
+  description: 'Ylada support center — contact us and find answers. Central de suporte Ylada.',
 }
 
 export default function Suporte() {
   return (
     <main className="max-w-3xl mx-auto px-6 py-16 text-gray-800">
-      <h1 className="text-3xl font-bold mb-2">Central de Suporte</h1>
-      <p className="text-sm text-gray-500 mb-10">Estamos aqui para ajudar você.</p>
+      <h1 className="text-3xl font-bold mb-2">Support / Central de Suporte</h1>
+      <p className="text-sm text-gray-500 mb-6">We are here to help. / Estamos aqui para ajudar você.</p>
+
+      {/* English section for international users / App Review */}
+      <section className="mb-8 bg-blue-50 border border-blue-100 rounded-xl p-5 text-sm text-gray-700">
+        <p className="font-semibold mb-2">🇺🇸 English Support</p>
+        <p className="mb-1">For support in English, please contact us:</p>
+        <ul className="list-disc list-inside space-y-1">
+          <li>Email: <a href="mailto:suporte@ylada.com" className="text-blue-600 underline">suporte@ylada.com</a></li>
+          <li>WhatsApp: <a href="https://wa.me/5519997230912" className="text-blue-600 underline">+55 19 99723-0912</a></li>
+          <li>Business hours: Monday–Friday, 9 AM–6 PM (Brasília time, UTC-3)</li>
+          <li>Response time: within 1 business day</li>
+        </ul>
+      </section>
 
       {/* Contato */}
       <section className="mb-10">

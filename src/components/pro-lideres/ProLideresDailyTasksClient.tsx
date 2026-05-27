@@ -144,12 +144,13 @@ function diplomaLabel(pct: number): string {
 }
 
 /** Gera um PNG compacto com logo YLADA + diploma de pontos + lista de tarefas.
- *  Sem carregar imagens externas — logo desenhado diretamente no canvas. */
+ *  Sem carregar imagens externas — logo desenhado diretamente no canvas.
+ *  Retorna dataUrl (string) — sem conversão para Blob (mais confiável em produção). */
 function generateShareImage(
   tasks: ProLideresDailyTaskRow[],
   completedIds: Set<string>,
   dateStr: string
-): Promise<Blob> {
+): string {
   const SCALE     = 2
   const W         = 480
   const PAD       = 16
@@ -247,14 +248,14 @@ function generateShareImage(
   let y = DY + DIPLOMA_H
   for (const t of tasks) {
     const done = completedIds.has(t.id)
-    ctx.fillStyle = done ? '#f0fdf4' : '#f9fafb'
+    ctx.fillStyle = done ? '#eff6ff' : '#f9fafb'
     ctx.fillRect(0, y, W, ROW_H)
     ctx.strokeStyle = '#f3f4f6'; ctx.lineWidth = 1
     ctx.beginPath(); ctx.moveTo(0, y + ROW_H - 1); ctx.lineTo(W, y + ROW_H - 1); ctx.stroke()
 
     const cy = y + ROW_H / 2
     ctx.beginPath(); ctx.arc(PAD + 11, cy, 11, 0, Math.PI * 2)
-    ctx.fillStyle = done ? '#22c55e' : '#e5e7eb'; ctx.fill()
+    ctx.fillStyle = done ? '#3b82f6' : '#e5e7eb'; ctx.fill()
 
     ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2
     ctx.lineCap = 'round'; ctx.lineJoin = 'round'
@@ -273,7 +274,7 @@ function generateShareImage(
     ctx.font = done ? f(13, '500') : f(13)
     ctx.fillText(t.title, PAD + 28, cy + 5)
 
-    ctx.fillStyle = done ? '#16a34a' : '#d1d5db'
+    ctx.fillStyle = done ? '#2563eb' : '#d1d5db'
     ctx.font = f(11, 'bold')
     ctx.textAlign = 'right'
     ctx.fillText(`+${t.points}pts`, W - PAD, cy + 5)
@@ -296,15 +297,12 @@ function generateShareImage(
   )
   ctx.textAlign = 'left'
 
-  // toDataURL é síncrono e mais confiável em produção do que toBlob
+  // Retorna dataUrl diretamente — sem conversão para Blob (mais confiável em produção)
   const dataUrl = canvas.toDataURL('image/png')
   if (!dataUrl || dataUrl === 'data:,') {
-    return Promise.reject(new Error('Canvas toDataURL retornou vazio'))
+    throw new Error('Canvas toDataURL retornou vazio')
   }
-  const byteStr = atob(dataUrl.split(',')[1])
-  const u8 = new Uint8Array(byteStr.length)
-  for (let i = 0; i < byteStr.length; i++) u8[i] = byteStr.charCodeAt(i)
-  return Promise.resolve(new Blob([u8], { type: 'image/png' }))
+  return dataUrl
 }
 
 export function ProLideresDailyTasksClient() {
@@ -339,6 +337,7 @@ export function ProLideresDailyTasksClient() {
   const [savingToday, setSavingToday] = useState(false)
   const [generatingShare, setGeneratingShare] = useState(false)
   const [shareImageUrl, setShareImageUrl] = useState<string | null>(null)
+  const [shareError, setShareError] = useState<string | null>(null)
   const [todayDraft, setTodayDraft] = useState<Set<string>>(() => new Set())
   const [todaySaved, setTodaySaved] = useState<Set<string>>(() => new Set())
   const [todaySaveOk, setTodaySaveOk] = useState(true)
@@ -494,32 +493,35 @@ export function ProLideresDailyTasksClient() {
 
   async function handleShare() {
     if (generatingShare || applicableToday.length === 0) return
-    // Limpa preview anterior
-    if (shareImageUrl) {
-      URL.revokeObjectURL(shareImageUrl)
-      setShareImageUrl(null)
-    }
+    setShareImageUrl(null)
     setGeneratingShare(true)
     setError(null)
     try {
-      const blob = await generateShareImage(applicableToday, todaySaved, todayStr)
-      const file = new File([blob], 'tarefas-do-dia.png', { type: 'image/png' })
+      // Gera dataUrl diretamente — síncrono, sem conversão para Blob em desktop
+      const dataUrl = generateShareImage(applicableToday, todaySaved, todayStr)
+
       // Mobile com suporte a share nativo de arquivos
       if (
         typeof navigator !== 'undefined' &&
         navigator.share &&
-        navigator.canShare?.({ files: [file] })
+        navigator.canShare
       ) {
-        await navigator.share({ files: [file], title: 'Minhas tarefas do dia' })
-      } else {
-        // Desktop / fallback: mostra preview inline com botões de ação
-        const url = URL.createObjectURL(blob)
-        setShareImageUrl(url)
+        // Converte dataUrl → Blob → File apenas para o share nativo
+        const res = await fetch(dataUrl)
+        const blob = await res.blob()
+        const file = new File([blob], 'tarefas-do-dia.png', { type: 'image/png' })
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'Minhas tarefas do dia' })
+          return
+        }
       }
+      // Desktop / fallback: mostra preview inline com dataUrl diretamente
+      setShareImageUrl(dataUrl)
     } catch (err) {
-      if (err instanceof Error && err.name !== 'AbortError') {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (!(err instanceof Error) || err.name !== 'AbortError') {
         console.error('handleShare error', err)
-        setError('Não foi possível gerar a imagem. Tente novamente.')
+        setShareError(msg || 'Não foi possível gerar a imagem.')
       }
     } finally {
       setGeneratingShare(false)
@@ -527,8 +529,8 @@ export function ProLideresDailyTasksClient() {
   }
 
   function dismissSharePreview() {
-    if (shareImageUrl) URL.revokeObjectURL(shareImageUrl)
     setShareImageUrl(null)
+    setShareError(null)
   }
 
   function downloadShareImage() {
@@ -779,13 +781,13 @@ export function ProLideresDailyTasksClient() {
                     key={t.id}
                     onClick={() => !savingToday && void toggleTodayTask(t.id)}
                     className={`flex cursor-pointer gap-3 px-4 py-4 transition-colors sm:px-5 ${
-                      checked ? 'bg-green-50' : 'hover:bg-gray-50'
+                      checked ? 'bg-blue-50' : 'hover:bg-gray-50'
                     }`}
                   >
                     {/* Checkbox custom */}
                     <div className={`mt-0.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border-2 transition-all ${
                       checked
-                        ? 'border-green-500 bg-green-500'
+                        ? 'border-blue-500 bg-blue-500'
                         : 'border-gray-300 bg-white'
                     }`}>
                       {checked && (
@@ -795,7 +797,7 @@ export function ProLideresDailyTasksClient() {
                       )}
                     </div>
                     <div className="flex min-w-0 flex-1 gap-3">
-                      <span className={`shrink-0 text-[15px] font-bold transition-colors ${checked ? 'text-green-600' : 'text-blue-700'}`}>
+                      <span className={`shrink-0 text-[15px] font-bold transition-colors ${checked ? 'text-blue-600' : 'text-blue-700'}`}>
                         {t.points} pts
                       </span>
                       <div className="min-w-0">
@@ -864,6 +866,14 @@ export function ProLideresDailyTasksClient() {
                   </>
                 )}
               </button>
+            )}
+
+            {/* Erro ao gerar imagem — mostrado inline, não no rodapé */}
+            {shareError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-800">
+                ❌ {shareError}
+                <button type="button" onClick={() => setShareError(null)} className="ml-2 underline text-red-600">Fechar</button>
+              </div>
             )}
 
             {/* Preview da imagem gerada */}

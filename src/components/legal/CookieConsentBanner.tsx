@@ -9,11 +9,7 @@ import { X, Cookie, Settings } from 'lucide-react'
 function isNativeApp(): boolean {
   if (typeof window === 'undefined') return false
   // Capacitor expõe window.Capacitor quando rodando em app nativo
-  const hasCapacitor = !!(window as unknown as Record<string, unknown>)['Capacitor']
-  // User agent do Capacitor contém "Capacitor" ou pode ser detectado por ausência de navegador
-  const ua = navigator.userAgent || ''
-  const isCapacitorUA = ua.includes('Capacitor') || ua.includes('capacitor') || ua.includes('YladaApp')
-  return hasCapacitor || isCapacitorUA
+  return !!(window as unknown as Record<string, unknown>)['Capacitor']
 }
 
 type CookiePreferences = {
