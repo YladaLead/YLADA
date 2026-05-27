@@ -31,7 +31,6 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
         label: 'Ylada Boards',
         path: 'y-scripts',
         icon: '📲',
-        subtitle: 'Mensagens prontas p/ WhatsApp',
       },
       { key: 'tarefas', label: 'Tarefas diárias', path: 'tarefas', icon: '✅' },
       { key: 'noel', label: 'Noel líder', path: 'noel', icon: '💬', leaderOnly: true },

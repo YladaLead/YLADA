@@ -411,7 +411,7 @@ export function YScriptsContent() {
   const sidebar = (
     <div className="flex h-full min-h-0 flex-col">
       <div className="hidden shrink-0 border-b border-gray-100 px-4 py-4 lg:block">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#7F77DD]">Y-Scripts</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-[#7F77DD]">Ylada Boards</p>
         <p className="mt-1 text-sm text-gray-600">
           {isMemberCopyOnly ? 'Só copiar. Quem edita é o líder.' : 'Toque na mensagem para copiar.'}
         </p>
@@ -578,7 +578,7 @@ export function YScriptsContent() {
         }`}
       >
         <div className="shrink-0 border-b border-gray-100 px-4 py-4">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#7F77DD]">Y-Scripts</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-[#7F77DD]">Ylada Boards</p>
           <h1 className="mt-1 text-xl font-bold text-gray-900">Suas pastas</h1>
           <p className="mt-1 text-sm text-gray-500">
             {isMemberCopyOnly

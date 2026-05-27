@@ -1,8 +1,8 @@
 import { YScriptsContent } from '@/components/pro-lideres/YScriptsContent'
 
 export const metadata = {
-  title: 'Y-Scripts | Pro Líderes',
-  description: 'Scripts prontos para copiar e colar no WhatsApp',
+  title: 'Ylada Boards | Pro Líderes',
+  description: 'Mensagens prontas para copiar e colar no WhatsApp',
 }
 
 export default function ProLideresYScriptsPage() {
