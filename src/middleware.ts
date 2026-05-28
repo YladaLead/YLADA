@@ -70,6 +70,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308)
   }
 
+  // Pro Joias (e subrotas): URL canónica sem /pt
+  if (pathname === '/pt/pro-joias' || pathname.startsWith('/pt/pro-joias/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace(/^\/pt(?=\/pro-joias)/, '') || '/pro-joias'
+    return NextResponse.redirect(url, 308)
+  }
+
   // Rotas que NUNCA devem ser redirecionadas (verificar PRIMEIRO)
   if (
     pathname === '/suporte' || // Página de suporte pública — não redirecionar para /pt/suporte
@@ -94,6 +101,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/pro-estetica-corporal') || // YLADA Pro Estética Corporal — canônico sem /pt
     pathname.startsWith('/pro-estetica-capilar') || // YLADA Pro Estética Capilar — canônico sem /pt
     pathname.startsWith('/pro-estetica') || // YLADA Pro Estética (hub por segmentos) — canônico sem /pt
+    pathname.startsWith('/pro-joias') || // YLADA Pro Joias — canônico sem /pt
     pathname.startsWith('/cursos') ||
     pathname.startsWith('/create') ||
     pathname.startsWith('/api/') ||

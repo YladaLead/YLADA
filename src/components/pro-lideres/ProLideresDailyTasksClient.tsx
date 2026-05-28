@@ -132,8 +132,17 @@ function diplomaLabel(pct: number): string {
   return 'Começando'
 }
 
-/** Gera PNG: logo YLADA + barra de score compacta + lista completa de tarefas (feitas e pendentes).
- *  Retorna dataUrl string — síncrono, sem Blob, sem fetch. */
+/** Converte dataUrl → Blob sem usar fetch (funciona em todos os browsers). */
+function dataUrlToBlob(dataUrl: string): Blob {
+  const parts = dataUrl.split(',')
+  const mime  = parts[0].match(/:(.*?);/)?.[1] ?? 'image/png'
+  const bstr  = atob(parts[1])
+  const u8    = new Uint8Array(bstr.length)
+  for (let i = 0; i < bstr.length; i++) u8[i] = bstr.charCodeAt(i)
+  return new Blob([u8], { type: mime })
+}
+
+/** Gera PNG: logo YLADA + certificado de pontos + lista de tarefas (feitas e pendentes). */
 function generateShareImage(
   tasks: ProLideresDailyTaskRow[],
   completedIds: Set<string>,
@@ -143,10 +152,10 @@ function generateShareImage(
   const W        = 480
   const PAD      = 16
   const LOGO_H   = 52
-  const SCORE_H  = 40
-  const ROW_H    = 44
-  const FOOTER_H = 30
-  const H = LOGO_H + SCORE_H + tasks.length * ROW_H + FOOTER_H
+  const CERT_H   = 88          // certificado compacto (era 112)
+  const ROW_H    = 40
+  const FOOTER_H = 28
+  const H = LOGO_H + CERT_H + tasks.length * ROW_H + FOOTER_H
 
   const canvas = document.createElement('canvas')
   canvas.width  = W * SCALE
@@ -166,7 +175,6 @@ function generateShareImage(
   const dateFull = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })
   const dateShort = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 
-  // Fundo branco
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, W, H)
 
@@ -188,20 +196,34 @@ function generateShareImage(
   ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1
   ctx.beginPath(); ctx.moveTo(0, LOGO_H); ctx.lineTo(W, LOGO_H); ctx.stroke()
 
-  // ── Score compacto ────────────────────────────────────────────────────────
-  ctx.fillStyle = '#eff6ff'
-  ctx.fillRect(0, LOGO_H, W, SCORE_H)
-  ctx.strokeStyle = '#bfdbfe'; ctx.lineWidth = 1
-  ctx.beginPath(); ctx.moveTo(0, LOGO_H + SCORE_H); ctx.lineTo(W, LOGO_H + SCORE_H); ctx.stroke()
-  const sY = LOGO_H + SCORE_H / 2 + 6
+  // ── Certificado ──────────────────────────────────────────────────────────
+  const CY = LOGO_H
+  ctx.fillStyle = '#fffbeb'
+  ctx.fillRect(0, CY, W, CERT_H)
+  // Borda dupla
+  ctx.strokeStyle = '#d97706'; ctx.lineWidth = 1.5
+  ctx.strokeRect(8, CY + 8, W - 16, CERT_H - 16)
+  ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 0.75
+  ctx.strokeRect(13, CY + 13, W - 26, CERT_H - 26)
+  // Título
+  ctx.fillStyle = '#92400e'; ctx.font = f(8, 'bold')
   ctx.textAlign = 'center'
-  ctx.font = f(15)
-  ctx.fillStyle = '#1d4ed8'
-  ctx.fillText(`🏆  ${totalPts} / ${maxPts} pts  ·  ${diplomaLabel(pct)}`, W / 2, sY)
+  ctx.fillText('C E R T I F I C A D O  D O  D I A', W / 2, CY + 26)
+  // Score grande
+  ctx.font = f(32, 'bold')
+  ctx.fillStyle = '#92400e'
+  const sw = ctx.measureText(String(totalPts)).width
+  ctx.fillText(String(totalPts), W / 2 - sw / 2, CY + 64)
+  ctx.font = f(12)
+  ctx.fillStyle = '#b45309'
+  ctx.fillText(' pts', W / 2 + sw / 2, CY + 60)
+  // Classificação
+  ctx.font = f(9)
+  ctx.fillText(`de ${maxPts} pts  ·  ${diplomaLabel(pct)}`, W / 2, CY + CERT_H - 14)
   ctx.textAlign = 'left'
 
   // ── Tarefas ───────────────────────────────────────────────────────────────
-  let y = LOGO_H + SCORE_H
+  let y = CY + CERT_H
   for (const t of tasks) {
     const done = completedIds.has(t.id)
     ctx.fillStyle = done ? '#eff6ff' : '#f9fafb'
@@ -210,32 +232,31 @@ function generateShareImage(
     ctx.beginPath(); ctx.moveTo(0, y + ROW_H - 1); ctx.lineTo(W, y + ROW_H - 1); ctx.stroke()
 
     const cy = y + ROW_H / 2
-    ctx.beginPath(); ctx.arc(PAD + 11, cy, 11, 0, Math.PI * 2)
+    ctx.beginPath(); ctx.arc(PAD + 10, cy, 10, 0, Math.PI * 2)
     ctx.fillStyle = done ? '#3b82f6' : '#e5e7eb'; ctx.fill()
 
     ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2
     ctx.lineCap = 'round'; ctx.lineJoin = 'round'
     if (done) {
       ctx.beginPath()
-      ctx.moveTo(PAD + 6, cy); ctx.lineTo(PAD + 10, cy + 4); ctx.lineTo(PAD + 17, cy - 4)
+      ctx.moveTo(PAD + 5, cy); ctx.lineTo(PAD + 9, cy + 4); ctx.lineTo(PAD + 16, cy - 4)
       ctx.stroke()
     } else {
       ctx.beginPath()
-      ctx.moveTo(PAD + 6, cy - 4); ctx.lineTo(PAD + 16, cy + 4)
-      ctx.moveTo(PAD + 16, cy - 4); ctx.lineTo(PAD + 6, cy + 4)
+      ctx.moveTo(PAD + 5, cy - 3); ctx.lineTo(PAD + 15, cy + 3)
+      ctx.moveTo(PAD + 15, cy - 3); ctx.lineTo(PAD + 5, cy + 3)
       ctx.stroke()
     }
 
     ctx.fillStyle = done ? '#1e40af' : '#9ca3af'
-    ctx.font = done ? f(13, '600') : f(13)
-    ctx.fillText(t.title, PAD + 28, cy + 5)
+    ctx.font = done ? f(12, '600') : f(12)
+    ctx.fillText(t.title, PAD + 26, cy + 5)
 
     ctx.fillStyle = done ? '#2563eb' : '#d1d5db'
-    ctx.font = f(11, 'bold')
+    ctx.font = f(10, 'bold')
     ctx.textAlign = 'right'
     ctx.fillText(`+${t.points}pts`, W - PAD, cy + 5)
     ctx.textAlign = 'left'
-
     y += ROW_H
   }
 
@@ -244,7 +265,7 @@ function generateShareImage(
   ctx.fillRect(0, y, W, FOOTER_H)
   ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1
   ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke()
-  ctx.fillStyle = '#9ca3af'; ctx.font = f(10)
+  ctx.fillStyle = '#9ca3af'; ctx.font = f(9)
   ctx.textAlign = 'center'
   ctx.fillText(
     `${completedCount}/${tasks.length} tarefas · ${dateFull.charAt(0).toUpperCase() + dateFull.slice(1)} · ${dateShort} · ylada.com`,
@@ -443,15 +464,33 @@ export function ProLideresDailyTasksClient() {
     await saveTodayExecution(todayDraft)
   }
 
-  function handleShare() {
+  async function handleShare() {
     if (generatingShare || applicableToday.length === 0) return
     setShareImageUrl(null)
     setShareError(null)
     setGeneratingShare(true)
     try {
       const dataUrl = generateShareImage(applicableToday, todaySaved, todayStr)
-      setShareImageUrl(dataUrl)
+      const blob = dataUrlToBlob(dataUrl)
+      const file = new File([blob], 'tarefas-do-dia.png', { type: 'image/png' })
+
+      // Mobile / browsers com Web Share API de arquivos → abre painel nativo (WhatsApp etc)
+      if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Minhas tarefas do dia' })
+        return
+      }
+
+      // Fallback desktop: baixa a imagem automaticamente
+      const a = document.createElement('a')
+      a.href = dataUrl
+      a.download = 'tarefas-do-dia.png'
+      a.style.display = 'none'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      setShareImageUrl(dataUrl) // mostra preview só no desktop como confirmação
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return // usuário cancelou o share
       const msg = err instanceof Error ? err.message : String(err)
       console.error('handleShare error', err)
       setShareError(msg || 'Não foi possível gerar a imagem.')
@@ -808,47 +847,15 @@ export function ProLideresDailyTasksClient() {
               </div>
             )}
 
-            {/* Preview da imagem gerada */}
+            {/* Preview desktop — só aparece quando Web Share não está disponível */}
             {shareImageUrl && (
-              <div className="mt-1 overflow-hidden rounded-xl border border-green-200 bg-green-50">
+              <div className="mt-1 overflow-hidden rounded-xl border border-blue-200 bg-blue-50">
                 <div className="flex items-center justify-between px-3 py-2">
-                  <p className="text-xs font-semibold text-green-800">✅ Imagem gerada! Escolha o que fazer:</p>
-                  <button
-                    type="button"
-                    onClick={dismissSharePreview}
-                    className="text-green-600 hover:text-green-800 text-lg leading-none"
-                    aria-label="Fechar preview"
-                  >×</button>
+                  <p className="text-xs font-semibold text-blue-800">✅ Imagem baixada! Envie pelo WhatsApp.</p>
+                  <button type="button" onClick={dismissSharePreview} className="text-blue-400 hover:text-blue-700 text-lg leading-none" aria-label="Fechar">×</button>
                 </div>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={shareImageUrl}
-                  alt="Preview das tarefas do dia"
-                  className="w-full"
-                />
-                <div className="flex gap-2 p-3">
-                  <button
-                    type="button"
-                    onClick={downloadShareImage}
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-green-300 bg-white px-3 py-2.5 text-sm font-semibold text-green-800 hover:bg-green-50 transition-colors"
-                  >
-                    <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Baixar imagem
-                  </button>
-                  <a
-                    href={`https://wa.me/?text=${encodeURIComponent(buildWhatsAppShareMessage(applicableToday, todaySaved, todayStr))}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-green-600 px-3 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
-                  >
-                    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-                    </svg>
-                    Abrir WhatsApp
-                  </a>
-                </div>
+                <img src={shareImageUrl} alt="Tarefas do dia" className="w-full" />
               </div>
             )}
           </div>
