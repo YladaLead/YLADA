@@ -24,6 +24,28 @@ export default function ProJoiasPainelPage() {
         </Link>
 
         <Link
+          href="/pro-joias/painel/links"
+          className="flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-5 hover:border-amber-300 hover:shadow-sm transition-all"
+        >
+          <span className="text-2xl" aria-hidden>🔗</span>
+          <div>
+            <p className="font-semibold text-gray-900">Criar diagnóstico</p>
+            <p className="text-sm text-gray-500 mt-0.5">Qualifique clientes antes do catálogo</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/pro-joias/painel/leads"
+          className="flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-5 hover:border-amber-300 hover:shadow-sm transition-all"
+        >
+          <span className="text-2xl" aria-hidden>🎯</span>
+          <div>
+            <p className="font-semibold text-gray-900">Leads</p>
+            <p className="text-sm text-gray-500 mt-0.5">Clientes que responderam seus diagnósticos</p>
+          </div>
+        </Link>
+
+        <Link
           href="/pro-joias/painel/equipe"
           className="flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-5 hover:border-amber-300 hover:shadow-sm transition-all"
         >
@@ -33,28 +55,6 @@ export default function ProJoiasPainelPage() {
             <p className="text-sm text-gray-500 mt-0.5">Convide e gerencie suas distribuidoras</p>
           </div>
         </Link>
-
-        <Link
-          href="/pro-joias/painel/links"
-          className="flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-5 hover:border-amber-300 hover:shadow-sm transition-all"
-        >
-          <span className="text-2xl" aria-hidden>🔗</span>
-          <div>
-            <p className="font-semibold text-gray-900">Links e diagnósticos</p>
-            <p className="text-sm text-gray-500 mt-0.5">Qualifique clientes antes do catálogo</p>
-          </div>
-        </Link>
-
-        <Link
-          href="/pro-joias/painel/noel"
-          className="flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-5 hover:border-amber-300 hover:shadow-sm transition-all"
-        >
-          <span className="text-2xl" aria-hidden>💡</span>
-          <div>
-            <p className="font-semibold text-gray-900">Noel IA</p>
-            <p className="text-sm text-gray-500 mt-0.5">Tire dúvidas, crie textos e estratégias</p>
-          </div>
-        </Link>
       </div>
 
       <div className="rounded-xl border border-amber-100 bg-amber-50 p-4">
@@ -62,13 +62,22 @@ export default function ProJoiasPainelPage() {
         <p className="text-sm text-amber-800">
           Comece pelos <strong>Scripts</strong> — já temos prontos para recrutamento de distribuidoras,
           venda ao consumidor final e desenvolvimento da equipe.
+          Depois crie um <strong>diagnóstico</strong> e compartilhe o link com clientes.
         </p>
-        <Link
-          href="/pro-joias/painel/scripts"
-          className="mt-3 inline-flex text-sm font-semibold text-amber-800 hover:text-amber-900 underline"
-        >
-          Ver scripts →
-        </Link>
+        <div className="mt-3 flex flex-wrap gap-3">
+          <Link
+            href="/pro-joias/painel/scripts"
+            className="inline-flex text-sm font-semibold text-amber-800 hover:text-amber-900 underline"
+          >
+            Ver scripts →
+          </Link>
+          <Link
+            href="/pro-joias/painel/links"
+            className="inline-flex text-sm font-semibold text-amber-800 hover:text-amber-900 underline"
+          >
+            Criar diagnóstico →
+          </Link>
+        </div>
       </div>
     </div>
   )

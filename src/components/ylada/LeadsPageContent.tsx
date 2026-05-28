@@ -45,6 +45,7 @@ function formatDate(iso: string): string {
 interface LeadsPageContentProps {
   areaCodigo: string
   areaLabel: string
+  noAreaShell?: boolean
 }
 
 function formatRelativeDate(iso: string): string {
@@ -62,7 +63,7 @@ function formatRelativeDate(iso: string): string {
   }
 }
 
-export default function LeadsPageContent({ areaCodigo, areaLabel }: LeadsPageContentProps) {
+export default function LeadsPageContent({ areaCodigo, areaLabel, noAreaShell }: LeadsPageContentProps) {
   const prefix = getYladaAreaPathPrefix(areaCodigo)
   const linksPath = `${prefix}/links`
   const isPerfumaria = areaCodigo === 'perfumaria'
@@ -103,10 +104,9 @@ export default function LeadsPageContent({ areaCodigo, areaLabel }: LeadsPageCon
     load()
   }, [filterLinkId, isPerfumaria, filterPerfumeUsage])
 
-  return (
-    <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
-      <div>
-        <h1 className="text-xl font-bold text-gray-900 mb-1">Leads dos seus diagnósticos</h1>
+  const core = (
+    <div>
+      <h1 className="text-xl font-bold text-gray-900 mb-1">Leads dos seus diagnósticos</h1>
         <p className="text-gray-600 text-sm mb-6">
           Pessoas que responderam seus diagnósticos e podem iniciar uma conversa com você.
         </p>
@@ -243,7 +243,13 @@ export default function LeadsPageContent({ areaCodigo, areaLabel }: LeadsPageCon
             </div>
           </>
         )}
-      </div>
+    </div>
+  )
+
+  if (noAreaShell) return core
+  return (
+    <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
+      {core}
     </YladaAreaShell>
   )
 }

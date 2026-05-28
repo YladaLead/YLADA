@@ -86,17 +86,21 @@ function buildWhatsAppShareMessage(
   completedIds: Set<string>,
   dateStr: string
 ): string {
-  const completed = tasks.filter((t) => completedIds.has(t.id))
-  const totalPts = completed.reduce((sum, t) => sum + t.points, 0)
-  const lines = completed.map((t) => `✔️ ${t.title} (+${t.points} pt${t.points !== 1 ? 's' : ''})`)
+  const totalPts = tasks.filter((t) => completedIds.has(t.id)).reduce((s, t) => s + t.points, 0)
+  const maxPts  = tasks.reduce((s, t) => s + t.points, 0)
   const d = new Date(`${dateStr}T12:00:00`)
   const dateBr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  const lines = tasks.map((t) =>
+    completedIds.has(t.id)
+      ? `✅ ${t.title} (+${t.points} pts)`
+      : `⬜ ${t.title} (+${t.points} pts)`
+  )
   return [
-    `✅ *Tarefas de hoje — ${dateBr}*`,
+    `📋 *Tarefas do dia — ${dateBr}*`,
     '',
     lines.join('\n'),
     '',
-    `🏆 Total: *${totalPts} pontos*`,
+    `🏆 *${totalPts} / ${maxPts} pts*`,
   ].join('\n')
 }
 
@@ -118,21 +122,6 @@ function canvasRoundRect(
   ctx.closePath()
 }
 
-/** Estrela de 5 pontas no canvas. */
-function drawStar(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, color: string) {
-  ctx.beginPath()
-  for (let i = 0; i < 10; i++) {
-    const angle = (i * Math.PI) / 5 - Math.PI / 2
-    const radius = i % 2 === 0 ? r : r * 0.42
-    const x = cx + Math.cos(angle) * radius
-    const y = cy + Math.sin(angle) * radius
-    if (i === 0) ctx.moveTo(x, y)
-    else ctx.lineTo(x, y)
-  }
-  ctx.closePath()
-  ctx.fillStyle = color
-  ctx.fill()
-}
 
 /** Classifica o desempenho por % de pontos atingidos. */
 function diplomaLabel(pct: number): string {
@@ -143,35 +132,34 @@ function diplomaLabel(pct: number): string {
   return 'Começando'
 }
 
-/** Gera um PNG compacto com logo YLADA + diploma de pontos + lista de tarefas.
- *  Sem carregar imagens externas — logo desenhado diretamente no canvas.
- *  Retorna dataUrl (string) — sem conversão para Blob (mais confiável em produção). */
+/** Gera PNG: logo YLADA + barra de score compacta + lista completa de tarefas (feitas e pendentes).
+ *  Retorna dataUrl string — síncrono, sem Blob, sem fetch. */
 function generateShareImage(
   tasks: ProLideresDailyTaskRow[],
   completedIds: Set<string>,
   dateStr: string
 ): string {
-  const SCALE     = 2
-  const W         = 480
-  const PAD       = 16
-  const LOGO_H    = 54
-  const DIPLOMA_H = 112
-  const ROW_H     = 44
-  const FOOTER_H  = 36
-  const H = LOGO_H + DIPLOMA_H + tasks.length * ROW_H + FOOTER_H
+  const SCALE    = 2
+  const W        = 480
+  const PAD      = 16
+  const LOGO_H   = 52
+  const SCORE_H  = 40
+  const ROW_H    = 44
+  const FOOTER_H = 30
+  const H = LOGO_H + SCORE_H + tasks.length * ROW_H + FOOTER_H
 
   const canvas = document.createElement('canvas')
   canvas.width  = W * SCALE
   canvas.height = H * SCALE
   const ctx = canvas.getContext('2d')
-  if (!ctx) return Promise.reject(new Error('Canvas não disponível'))
+  if (!ctx) throw new Error('Canvas não disponível')
   ctx.scale(SCALE, SCALE)
 
   const f = (size: number, weight = 'normal') =>
     `${weight} ${size}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
 
-  const completedTasks = tasks.filter((t) => completedIds.has(t.id))
-  const totalPts = completedTasks.reduce((s, t) => s + t.points, 0)
+  const completedCount = tasks.filter((t) => completedIds.has(t.id)).length
+  const totalPts = tasks.filter((t) => completedIds.has(t.id)).reduce((s, t) => s + t.points, 0)
   const maxPts   = tasks.reduce((s, t) => s + t.points, 0)
   const pct      = maxPts > 0 ? Math.round((totalPts / maxPts) * 100) : 0
   const d        = new Date(`${dateStr}T12:00:00`)
@@ -185,67 +173,35 @@ function generateShareImage(
   // ── Logo ──────────────────────────────────────────────────────────────────
   const lY = LOGO_H / 2
   const r  = 10
-  // Círculo esquerdo (azul claro)
   ctx.beginPath(); ctx.arc(PAD + r, lY, r, 0, Math.PI * 2)
   ctx.fillStyle = '#60a5fa'; ctx.fill()
-  // Círculo direito sobreposto (azul escuro)
   ctx.beginPath(); ctx.arc(PAD + r + r * 1.15, lY, r, 0, Math.PI * 2)
   ctx.fillStyle = '#1d4ed8'; ctx.fill()
-  // Texto YLADA
-  ctx.fillStyle = '#1e3a5f'
-  ctx.font = f(16, 'bold')
+  ctx.fillStyle = '#1e3a5f'; ctx.font = f(16, 'bold')
   ctx.fillText('YLADA', PAD + r * 2.3 + 10, lY + 6)
-  // Badge Pro Líderes
-  ctx.fillStyle = '#eff6ff'
   canvasRoundRect(ctx, W - 96, lY - 11, 80, 22, 6)
-  ctx.fill()
+  ctx.fillStyle = '#eff6ff'; ctx.fill()
   ctx.fillStyle = '#1d4ed8'; ctx.font = f(9, 'bold')
   ctx.textAlign = 'right'
   ctx.fillText('Pro Líderes', W - PAD, lY + 4)
   ctx.textAlign = 'left'
-  // Linha separadora
   ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1
   ctx.beginPath(); ctx.moveTo(0, LOGO_H); ctx.lineTo(W, LOGO_H); ctx.stroke()
 
-  // ── Diploma ───────────────────────────────────────────────────────────────
-  const DY = LOGO_H
-  ctx.fillStyle = '#fffbeb'
-  ctx.fillRect(0, DY, W, DIPLOMA_H)
-
-  const bp = 10 // border padding
-  ctx.strokeStyle = '#d97706'; ctx.lineWidth = 1.5
-  ctx.strokeRect(bp, DY + bp, W - bp * 2, DIPLOMA_H - bp * 2)
-  ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 0.75
-  ctx.strokeRect(bp + 5, DY + bp + 5, W - (bp + 5) * 2, DIPLOMA_H - (bp + 5) * 2)
-
-  // Título do diploma
-  ctx.fillStyle = '#92400e'; ctx.font = f(9, 'bold')
+  // ── Score compacto ────────────────────────────────────────────────────────
+  ctx.fillStyle = '#eff6ff'
+  ctx.fillRect(0, LOGO_H, W, SCORE_H)
+  ctx.strokeStyle = '#bfdbfe'; ctx.lineWidth = 1
+  ctx.beginPath(); ctx.moveTo(0, LOGO_H + SCORE_H); ctx.lineTo(W, LOGO_H + SCORE_H); ctx.stroke()
+  const sY = LOGO_H + SCORE_H / 2 + 6
   ctx.textAlign = 'center'
-  ctx.fillText('C O N Q U I S T A  D O  D I A', W / 2, DY + bp + 20)
-
-  // Score — mede largura para posicionar "pts" corretamente
-  const scoreY = DY + 70
-  ctx.font = f(44, 'bold')
-  ctx.fillStyle = '#92400e'
-  const scoreW = ctx.measureText(String(totalPts)).width
-  ctx.fillText(String(totalPts), W / 2 - scoreW / 2, scoreY)
-  ctx.font = f(13)
-  ctx.fillStyle = '#b45309'
-  ctx.fillText('pts', W / 2 + scoreW / 2 + 4, scoreY - 4)
-
-  // Estrelas ao lado do score
-  drawStar(ctx, W / 2 - scoreW / 2 - 18, scoreY - 14, 7, '#f59e0b')
-  drawStar(ctx, W / 2 + scoreW / 2 + 24, scoreY - 14, 7, '#f59e0b')
-
-  // Sub-linha
-  ctx.font = f(10)
-  ctx.fillStyle = '#b45309'
-  ctx.textAlign = 'center'
-  ctx.fillText(`de ${maxPts} pts · ${diplomaLabel(pct)}`, W / 2, DY + DIPLOMA_H - bp - 10)
+  ctx.font = f(15)
+  ctx.fillStyle = '#1d4ed8'
+  ctx.fillText(`🏆  ${totalPts} / ${maxPts} pts  ·  ${diplomaLabel(pct)}`, W / 2, sY)
   ctx.textAlign = 'left'
 
   // ── Tarefas ───────────────────────────────────────────────────────────────
-  let y = DY + DIPLOMA_H
+  let y = LOGO_H + SCORE_H
   for (const t of tasks) {
     const done = completedIds.has(t.id)
     ctx.fillStyle = done ? '#eff6ff' : '#f9fafb'
@@ -270,8 +226,8 @@ function generateShareImage(
       ctx.stroke()
     }
 
-    ctx.fillStyle = done ? '#111827' : '#9ca3af'
-    ctx.font = done ? f(13, '500') : f(13)
+    ctx.fillStyle = done ? '#1e40af' : '#9ca3af'
+    ctx.font = done ? f(13, '600') : f(13)
     ctx.fillText(t.title, PAD + 28, cy + 5)
 
     ctx.fillStyle = done ? '#2563eb' : '#d1d5db'
@@ -288,20 +244,16 @@ function generateShareImage(
   ctx.fillRect(0, y, W, FOOTER_H)
   ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1
   ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke()
-
   ctx.fillStyle = '#9ca3af'; ctx.font = f(10)
   ctx.textAlign = 'center'
   ctx.fillText(
-    `${completedTasks.length}/${tasks.length} tarefas · ${dateFull.charAt(0).toUpperCase() + dateFull.slice(1)} · ${dateShort} · ylada.com`,
+    `${completedCount}/${tasks.length} tarefas · ${dateFull.charAt(0).toUpperCase() + dateFull.slice(1)} · ${dateShort} · ylada.com`,
     W / 2, y + FOOTER_H / 2 + 4
   )
   ctx.textAlign = 'left'
 
-  // Retorna dataUrl diretamente — sem conversão para Blob (mais confiável em produção)
   const dataUrl = canvas.toDataURL('image/png')
-  if (!dataUrl || dataUrl === 'data:,') {
-    throw new Error('Canvas toDataURL retornou vazio')
-  }
+  if (!dataUrl || dataUrl === 'data:,') throw new Error('Canvas retornou vazio')
   return dataUrl
 }
 

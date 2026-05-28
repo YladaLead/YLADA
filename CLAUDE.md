@@ -1,7 +1,7 @@
 # CLAUDE.md — Contexto do Projeto Ylada
 ## Leia este arquivo no início de TODA sessão de código
 
-**Última atualização:** 11/05/2026
+**Última atualização:** 27/05/2026
 
 > Para contexto completo de estratégia e marketing, leia:
 > `/Users/air/Desktop/Ylada-Workspace/CLAUDE.md`
@@ -36,6 +36,54 @@ Os quizzes e calculadoras são a entrada do funil de diagnóstico — não o pro
 
 ---
 
+## YLADA BOARDS — MÓDULO INDEPENDENTE (implementado 27/05/2026)
+
+Ferramenta de atalhos de mensagens para WhatsApp — similar ao app Boards. Pastas com cards de texto prontos para copiar com um toque. Variáveis `{{nome}}` substituíveis antes de copiar.
+
+### Arquitetura de 3 camadas (decisão tomada)
+1. **Boards pessoal** — cada usuário tem seus próprios boards. ✅ Implementado.
+2. **Boards do líder para equipe** — líder cria conteúdo, equipe acessa somente leitura. ⏳ Aguardando app nas lojas.
+3. **Teclado nativo** — aparece dentro do WhatsApp sem sair do app (igual Boards app). ⏳ Aguardando aprovação Apple + Google Play.
+
+### Tabelas Supabase
+```
+ylada_boards      — pastas (tenant_id = user.id:area)
+ylada_board_cards — cards dentro das pastas (FK → ylada_boards, CASCADE)
+```
+⚠️ SQL de renomear tabelas ainda precisa ser rodado no Supabase:
+```sql
+ALTER TABLE yscripts_boards RENAME TO ylada_boards;
+ALTER TABLE yscripts_cards RENAME TO ylada_board_cards;
+```
+
+### Arquivos criados
+- `src/app/api/ylada-boards/boards/route.ts` — GET (listar) + POST (criar)
+- `src/app/api/ylada-boards/boards/[id]/route.ts` — PUT (editar) + DELETE (cascade)
+- `src/app/api/ylada-boards/cards/route.ts` — GET (por board) + POST (cria, detecta variáveis)
+- `src/app/api/ylada-boards/cards/[id]/route.ts` — PUT (editar, re-detecta vars) + DELETE
+- `src/components/ylada-boards/YladaBoardsContent.tsx` — componente genérico (aceita prop `area`)
+- `src/app/ylada-boards/page.tsx` — página standalone (`area="geral"`)
+
+### Integração Pró Líderes
+As páginas do Pró Líderes já usam o novo componente independente:
+- `src/app/pro-lideres/painel/y-scripts/page.tsx` → `<YladaBoardsContent area="pro-lideres" />`
+- `src/app/pro-lideres/membro/(area)/y-scripts/page.tsx` → `<YladaBoardsContent area="pro-lideres" />`
+
+### Isolamento por área
+`tenant_id = ${user.id}:${area}` — mesmo usuário pode ter boards diferentes em cada área do Ylada.
+
+### Próximos passos do Ylada Boards (quando app nas lojas)
+- Camada 2: painel do líder com upload de mídia + visão somente leitura do membro
+- Camada 3: teclado nativo iOS (Custom Keyboard Extension) + Android (overlay permission)
+- Storage de mídia: Supabase Storage agora, migrar para Cloudflare R2 em escala
+
+### Commit pendente
+```bash
+git add -A && git commit -m "feat: Ylada Boards — módulo independente /ylada-boards + API + componente genérico + Pró Líderes migrado" && git push
+```
+
+---
+
 ## O QUE IMPLEMENTAR AGORA (prioridade)
 
 ### 1. Quiz pré-diagnóstico socrático
@@ -48,13 +96,7 @@ Fluxo técnico:
 - Disparo automático: mensagem Carol no WhatsApp + lead no HubSpot + email MailerLite
 
 ### 2. Integração Carol — WhatsApp Business API (Meta oficial)
-**Spec completa:** a ser criada (próxima sessão)
-
-Fluxo:
-- Webhook recebe mensagem → OpenAI processa com prompt da Carol → responde
-- Contexto da conversa salvo no Supabase
-- Lead qualificado → criado/atualizado no HubSpot
-- Appointment confirmado → evento no calendário + lembrete automático
+Carol já está operacional. Ver detalhes no `/Users/air/Desktop/Ylada-Workspace/CLAUDE.md`.
 
 ### 3. Landing page do diagnóstico gratuito
 Página simples dentro do Next.js:
@@ -105,7 +147,7 @@ leads_quiz (
 | OpenAI | ✅ | OPENAI_API_KEY |
 | HubSpot | ✅ Cowork | via MCP |
 | MailerLite | ✅ Cowork | via MCP |
-| WhatsApp Business API | 🔲 Implementar | WHATSAPP_TOKEN, WHATSAPP_PHONE_ID |
+| WhatsApp Business API | ✅ Implementado | WHATSAPP_TOKEN, WHATSAPP_PHONE_ID |
 
 ---
 

@@ -20,9 +20,10 @@ export const PRO_JOIAS_MENU_GROUPS: { label: string; items: ProJoiasMenuItem[] }
     items: [
       { key: 'inicio', label: 'Início', path: '', icon: '✨', hint: 'Visão geral' },
       { key: 'scripts', label: 'Scripts', path: 'scripts', icon: '💬', hint: 'Abordagem e vendas' },
+      { key: 'links', label: 'Links', path: 'links', icon: '🔗', hint: 'Diagnósticos e captura' },
+      { key: 'leads', label: 'Leads', path: 'leads', icon: '🎯', hint: 'Clientes que responderam' },
       { key: 'equipe', label: 'Equipe', path: 'equipe', icon: '👥', hint: 'Distribuidoras da rede', leaderOnly: true },
       { key: 'catalogo', label: 'Catálogo', path: 'catalogo', icon: '💍', hint: 'Links e produtos' },
-      { key: 'links', label: 'Links', path: 'links', icon: '🔗', hint: 'Diagnósticos e captura' },
       { key: 'noel', label: 'Noel', path: 'noel', icon: '💡', hint: 'Tire dúvidas com IA' },
     ],
   },
