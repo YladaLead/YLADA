@@ -63,7 +63,7 @@ export default async function ProLideresMembroVisaoPage() {
 
   const quick = [
     { href: proLideresItemHrefWithBase(base, 'catalogo'), label: 'Meus links', desc: 'Ferramentas compartilhadas pelo líder' },
-    { href: proLideresItemHrefWithBase(base, 'y-scripts'), label: 'Y-Scripts', desc: 'Copiar e colar no WhatsApp' },
+    { href: proLideresItemHrefWithBase(base, 'boards'), label: 'Boards', desc: 'Copiar e colar no WhatsApp' },
     ...(dailyVisible
       ? [{ href: proLideresItemHrefWithBase(base, 'tarefas'), label: 'Tarefas diárias', desc: 'Checklist do dia' }]
       : []),

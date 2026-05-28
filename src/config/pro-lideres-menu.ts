@@ -27,9 +27,9 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
       { key: 'visao', label: 'Visão geral', path: '', icon: '📊' },
       { key: 'catalogo', label: 'Meus links', path: 'catalogo', icon: '🛠️' },
       {
-        key: 'y-scripts',
+        key: 'boards',
         label: 'Ylada Boards',
-        path: 'y-scripts',
+        path: 'boards',
         icon: '📲',
       },
       { key: 'tarefas', label: 'Tarefas diárias', path: 'tarefas', icon: '✅' },

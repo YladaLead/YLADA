@@ -1,10 +1,5 @@
-import YladaBoardsContent from '@/components/ylada-boards/YladaBoardsContent'
+import { redirect } from 'next/navigation'
 
-export const metadata = {
-  title: 'Ylada Boards | Pro Líderes',
-  description: 'Mensagens prontas para copiar e colar no WhatsApp',
-}
-
-export default function ProLideresYScriptsPage() {
-  return <YladaBoardsContent area="pro-lideres" />
+export default function ProLideresYScriptsRedirect() {
+  redirect('/pro-lideres/painel/boards')
 }
