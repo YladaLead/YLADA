@@ -11,6 +11,7 @@ DECLARE
   v_email TEXT := 'demo@projoias.com';
   v_senha TEXT := '123456';
   v_user_id UUID;
+  v_profiles_exists BOOLEAN;
 BEGIN
   -- 1. Criar usuário no Supabase Auth (se não existir)
   IF NOT EXISTS (SELECT 1 FROM auth.users WHERE lower(trim(email)) = v_email) THEN
@@ -55,13 +56,25 @@ BEGIN
     RAISE NOTICE 'Auth já existe: % (id: %)', v_email, v_user_id;
   END IF;
 
-  -- 2. Criar perfil YLADA (profiles) se não existir
-  INSERT INTO profiles (id, email, full_name, updated_at)
-  VALUES (v_user_id, v_email, 'Demo Pro Joias', NOW())
-  ON CONFLICT (id) DO UPDATE SET
-    email = EXCLUDED.email,
-    full_name = EXCLUDED.full_name,
-    updated_at = NOW();
+  -- 2. Criar perfil YLADA (profiles) se existir no projeto
+  SELECT EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'profiles'
+  ) INTO v_profiles_exists;
+
+  IF v_profiles_exists THEN
+    INSERT INTO public.profiles (id, email, full_name, updated_at)
+    VALUES (v_user_id, v_email, 'Demo Pro Joias', NOW())
+    ON CONFLICT (id) DO UPDATE SET
+      email = EXCLUDED.email,
+      full_name = EXCLUDED.full_name,
+      updated_at = NOW();
+    RAISE NOTICE 'Perfil atualizado em public.profiles para %', v_email;
+  ELSE
+    RAISE NOTICE 'Tabela public.profiles não existe; pulando etapa de perfil.';
+  END IF;
 
   -- 3. Criar tenant Pro Joias se não existir
   IF NOT EXISTS (

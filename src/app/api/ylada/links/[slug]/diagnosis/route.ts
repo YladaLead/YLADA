@@ -92,7 +92,7 @@ function hashAnswersForCache(
 
 function parseDiagnosisVertical(meta: Record<string, unknown> | undefined): DiagnosisVertical | undefined {
   const v = typeof meta?.diagnosis_vertical === 'string' ? meta.diagnosis_vertical.trim().toLowerCase() : ''
-  if (v === 'capilar' || v === 'corporal' || v === 'pro_lideres') return v
+  if (v === 'capilar' || v === 'corporal' || v === 'pro_lideres' || v === 'joias') return v as DiagnosisVertical
   return undefined
 }
 

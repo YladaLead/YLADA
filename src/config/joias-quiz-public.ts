@@ -9,8 +9,8 @@ import {
   personalizeMatrixPublicQuizForNicho,
 } from '@/config/matrix-public-quiz-base'
 import { snippetJoiasLinhaParaQuiz } from '@/config/joias-linha-produto'
-import { YLADA_QUIZ_POST_RESULT_COPY } from '@/config/ylada-quiz-result-post-copy'
 import { JOIAS_DEMO_CLIENTE_NICHOS } from '@/lib/joias-demo-cliente-data'
+import type { PublicFlowQuizQuestion } from '@/config/ylada-public-flow-types'
 
 export const JOIAS_QUIZ_CADASTRO_HREF = '/pt/cadastro?area=joias'
 export const JOIAS_QUIZ_VER_PRATICA_HREF = '/pt/joias/quiz/ver-pratica'
@@ -35,13 +35,92 @@ function mergeQuizContextSnippet(linhaProduto: string | null | undefined, foco: 
   return focoPart
 }
 
+/**
+ * Sobrescreve as perguntas genéricas com vocabulário correto para joias/bijuterias.
+ * "agendamentos" → "vendas", "atendimento" → "conversa de venda".
+ */
+function adaptQuestionsForJoias(
+  questions: PublicFlowQuizQuestion[]
+): PublicFlowQuizQuestion[] {
+  return questions.map((q) => {
+    if (q.id === 'filtro') {
+      return {
+        ...q,
+        title: 'Hoje isso está limitando suas vendas?',
+      }
+    }
+    if (q.id === 'foco_tempo') {
+      return {
+        ...q,
+        title: 'Hoje você sente que seu tempo está mais focado em:',
+        options: [
+          { value: 'clientes', label: 'Atender quem já compra de você' },
+          { value: 'mensagens', label: 'Explicar e responder mensagens' },
+          { value: 'converter', label: 'Tentar converter quem ainda não decidiu comprar' },
+        ],
+      }
+    }
+    if (q.id === 'mudaria') {
+      return {
+        ...q,
+        title: 'Se você pudesse ajustar uma coisa hoje, seria:',
+        options: [
+          { value: 'prontos', label: 'Ter mais pessoas já prontas pra comprar' },
+          { value: 'menos_explicar', label: 'Explicar menos sobre os produtos no começo' },
+          { value: 'conversa', label: 'Aproveitar melhor cada conversa de venda' },
+        ],
+      }
+    }
+    if (q.id === 'antes_contato') {
+      return {
+        ...q,
+        title: 'Antes de falar com você, quanto a cliente costuma saber o que quer comprar?',
+        options: [
+          { value: 'pouco', label: 'Muito pouco, quase sempre do zero' },
+          { value: 'as_vezes', label: 'Depende: às vezes sim, às vezes não' },
+          { value: 'claro', label: 'Já chega bem direcionada na maioria das vezes' },
+        ],
+      }
+    }
+    if (q.id === 'conversa_inicio') {
+      return {
+        ...q,
+        title: 'Nas suas vendas, como você sente que as conversas costumam começar?',
+        options: [
+          { value: 'interesse', label: 'A cliente já chega interessada em algo específico' },
+          { value: 'explica', label: 'Preciso explicar bastante sobre os produtos antes' },
+          { value: 'preco', label: 'Muitas começam com "quanto custa?"' },
+        ],
+      }
+    }
+    if (q.id === 'apos_primeira') {
+      return {
+        ...q,
+        title: 'E depois do primeiro contato, normalmente…',
+        options: [
+          { value: 'agenda', label: 'A cliente compra ou retorna rápido pra fechar' },
+          { value: 'duvida', label: 'Fica em dúvida ou pede pra pensar' },
+          { value: 'some', label: 'Some ou para de responder' },
+        ],
+      }
+    }
+    return q
+  })
+}
+
 export function getJoiasQuizQuestionsForNicho(foco: string, linhaProduto?: string | null) {
   const label = getJoiasQuizLabelForNicho(foco)
   const merged = mergeQuizContextSnippet(linhaProduto ?? null, foco)
   const ctxMap: Record<string, string> = { [foco]: merged }
-  return personalizeMatrixPublicQuizForNicho(label, ctxMap, foco)
+  const base = personalizeMatrixPublicQuizForNicho(label, ctxMap, foco)
+  return adaptQuestionsForJoias(base)
 }
 
-export const JOIAS_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
+export const JOIAS_QUIZ_QUESTIONS = adaptQuestionsForJoias(MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE)
 
-export const JOIAS_QUIZ_RESULT_COPY = { ...YLADA_QUIZ_POST_RESULT_COPY } as const
+/** Copy pós-quiz específico para joias — vocabulário de vendas, não de agendamentos. */
+export const JOIAS_QUIZ_RESULT_COPY = {
+  question: 'Você gostaria de ter mais vendas com clientes que já chegam qualificadas?',
+  ctaSim: 'Sim',
+  ctaSimCerteza: 'Sim, quero isso',
+} as const

@@ -14,9 +14,11 @@ import {
   RISK_LEVEL_VARIANTS_CAPILAR,
   RISK_LEVEL_VARIANTS_CORPORAL,
   RISK_LEVEL_VARIANTS_PRO_LIDERES,
+  RISK_LEVEL_VARIANTS_JOIAS,
   RISK_VARIANTS_EXTRA_CAPILAR,
   RISK_VARIANTS_EXTRA_CORPORAL,
   RISK_VARIANTS_EXTRA_PRO_LIDERES,
+  RISK_VARIANTS_EXTRA_JOIAS,
 } from './diagnosis-vertical-variants'
 
 /** Variação por nível para RISK_DIAGNOSIS (5 blocos: nome, leitura, consequência, direção, CTA). */
@@ -926,6 +928,7 @@ export function getRiskLevelVariants(
   if (level && diagnosisVertical === 'capilar') return RISK_LEVEL_VARIANTS_CAPILAR[level]
   if (level && diagnosisVertical === 'corporal') return RISK_LEVEL_VARIANTS_CORPORAL[level]
   if (level && diagnosisVertical === 'pro_lideres') return RISK_LEVEL_VARIANTS_PRO_LIDERES[level]
+  if (level && diagnosisVertical === 'joias') return RISK_LEVEL_VARIANTS_JOIAS[level]
   if (level && isAestheticsContext(themeRaw ?? '')) return RISK_LEVEL_VARIANTS_AESTHETICS[level]
   if (level && RISK_LEVEL_VARIANTS[level]) return RISK_LEVEL_VARIANTS[level]
   return RISK_LEVEL_VARIANTS.medio
@@ -940,6 +943,7 @@ export function getRiskVariantsExtra(
   if (level && diagnosisVertical === 'capilar') return RISK_VARIANTS_EXTRA_CAPILAR[level]
   if (level && diagnosisVertical === 'corporal') return RISK_VARIANTS_EXTRA_CORPORAL[level]
   if (level && diagnosisVertical === 'pro_lideres') return RISK_VARIANTS_EXTRA_PRO_LIDERES[level]
+  if (level && diagnosisVertical === 'joias') return RISK_VARIANTS_EXTRA_JOIAS[level]
   if (level && isAestheticsContext(themeRaw ?? '')) return RISK_VARIANTS_EXTRA_AESTHETICS[level]
   if (level && RISK_VARIANTS_EXTRA[level]) return RISK_VARIANTS_EXTRA[level]
   return RISK_VARIANTS_EXTRA.medio

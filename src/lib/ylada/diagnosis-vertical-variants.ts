@@ -574,3 +574,101 @@ export const RISK_MAIN_BLOCKER_PRO_LIDERES: Record<RiskLevel, string> = {
   medio: 'Esforço sem prioridade com quem te orienta tende a virar cansaço',
   alto: 'Decidir com apoio de quem te enviou este link é o que destrava agora',
 }
+
+// ---------------------------------------------------------------------------
+// PRO JOIAS — copy de diagnóstico do ponto de vista do COMPRADOR
+// (pessoa que preencheu o quiz de estilo para descobrir sua bijuteria ideal)
+// ---------------------------------------------------------------------------
+
+export const RISK_LEVEL_VARIANTS_JOIAS: Record<RiskLevel, RiskLevelCopy> = {
+  baixo: {
+    // Perfil "Estilo bem definido" — sabe o que quer, ready to buy
+    explanation:
+      'Pelas suas respostas, você tem um estilo bastante definido. Você sabe o que funciona no seu corpo, nas suas ocasiões e no seu dia a dia — e isso torna muito mais fácil encontrar peças que realmente vão ser usadas.',
+    consequence:
+      'Quem tem estilo definido raramente erra na compra — o que às vezes falta é ter a pessoa certa mostrando as peças certas, sem precisar garimpar em catálogos genéricos.',
+    possibility:
+      'Com esse recorte em mãos, você pode pedir sugestões diretas, já com o contexto das suas preferências — e provavelmente vai se surpreender com o que tem a ver com você.',
+    cta_imperative: 'Quero ver as peças que combinam comigo',
+  },
+  medio: {
+    // Perfil "Estilo em desenvolvimento" — tem direção mas está explorando
+    explanation:
+      'Pelas suas respostas, você tem um senso de estilo que está se firmando. Às vezes você vai no clássico, às vezes arrisca — e isso é um sinal de que você está afinando o que realmente combina com você.',
+    consequence:
+      'Essa fase de transição é ótima para explorar: você já sabe o que não quer, tem uma direção, e está aberta a descobrir o que encaixa de verdade no seu estilo atual.',
+    possibility:
+      'Uma sugestão guiada com base nas suas respostas costuma resolver muito mais rápido do que navegar por catálogo sozinha — você chega com contexto, a conversa vai direto ao que faz sentido.',
+    cta_imperative: 'Quero uma sugestão de peça para mim',
+  },
+  alto: {
+    // Perfil "Descobrindo o estilo" — ainda explorando, alta abertura
+    explanation:
+      'Pelas suas respostas, você está num momento de descoberta — aberta a testar, experimentar e encontrar o que combina com você de verdade. Isso é bom: não tem preconceito, tem curiosidade.',
+    consequence:
+      'Momentos de descoberta costumam gerar as melhores compras, porque você vai além do óbvio. O que pode ajudar é ter alguém que filtre as opções com base no que você respondeu aqui.',
+    possibility:
+      'Com esse resultado em mãos, você já tem um ponto de partida concreto para pedir indicações — sem precisar saber o nome técnico de cada peça ou metal.',
+    cta_imperative: 'Quero descobrir o que combina comigo',
+  },
+}
+
+export const RISK_VARIANTS_EXTRA_JOIAS: Record<RiskLevel, RiskExtraCopy> = {
+  baixo: {
+    causa_provavel:
+      'Você tem preferências claras e consistentes — o que faz sentido, porque estilo definido vem de autoconhecimento, não de tentativa e erro.',
+    preocupacoes:
+      'O único risco é errar por falta de opção: quando você não tem acesso fácil às peças que combinam com o seu perfil, acaba comprando o que aparece — e não o que encaixa.',
+    providencias:
+      'Use esse resultado para pedir sugestões personalizadas diretamente — você já vai com contexto, a pessoa que te atende já sabe por onde começar.',
+    specific_actions: [
+      'Compartilhe esse resultado no WhatsApp com quem te enviou o link — ela já vai saber quais peças mostrar.',
+      'Peça duas ou três opções com foto real, no metal certo para sua pele e no tamanho que você descreveu aqui.',
+      'Se quiser presente ou ocasião especial, mencione isso na primeira mensagem — facilita demais a indicação.',
+    ],
+    dica_rapida:
+      'Quem sabe o que quer compra mais fácil e com mais satisfação. Você já tem esse filtro — use-o a seu favor na próxima conversa.',
+    frase_identificacao:
+      'Se esse resultado fez sentido pra você, a próxima peça que você comprar provavelmente vai ser uma das favoritas.',
+  },
+  medio: {
+    causa_provavel:
+      'Seu estilo está passando por um momento de transição natural — e não é indecisão, é refinamento. Você está eliminando o que não faz sentido e ficando com o que realmente é você.',
+    preocupacoes:
+      'Nessa fase, é fácil comprar "quase certo" — peças que são boas, mas não são as que você vai usar de verdade. A diferença está em ter uma orientação no momento da escolha.',
+    providencias:
+      'Esse recorte já simplifica a conversa com quem vai te atender: você não precisa saber o nome de cada estilo — o resultado já faz esse trabalho por você.',
+    specific_actions: [
+      'Envie esse resultado para quem te passou o link — ela pode sugerir algo dentro do seu momento de estilo.',
+      'Peça opções versáteis: peças que funcionam tanto no clássico quanto quando você quer arriscar um pouco.',
+      'Se tiver dúvida entre dois estilos, mencione os dois — isso ajuda muito a indicação ficar certeira.',
+    ],
+    dica_rapida:
+      'Nessa fase de refinamento, uma peça versátil costuma ser a melhor aposta: funciona no clássico e aceita um toque a mais quando o mood pede.',
+    frase_identificacao:
+      'Se você se reconheceu nesse resultado, uma conversa rápida com quem te enviou o link provavelmente vai te surpreender com as opções.',
+  },
+  alto: {
+    causa_provavel:
+      'Você está no começo de uma descoberta de estilo — e isso é um momento especial. Sem rótulos prontos, você tem mais abertura para encontrar o que é realmente você.',
+    preocupacoes:
+      'O desafio dessa fase é o excesso de opções: sem um fio condutor claro, fica difícil saber por onde começar. É aí que um olhar de fora ajuda muito.',
+    providencias:
+      'Com esse resultado, você já tem um ponto de partida concreto — metal, escala de peça, e ocasião — para pedir sugestões que fazem sentido sem precisar saber o nome técnico de nada.',
+    specific_actions: [
+      'Mande esse resultado para quem compartilhou o link e peça: "Quais peças combinam com esse perfil?"',
+      'Se não souber descrever o que quer, compartilhe a foto de um look ou referência que você admira — isso fala mais do que qualquer nome de estilo.',
+      'Comece por uma peça coringa: brinco ou colar que funciona com várias roupas e várias ocasiões.',
+    ],
+    dica_rapida:
+      'Quem está descobrindo o estilo quase sempre se surpreende com o que combina. Peça duas opções bem diferentes — você vai saber na hora qual é a certa.',
+    frase_identificacao:
+      'Se você curtiu as perguntas desse quiz, é porque algo nelas fez sentido pra você. A próxima descoberta está a uma mensagem de distância.',
+  },
+}
+
+export const RISK_MAIN_BLOCKER_JOIAS: Record<RiskLevel, string> = {
+  baixo: 'Estilo bem definido — você sabe o que quer, falta encontrar as peças certas',
+  medio: 'Estilo em transição — você tem direção e está afinando o que realmente combina',
+  alto: 'Descobrindo o estilo — aberta a experimentar e encontrar o que é você de verdade',
+}

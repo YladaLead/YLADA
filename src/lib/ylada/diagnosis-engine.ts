@@ -19,6 +19,7 @@ import {
   RISK_MAIN_BLOCKER_CAPILAR,
   RISK_MAIN_BLOCKER_CORPORAL,
   RISK_MAIN_BLOCKER_PRO_LIDERES,
+  RISK_MAIN_BLOCKER_JOIAS,
 } from './diagnosis-vertical-variants'
 import { DiagnosisValidationError } from './diagnosis-types'
 import {
@@ -76,6 +77,86 @@ function calcRiskLevel(answers: Record<string, unknown>): { level: RiskLevel; ev
       level: genericLevel,
       evidence: ['Suas respostas indicam um padrão que merece atenção.'],
     }
+  }
+
+  // Quiz de joias COMPRADOR (buyer-facing, /l/[slug])
+  // Detecta pela presença de q1 e ausência de chaves do quiz de vendedor.
+  // Clareza de estilo: baixo = definido | medio = em transição | alto = descobrindo
+  const q1Buyer = getStr(answers, 'q1')
+  const conversaInicio = getStr(answers, 'conversa_inicio')
+  const aposPrimeira = getStr(answers, 'apos_primeira')
+  const antesContato = getStr(answers, 'antes_contato')
+  const filtro = getStr(answers, 'filtro')
+  const focoTempo = getStr(answers, 'foco_tempo')
+  const isSellerQuiz = !!(conversaInicio || aposPrimeira || antesContato || filtro)
+
+  if (q1Buyer && !isSellerQuiz) {
+    // Analisa clareza de estilo pelos padrões nas respostas do quiz de comprador
+    const buyerAnswers = [
+      q1Buyer,
+      getStr(answers, 'q2'),
+      getStr(answers, 'q3'),
+      getStr(answers, 'q4'),
+      getStr(answers, 'q5'),
+    ].map((a) => a.toLowerCase())
+
+    // Padrões que indicam exploração / incerteza (→ alto: "Descobrindo o estilo")
+    const exploratoryPatterns = [
+      'depende', 'às vezes', 'as vezes', 'ainda', 'muda', 'conforme',
+      'quero descobrir', 'um pouco de cada', 'testando', 'em busca',
+      'não penso', 'oscila', 'variado',
+    ]
+    // Padrões que indicam clareza / estilo definido (→ baixo: "Estilo bem definido")
+    const definedPatterns = [
+      'sempre', 'quase sempre', 'evito', 'amo', 'clássica', 'clássico',
+      'fico melhor', 'cuido', 'quase nunca', 'fica no', 'bem eu',
+    ]
+
+    let exploratoryCount = 0
+    let definedCount = 0
+    for (const ans of buyerAnswers) {
+      if (exploratoryPatterns.some((p) => ans.includes(p))) exploratoryCount++
+      else if (definedPatterns.some((p) => ans.includes(p))) definedCount++
+    }
+
+    let level: RiskLevel = 'medio'
+    if (exploratoryCount >= 2) level = 'alto'
+    else if (definedCount >= 2) level = 'baixo'
+
+    const evidence: string[] = ['Suas preferências foram analisadas para identificar seu perfil de estilo.']
+    if (level === 'baixo') evidence.push('Suas respostas mostram preferências bem definidas — você sabe o que gosta.')
+    else if (level === 'alto') evidence.push('Suas respostas indicam um momento de descoberta e experimentação de estilo.')
+    else evidence.push('Suas respostas mostram um estilo em refinamento — você tem direção e está afinando.')
+    return { level, evidence }
+  }
+
+  if (isSellerQuiz) {
+    // Quiz de joias VENDEDOR — mapeamento do quiz socrático de vendas
+    let score = 0
+    // conversa_inicio: preco é o sinal mais crítico (cliente não veio qualificada)
+    if (conversaInicio === 'preco') score += 3
+    else if (conversaInicio === 'explica') score += 1
+    // apos_primeira: some é o sinal mais crítico (conversa não gerou decisão)
+    if (aposPrimeira === 'some') score += 3
+    else if (aposPrimeira === 'duvida') score += 2
+    // antes_contato: pouco = cliente chega sem nenhuma referência de estilo
+    if (antesContato === 'pouco') score += 2
+    else if (antesContato === 'as_vezes') score += 1
+    // filtro: muita = conversas claramente travadas pela falta de qualificação
+    if (filtro === 'muita') score += 2
+    else if (filtro === 'alguma') score += 1
+    // foco_tempo: converter = gastando energia em quem não decidiu
+    if (focoTempo === 'converter') score += 1
+
+    let level: RiskLevel = 'baixo'
+    if (score >= 7) level = 'alto'
+    else if (score >= 3) level = 'medio'
+
+    const evidence: string[] = ['Suas respostas sobre como as conversas começam e terminam foram analisadas.']
+    if (conversaInicio === 'preco') evidence.push('A maioria das conversas começa pelo preço — sinal de que a cliente chega sem referência de estilo.')
+    if (aposPrimeira === 'some' || aposPrimeira === 'duvida') evidence.push('Clientes sumindo ou ficando em dúvida depois do primeiro contato é o principal travador de conversão.')
+    if (evidence.length < 3) evidence.push('O padrão identificado aponta oportunidade de qualificação antes do catálogo.')
+    return { level, evidence: evidence.slice(0, 3) }
   }
 
   const symptoms = getArr(answers, 'symptoms', 'sintomas')
@@ -433,6 +514,7 @@ function getMainBlocker(
       if (dv === 'capilar') return RISK_MAIN_BLOCKER_CAPILAR[level]
       if (dv === 'corporal') return RISK_MAIN_BLOCKER_CORPORAL[level]
       if (dv === 'pro_lideres') return RISK_MAIN_BLOCKER_PRO_LIDERES[level]
+      if (dv === 'joias') return RISK_MAIN_BLOCKER_JOIAS[level]
       if (isAestheticsContext(theme)) return RISK_MAIN_BLOCKER_AESTHETICS[level]
       const t = RISK_MAIN_BLOCKER[level]
       const useTheme = theme.length > 2 && !/^seu\s+objetivo$/i.test(theme)
