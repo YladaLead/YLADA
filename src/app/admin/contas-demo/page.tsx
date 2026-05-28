@@ -68,6 +68,7 @@ function ContasDemoContent() {
                   ['Pró Líderes', 'demo@prolider.com', '/pro-lideres/entrar', '123456'],
                   ['Perfumaria', 'demo.perfumaria@ylada.app', '/pt/perfumaria/login'],
                   ['Joias e bijuterias', 'demo.joias@ylada.app', '/pt/joias/login'],
+                  ['Pro Joias (rede de distribuidoras)', 'demo@projoias.com', '/pro-joias/entrar', '123456'],
                 ] satisfies [string, string, string, string?][]).map((row) => {
                   const [area, email, login, pwd] = row
                   const senha = pwd ?? 'Demo@2025!'
@@ -108,6 +109,11 @@ function ContasDemoContent() {
             {' '}(inclui convite fixo de membro:{' '}
             <code className="bg-gray-100 px-1 rounded">/pro-lideres/convite/ylada_pl_demo_membro_noel_v1</code> — conta{' '}
             <code className="bg-gray-100 px-1 rounded">pldemo.noel.membro@ylada.app</code>).
+          </span>
+          <span className="block">
+            Pro Joias (demo@projoias.com): aplicar{' '}
+            <code className="bg-gray-100 px-1 rounded">scripts/pro-joias-demo-login.sql</code>
+            {' '}no Supabase SQL Editor. Depois acesse o admin Pro Joias e aplique o seed de scripts.
           </span>
         </p>
       </main>
