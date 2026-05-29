@@ -45,7 +45,7 @@ export function ProLideresPreviewConviteClient() {
   })
 
   return (
-    <div className="min-h-[100dvh] bg-gray-50 px-4 py-10">
+    <div className="min-h-[100svh] bg-gray-50 px-4 py-10">
       <div className="mx-auto w-full max-w-md space-y-6">
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm">
           <p className="font-semibold text-amber-950">Pré-visualização (teste)</p>

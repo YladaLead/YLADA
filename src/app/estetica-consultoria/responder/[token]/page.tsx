@@ -38,7 +38,7 @@ export default async function EsteticaConsultoriaResponderPage({
     typeof confirmRaw === 'string' ? confirmRaw : Array.isArray(confirmRaw) ? confirmRaw[0] : null
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-b from-slate-50 via-blue-50/40 to-white px-4 pt-[max(2.5rem,env(safe-area-inset-top,0px))] pb-[max(2.5rem,env(safe-area-inset-bottom,0px))]">
+    <div className="min-h-[100svh] bg-gradient-to-b from-slate-50 via-blue-50/40 to-white px-4 pt-[max(2.5rem,env(safe-area-inset-top,0px))] pb-[max(2.5rem,env(safe-area-inset-bottom,0px))]">
       <div className="mx-auto w-full max-w-lg sm:max-w-xl">
         <div className="mb-8 flex flex-col items-center gap-2 text-center">
           <Link

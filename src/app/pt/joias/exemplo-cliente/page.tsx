@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function JoiasExemploClientePage() {
   return (
-    <div className="min-h-[100dvh] bg-white">
+    <div className="min-h-[100svh] bg-white">
       <JoiasDemoClienteContent />
     </div>
   )

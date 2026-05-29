@@ -258,7 +258,7 @@ export default function YladaSidebar({
   return (
     <>
       {/* Desktop: altura da viewport; não estica com o main; sticky mantém visível ao rolar */}
-      <div className="hidden lg:flex lg:flex-shrink-0 lg:self-start lg:h-screen lg:max-h-[100dvh] lg:sticky lg:top-0 lg:z-20">
+      <div className="hidden lg:flex lg:flex-shrink-0 lg:self-start lg:h-screen lg:max-h-[100svh] lg:sticky lg:top-0 lg:z-20">
         {content}
       </div>
       {/* Mobile overlay */}

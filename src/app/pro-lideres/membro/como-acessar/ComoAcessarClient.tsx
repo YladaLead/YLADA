@@ -54,7 +54,7 @@ export function ProLideresMembroComoAcessarClient({
   }, [fullLoginUrl])
 
   return (
-    <div className="flex min-h-[100dvh] min-h-screen items-center justify-center bg-gray-50 px-4 py-10">
+    <div className="flex min-h-[100svh] min-h-screen items-center justify-center bg-gray-50 px-4 py-10">
       <div className="w-full max-w-lg rounded-2xl border border-gray-100 bg-white p-8 shadow-xl">
         <div className="mb-6 flex justify-center">
           <Image

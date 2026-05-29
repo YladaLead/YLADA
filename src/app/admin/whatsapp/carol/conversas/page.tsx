@@ -566,7 +566,7 @@ function ConversationDetail({
   }
 
   return (
-    <div className="flex h-[calc(100dvh-52px)] flex-col overflow-hidden bg-[#e5ddd5]">
+    <div className="flex h-[calc(100svh-52px)] flex-col overflow-hidden bg-[#e5ddd5]">
       {/* Header — fixo; scroll só na área de mensagens */}
       <div className="shrink-0 border-b border-gray-200 bg-[#075e54] px-4 py-3">
         <div className="flex items-center gap-3">

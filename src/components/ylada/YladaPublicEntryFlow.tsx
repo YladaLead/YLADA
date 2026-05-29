@@ -225,7 +225,7 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
   const showAuthLoading = loading && isPublicFlowPath && !authTimeout
   if (showAuthLoading) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center p-6 bg-white">
+      <div className="min-h-[100svh] flex items-center justify-center p-6 bg-white">
         <p className="text-gray-500 text-sm">Carregando…</p>
       </div>
     )
@@ -233,7 +233,7 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
 
   if (user && isPublicFlowPath) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center p-6 bg-white">
+      <div className="min-h-[100svh] flex items-center justify-center p-6 bg-white">
         <p className="text-gray-500 text-sm">Redirecionando…</p>
       </div>
     )

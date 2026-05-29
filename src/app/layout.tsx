@@ -93,7 +93,7 @@ export default function RootLayout({
         <meta httpEquiv="Expires" content="0" />
       </head>
       <body
-        className={`${inter.className} flex min-h-[100dvh] flex-col bg-white`}
+        className={`${inter.className} flex min-h-[100svh] flex-col bg-white`}
         style={{
           margin: 0,
           padding:

@@ -16,7 +16,7 @@ export default async function ProJoiasEntrarPage({
       : '/pro-joias/painel'
 
   return (
-    <div className="flex min-h-[100dvh] min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
+    <div className="flex min-h-[100svh] min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
           <p className="text-3xl mb-1">💍</p>

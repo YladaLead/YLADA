@@ -69,7 +69,7 @@ export default async function ProLideresConsultoriaResponderPage({
   const safe = typeof token === 'string' ? token : ''
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-b from-slate-50 to-white px-4 py-10">
+    <div className="min-h-[100svh] bg-gradient-to-b from-slate-50 to-white px-4 py-10">
       <div className="mx-auto max-w-lg">
         <div className="mb-8 flex flex-col items-center gap-2 text-center">
           <Link href="/pro-lideres" className="inline-flex flex-col items-center gap-2">

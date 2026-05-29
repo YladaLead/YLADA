@@ -12,7 +12,7 @@ export default function NutraExemploClientePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[100dvh] flex items-center justify-center bg-white">
+        <div className="min-h-[100svh] flex items-center justify-center bg-white">
           <p className="text-gray-500 text-sm">Carregando…</p>
         </div>
       }

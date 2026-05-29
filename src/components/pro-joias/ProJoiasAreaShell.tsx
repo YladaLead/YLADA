@@ -45,7 +45,7 @@ export default function ProJoiasAreaShell({
 
   return (
     <ProLideresPainelProvider value={painelContext}>
-      <div className="flex min-h-screen min-h-[100dvh] bg-gray-50">
+      <div className="flex min-h-screen min-h-[100svh] bg-gray-50">
         <ProJoiasSidebar isMobileOpen={mobileMenuOpen} onMobileClose={() => setMobileMenuOpen(false)} />
         <div className="flex min-w-0 flex-1 flex-col">
           {previewWithoutLogin && (

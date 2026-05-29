@@ -1026,7 +1026,7 @@ export default function AdminUsuarios() {
   }
 
   return (
-    <div className="h-dvh max-h-dvh flex flex-col overflow-hidden bg-gray-50">
+    <div className="h-svh max-h-svh flex flex-col overflow-hidden bg-gray-50">
       {/* Header */}
       <header className="flex-shrink-0 bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-2">

@@ -169,7 +169,7 @@ export default function ProEsteticaCapilarSidebar({
 
   return (
     <>
-      <div className="hidden lg:flex lg:h-screen lg:max-h-[100dvh] lg:flex-shrink-0 lg:self-start lg:sticky lg:top-0 lg:z-20">
+      <div className="hidden lg:flex lg:h-screen lg:max-h-[100svh] lg:flex-shrink-0 lg:self-start lg:sticky lg:top-0 lg:z-20">
         {content}
       </div>
       {isMobileOpen && (

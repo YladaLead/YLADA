@@ -89,7 +89,7 @@ export default function FitnessDemoClienteContent() {
 
   if (!cfg && !nichoParam) {
     return (
-      <div className="min-h-[100dvh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
+      <div className="min-h-[100svh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
         <header className="sticky top-0 z-10 shrink-0 border-b border-gray-100 bg-white/95 pt-[env(safe-area-inset-top,0px)]">
           <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
             <Link
@@ -132,7 +132,7 @@ export default function FitnessDemoClienteContent() {
 
   if (nichoParam && !cfg) {
     return (
-      <div className="min-h-[100dvh] flex flex-col items-center justify-center p-6 bg-white">
+      <div className="min-h-[100svh] flex flex-col items-center justify-center p-6 bg-white">
         <p className="text-gray-600 text-sm mb-4">Nicho não encontrado.</p>
         <Link href="/pt/fitness/exemplo-cliente" className="text-blue-600 font-medium text-sm">
           Ver opções de nicho
@@ -145,7 +145,7 @@ export default function FitnessDemoClienteContent() {
 
   if (finalizado) {
     return (
-      <div className="min-h-[100dvh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
+      <div className="min-h-[100svh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
         <header className="sticky top-0 z-10 shrink-0 border-b border-gray-100 bg-white/95 pt-[env(safe-area-inset-top,0px)]">
           <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
             <Link
@@ -224,7 +224,7 @@ export default function FitnessDemoClienteContent() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
+    <div className="min-h-[100svh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
       <header className="sticky top-0 z-10 shrink-0 border-b border-gray-100 bg-white/95 pt-[env(safe-area-inset-top,0px)]">
         <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
           <Link

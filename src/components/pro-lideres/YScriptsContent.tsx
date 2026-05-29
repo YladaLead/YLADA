@@ -226,7 +226,7 @@ function ScriptPreviewSheet({
       <div
         role="dialog"
         aria-modal="true"
-        className="relative z-10 flex max-h-[min(88dvh,32rem)] w-full flex-col rounded-t-2xl bg-white shadow-2xl sm:max-w-lg sm:rounded-2xl"
+        className="relative z-10 flex max-h-[min(88svh,32rem)] w-full flex-col rounded-t-2xl bg-white shadow-2xl sm:max-w-lg sm:rounded-2xl"
       >
         <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
           <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase ${category.bg} ${category.text}`}>
@@ -391,7 +391,7 @@ export function YScriptsContent() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[50dvh] items-center justify-center">
+      <div className="flex min-h-[50svh] items-center justify-center">
         <p className="text-sm text-gray-500">Carregando pastas…</p>
       </div>
     )
@@ -570,7 +570,7 @@ export function YScriptsContent() {
   )
 
   return (
-    <div className="relative -mx-4 flex min-h-[calc(100dvh-7.5rem)] flex-col sm:-mx-5 lg:mx-0 lg:min-h-[calc(100dvh-9rem)]">
+    <div className="relative -mx-4 flex min-h-[calc(100svh-7.5rem)] flex-col sm:-mx-5 lg:mx-0 lg:min-h-[calc(100svh-9rem)]">
       {/* Mobile: tela cheia de pastas */}
       <div
         className={`flex min-h-0 flex-1 flex-col bg-white lg:hidden ${

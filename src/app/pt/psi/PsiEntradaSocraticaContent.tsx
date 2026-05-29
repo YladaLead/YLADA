@@ -344,7 +344,7 @@ export default function PsiEntradaSocraticaContent() {
   const showAuthLoading = loading && isPsiRoot && !authTimeout
   if (showAuthLoading) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center p-6 bg-white">
+      <div className="min-h-[100svh] flex items-center justify-center p-6 bg-white">
         <p className="text-gray-500 text-sm">Carregando…</p>
       </div>
     )
@@ -352,7 +352,7 @@ export default function PsiEntradaSocraticaContent() {
 
   if (user && isPsiRoot) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center p-6 bg-white">
+      <div className="min-h-[100svh] flex items-center justify-center p-6 bg-white">
         <p className="text-gray-500 text-sm">Redirecionando…</p>
       </div>
     )
@@ -375,7 +375,7 @@ export default function PsiEntradaSocraticaContent() {
   }
 
   return (
-    <div className="h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden bg-white text-gray-900 estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]">
+    <div className="h-[100svh] max-h-[100svh] flex flex-col overflow-hidden bg-white text-gray-900 estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]">
       <header className="sticky top-0 z-20 shrink-0 border-b border-gray-100/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)]">
         <div className="h-0.5 w-full bg-gray-100 overflow-hidden" aria-hidden>
           <div
@@ -463,7 +463,7 @@ export default function PsiEntradaSocraticaContent() {
             aria-label="Fechar"
             onClick={() => setDemoOpen(false)}
           />
-          <div className="relative flex min-h-full max-h-[100dvh] items-center justify-center p-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none sm:py-8 supports-[height:100svh]:max-h-[100svh]">
+          <div className="relative flex min-h-full max-h-[100svh] items-center justify-center p-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none sm:py-8 supports-[height:100svh]:max-h-[100svh]">
             <div className="pointer-events-auto w-full max-w-md max-h-[min(90dvh,640px)] overflow-y-auto overscroll-y-contain bg-white rounded-2xl p-6 estetica-safe-modal-bottom shadow-2xl border border-gray-200 animate-fade-in-up estetica-touch supports-[height:100svh]:max-h-[min(90svh,640px)]">
               {demoPhase === 'local' ? (
                 <>

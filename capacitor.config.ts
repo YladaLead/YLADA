@@ -10,8 +10,9 @@ const config: CapacitorConfig = {
     allowNavigation: ['*.ylada.com']
   },
   ios: {
-    contentInset: 'automatic'
-    // appendUserAgent removido: causava tela branca no WebView em alguns dispositivos
+    // contentInset 'automatic' removido: causava layout shift (e flickering no iOS 26)
+    // quando o teclado aparece, ajustando o scroll inset continuamente.
+    // appendUserAgent removido anteriormente: causava tela branca no WebView.
   }
 };
 

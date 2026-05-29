@@ -26,8 +26,10 @@
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  min-height: 100dvh;
-  min-height: 100vh;
+  /* svh = Small Viewport Height: estável, não muda quando teclado aparece.
+     dvh causava flickering no iOS 26 WKWebView (teclado animado = layout shift contínuo) */
+  min-height: 100svh;
+  min-height: 100vh; /* fallback para browsers sem suporte a svh */
 }
 
 body {
@@ -37,8 +39,10 @@ body {
   margin: 0;
   padding: 0;
   line-height: 1.5;
-  min-height: 100dvh;
-  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100vh; /* fallback para browsers sem suporte a svh */
+  /* Previne bounce scroll que causa flicker em iOS WebView */
+  overscroll-behavior-y: none;
 }
 
 input,

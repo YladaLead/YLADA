@@ -103,7 +103,7 @@ export default function ProEsteticaCorporalOnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-[100dvh] min-h-screen items-center justify-center bg-gray-50 px-4 py-10">
+    <div className="flex min-h-[100svh] min-h-screen items-center justify-center bg-gray-50 px-4 py-10">
       <div className="w-full max-w-2xl rounded-2xl border border-gray-100 bg-white p-6 shadow-xl sm:p-8">
         <div className="mb-5 flex justify-center">
           <Image

@@ -16,7 +16,7 @@ export default async function ProLideresEntrarPage({
   const initialEmail = typeof sp.email === 'string' && sp.email.includes('@') ? sp.email.trim() : undefined
 
   return (
-    <div className="flex min-h-[100dvh] min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
+    <div className="flex min-h-[100svh] min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
       <div className="w-full max-w-md">
         <LoginForm
           perfil="ylada"
