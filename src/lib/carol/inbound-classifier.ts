@@ -30,12 +30,32 @@ function looksAmbiguousForRules(text: string): boolean {
   )
 }
 
+function historyHasIgnoredAutoReply(
+  history: { role: string; content: string }[]
+): boolean {
+  return history.some(
+    (m) => m.role === 'user' && m.content.startsWith('[auto-resposta ignorada]')
+  )
+}
+
+function carolAlreadySpoke(
+  history: { role: string; content: string }[]
+): boolean {
+  return history.some((m) => m.role === 'assistant')
+}
+
 /** Evita custo de IA em conversas inbound simples sem outbound */
 export function shouldClassifyWithAi(
   text: string,
   history: { role: string; content: string }[]
 ): boolean {
-  return historyHasOutbound(history) || looksAmbiguousForRules(text)
+  // Outbound ou mensagem longa/link — sempre classificar
+  if (historyHasOutbound(history) || looksAmbiguousForRules(text)) return true
+  // Carol já falou (template ou resposta) — próxima msg pode ser bot curto do WhatsApp Business
+  if (carolAlreadySpoke(history)) return true
+  // Clínica mandou auto-resposta antes — segunda/terceira tentativa do mesmo bot
+  if (historyHasIgnoredAutoReply(history)) return true
+  return false
 }
 
 function buildClassifierContext(

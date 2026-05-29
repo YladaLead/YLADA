@@ -22,7 +22,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 // ── Detecta auto-resposta de bots/assistentes de outras empresas ────────────
 function isAutoResponse(text: string): boolean {
-  const t = text.toLowerCase()
+  const t = text.toLowerCase().replace(/\s+/g, ' ').trim()
   const patterns = [
     // Variações de boas-vindas automáticas
     'seja bem-vindo',
@@ -35,8 +35,31 @@ function isAutoResponse(text: string): boolean {
     'bem vinda!',
     'olá, seja',
     // Respostas automáticas de WhatsApp Business (bots de clínicas)
+    'agradecemos sua mensagem',
+    'agradecemos o contato',
+    'agradecemos por entrar em contato',
+    'obrigada pelo contato',
+    'obrigado pelo contato',
+    'obrigada por entrar em contato',
+    'obrigado por entrar em contato',
+    'obrigada por nos contatar',
+    'obrigado por nos contatar',
+    'não estamos disponíveis no momento',
+    'nao estamos disponiveis no momento',
+    'no momento não estamos disponíveis',
+    'no momento nao estamos disponiveis',
+    'responderemos assim que possível',
+    'responderemos assim que for possível',
+    'responderemos assim que possivel',
+    'assim que possível responderemos',
+    'sua mensagem é muito importante',
+    'sua mensagem e muito importante',
+    'mensagem recebida com sucesso',
     'recebemos sua mensagem',
+    'recebemos o seu contato',
     'nossa equipe retornará',
+    'nossa equipe responderá',
+    'nossa equipe responde em breve',
     'nossa equipe entrará em contato',
     'assim que possível, nossa equipe',
     'assim que possível nossa equipe',
@@ -53,9 +76,28 @@ function isAutoResponse(text: string): boolean {
     'em breve retornarei',
     'retornarei sua mensagem',
     'retornaremos em breve',
+    'retornaremos o contato',
+    'entraremos em contato em breve',
     'voltarei assim que possível',
+    'fora do expediente',
+    'expediente encerrado',
+    'estamos fechados',
+    'horário comercial',
+    'horario comercial',
     // Assistentes de atendimento
     'assistente de atendimento',
+    'assistente virtual',
+    'secretária virtual',
+    'secretaria virtual',
+    'atendimento virtual',
+    'atendimento online',
+    'chatbot',
+    'menu de opções',
+    'menu de opcoes',
+    'escolha uma opção',
+    'escolha uma opcao',
+    'digite 1 para',
+    'digite 2 para',
     'mensagem automática',
     'resposta automática',
     'este é um atendimento automático',
@@ -127,9 +169,19 @@ function isAutoResponse(text: string): boolean {
   ) && (
     t.includes('aguardo') ||
     t.includes('disposição') ||
+    t.includes('disposicao') ||
     t.includes('adorar')
   )
-  return patterns.some(p => t.includes(p)) || isBotStructure || foreignWelcomeBot
+
+  const regexAuto =
+    /(agradecemos\s+(sua\s+mensagem|o\s+contato|por\s+entrar\s+em\s+contato)|obrigad[oa]\s+por\s+(entrar\s+em\s+contato|seu\s+contato|sua\s+mensagem|nos\s+contatar)|n[aã]o\s+estamos\s+dispon[ií]veis|responderemos\s+assim\s+que\s+(poss[ií]vel|for\s+poss[ií]vel)|em\s+breve\s+(retornaremos|entraremos\s+em\s+contato|te\s+responderemos)|nossa\s+equipe\s+(retornar[aá]|responder[aá]|entrar[aá]\s+em\s+contato))/i
+
+  return (
+    patterns.some((p) => t.includes(p)) ||
+    regexAuto.test(t) ||
+    isBotStructure ||
+    foreignWelcomeBot
+  )
 }
 
 // ── Delay humanizado antes de enviar resposta (~15 segundos) ────────────────
