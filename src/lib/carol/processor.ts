@@ -353,7 +353,9 @@ Use este modelo (adapte o tom, nunca copie palavra por palavra):
 "É uma conversa de 30 minutos só você e o Andre.
 Ele olha seu caso e te diz o que está causando essa oscilação na agenda, o que está travando o crescimento sem você estar vendo, e o que mudar primeiro pra sentir resultado rápido.
 Sem apresentação, sem pitch. Você sai com clareza — e não tem custo.
-Quando você teria uma manhã livre essa semana?"
+Quer que eu agende um horário pra você?"
+
+ATENÇÃO — NUNCA use "Quando você teria uma manhã livre?" antes de receber um "sim" explícito ao convite de agendamento. Perguntar sobre disponibilidade antes do consentimento é tratar a pessoa como já convertida, o que quebra a confiança.
 
 QUANDO ELA JÁ DISSE O TURNO (manhã, tarde ou noite):
 NÃO repita "Qual dia e horário fica melhor". Confirme e avance:
@@ -368,8 +370,12 @@ Jamais repita a mesma pergunta duas vezes. Antes de gerar sua resposta, releia o
 Se a pessoa respondeu "Não", "Sim", "Não sei", "Talvez" ou qualquer resposta curta/monossilábica — ACEITE como resposta completa e avance para o próximo tópico. NUNCA reenvie a mesma pergunta esperando uma resposta mais longa.
 Se você se pegar repetindo a mesma pergunta, mude completamente de ângulo ou avance no fluxo.
 Se o histórico já tiver mais de 3 trocas, NUNCA use a abertura da ETAPA 1 ("Oi! Me conta — qual é seu maior desafio..."). A conversa já começou — continue de onde parou.
+Se o histórico contém [SISTEMA: Diagnóstico agendado], o agendamento já foi feito — NÃO pergunte sobre horário ou coleta de dados novamente.
 
-ETAPA 8: COLETA PARA AGENDAMENTO
+ETAPA 8: COLETA PARA AGENDAMENTO — SOMENTE APÓS CONSENTIMENTO EXPLÍCITO
+⛔ REGRA: Só inicie esta etapa se a pessoa respondeu de forma AFIRMATIVA ao "Quer que eu agende?" da ETAPA 7.
+Respostas afirmativas válidas: "Sim", "Quero", "Pode ser", "Claro", "Topo", "Vamos", "Com certeza", "Ok", "Pode", qualquer resposta que indique concordância.
+Se a pessoa apenas fez uma pergunta sobre o diagnóstico, expressou dúvida ou deu uma resposta ambígua → volte à ETAPA 7: "Quer que eu agende um horário pra você?"
 1. Nome completo
 2. Email (se a pessoa quiser informar)
 3. Melhor horário — primeiro turno (manhã/tarde/noite), depois dia da semana. Faça em duas perguntas separadas se necessário, nunca repita a mesma.
@@ -429,6 +435,38 @@ A mensagem com prefixo [FLOW_DIAGNÓSTICO_COMPLETO] traz respostas do questioná
 4. Só depois proponha os 30 minutos com o Andre.
 5. Não leia as respostas como lista; incorpore na conversa.
 `
+
+// ── Detecta se a resposta gerada é muito similar à última resposta da Carol ──
+// Evita loops onde o LLM repete a mesma pergunta apesar das instruções no prompt
+function isTooSimilarToLastAssistantReply(
+  candidate: string,
+  history: Array<{ role: string; content: string }>
+): boolean {
+  const lastAssistant = [...history]
+    .reverse()
+    .find((m) => m.role === 'assistant' && !m.content.startsWith('['))
+  if (!lastAssistant) return false
+
+  const normalize = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/https?:\/\/\S+/g, '')            // remove links
+      .replace(/[^a-záéíóúãõçêôàü\s]/g, ' ')     // remove pontuação
+      .replace(/\s+/g, ' ')
+      .trim()
+
+  const a = normalize(candidate)
+  const b = normalize(lastAssistant.content)
+  if (a.length < 20 || b.length < 20) return false
+
+  const wordsA = a.split(' ').filter((w) => w.length > 3)
+  const setB = new Set(b.split(' ').filter((w) => w.length > 3))
+  if (wordsA.length === 0) return false
+
+  const overlap = wordsA.filter((w) => setB.has(w)).length
+  const ratio = overlap / wordsA.length
+  return ratio > 0.70 // > 70% sobreposição = muito repetitivo
+}
 
 // Cache em memória de messageIds já processados (evita duplicatas do Meta)
 const processedMessageIds = new Set<string>()
@@ -523,8 +561,8 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       return
     }
 
-    // Busca histórico (já inclui a mensagem que acabou de salvar)
-    const history = await getConversationHistory(conversation.id)
+    // Busca histórico (já inclui a mensagem que acabou de salvar) — limite maior para evitar perda de contexto
+    const history = await getConversationHistory(conversation.id, 40)
 
     // ── Lead novo: log apenas — sem notificação (muito cedo, pessoa ainda não qualificou) ──
     const userMsgCount = history.filter((m) => m.role === 'user').length
@@ -548,6 +586,13 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       : ''
 
     const channel = resolveCarolChannel({ history, isFlowResponse })
+
+    // ── Nota de status: impede re-perguntar horário quando já agendado ─────────
+    const convStatus = (conversation as any).status as string | undefined
+    const statusContextNote =
+      convStatus === 'diagnostico_agendado'
+        ? `\n\n⛔ DIAGNÓSTICO JÁ AGENDADO — REGRA CRÍTICA: Esta conversa já tem um diagnóstico confirmado com o Andre. PROIBIDO perguntar sobre horário, disponibilidade, nome completo, email ou qualquer dado de agendamento. Se a pessoa mandar mensagem, responda de forma amistosa, confirme que o Andre vai entrar em contato e direcione para o link direto: https://wa.me/5519981868000?text=Oi+Andre%21+A+Carol+me+ajudou+a+agendar+um+diagn%C3%B3stico+com+voc%C3%AA.+Pode+me+confirmar+o+hor%C3%A1rio%3F\n`
+        : ''
 
     const isAdLead =
       inboundKind === 'lead_anuncio' ||
@@ -598,7 +643,8 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       (isFlowResponse
         ? FLOW_CONTEXT_PROMPT
         : adLeadNote + outboundContextNote + classifierNote + duplicateCtaNote) +
-      notaAndreContext
+      notaAndreContext +
+      statusContextNote
 
     console.log(`[Carol] Canal=${channel} modelo=${replyModel} de ${from}`)
 
@@ -612,7 +658,27 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       max_tokens: 900,
     })
 
-    const reply = response.choices[0].message.content!
+    let reply = response.choices[0].message.content!
+
+    // ── Anti-repetição programática: se reply muito similar ao anterior, pede variação ──
+    if (isTooSimilarToLastAssistantReply(reply, history)) {
+      console.warn(`[Carol] ⚠️ Reply muito similar ao anterior para ${from} — regenerando com instrução de variação`)
+      const variationResponse = await openai.chat.completions.create({
+        model: replyModel,
+        messages: [
+          {
+            role: 'system',
+            content:
+              systemContent +
+              '\n\n⚠️ ATENÇÃO: Sua última resposta foi detectada como muito repetitiva. Você DEVE responder de forma COMPLETAMENTE DIFERENTE da mensagem anterior — ângulo diferente, progressão no fluxo, nunca repita a mesma pergunta.',
+          },
+          ...history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+        ],
+        temperature: 0.9,
+        max_tokens: 900,
+      })
+      reply = variationResponse.choices[0].message.content!
+    }
 
     // Verifica tags internas
     const isAgendamento = reply.includes('[AGENDAMENTO_CONFIRMADO]')
@@ -659,6 +725,16 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
     // ── NOTIFICAÇÃO 3: Diagnóstico agendado ──────────────────────────────────
     if (isAgendamento) {
       await updateConversationStatus(conversation.id, 'diagnostico_agendado')
+
+      // Salva marcador visível ao LLM no histórico — impede que future mensagens
+      // causem re-pergunta de horário mesmo que o status não seja injetado corretamente
+      const leadNomeTemp = parseField('nome')
+      const leadHorarioTemp = parseField('horario')
+      await saveMessage(
+        conversation.id,
+        'assistant',
+        `[SISTEMA: Diagnóstico agendado com sucesso. Nome: ${leadNomeTemp} | Horário preferido: ${leadHorarioTemp}. A partir daqui NÃO pedir horário, nome ou dados de agendamento novamente.]`
+      )
 
       const leadNome        = parseField('nome')
       const leadEmail       = parseField('email')
