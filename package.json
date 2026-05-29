@@ -35,6 +35,7 @@
     "agente:auditor": "npx tsx scripts/agents/ylada-auditor-noel.ts",
     "agente:otimizador": "npx tsx scripts/agents/ylada-otimizador-noel.ts",
     "agente:interno": "npx tsx scripts/agents/ylada-interno.ts",
+    "carol:reprocess-sem-resposta": "tsx scripts/carol-reprocess-sem-resposta.ts",
     "og:pexels": "tsx scripts/fetch-og-ylada-pexels.ts",
     "og:pexels-corporal": "tsx scripts/fetch-pro-estetica-corporal-og-pexels.ts",
     "og:pexels-capilar": "tsx scripts/fetch-pro-estetica-capilar-og-pexels.ts",

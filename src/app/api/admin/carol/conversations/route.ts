@@ -69,6 +69,7 @@ export async function GET(request: NextRequest) {
       has_outbound: ins?.has_outbound ?? false,
       follow_up_sent: ins?.follow_up_sent ?? false,
       awaiting_reply: ins?.awaiting_reply ?? false,
+      pending_carol_reply: ins?.pending_carol_reply ?? false,
     }
   })
 
@@ -76,6 +77,7 @@ export async function GET(request: NextRequest) {
     total: result.length,
     responded: result.filter((c) => c.has_user_reply).length,
     awaiting_reply: result.filter((c) => c.awaiting_reply).length,
+    pending_carol_reply: result.filter((c) => c.pending_carol_reply).length,
     follow_up_sent: result.filter((c) => c.follow_up_sent).length,
   }
 
