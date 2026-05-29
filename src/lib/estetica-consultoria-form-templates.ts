@@ -619,8 +619,41 @@ export function buildPreDiagnosticoCorporalV1Fields(): ConsultoriaFormField[] {
       required: true,
     },
     {
+      id: 'pre_agenda',
+      label: '2. Sua agenda hoje está:',
+      type: 'select',
+      required: true,
+      options: ['Cheia e organizada', 'Oscila bastante', 'Com muitos horários livres'],
+    },
+    {
+      id: 'pre_canais',
+      label: '3. De onde vêm seus clientes hoje? (marque)',
+      type: 'checkbox_group',
+      required: true,
+      options: ['Instagram', 'Indicação', 'Tráfego pago', 'WhatsApp', 'Outros'],
+    },
+    {
+      id: 'pre_retorno',
+      label: '4. Quando uma cliente termina o protocolo, o que normalmente acontece?',
+      type: 'select',
+      required: true,
+      options: [
+        'Ela agenda a manutenção sozinha',
+        'Preciso ligar para trazer de volta',
+        'Ela some e só aparece quando piora',
+        'Não tenho um processo de retorno',
+      ],
+    },
+    {
+      id: 'pre_cobrar_preco',
+      label: '5. Você sente dificuldade em cobrar seu preço?',
+      type: 'select',
+      required: true,
+      options: ['Sim', 'Às vezes', 'Não'],
+    },
+    {
       id: 'pre_dor_principal',
-      label: '2. Hoje, o que mais incomoda no seu negócio?',
+      label: '6. Hoje, o que mais incomoda no seu negócio?',
       type: 'select',
       required: true,
       options: [
@@ -631,34 +664,6 @@ export function buildPreDiagnosticoCorporalV1Fields(): ConsultoriaFormField[] {
         'Preciso baixar preço pra fechar',
         'Falta de posicionamento ou autoridade',
       ],
-    },
-    {
-      id: 'pre_agenda',
-      label: '3. Sua agenda hoje está:',
-      type: 'select',
-      required: true,
-      options: ['Cheia e organizada', 'Oscila bastante', 'Com muitos horários livres'],
-    },
-    {
-      id: 'pre_canais',
-      label: '4. De onde vêm seus clientes hoje? (marque)',
-      type: 'checkbox_group',
-      required: true,
-      options: ['Instagram', 'Indicação', 'Tráfego pago', 'WhatsApp', 'Outros'],
-    },
-    {
-      id: 'pre_retorno',
-      label: '5. Seus clientes costumam voltar?',
-      type: 'select',
-      required: true,
-      options: ['Sim, com frequência', 'Às vezes', 'Raramente'],
-    },
-    {
-      id: 'pre_cobrar_preco',
-      label: '6. Você sente dificuldade em cobrar seu preço?',
-      type: 'select',
-      required: true,
-      options: ['Sim', 'Às vezes', 'Não'],
     },
     {
       id: 'pre_queixa_corporal',
@@ -688,15 +693,35 @@ export function buildPreDiagnosticoCorporalV1Fields(): ConsultoriaFormField[] {
       visibleWhenAnswerIncludes: { fieldId: 'pre_queixa_corporal', substring: 'Outros' },
     },
     {
+      id: 'pre_tentativas',
+      label: '8. Você já tentou resolver isso de alguma forma? (marque)',
+      type: 'checkbox_group',
+      required: false,
+      options: [
+        'Investi em tráfego pago',
+        'Contratei social media ou criador de conteúdo',
+        'Fiz cursos de marketing ou vendas',
+        'Já tive consultoria antes',
+        'Tentei por conta própria',
+        'Ainda não tentei nada específico',
+      ],
+    },
+    {
+      id: 'pre_visao_futuro',
+      label: '9. Se esses problemas estivessem resolvidos em 90 dias, como estaria o seu negócio?',
+      type: 'textarea',
+      required: true,
+    },
+    {
       id: 'pre_aberta_estrategia',
-      label: '8. Você está aberta a ajustar sua estratégia para melhorar resultados nos próximos 30 dias?',
+      label: '10. Você está aberta a ajustar sua estratégia para melhorar resultados nos próximos 30 dias?',
       type: 'select',
       required: true,
       options: ['Sim', 'Depende do que for', 'Só quero entender melhor por enquanto'],
     },
     {
       id: 'pre_interesse_plano',
-      label: '9. Se fizer sentido, teria interesse em aplicar um plano para melhorar seus resultados?',
+      label: '11. Se fizer sentido, teria interesse em aplicar um plano para melhorar seus resultados?',
       type: 'select',
       required: true,
       options: ['Sim', 'Talvez', 'Não no momento'],
@@ -706,7 +731,7 @@ export function buildPreDiagnosticoCorporalV1Fields(): ConsultoriaFormField[] {
 
 export function getPreDiagnosticoCorporalV1Description(): string {
   return [
-    'Antes da consultoria: 2 a 3 minutos. Leve e estratégico — para chegarmos na conversa com foco.',
+    'Antes da consultoria: 3 a 4 minutos. Leve e estratégico — para chegarmos na conversa com foco.',
     'Depois você recebe o diagnóstico completo (outro link), com mais detalhe operacional.',
   ].join('\n')
 }
@@ -996,8 +1021,41 @@ export function buildPreDiagnosticoCapilarV1Fields(): ConsultoriaFormField[] {
       required: true,
     },
     {
+      id: 'pre_agenda',
+      label: '2. Sua agenda hoje está:',
+      type: 'select',
+      required: true,
+      options: ['Cheia e organizada', 'Oscila bastante', 'Com muitos horários livres'],
+    },
+    {
+      id: 'pre_canais',
+      label: '3. De onde vêm suas clientes hoje? (marque)',
+      type: 'checkbox_group',
+      required: true,
+      options: ['Instagram', 'Indicação', 'Tráfego pago', 'WhatsApp', 'Outros'],
+    },
+    {
+      id: 'pre_retorno',
+      label: '4. Quando uma cliente termina o tratamento, o que normalmente acontece?',
+      type: 'select',
+      required: true,
+      options: [
+        'Ela mantém o tratamento por conta própria',
+        'Preciso lembrar para ela voltar',
+        'Ela some e só aparece quando o problema piora',
+        'Não tenho um processo de retorno',
+      ],
+    },
+    {
+      id: 'pre_cobrar_preco',
+      label: '5. Você sente dificuldade em cobrar seu preço?',
+      type: 'select',
+      required: true,
+      options: ['Sim', 'Às vezes', 'Não'],
+    },
+    {
       id: 'pre_dor_principal',
-      label: '2. Hoje, o que mais incomoda no seu negócio?',
+      label: '6. Hoje, o que mais incomoda no seu negócio?',
       type: 'select',
       required: true,
       options: [
@@ -1008,34 +1066,6 @@ export function buildPreDiagnosticoCapilarV1Fields(): ConsultoriaFormField[] {
         'Preciso baixar preço pra fechar',
         'Falta de posicionamento ou autoridade',
       ],
-    },
-    {
-      id: 'pre_agenda',
-      label: '3. Sua agenda hoje está:',
-      type: 'select',
-      required: true,
-      options: ['Cheia e organizada', 'Oscila bastante', 'Com muitos horários livres'],
-    },
-    {
-      id: 'pre_canais',
-      label: '4. De onde vêm suas clientes hoje? (marque)',
-      type: 'checkbox_group',
-      required: true,
-      options: ['Instagram', 'Indicação', 'Tráfego pago', 'WhatsApp', 'Outros'],
-    },
-    {
-      id: 'pre_retorno',
-      label: '5. As clientes costumam voltar para manter o tratamento?',
-      type: 'select',
-      required: true,
-      options: ['Sim, com frequência', 'Às vezes', 'Raramente'],
-    },
-    {
-      id: 'pre_cobrar_preco',
-      label: '6. Você sente dificuldade em cobrar seu preço?',
-      type: 'select',
-      required: true,
-      options: ['Sim', 'Às vezes', 'Não'],
     },
     {
       id: 'pre_queixa_capilar',
@@ -1064,15 +1094,35 @@ export function buildPreDiagnosticoCapilarV1Fields(): ConsultoriaFormField[] {
       visibleWhenAnswerIncludes: { fieldId: 'pre_queixa_capilar', substring: 'Outros' },
     },
     {
+      id: 'pre_tentativas',
+      label: '8. Você já tentou resolver isso de alguma forma? (marque)',
+      type: 'checkbox_group',
+      required: false,
+      options: [
+        'Investi em tráfego pago',
+        'Contratei social media ou criador de conteúdo',
+        'Fiz cursos de marketing ou vendas',
+        'Já tive consultoria antes',
+        'Tentei por conta própria',
+        'Ainda não tentei nada específico',
+      ],
+    },
+    {
+      id: 'pre_visao_futuro',
+      label: '9. Se esses problemas estivessem resolvidos em 90 dias, como estaria o seu negócio?',
+      type: 'textarea',
+      required: true,
+    },
+    {
       id: 'pre_aberta_estrategia',
-      label: '8. Você está aberta a ajustar sua estratégia para melhorar resultados nos próximos 30 dias?',
+      label: '10. Você está aberta a ajustar sua estratégia para melhorar resultados nos próximos 30 dias?',
       type: 'select',
       required: true,
       options: ['Sim', 'Depende do que for', 'Só quero entender melhor por enquanto'],
     },
     {
       id: 'pre_interesse_plano',
-      label: '9. Se fizer sentido, teria interesse em aplicar um plano para melhorar seus resultados?',
+      label: '11. Se fizer sentido, teria interesse em aplicar um plano para melhorar seus resultados?',
       type: 'select',
       required: true,
       options: ['Sim', 'Talvez', 'Não no momento'],
@@ -1082,7 +1132,7 @@ export function buildPreDiagnosticoCapilarV1Fields(): ConsultoriaFormField[] {
 
 export function getPreDiagnosticoCapilarV1Description(): string {
   return [
-    'Antes da consultoria: 2 a 3 minutos. Para reflexão rápida e conversa mais produtiva.',
+    'Antes da consultoria: 3 a 4 minutos. Para reflexão rápida e conversa mais produtiva.',
     'O diagnóstico completo capilar (outro link) aprofunda protocolos, valores e processos.',
   ].join('\n')
 }
