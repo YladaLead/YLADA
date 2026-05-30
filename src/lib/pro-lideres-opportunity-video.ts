@@ -50,6 +50,11 @@ export function parseOpportunityVideoUrl(
     return { ok: false, error: `O URL é demasiado longo (máximo ${MAX_URL_LEN} caracteres).` }
   }
 
+  // MP4 hospedado no próprio site (sem branding YouTube)
+  if (s.startsWith('/') && s.toLowerCase().endsWith('.mp4')) {
+    return { ok: true, value: { kind: 'mp4', src: s } }
+  }
+
   let u: URL
   try {
     u = new URL(s)

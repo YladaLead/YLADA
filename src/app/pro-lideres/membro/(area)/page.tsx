@@ -62,8 +62,10 @@ export default async function ProLideresMembroVisaoPage() {
   )
 
   const quick = [
-    { href: proLideresItemHrefWithBase(base, 'catalogo'), label: 'Meus links', desc: 'Ferramentas compartilhadas pelo líder' },
+    { href: proLideresItemHrefWithBase(base, 'catalogo'), label: 'Meus links', desc: 'Bebida, negócio e Reset completo' },
     { href: proLideresItemHrefWithBase(base, 'boards'), label: 'Boards', desc: 'Copiar e colar no WhatsApp' },
+    { href: proLideresItemHrefWithBase(base, 'reset'), label: 'Reset Metabólico', desc: 'Vídeo da bebida + encomendar sacola' },
+    { href: proLideresItemHrefWithBase(base, 'hom'), label: 'Apresentação HOM', desc: 'Oportunidade de negócio' },
     ...(dailyVisible
       ? [{ href: proLideresItemHrefWithBase(base, 'tarefas'), label: 'Tarefas diárias', desc: 'Checklist do dia' }]
       : []),
