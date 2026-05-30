@@ -155,6 +155,14 @@ export default function ProLideresResetPublicClient({
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
   }
 
+  const encomendarReset = () =>
+    openWa(
+      PRO_LIDERES_RESET_WHATSAPP_PEDIDO.replace(
+        'Olá!',
+        memberName?.trim() ? `Olá, ${firstName}!` : 'Olá!'
+      )
+    )
+
   return (
     <div className="pl-reset-public">
       {/* Hero compacto — logo + tagline, vídeo logo abaixo */}
@@ -184,6 +192,16 @@ export default function ProLideresResetPublicClient({
             <div className="pl-reset-bebida__video-wrap">
               <ResetVideo parsedVideo={parsedVideo} memberLabel={memberLabel} />
             </div>
+            {isCompleta ? (
+              <button
+                type="button"
+                onClick={encomendarReset}
+                className="pl-reset-beneficios__cta pl-reset-bebida__cta-completa"
+              >
+                <WhatsappIcon />
+                Quero meu Reset agora
+              </button>
+            ) : null}
           </div>
         </div>
       </section>
@@ -210,14 +228,7 @@ export default function ProLideresResetPublicClient({
             <button
               id="reset-encomendar"
               type="button"
-              onClick={() =>
-                openWa(
-                  PRO_LIDERES_RESET_WHATSAPP_PEDIDO.replace(
-                    'Olá!',
-                    memberName?.trim() ? `Olá, ${firstName}!` : 'Olá!'
-                  )
-                )
-              }
+              onClick={encomendarReset}
               className="pl-reset-beneficios__cta"
             >
               <WhatsappIcon />

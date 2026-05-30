@@ -215,8 +215,10 @@
 
 .pl-reset-bebida__content {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .pl-reset-bebida__video-wrap {
@@ -228,6 +230,13 @@
   background: rgba(0, 0, 0, 0.06);
   aspect-ratio: 9 / 16;
   box-shadow: 0 8px 32px rgba(30, 70, 32, 0.12);
+}
+
+.pl-reset-bebida__cta-completa {
+  width: 100%;
+  max-width: 280px;
+  margin-top: 1rem;
+  margin-bottom: 0;
 }
 
 .pl-reset-bebida__video,
@@ -282,6 +291,10 @@
   }
 
   .pl-reset-bebida__video-wrap {
+    max-width: 320px;
+  }
+
+  .pl-reset-bebida__cta-completa {
     max-width: 320px;
   }
 }
