@@ -74,7 +74,6 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
         label: 'Noel para equipe',
         path: 'noel-membro',
         icon: '💬',
-        subtitle: 'Visão do membro',
         requireNoelMemberNav: true,
       },
       {
