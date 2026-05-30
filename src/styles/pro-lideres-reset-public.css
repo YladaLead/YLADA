@@ -571,6 +571,17 @@
   color: #9ca3af;
 }
 
+/* Reset completa — compartilhar no rodapé */
+.pl-reset-completa-footer {
+  padding: 1.25rem 1rem 2.5rem;
+  background: var(--gray-bg);
+}
+
+.pl-reset-completa-footer .pl-reset-beneficios__share {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
 /* HOM — página standalone (oportunidade de negócio) */
 .pl-reset-hom-page__main {
   padding: 0.25rem 1rem 2.5rem;

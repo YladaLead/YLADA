@@ -225,21 +225,23 @@ export default function ProLideresResetPublicClient({
             </button>
           ) : null}
 
-          <button
-            type="button"
-            onClick={openCompartilhar}
-            className="pl-reset-beneficios__share"
-          >
-            <ShareIcon />
-            <span>{PRO_LIDERES_RESET_FRASE_COMPARTILHAR}</span>
-          </button>
+          {!isCompleta ? (
+            <button
+              type="button"
+              onClick={openCompartilhar}
+              className="pl-reset-beneficios__share"
+            >
+              <ShareIcon />
+              <span>{PRO_LIDERES_RESET_FRASE_COMPARTILHAR}</span>
+            </button>
+          ) : null}
 
-          <p className="pl-reset-beneficios__footnote">
-            {headline !== 'Reset Metabólico' ? `${headline} · ` : null}
-            {isCompleta
-              ? 'Seus dados não são armazenados ao assistir aos vídeos.'
-              : `Ao clicar, você fala no WhatsApp de ${memberLabel}. Seus dados não são armazenados ao assistir ao vídeo.`}
-          </p>
+          {!isCompleta ? (
+            <p className="pl-reset-beneficios__footnote">
+              {headline !== 'Reset Metabólico' ? `${headline} · ` : null}
+              {`Ao clicar, você fala no WhatsApp de ${memberLabel}. Seus dados não são armazenados ao assistir ao vídeo.`}
+            </p>
+          ) : null}
         </div>
       </section>
 
@@ -276,6 +278,15 @@ export default function ProLideresResetPublicClient({
             </div>
           </div>
         </section>
+      ) : null}
+
+      {isCompleta ? (
+        <footer className="pl-reset-completa-footer" aria-label="Compartilhar página">
+          <button type="button" onClick={openCompartilhar} className="pl-reset-beneficios__share">
+            <ShareIcon />
+            <span>{PRO_LIDERES_RESET_FRASE_COMPARTILHAR}</span>
+          </button>
+        </footer>
       ) : null}
     </div>
   )
