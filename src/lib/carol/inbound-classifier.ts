@@ -1,5 +1,6 @@
 import OpenAI from 'openai'
 import { getClassifierModel } from './carol-reply-profile'
+import { isCarolInteractiveReply } from './parse-interactive'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -49,6 +50,7 @@ export function shouldClassifyWithAi(
   text: string,
   history: { role: string; content: string }[]
 ): boolean {
+  if (isCarolInteractiveReply(text)) return false
   // Outbound ou mensagem longa/link — sempre classificar
   if (historyHasOutbound(history) || looksAmbiguousForRules(text)) return true
   // Carol já falou (template ou resposta) — próxima msg pode ser bot curto do WhatsApp Business
@@ -79,7 +81,7 @@ A Carol pode ter enviado antes um template de pesquisa de mercado (outbound). Mu
 Classifique a ÚLTIMA mensagem do lead em exatamente uma categoria:
 
 - auto_resposta: mensagem automática de WhatsApp Business, bot de boas-vindas, fora de horário, "aguarde um momento", link de site + pedido de nome/horário sem contexto de agenda, mensagem de OUTRO negócio (nutrição, curso, spa genérico) que não responde à pesquisa de agenda.
-- humano: pessoa real respondendo (pergunta, interesse, "oi" curto, dúvida, fala de agenda/clínica/negócio próprio).
+- humano: pessoa real respondendo (pergunta, interesse, "oi" curto, dúvida, fala de agenda/clínica/negócio próprio). SEMPRE humano se a mensagem for escolha de botão da Carol: "[botão: Agenda oscila]", "[botão: Faço tudo sozinha]", "[botão: Lucro não cresce]" ou "[lista: ...]" — isso é clique da dona, nunca bot.
 - lead_anuncio: CTA típico de anúncio Meta ("tenho interesse", "quero mais informações", etc.).
 - possivel_nao_icp: parece humano mas claramente busca tratamento para si, emprego, vendedor, ou negócio que não é clínica/espaço de estética — ainda assim não é auto_resposta.
 
@@ -89,6 +91,11 @@ export async function classifyInboundMessage(
   text: string,
   history: { role: string; content: string }[]
 ): Promise<InboundKind> {
+  if (isCarolInteractiveReply(text)) {
+    console.log(`[Carol Classifier] humano (botão/lista) — ${text.slice(0, 60)}…`)
+    return 'humano'
+  }
+
   if (!process.env.OPENAI_API_KEY) {
     console.warn('[Carol Classifier] OPENAI_API_KEY ausente — tratando como humano')
     return 'humano'

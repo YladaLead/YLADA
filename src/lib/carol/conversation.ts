@@ -75,7 +75,7 @@ export async function getConversationHistory(
     .from('carol_messages')
     .select('role, content')
     .eq('conversation_id', conversationId)
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
     .limit(limit)
 
   if (error) {
@@ -83,7 +83,7 @@ export async function getConversationHistory(
     return []
   }
 
-  return (data || []) as { role: 'user' | 'assistant'; content: string }[]
+  return ((data || []) as { role: 'user' | 'assistant'; content: string }[]).reverse()
 }
 
 export async function updateConversationStatus(

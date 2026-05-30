@@ -11,6 +11,7 @@ import {
   shouldClassifyWithAi,
   type InboundKind,
 } from './inbound-classifier'
+import { isCarolInteractiveReply } from './parse-interactive'
 import {
   getOrCreateConversation,
   saveMessage,
@@ -397,6 +398,18 @@ export async function ingestInboundMessage(
   }
 
   const conversation = await getOrCreateConversation(from)
+
+  if (isCarolInteractiveReply(text)) {
+    await saveMessage(conversation.id, 'user', text)
+    console.log(`[Carol] 📥 Clique em botão/lista de ${from}: ${text}`)
+    return {
+      status: 'saved',
+      payload,
+      conversationId: conversation.id,
+      conversation,
+      inboundKind: 'humano',
+    }
+  }
 
   if (isAutoResponse(text)) {
     console.log(`[Carol] 🤖 Auto-resposta (regras) de ${from} — ignorando silenciosamente`)

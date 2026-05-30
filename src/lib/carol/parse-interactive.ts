@@ -1,3 +1,9 @@
+/** Resposta de botão/lista que a Carol enviou — sempre é a dona escolhendo, nunca bot da clínica */
+export function isCarolInteractiveReply(text: string): boolean {
+  const t = text.trim()
+  return t.startsWith('[botão:') || t.startsWith('[lista:')
+}
+
 /** Converte respostas de botão/lista do WhatsApp em texto para a Carol */
 export function parseInteractiveMessage(interactive: {
   type?: string
