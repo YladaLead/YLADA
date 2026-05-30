@@ -71,9 +71,53 @@ export function toMercadoPagoExternalAreaSlug(area: string): string {
 }
 
 /**
- * Monta external_reference no formato area_planType_userId.
- * Garante tamanho <= 256 caracteres (limite da API do MP).
+ * Slug curto do MP → coluna `subscriptions.area`.
  */
+export function normalizeMercadoPagoWebhookArea(area: string): string {
+  if (area === 'prolideres') return 'pro_lideres_team'
+  if (area === 'plnoelmem') return 'pro_lideres_noel_member'
+  if (area === 'pecapilar') return 'pro_estetica_capilar'
+  return area
+}
+
+export const MERCADO_PAGO_SUBSCRIPTION_AREAS = [
+  'wellness',
+  'nutri',
+  'coach',
+  'nutra',
+  'pro_lideres_team',
+  'pro_lideres_noel_member',
+  'pro_estetica_capilar',
+] as const
+
+/** Inferir área quando external_reference veio truncada ou slug desconhecido. */
+export function inferMercadoPagoAreaFromDescription(desc: string): string | null {
+  const d = desc.toUpperCase()
+  if (d.includes('PRO ESTÉTICA CAPILAR') || d.includes('PRO ESTETICA CAPILAR')) {
+    return 'pro_estetica_capilar'
+  }
+  if (d.includes('NOEL CAMPO') || d.includes('NOEL MEMBRO') || d.includes('NOEL MEMBRO PRO')) {
+    return 'pro_lideres_noel_member'
+  }
+  if (d.includes('PRO LÍDERES') || d.includes('PRO LIDERES')) return 'pro_lideres_team'
+  if (d.includes('WELLNESS')) return 'wellness'
+  if (d.includes('NUTRI')) return 'nutri'
+  if (d.includes('COACH')) return 'coach'
+  if (d.includes('NUTRA')) return 'nutra'
+  return null
+}
+
+export function extractMercadoPagoPreapprovalIdFromPayment(fullData: {
+  metadata?: Record<string, unknown> | null
+  point_of_interaction?: { transaction_data?: { subscription_id?: string } } | null
+}): string | null {
+  const fromMeta = fullData.metadata?.preapproval_id
+  if (typeof fromMeta === 'string' && fromMeta.trim()) return fromMeta.trim()
+  const fromPoi = fullData.point_of_interaction?.transaction_data?.subscription_id
+  if (typeof fromPoi === 'string' && fromPoi.trim()) return fromPoi.trim()
+  return null
+}
+
 export function buildExternalReference(
   area: string,
   planType: string,

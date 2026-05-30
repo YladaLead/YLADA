@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { verifyPayment } from '@/lib/mercado-pago'
+import {
+  extractMercadoPagoPreapprovalIdFromPayment,
+  inferMercadoPagoAreaFromDescription,
+  MERCADO_PAGO_SUBSCRIPTION_AREAS,
+  normalizeMercadoPagoWebhookArea,
+  verifyPayment,
+} from '@/lib/mercado-pago'
+import { PRO_LIDERES_INVITE_SLOTS_PER_PACK } from '@/lib/pro-lideres-invite-slots'
 import { createAccessToken } from '@/lib/email-tokens'
 import { sendWelcomeEmail } from '@/lib/email-templates'
 import { getCarolAutomationDisabled } from '@/lib/carol-admin-settings'
@@ -19,6 +26,54 @@ import {
 
 function mercadoPagoReversalStatus(status: string | undefined): boolean {
   return status === 'refunded' || status === 'charged_back'
+}
+
+async function fetchMercadoPagoPreapprovalFull(
+  preapprovalId: string,
+  isTest: boolean
+): Promise<Record<string, unknown> | null> {
+  const { PreApproval } = await import('mercadopago')
+  const { createMercadoPagoClient } = await import('@/lib/mercado-pago')
+
+  for (const tryTest of [isTest, !isTest]) {
+    try {
+      const client = createMercadoPagoClient(tryTest)
+      const preapproval = new PreApproval(client)
+      const got = await preapproval.get({ id: String(preapprovalId) })
+      if (got?.id) {
+        console.log('✅ Preapproval obtido na API MP:', {
+          id: got.id,
+          status: got.status,
+          hasMetadata: !!got.metadata,
+          hasExternalReference: !!got.external_reference,
+        })
+        return got as Record<string, unknown>
+      }
+    } catch (apiError: unknown) {
+      const msg = apiError instanceof Error ? apiError.message : String(apiError)
+      console.warn(`⚠️ Falha ao buscar preapproval (isTest=${tryTest}):`, msg)
+    }
+  }
+  return null
+}
+
+async function ensureProLideresTeamInviteQuotaOnActivation(ownerUserId: string) {
+  if (!supabaseAdmin) return
+  const { data: tenant } = await supabaseAdmin
+    .from('leader_tenants')
+    .select('id, team_invite_pending_quota')
+    .eq('owner_user_id', ownerUserId)
+    .maybeSingle()
+  if (!tenant?.id) return
+  const q = tenant.team_invite_pending_quota
+  if (typeof q === 'number' && q >= PRO_LIDERES_INVITE_SLOTS_PER_PACK) return
+  await supabaseAdmin
+    .from('leader_tenants')
+    .update({
+      team_invite_pending_quota: PRO_LIDERES_INVITE_SLOTS_PER_PACK,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', tenant.id as string)
 }
 
 /**
@@ -569,20 +624,16 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
       return
     }
     
-    let area = metadata.area || (fullData.external_reference?.split('_')[0]) || ''
-    if (area === PRO_ESTETICA_CAPILAR_MP_AREA_SLUG) area = PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA
+    let area = normalizeMercadoPagoWebhookArea(
+      metadata.area || (fullData.external_reference?.split('_')[0]) || ''
+    )
     let planType = metadata.plan_type || (fullData.external_reference?.split('_')[1]) || ''
-    // Fallback: inferir área e plano pela descrição (ex: "YLADA WELLNESS - Plano Anual") quando referência vem truncada/errada
     const desc = (fullData.description || fullData.additional_info?.items?.[0]?.title || '').toUpperCase()
-    if (!area || !['wellness', 'nutri', 'coach', 'nutra', PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA].includes(area)) {
-      if (desc.includes('PRO ESTÉTICA CAPILAR') || desc.includes('PRO ESTETICA CAPILAR')) {
-        area = PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA
-      } else if (desc.includes('WELLNESS')) area = 'wellness'
-      else if (desc.includes('NUTRI')) area = 'nutri'
-      else if (desc.includes('COACH')) area = 'coach'
-      else if (desc.includes('NUTRA')) area = 'nutra'
-      else area = area || 'wellness'
+    if (!area || !MERCADO_PAGO_SUBSCRIPTION_AREAS.includes(area as (typeof MERCADO_PAGO_SUBSCRIPTION_AREAS)[number])) {
+      const inferred = inferMercadoPagoAreaFromDescription(desc)
+      area = inferred || area || 'wellness'
     }
+    area = normalizeMercadoPagoWebhookArea(area)
     if (!planType || !['monthly', 'annual'].includes(planType)) {
       if (desc.includes('ANUAL') || desc.includes('PLANO ANUAL')) planType = 'annual'
       else if (desc.includes('MENSAL') || desc.includes('PLANO MENSAL')) planType = 'monthly'
@@ -599,6 +650,12 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
     if (area === 'nutri' && (!features || features.length === 0)) {
       features = ['ferramentas', 'cursos']
       console.log('🛡️ Features Nutri garantidas (fallback):', features)
+    }
+    if (area === 'pro_lideres_team' && (!features || features.length === 0)) {
+      features = ['equipe']
+    }
+    if (area === 'pro_lideres_noel_member' && (!features || features.length === 0)) {
+      features = ['noel_campo_pro_lideres']
     }
     console.log('🎯 Features determinadas:', { area, planType, productType, features })
 
@@ -840,17 +897,20 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
     }
 
     let subscription: any
+    const mpPreapprovalId = extractMercadoPagoPreapprovalIdFromPayment(fullData)
+    const subscriptionStripeId =
+      mpPreapprovalId && (area === 'pro_lideres_team' || area === 'pro_lideres_noel_member')
+        ? `mp_sub_${mpPreapprovalId}`
+        : `mp_${paymentId}`
     
     if (existingSubscription) {
       // 🚀 ATUALIZAR subscription existente (renovação)
-      const subscriptionId = `mp_${paymentId}` // ID único para este pagamento
-      
       const { data: updatedSubscription, error: updateError } = await supabaseAdmin
         .from('subscriptions')
         .update({
           // Pagamento anual/mensal após trial (ou upgrade): antes só estendia o fim do período e deixava plan_type=trial
           plan_type: planType,
-          stripe_subscription_id: subscriptionId,
+          stripe_subscription_id: subscriptionStripeId,
           current_period_start: new Date().toISOString(), // Novo período começa agora
           current_period_end: expiresAt.toISOString(), // Estender vencimento
           amount: Math.round(amount * 100),
@@ -879,8 +939,6 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
       })
     } else {
       // 🆕 CRIAR nova subscription (primeiro pagamento)
-      const subscriptionId = `mp_${paymentId}`
-      
       const { data: newSubscription, error: subError } = await supabaseAdmin
         .from('subscriptions')
         .insert({
@@ -889,7 +947,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
           plan_type: planType,
           features: features,
           stripe_account: null,
-          stripe_subscription_id: subscriptionId,
+          stripe_subscription_id: subscriptionStripeId,
           stripe_customer_id: fullData.payer?.id?.toString() || 'mp_customer',
           stripe_price_id: 'mp_price',
           amount: Math.round(amount * 100),
@@ -985,6 +1043,10 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
           pecErr instanceof Error ? pecErr.message : pecErr
         )
       }
+    }
+
+    if (area === 'pro_lideres_team' && subscription?.status === 'active') {
+      await ensureProLideresTeamInviteQuotaOnActivation(userId)
     }
 
     // 🆕 NOVO: Direcionar para suporte via WhatsApp (apenas para área nutri)
@@ -1083,7 +1145,12 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
     // 🚀 CORREÇÃO: Enviar email apenas se:
     // 1. É nova subscription (não renovação) OU
     // 2. É renovação mas ainda não foi enviado email de boas-vindas
-    const shouldSendEmail = (isNewSubscription || !alreadySent) && payerEmail
+    const shouldSendEmail =
+      (isNewSubscription || !alreadySent) &&
+      payerEmail &&
+      area !== 'pro_lideres_team' &&
+      area !== 'pro_lideres_noel_member' &&
+      !isProEsteticaCapilarSubscriptionArea(area)
     
     // Enviar e-mail de boas-vindas (apenas se ainda não foi enviado)
     console.log('📧 ========================================')
@@ -1268,29 +1335,58 @@ async function handleMerchantOrderEvent(data: any, isTest: boolean = false) {
 /**
  * Processa evento de assinatura recorrente (Preapproval)
  */
-async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
-  const subscriptionId = data.id
+async function handleSubscriptionEvent(
+  data: any,
+  isTest: boolean = false,
+  preFetchedFullData?: Record<string, unknown>
+) {
+  if (!data?.id) {
+    console.error('❌ handleSubscriptionEvent: data inválida ou sem ID')
+    return
+  }
+
+  let fullData: Record<string, unknown> | null = preFetchedFullData ?? null
+  if (!fullData?.status || !fullData?.auto_recurring) {
+    fullData = await fetchMercadoPagoPreapprovalFull(String(data.id), isTest)
+  }
+  if (!fullData?.id) {
+    console.error('❌ Preapproval não encontrado na API MP:', data.id)
+    return
+  }
+
+  const subscriptionId = fullData.id
   console.log('🔄 Processando assinatura recorrente (Preapproval):', subscriptionId, 'isTest:', isTest)
 
   try {
-    const metadata = data.metadata || {}
-    let userId = metadata.user_id
-    let area = metadata.area || (data.external_reference?.split('_')[0]) || ''
-    if (area === 'prolideres') area = 'pro_lideres_team'
-    if (area === 'plnoelmem') area = 'pro_lideres_noel_member'
-    if (area === PRO_ESTETICA_CAPILAR_MP_AREA_SLUG) area = PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA
-    let planType = metadata.plan_type || (data.external_reference?.split('_')[1]) || ''
+    const metadata = (fullData.metadata as Record<string, unknown> | undefined) || {}
+    let userId = metadata.user_id as string | undefined
+    let area = normalizeMercadoPagoWebhookArea(
+      (metadata.area as string | undefined) ||
+        (typeof fullData.external_reference === 'string' ? fullData.external_reference.split('_')[0] : '') ||
+        ''
+    )
+    let planType =
+      (metadata.plan_type as string | undefined) ||
+      (typeof fullData.external_reference === 'string' ? fullData.external_reference.split('_')[1] : '') ||
+      ''
     const productType = metadata.product_type || metadata.productType
     // Sem ref na URL = matriz (ida); com ref=paula (etc) = esse vendedor
-    const refVendedor = metadata.ref_vendedor && String(metadata.ref_vendedor).trim() ? String(metadata.ref_vendedor).trim() : 'ida'
+    const refVendedor =
+      metadata.ref_vendedor && String(metadata.ref_vendedor).trim()
+        ? String(metadata.ref_vendedor).trim()
+        : 'ida'
 
     // Fallback: extrair userId do external_reference (formato area_planType_userId)
-    if (!userId && data.external_reference) {
-      const parts = data.external_reference.split('_')
+    if (!userId && typeof fullData.external_reference === 'string') {
+      const parts = fullData.external_reference.split('_')
       if (parts.length >= 3) userId = parts.slice(2).join('_')
     }
 
-    const payerEmailSub = data.payer_email || data.payer?.email || data.payer?.identification?.email || null
+    const payerEmailSub =
+      (fullData.payer_email as string | undefined) ||
+      (fullData.payer as { email?: string } | undefined)?.email ||
+      (fullData.payer as { identification?: { email?: string } } | undefined)?.identification?.email ||
+      null
 
     // Fallback: usuário por e-mail quando metadata/referência não trazem user_id
     if (!userId && payerEmailSub && payerEmailSub.includes('@')) {
@@ -1309,42 +1405,22 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
       }
     }
 
-    // Fallback: área e plano pela descrição (reason)
-    const reasonUpper = (data.reason || '').toUpperCase()
-    if (
-      !area ||
-      ![
-        'wellness',
-        'nutri',
-        'coach',
-        'nutra',
-        'pro_lideres_team',
-        'pro_lideres_noel_member',
-        PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA,
-      ].includes(area)
-    ) {
-      if (
-        reasonUpper.includes('PRO ESTÉTICA CAPILAR') ||
-        reasonUpper.includes('PRO ESTETICA CAPILAR')
-      ) {
-        area = PRO_ESTETICA_CAPILAR_SUBSCRIPTION_AREA
-      } else if (
-        reasonUpper.includes('NOEL CAMPO') ||
-        reasonUpper.includes('NOEL MEMBRO') ||
-        reasonUpper.includes('NOEL MEMBRO PRO')
-      ) {
-        area = 'pro_lideres_noel_member'
-      } else if (reasonUpper.includes('PRO LÍDERES') || reasonUpper.includes('PRO LIDERES')) area = 'pro_lideres_team'
-      else if (reasonUpper.includes('WELLNESS')) area = 'wellness'
-      else if (reasonUpper.includes('NUTRI')) area = 'nutri'
-      else if (reasonUpper.includes('COACH')) area = 'coach'
-      else if (reasonUpper.includes('NUTRA')) area = 'nutra'
-      else area = area || 'wellness'
+    const reasonUpper = String(fullData.reason || '').toUpperCase()
+    if (!area || !MERCADO_PAGO_SUBSCRIPTION_AREAS.includes(area as (typeof MERCADO_PAGO_SUBSCRIPTION_AREAS)[number])) {
+      const inferred = inferMercadoPagoAreaFromDescription(reasonUpper)
+      area = inferred || area || 'wellness'
     }
+    area = normalizeMercadoPagoWebhookArea(area)
     if (!planType || !['monthly', 'annual'].includes(planType)) {
       if (reasonUpper.includes('ANUAL')) planType = 'annual'
       else if (reasonUpper.includes('MENSAL')) planType = 'monthly'
       else planType = planType || 'monthly'
+    }
+
+    const mpStatus = String(fullData.status || '')
+    if (mpStatus === 'pending') {
+      console.log('⏳ Preapproval ainda pendente — aguardando autorização:', subscriptionId)
+      return
     }
 
     if (!userId) {
@@ -1371,7 +1447,13 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
             email: emailParaCriar,
             password: randomPassword,
             email_confirm: true,
-            user_metadata: { perfil: area, name: data.payer?.first_name || data.payer?.name || '' },
+            user_metadata: {
+              perfil: area,
+              name:
+                (fullData.payer as { first_name?: string; name?: string } | undefined)?.first_name ||
+                (fullData.payer as { first_name?: string; name?: string } | undefined)?.name ||
+                '',
+            },
           })
           if (!createError && newUser?.user) {
             userId = newUser.user.id
@@ -1381,7 +1463,10 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
               await supabaseAdmin.from('user_profiles').insert({
                 user_id: userId,
                 email: emailParaCriar,
-                nome_completo: data.payer?.first_name || data.payer?.name || '',
+                nome_completo:
+                  (fullData.payer as { first_name?: string; name?: string } | undefined)?.first_name ||
+                  (fullData.payer as { first_name?: string; name?: string } | undefined)?.name ||
+                  '',
                 perfil: area,
               })
             }
@@ -1412,7 +1497,7 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     console.log('🎯 Features determinadas (Subscription):', { area, planType, productType, features })
 
     // Status da assinatura
-    const status = data.status // 'authorized', 'paused', 'cancelled'
+    const status = String(fullData.status || '') // 'authorized', 'paused', 'cancelled'
     
     // Mapear status do Mercado Pago para nosso status
     const statusMap: Record<string, string> = {
@@ -1425,19 +1510,21 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     const mappedStatus = statusMap[status] || 'pending'
 
     // Obter informações financeiras
-    const amount = data.auto_recurring?.transaction_amount || 0
-    const currency = data.auto_recurring?.currency_id || 'BRL'
+    const autoRecurring = fullData.auto_recurring as
+      | { transaction_amount?: number; currency_id?: string }
+      | undefined
+    const amount = autoRecurring?.transaction_amount || 0
+    const currency = autoRecurring?.currency_id || 'BRL'
     
     // E-mail do pagador (já obtido acima como payerEmailSub; garantir variável única para o resto do fluxo)
-    const payerEmail = payerEmailSub || data.collector?.email || null
+    const payerEmail =
+      payerEmailSub ||
+      (fullData.collector as { email?: string } | undefined)?.email ||
+      null
 
     console.log('📧 [Subscription] Tentando capturar e-mail do pagador:', {
-      'data.payer_email': data.payer_email,
-      'data.payer?.email': data.payer?.email,
-      'data.payer?.identification?.email': data.payer?.identification?.email,
-      'data.collector?.email': data.collector?.email,
-      'payerEmail final': payerEmail,
-      'payer completo': data.payer,
+      payer_email: fullData.payer_email,
+      payerEmailFinal: payerEmail,
     })
     
     // Salvar/atualizar e-mail do usuário no perfil (se disponível e diferente)
@@ -1486,7 +1573,7 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
         features: features,
         stripe_account: null,
         stripe_subscription_id: subscriptionIdDb,
-        stripe_customer_id: data.payer_id?.toString() || 'mp_customer',
+        stripe_customer_id: String(fullData.payer_id ?? 'mp_customer'),
         stripe_price_id: 'mp_recurring',
         amount: Math.round(amount * 100),
         currency: currency.toLowerCase(),
@@ -1505,6 +1592,10 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     if (subError) {
       console.error('❌ Erro ao salvar subscription recorrente:', subError)
       throw subError
+    }
+
+    if (area === 'pro_lideres_team' && mappedStatus === 'active') {
+      await ensureProLideresTeamInviteQuotaOnActivation(userId)
     }
 
     // Enviar e-mail de boas-vindas (apenas se ainda não foi enviado e status é authorized; Pro Líderes equipe não usa o mesmo template)
@@ -1585,6 +1676,26 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
   } catch (error: any) {
     console.error('❌ Erro ao processar assinatura recorrente:', error)
     throw error
+  }
+}
+
+export async function syncPreapprovalByIdFromMercadoPago(
+  preapprovalId: string | number,
+  isTest: boolean = false
+): Promise<{ success: boolean; message?: string; error?: string }> {
+  try {
+    const fullData = await fetchMercadoPagoPreapprovalFull(String(preapprovalId), isTest)
+    if (!fullData?.id) {
+      return { success: false, error: 'Assinatura (preapproval) não encontrada na API do Mercado Pago.' }
+    }
+    await handleSubscriptionEvent({ id: fullData.id }, isTest, fullData)
+    return { success: true, message: 'Assinatura recorrente sincronizada com sucesso.' }
+  } catch (e: unknown) {
+    console.error('syncPreapprovalByIdFromMercadoPago:', e)
+    return {
+      success: false,
+      error: e instanceof Error ? e.message : 'Erro ao sincronizar assinatura',
+    }
   }
 }
 
