@@ -15,12 +15,6 @@ export function ProLideresHeader() {
           <Link href="/pro-lideres" className="inline-flex shrink-0 touch-manipulation items-center" aria-label="Pro Líderes">
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
-          <Link
-            href="/pro-lideres/entrar"
-            className="rounded-lg px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-          >
-            Entrar
-          </Link>
         </div>
       </header>
     )
