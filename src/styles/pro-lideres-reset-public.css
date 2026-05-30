@@ -629,6 +629,38 @@
   border: none;
 }
 
+/* Rodapé Ylada Pro Líderes — link para /pro-lideres */
+.pl-reset-ylada-footer {
+  padding: 1.25rem 1rem 1.75rem;
+  text-align: center;
+  background: var(--gray-bg);
+  border-top: 1px solid rgba(30, 70, 32, 0.08);
+}
+
+.pl-reset-ylada-footer__label {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #9ca3af;
+  letter-spacing: 0.02em;
+}
+
+.pl-reset-ylada-footer__link {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0284c7;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(2, 132, 199, 0.45);
+  transition: color 0.2s, text-decoration-color 0.2s;
+}
+
+.pl-reset-ylada-footer__link:hover {
+  color: #0369a1;
+  text-decoration-color: #0369a1;
+}
+
 @media (min-width: 640px) {
   .pl-reset-beneficios {
     padding: 4rem 1.5rem;

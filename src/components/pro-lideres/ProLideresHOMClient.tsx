@@ -5,6 +5,7 @@ import { getCountryByCode, inferCountryIsoFromLeadingDigits } from '@/components
 import type { ParsedOpportunityVideo } from '@/lib/pro-lideres-opportunity-video'
 import { buildVimeoEmbedSrc, buildYouTubeEmbedSrc } from '@/lib/pro-lideres-opportunity-video'
 import { PRO_LIDERES_HOM_VIDEO_POSTER } from '@/lib/pro-lideres-reset-content'
+import ProLideresResetYladaFooter from '@/components/pro-lideres/ProLideresResetYladaFooter'
 
 export type ProLideresHOMClientProps = {
   headline: string
@@ -159,6 +160,8 @@ export default function ProLideresHOMClient({
           </p>
         </div>
       </section>
+
+      <ProLideresResetYladaFooter source="hom" />
     </div>
   )
 }

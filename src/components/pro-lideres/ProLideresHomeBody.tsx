@@ -1,8 +1,28 @@
 'use client'
 
 import Link from 'next/link'
+import { useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { buildProLideresYladaInteresseWhatsappUrl } from '@/lib/pro-lideres-reset-content'
 
 export function ProLideresHomeBody() {
+  const searchParams = useSearchParams()
+  const source = searchParams.get('source')
+  const interesseHref = buildProLideresYladaInteresseWhatsappUrl(source)
+
+  const handleInteresse = useCallback(async () => {
+    try {
+      await fetch('/api/pro-lideres/interesse-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source: source || 'pro-lideres' }),
+      })
+    } catch {
+      /* WhatsApp abre mesmo se o e-mail falhar */
+    }
+    window.open(interesseHref, '_blank', 'noopener,noreferrer')
+  }, [interesseHref, source])
+
   return (
     <div className="space-y-10">
       <div className="space-y-3">
@@ -69,14 +89,22 @@ export function ProLideresHomeBody() {
         </ul>
       </section>
 
-      <div>
+      <div className="flex flex-col gap-3">
+        <button
+          type="button"
+          onClick={handleInteresse}
+          className="inline-flex min-h-[48px] w-full items-center justify-center rounded-xl bg-[#1E4620] px-6 py-3 text-center text-base font-bold text-white shadow-md transition hover:bg-[#163618]"
+        >
+          Tenho interesse — falar no WhatsApp
+        </button>
         <Link
           href="/pro-lideres/entrar"
-          className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-center text-base font-semibold text-gray-900 hover:border-gray-400 hover:bg-gray-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-center text-sm font-semibold text-gray-700 hover:border-gray-400 hover:bg-gray-50"
         >
-          Entrar no painel
+          Já sou cliente — entrar no painel
         </Link>
       </div>
+
       <p className="text-center text-sm text-gray-500 sm:text-left">
         <Link href="/pro-lideres/acompanhar" className="font-medium text-blue-600 underline hover:text-blue-800">
           Acompanhar o que já existe

@@ -13,6 +13,7 @@ import {
 } from '@/lib/pro-lideres-reset-content'
 import type { ParsedOpportunityVideo } from '@/lib/pro-lideres-opportunity-video'
 import { buildVimeoEmbedSrc, buildYouTubeEmbedSrc } from '@/lib/pro-lideres-opportunity-video'
+import ProLideresResetYladaFooter from '@/components/pro-lideres/ProLideresResetYladaFooter'
 
 export type ProLideresResetPublicClientProps = {
   headline: string
@@ -294,6 +295,8 @@ export default function ProLideresResetPublicClient({
           </div>
         </section>
       ) : null}
+
+      <ProLideresResetYladaFooter source={isCompleta ? 'completa' : 'bebida'} />
     </div>
   )
 }

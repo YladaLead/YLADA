@@ -3,6 +3,8 @@
  * Arquivo: public/videos/reset-metabolico-bebida.mp4 (origem: Litrão Reset).
  * Líder pode trocar no painel por YouTube/Vimeo se preferir.
  */
+import { getCarolWhatsAppUrl } from '@/config/ylada-support'
+
 export const PRO_LIDERES_RESET_DEFAULT_VIDEO_URL = '/videos/reset-metabolico-bebida.mp4'
 
 /**
@@ -64,3 +66,24 @@ Conheça o Reset Metabólico:
 /** Mensagem WhatsApp pré-preenchida ao encomendar sacola. */
 export const PRO_LIDERES_RESET_WHATSAPP_PEDIDO =
   'Olá! 👋\n\nVi o Reset Metabólico e gostaria de encomendar uma sacola.'
+
+/**
+ * Interesse Pro Líderes — WhatsApp Ylada (19) 99604-9800 + notificação por e-mail no clique.
+ */
+export const PRO_LIDERES_INTERESSE_WHATSAPP_MSG =
+  'Olá! Gostaria de saber mais sobre o Ylada Pro Líderes, por favor.'
+
+export type ProLideresResetLandingSource = 'bebida' | 'hom' | 'completa'
+
+export function buildProLideresLandingHref(source: ProLideresResetLandingSource): string {
+  return `/pro-lideres?source=reset-${source}`
+}
+
+export function buildProLideresYladaInteresseWhatsappUrl(fromSource?: string | null): string {
+  let msg = PRO_LIDERES_INTERESSE_WHATSAPP_MSG
+  const trimmed = fromSource?.trim()
+  if (trimmed) {
+    msg += `\n\n(Vim por: ${trimmed})`
+  }
+  return getCarolWhatsAppUrl(msg)
+}
