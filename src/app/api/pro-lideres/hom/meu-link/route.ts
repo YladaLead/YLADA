@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
-import { fetchHOMConfig, resolveProLideresHomLinkSubject } from '@/lib/pro-lideres-hom'
+import { fetchHOMConfig, resolveHomVideoUrl, resolveProLideresHomLinkSubject } from '@/lib/pro-lideres-hom'
 import { PRO_LIDERES_TEAM_PREVIEW_COOKIE } from '@/lib/pro-lideres-team-preview'
 import { resolveYladaOgBaseUrlForMetadata } from '@/lib/ylada-public-link-base-url'
 
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     hasWhatsapp,
     memberName: (profile?.nome_completo as string | null) ?? null,
     headline: cfg?.headline ?? null,
-    videoConfigured: !!(cfg?.videoUrl),
+    videoConfigured: !!resolveHomVideoUrl(cfg?.videoUrl),
     leaderTeamPreview: previewMode,
   })
 }

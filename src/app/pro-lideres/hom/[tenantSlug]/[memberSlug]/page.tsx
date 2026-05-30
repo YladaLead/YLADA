@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import ProLideresHOMClient from '@/components/pro-lideres/ProLideresHOMClient'
 import { fetchHOMPublicData } from '@/lib/pro-lideres-hom'
+import { PRO_LIDERES_HOM_DEFAULT_VIDEO_URL } from '@/lib/pro-lideres-reset-content'
 import { parseOpportunityVideoUrl, type ParsedOpportunityVideo } from '@/lib/pro-lideres-opportunity-video'
 import { buildProLideresHomShareMetadata } from '@/lib/pro-lideres/pro-lideres-hom-og'
 import { resolveYladaOgBaseUrlForMetadata } from '@/lib/ylada-public-link-base-url'
@@ -35,16 +36,14 @@ export default async function ProLideresHOMPage({
   const data = await fetchHOMPublicData(tenantSlug, memberSlug)
   if (!data) notFound()
 
-  const raw = data.videoUrl?.trim() ?? ''
+  const raw = data.videoUrl?.trim() || PRO_LIDERES_HOM_DEFAULT_VIDEO_URL
   let parsedVideo: ParsedOpportunityVideo | null = null
   let videoUrlInvalid = false
-  if (raw) {
-    const p = parseOpportunityVideoUrl(raw)
-    if (p.ok) {
-      parsedVideo = p.value
-    } else {
-      videoUrlInvalid = true
-    }
+  const p = parseOpportunityVideoUrl(raw)
+  if (p.ok) {
+    parsedVideo = p.value
+  } else {
+    videoUrlInvalid = true
   }
 
   return (

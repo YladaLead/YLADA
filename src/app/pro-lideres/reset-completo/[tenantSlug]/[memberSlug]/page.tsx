@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import ProLideresResetPublicClient from '@/components/pro-lideres/ProLideresResetPublicClient'
 import { fetchHOMPublicData } from '@/lib/pro-lideres-hom'
 import { fetchResetPublicData } from '@/lib/pro-lideres-reset'
-import { PRO_LIDERES_RESET_DEFAULT_VIDEO_URL } from '@/lib/pro-lideres-reset-content'
+import { PRO_LIDERES_HOM_DEFAULT_VIDEO_URL, PRO_LIDERES_RESET_DEFAULT_VIDEO_URL } from '@/lib/pro-lideres-reset-content'
 import { buildProLideresResetShareMetadata } from '@/lib/pro-lideres/pro-lideres-reset-og'
 import { parseOpportunityVideoUrl, type ParsedOpportunityVideo } from '@/lib/pro-lideres-opportunity-video'
 import { resolveYladaOgBaseUrlForMetadata } from '@/lib/ylada-public-link-base-url'
@@ -50,7 +50,8 @@ export default async function ProLideresResetCompletoPublicPage({
 
   const parsedVideo =
     parseVideo(resetData.videoUrl) ?? parseVideo(PRO_LIDERES_RESET_DEFAULT_VIDEO_URL)
-  const parsedHomVideo = parseVideo(homData.videoUrl)
+  const parsedHomVideo =
+    parseVideo(homData.videoUrl) ?? parseVideo(PRO_LIDERES_HOM_DEFAULT_VIDEO_URL)
 
   return (
     <ProLideresResetPublicClient

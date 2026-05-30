@@ -4,6 +4,9 @@
  */
 
 import { supabaseAdmin } from '@/lib/supabase'
+import {
+  PRO_LIDERES_HOM_DEFAULT_VIDEO_URL,
+} from '@/lib/pro-lideres-reset-content'
 
 export type ProLideresHOMConfig = {
   id: string
@@ -15,6 +18,14 @@ export type ProLideresHOMConfig = {
 
 const DEFAULT_HEADLINE = 'Oportunidade: R$500 extra por semana com bebidas funcionais'
 const DEFAULT_SUBHEADLINE = 'Assista à apresentação completa e escolha o próximo passo'
+
+/** URL efetiva do vídeo HOM — MP4 local por padrão; ignora YouTube legado (overlay de título). */
+export function resolveHomVideoUrl(stored: string | null | undefined): string {
+  const trimmed = stored?.trim()
+  if (!trimmed) return PRO_LIDERES_HOM_DEFAULT_VIDEO_URL
+  if (/youtube\.com|youtu\.be/i.test(trimmed)) return PRO_LIDERES_HOM_DEFAULT_VIDEO_URL
+  return trimmed
+}
 
 /** Slug fixo na URL pública da HOM para o dono do tenant (líder). */
 export const PRO_LIDERES_HOM_LEADER_SLUG = 'lider' as const
@@ -152,7 +163,7 @@ export async function fetchHOMPublicData(
     return {
       headline: cfg?.headline ?? DEFAULT_HEADLINE,
       subheadline: cfg?.subheadline ?? DEFAULT_SUBHEADLINE,
-      videoUrl: cfg?.videoUrl ?? null,
+      videoUrl: resolveHomVideoUrl(cfg?.videoUrl),
       memberName: (ownerProfile?.nome_completo as string | null) ?? (tenant.display_name as string | null) ?? null,
       memberWhatsapp: whatsapp,
       leaderDisplayName: (tenant.display_name as string | null) ?? null,
@@ -184,7 +195,7 @@ export async function fetchHOMPublicData(
   return {
     headline: cfg?.headline ?? DEFAULT_HEADLINE,
     subheadline: cfg?.subheadline ?? DEFAULT_SUBHEADLINE,
-    videoUrl: cfg?.videoUrl ?? null,
+    videoUrl: resolveHomVideoUrl(cfg?.videoUrl),
     memberName: (profile?.nome_completo as string | null) ?? null,
     memberWhatsapp: (profile?.whatsapp as string | null) ?? null,
     leaderDisplayName: (tenant.display_name as string | null) ?? null,

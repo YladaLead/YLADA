@@ -6,11 +6,13 @@ import {
   PRO_LIDERES_RESET_BENEFICIOS,
   PRO_LIDERES_RESET_FRASE_COMPARTILHAR,
   PRO_LIDERES_RESET_FRASE_RECRUTAMENTO,
+  PRO_LIDERES_HOM_VIDEO_POSTER,
   PRO_LIDERES_RESET_VIDEO_POSTER,
   PRO_LIDERES_RESET_WHATSAPP_COMPARTILHAR,
   PRO_LIDERES_RESET_WHATSAPP_PEDIDO,
 } from '@/lib/pro-lideres-reset-content'
 import type { ParsedOpportunityVideo } from '@/lib/pro-lideres-opportunity-video'
+import { buildVimeoEmbedSrc, buildYouTubeEmbedSrc } from '@/lib/pro-lideres-opportunity-video'
 
 export type ProLideresResetPublicClientProps = {
   headline: string
@@ -72,13 +74,15 @@ function ResetVideo({
     variant === 'horizontal' ? 'pl-reset-oportunidade__placeholder' : 'pl-reset-bebida__placeholder'
   if (parsedVideo?.kind === 'youtube') {
     return (
-      <iframe
-        className={iframeClass}
-        title={variant === 'horizontal' ? 'Oportunidade de negócio — Reset Metabólico' : 'Reset Metabólico — bebida funcional'}
-        src={`https://www.youtube.com/embed/${parsedVideo.videoId}?rel=0&modestbranding=1&playsinline=1`}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      />
+      <div className="pl-reset-embed-youtube">
+        <iframe
+          className={iframeClass}
+          title={variant === 'horizontal' ? 'Apresentação Reset Metabólico' : 'Reset Metabólico — bebida funcional'}
+          src={buildYouTubeEmbedSrc(parsedVideo.videoId)}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
     )
   }
 
@@ -86,8 +90,8 @@ function ResetVideo({
     return (
       <iframe
         className={iframeClass}
-        title={variant === 'horizontal' ? 'Oportunidade de negócio — Reset Metabólico' : 'Reset Metabólico — bebida funcional'}
-        src={`https://player.vimeo.com/video/${parsedVideo.id}`}
+        title={variant === 'horizontal' ? 'Apresentação Reset Metabólico' : 'Reset Metabólico — bebida funcional'}
+        src={buildVimeoEmbedSrc(parsedVideo.id)}
         allow="autoplay; fullscreen; picture-in-picture"
         allowFullScreen
       />
@@ -101,7 +105,7 @@ function ResetVideo({
         controls
         playsInline
         preload="metadata"
-        poster={PRO_LIDERES_RESET_VIDEO_POSTER}
+        poster={variant === 'horizontal' ? PRO_LIDERES_HOM_VIDEO_POSTER : PRO_LIDERES_RESET_VIDEO_POSTER}
       >
         <source src={parsedVideo.src} type="video/mp4" />
       </video>

@@ -5,13 +5,22 @@
  */
 export const PRO_LIDERES_RESET_DEFAULT_VIDEO_URL = '/videos/reset-metabolico-bebida.mp4'
 
+/**
+ * Vídeo padrão da HOM / oportunidade de negócio — MP4 local (sem título do YouTube).
+ * Arquivo: public/videos/reset-metabolico-hom.mp4 (origem: Desktop/RESET METABOLICO).
+ */
+export const PRO_LIDERES_HOM_DEFAULT_VIDEO_URL = '/videos/reset-metabolico-hom.mp4'
+
 export const PRO_LIDERES_RESET_DEFAULT_HEADLINE = 'Reset Metabólico'
 export const PRO_LIDERES_RESET_DEFAULT_SUBHEADLINE = 'Energia Natural em Movimento'
 export const PRO_LIDERES_RESET_DEFAULT_DESCRIPTION =
   'Conheça o projeto de bebidas funcionais: a bebida que revitaliza e a oportunidade de negócio que transforma.'
 
-/** Poster local (capa antes do play em vídeos .mp4). */
+/** Poster local (capa antes do play em vídeos .mp4 — bebida). */
 export const PRO_LIDERES_RESET_VIDEO_POSTER = '/images/pro-lideres/capa-bebida.jpg'
+
+/** Poster da HOM — André + «Oportunidade de renda» (capa antes do play). */
+export const PRO_LIDERES_HOM_VIDEO_POSTER = '/images/pro-lideres/capa-hom.png'
 
 /** Benefícios padrão da landing Reset Metabólico (Litrão Reset). */
 export const PRO_LIDERES_RESET_BENEFICIOS = [

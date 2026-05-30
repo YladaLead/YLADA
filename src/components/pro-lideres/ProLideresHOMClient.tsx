@@ -3,6 +3,8 @@
 import Image from 'next/image'
 import { getCountryByCode, inferCountryIsoFromLeadingDigits } from '@/components/CountrySelector'
 import type { ParsedOpportunityVideo } from '@/lib/pro-lideres-opportunity-video'
+import { buildVimeoEmbedSrc, buildYouTubeEmbedSrc } from '@/lib/pro-lideres-opportunity-video'
+import { PRO_LIDERES_HOM_VIDEO_POSTER } from '@/lib/pro-lideres-reset-content'
 
 export type ProLideresHOMClientProps = {
   headline: string
@@ -34,13 +36,15 @@ function HomVideo({
 }) {
   if (parsedVideo?.kind === 'youtube') {
     return (
-      <iframe
-        className="pl-reset-oportunidade__iframe"
-        title="Oportunidade de negócio — Reset Metabólico"
-        src={`https://www.youtube.com/embed/${parsedVideo.videoId}?rel=0&modestbranding=1&playsinline=1`}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      />
+      <div className="pl-reset-embed-youtube">
+        <iframe
+          className="pl-reset-oportunidade__iframe"
+          title="Apresentação Reset Metabólico"
+          src={buildYouTubeEmbedSrc(parsedVideo.videoId)}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
     )
   }
 
@@ -48,8 +52,8 @@ function HomVideo({
     return (
       <iframe
         className="pl-reset-oportunidade__iframe"
-        title="Oportunidade de negócio — Reset Metabólico"
-        src={`https://player.vimeo.com/video/${parsedVideo.id}`}
+        title="Apresentação Reset Metabólico"
+        src={buildVimeoEmbedSrc(parsedVideo.id)}
         allow="autoplay; fullscreen; picture-in-picture"
         allowFullScreen
       />
@@ -58,7 +62,13 @@ function HomVideo({
 
   if (parsedVideo?.kind === 'mp4') {
     return (
-      <video className="pl-reset-oportunidade__video" controls playsInline preload="metadata">
+      <video
+        className="pl-reset-oportunidade__video"
+        controls
+        playsInline
+        preload="metadata"
+        poster={PRO_LIDERES_HOM_VIDEO_POSTER}
+      >
         <source src={parsedVideo.src} type="video/mp4" />
       </video>
     )
@@ -103,14 +113,19 @@ export default function ProLideresHOMClient({
             <Image
               src="/images/pro-lideres/reset-metabolico-logo.png"
               alt="Reset Metabólico"
-              width={200}
-              height={86}
-              className="pl-reset-hero__logo"
+              width={140}
+              height={60}
+              className="pl-reset-hero__logo pl-reset-hero__logo--hom"
               priority
             />
           </h1>
           <div className="pl-reset-swoosh pl-reset-swoosh--bottom" aria-hidden />
-          <p className="pl-reset-hero__tagline">R$ 500,00 extra por semana com bebidas funcionais</p>
+          <p className="pl-reset-hero__headline">Oportunidade de Negócio</p>
+          <p className="pl-reset-hero__tagline pl-reset-hero__tagline--hom">
+            R$500,00 extra por semana
+            <br />
+            com bebidas funcionais
+          </p>
         </div>
       </section>
 

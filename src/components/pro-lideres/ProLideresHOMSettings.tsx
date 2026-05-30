@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { PRO_LIDERES_HOM_DEFAULT_VIDEO_URL } from '@/lib/pro-lideres-reset-content'
 
 type HOMConfig = {
   videoUrl: string | null
@@ -122,7 +123,7 @@ export default function ProLideresHOMSettings() {
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
         <h2 className="mb-1 text-lg font-bold text-gray-900">🎥 Configurar apresentação</h2>
         <p className="mb-5 text-sm text-gray-500">
-          Cole o link do vídeo da HOM (YouTube, Vimeo ou .mp4). Todos os membros usarão o mesmo vídeo.
+          Vídeo padrão hospedado no Ylada (sem título do YouTube). Cole outro link só se quiser trocar.
         </p>
 
         <div className="space-y-4">
@@ -134,7 +135,7 @@ export default function ProLideresHOMSettings() {
               type="url"
               value={config.videoUrl ?? ''}
               onChange={(e) => setConfig((c) => ({ ...c, videoUrl: e.target.value }))}
-              placeholder="https://www.youtube.com/watch?v=..."
+              placeholder={PRO_LIDERES_HOM_DEFAULT_VIDEO_URL}
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none ring-emerald-400 transition focus:border-emerald-400 focus:ring-2"
             />
           </div>

@@ -89,6 +89,28 @@ export function parseOpportunityVideoUrl(
   }
 }
 
+/** Embed YouTube sem exibir título/canal no topo (recorte via CSS `.pl-reset-embed-youtube`). */
+export function buildYouTubeEmbedSrc(videoId: string): string {
+  const params = new URLSearchParams({
+    rel: '0',
+    modestbranding: '1',
+    playsinline: '1',
+    iv_load_policy: '3',
+    controls: '1',
+  })
+  return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`
+}
+
+/** Vimeo sem título, autor e avatar no player. */
+export function buildVimeoEmbedSrc(id: string): string {
+  const params = new URLSearchParams({
+    title: '0',
+    byline: '0',
+    portrait: '0',
+  })
+  return `https://player.vimeo.com/video/${id}?${params.toString()}`
+}
+
 export type OpportunityVideoPatch =
   | { action: 'omit' }
   | { action: 'clear' }
