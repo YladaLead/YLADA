@@ -843,9 +843,32 @@ export async function POST(request: NextRequest) {
           as = raw as Record<string, unknown>
         }
       }
-      const temNome = as?.nome != null && String(as.nome).trim().length >= 2
-      const temWhatsapp = as?.whatsapp != null && String(as.whatsapp).replace(/\D/g, '').length >= 10
+      let temNome = as?.nome != null && String(as.nome).trim().length >= 2
+      let temWhatsapp = as?.whatsapp != null && String(as.whatsapp).replace(/\D/g, '').length >= 10
       const temPerfilEmpresarial = profileRow?.profile_type && profileRow?.profession
+
+      // Fallback: se o segmento atual não tem nome/whatsapp (ex.: coach-bem-estar sem onboarding próprio),
+      // buscar no perfil 'ylada' onde o onboarding padrão salva esses campos.
+      if ((!temNome || !temWhatsapp) && validSegment !== 'ylada' && supabaseAdmin) {
+        try {
+          const { data: yladaFallback } = await supabaseAdmin
+            .from('ylada_noel_profile')
+            .select('area_specific')
+            .eq('user_id', user.id)
+            .eq('segment', 'ylada')
+            .maybeSingle()
+          if (yladaFallback?.area_specific) {
+            const yAs = typeof yladaFallback.area_specific === 'string'
+              ? (JSON.parse(yladaFallback.area_specific) as Record<string, unknown>)
+              : (yladaFallback.area_specific as Record<string, unknown>)
+            if (!temNome) temNome = yAs?.nome != null && String(yAs.nome).trim().length >= 2
+            if (!temWhatsapp) temWhatsapp = yAs?.whatsapp != null && String(yAs.whatsapp).replace(/\D/g, '').length >= 10
+          }
+        } catch {
+          // silencioso — não bloquear o Noel por falha no fallback
+        }
+      }
+
       if (!temNome || !temWhatsapp || !temPerfilEmpresarial) {
         const msg = (message ?? '').toLowerCase().trim()
         let profileRequiredMessage: string
