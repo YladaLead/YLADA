@@ -232,7 +232,7 @@
   box-shadow: 0 8px 32px rgba(30, 70, 32, 0.12);
 }
 
-.pl-reset-bebida__cta-completa {
+.pl-reset-bebida__cta {
   width: 100%;
   max-width: 280px;
   margin-top: 1rem;
@@ -294,7 +294,7 @@
     max-width: 320px;
   }
 
-  .pl-reset-bebida__cta-completa {
+  .pl-reset-bebida__cta {
     max-width: 320px;
   }
 }

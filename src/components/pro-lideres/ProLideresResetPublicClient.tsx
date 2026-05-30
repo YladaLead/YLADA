@@ -193,16 +193,14 @@ export default function ProLideresResetPublicClient({
             <div className="pl-reset-bebida__video-wrap">
               <ResetVideo parsedVideo={parsedVideo} memberLabel={memberLabel} />
             </div>
-            {isCompleta ? (
-              <button
-                type="button"
-                onClick={encomendarReset}
-                className="pl-reset-beneficios__cta pl-reset-bebida__cta-completa"
-              >
-                <WhatsappIcon />
-                Quero meu Reset agora
-              </button>
-            ) : null}
+            <button
+              type="button"
+              onClick={encomendarReset}
+              className="pl-reset-beneficios__cta pl-reset-bebida__cta"
+            >
+              <WhatsappIcon />
+              Quero meu Reset agora
+            </button>
           </div>
         </div>
       </section>
@@ -224,18 +222,6 @@ export default function ProLideresResetPublicClient({
               </li>
             ))}
           </ul>
-
-          {!isCompleta ? (
-            <button
-              id="reset-encomendar"
-              type="button"
-              onClick={encomendarReset}
-              className="pl-reset-beneficios__cta"
-            >
-              <WhatsappIcon />
-              Quero encomendar minha sacola
-            </button>
-          ) : null}
 
           {!isCompleta ? (
             <button

@@ -1,9 +1,31 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
 
 export function ProLideresHeader() {
+  const pathname = usePathname()
+  const isLandingHome = pathname === '/pro-lideres' || pathname === '/pro-lideres/'
+
+  if (isLandingHome) {
+    return (
+      <header className="shrink-0 border-b border-gray-100 bg-white">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-3">
+          <Link href="/pro-lideres" className="inline-flex shrink-0 touch-manipulation items-center" aria-label="Pro Líderes">
+            <YLADALogo size="md" responsive className="bg-transparent" />
+          </Link>
+          <Link
+            href="/pro-lideres/entrar"
+            className="rounded-lg px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+          >
+            Entrar
+          </Link>
+        </div>
+      </header>
+    )
+  }
+
   return (
     <header className="shrink-0 border-b border-gray-100 bg-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-3">
