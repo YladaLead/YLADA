@@ -28,9 +28,21 @@ export async function GET(request: NextRequest) {
   const q = ctx.tenant.team_invite_pending_quota
   const pendingQuota = typeof q === 'number' && q > 0 ? q : DEFAULT_PENDING_QUOTA
 
+  const { data: latestTeamSub } = await supabaseAdmin
+    .from('subscriptions')
+    .select('status, current_period_end')
+    .eq('user_id', ownerId)
+    .eq('area', 'pro_lideres_team')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const isRenewal = Boolean(latestTeamSub)
+
   return NextResponse.json({
     accessOk,
     ownerUserId: ownerId,
+    isRenewal,
     subscription: sub
       ? {
           status: sub.status,
@@ -38,6 +50,7 @@ export async function GET(request: NextRequest) {
           amountCents: sub.amount,
         }
       : null,
+    lastPeriodEnd: latestTeamSub?.current_period_end ?? null,
     monthlyAmountBrl: 750,
     pendingInviteQuota: pendingQuota,
   })

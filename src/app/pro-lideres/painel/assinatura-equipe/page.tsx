@@ -6,6 +6,12 @@ import { useAuth } from '@/hooks/useAuth'
 
 type MpNotice = 'ok' | 'pending' | 'fail' | null
 
+function formatYmdPtBr(ymd: string | null | undefined): string {
+  if (!ymd || !/^\d{4}-\d{2}-\d{2}/.test(ymd)) return '—'
+  const [y, m, d] = ymd.slice(0, 10).split('-')
+  return `${d}/${m}/${y}`
+}
+
 function ProLideresAssinaturaEquipeContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -16,6 +22,9 @@ function ProLideresAssinaturaEquipeContent() {
   const [mpNotice, setMpNotice] = useState<MpNotice>(null)
   const [accessOk, setAccessOk] = useState(false)
   const [isLeaderOwner, setIsLeaderOwner] = useState(true)
+  const [isRenewal, setIsRenewal] = useState(false)
+  const [lastPeriodEnd, setLastPeriodEnd] = useState<string | null>(null)
+  const [monthlyAmountBrl, setMonthlyAmountBrl] = useState(750)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -31,6 +40,9 @@ function ProLideresAssinaturaEquipeContent() {
       }
       const ok = Boolean((data as { accessOk?: boolean }).accessOk)
       setAccessOk(ok)
+      setIsRenewal(Boolean((data as { isRenewal?: boolean }).isRenewal))
+      setLastPeriodEnd((data as { lastPeriodEnd?: string | null }).lastPeriodEnd ?? null)
+      setMonthlyAmountBrl((data as { monthlyAmountBrl?: number }).monthlyAmountBrl ?? 750)
       const ownerId = (data as { ownerUserId?: string }).ownerUserId
       if (ownerId && user?.id) {
         setIsLeaderOwner(user.id === ownerId)
@@ -140,18 +152,34 @@ function ProLideresAssinaturaEquipeContent() {
             estiver regularizada, você volta a entrar normalmente.
           </p>
         ) : (
-          <div className="flex w-full flex-col items-stretch gap-4 sm:items-center">
-            <p className="w-full text-left text-sm leading-relaxed text-gray-700 sm:text-center">
-              Para ativar ou renovar sua assinatura, acesse o site pelo navegador:
+          <div className="flex w-full flex-col items-stretch gap-6 sm:items-center">
+            {isRenewal && lastPeriodEnd ? (
+              <p className="w-full text-left text-sm leading-relaxed text-gray-600 sm:text-center">
+                O último período da assinatura terminou em{' '}
+                <strong className="tabular-nums text-gray-900">{formatYmdPtBr(lastPeriodEnd)}</strong>. Renove para
+                voltar a convidar e liberar o acesso da equipe.
+              </p>
+            ) : (
+              <p className="w-full text-left text-sm leading-relaxed text-gray-700 sm:text-center">
+                Comece a convidar sua equipe e construa um{' '}
+                <strong className="text-gray-900">crescimento organizado e previsível</strong> com clareza para orientar.
+              </p>
+            )}
+            <p className="w-full text-left text-sm leading-relaxed text-gray-600 sm:text-center">
+              Cobrança recorrente no cartão via Mercado Pago ·{' '}
+              <strong className="text-gray-900">
+                R$ {monthlyAmountBrl.toLocaleString('pt-BR')}/mês
+              </strong>
+              . Após a confirmação, os convites da equipe ativam automaticamente.
             </p>
-            <a
-              href="https://ylada.com/renovar"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="touch-manipulation inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-8 text-sm font-semibold text-white hover:bg-blue-700 sm:max-w-[13.5rem]"
+            <button
+              type="button"
+              onClick={() => void startCheckout()}
+              disabled={checkoutLoading}
+              className="touch-manipulation inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-8 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-60 sm:max-w-[13.5rem]"
             >
-              Ativar em ylada.com →
-            </a>
+              {checkoutLoading ? 'A abrir…' : isRenewal ? 'Renovar assinatura' : 'Ativar assinatura'}
+            </button>
           </div>
         )}
       </div>
