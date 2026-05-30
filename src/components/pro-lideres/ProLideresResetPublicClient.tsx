@@ -279,15 +279,6 @@ export default function ProLideresResetPublicClient({
           </div>
         </section>
       ) : null}
-
-      {isCompleta ? (
-        <footer className="pl-reset-completa-footer" aria-label="Compartilhar página">
-          <button type="button" onClick={openCompartilhar} className="pl-reset-beneficios__share">
-            <ShareIcon />
-            <span>{PRO_LIDERES_RESET_FRASE_COMPARTILHAR}</span>
-          </button>
-        </footer>
-      ) : null}
     </div>
   )
 }
