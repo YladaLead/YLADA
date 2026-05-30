@@ -439,6 +439,35 @@
   background: var(--white);
 }
 
+/* Reset completa — faixa verde separando bebida × negócio (como Litrão original) */
+.pl-reset-oportunidade--completa {
+  padding: 2.5rem 1rem 3.25rem;
+  background: var(--green-dark);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(160, 209, 80, 0.14) 0%, transparent 55%),
+    linear-gradient(180deg, #1e4620 0%, #163618 100%);
+  color: var(--white);
+}
+
+.pl-reset-oportunidade--completa .pl-reset-oportunidade__title {
+  color: var(--white);
+}
+
+.pl-reset-oportunidade--completa .pl-reset-oportunidade__frase--above-video {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--white);
+  box-shadow: none;
+}
+
+.pl-reset-oportunidade--completa .pl-reset-oportunidade__video-wrap {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+}
+
+.pl-reset-oportunidade--completa .pl-reset-oportunidade__cta--secondary {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
 .pl-reset-oportunidade__container {
   max-width: 640px;
   margin: 0 auto;

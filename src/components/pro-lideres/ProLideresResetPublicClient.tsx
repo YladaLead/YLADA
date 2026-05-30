@@ -257,7 +257,11 @@ export default function ProLideresResetPublicClient({
       </section>
 
       {isCompleta ? (
-        <section id="oportunidade" className="pl-reset-oportunidade" aria-labelledby="reset-oportunidade-title">
+        <section
+          id="oportunidade"
+          className="pl-reset-oportunidade pl-reset-oportunidade--completa"
+          aria-labelledby="reset-oportunidade-title"
+        >
           <div className="pl-reset-oportunidade__container">
             <div className="pl-reset-swoosh pl-reset-swoosh--top pl-reset-swoosh--large" aria-hidden />
             <h2 id="reset-oportunidade-title" className="pl-reset-oportunidade__title">
