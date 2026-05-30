@@ -1,8 +1,9 @@
 /* Landing /pro-lideres — socrática, curiosidade, sem promessas */
 .pl-landing {
-  --pl-green-dark: #1e4620;
-  --pl-green-leaf: #5a8d2a;
-  --pl-gray-bg: #f7f7f5;
+  --pl-navy: #1a3560;
+  --pl-navy-accent: #2a5298;
+  --pl-navy-light: #eef3fc;
+  --pl-gray-bg: #f4f6f9;
   --pl-radius: 14px;
 
   font-family: var(--font-plus-jakarta, 'Plus Jakarta Sans'), -apple-system, BlinkMacSystemFont, sans-serif;
@@ -19,18 +20,7 @@
 .pl-landing__wrap {
   max-width: 520px;
   margin: 0 auto;
-  padding-bottom: 1rem;
-}
-
-.pl-landing__source-banner {
-  margin: 0 0 1.5rem;
-  padding: 0.75rem 1rem;
-  border-radius: var(--pl-radius);
-  background: var(--pl-gray-bg);
-  border-left: 3px solid var(--pl-green-leaf);
-  font-size: 0.875rem;
-  color: #374151;
-  line-height: 1.45;
+  padding-bottom: 2rem;
 }
 
 .pl-landing__hero {
@@ -43,7 +33,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--pl-green-leaf);
+  color: var(--pl-navy-accent);
 }
 
 .pl-landing__title {
@@ -51,7 +41,7 @@
   font-size: 1.5rem;
   font-weight: 800;
   line-height: 1.25;
-  color: var(--pl-green-dark);
+  color: var(--pl-navy);
   letter-spacing: -0.02em;
 }
 
@@ -86,13 +76,41 @@
   line-height: 1.4;
 }
 
-.pl-landing__bridge {
-  margin: 0 0 2rem;
-  padding: 0 0.15rem;
+.pl-landing__philosophy {
+  margin-bottom: 2rem;
+  padding: 1.75rem 1.4rem;
+  border-radius: var(--pl-radius);
+  background: var(--pl-navy-light);
+  border: 1.5px solid #c6d8f5;
+}
+
+.pl-landing__philosophy-title {
+  margin: 0 0 1.1rem;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--pl-navy);
+  line-height: 1.3;
+}
+
+.pl-landing__philosophy-intro {
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.6;
+  border: 1px solid #c6d8f5;
+}
+
+.pl-landing__philosophy-text {
+  margin: 0;
   font-size: 0.95rem;
-  color: #6b7280;
-  line-height: 1.55;
-  text-align: center;
+  color: #0f172a;
+  line-height: 1.8;
+  white-space: pre-line;
 }
 
 .pl-landing__cta-block {
@@ -105,11 +123,12 @@
   width: 100%;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   min-height: 52px;
   padding: 0.95rem 1.5rem;
   border: none;
   border-radius: 999px;
-  background: var(--pl-green-dark);
+  background: var(--pl-navy);
   color: #fff;
   font-size: 1rem;
   font-weight: 700;
@@ -118,8 +137,14 @@
 }
 
 .pl-landing__cta-primary:hover {
-  background: #163618;
+  background: #081528;
   transform: translateY(-1px);
+}
+
+.pl-landing__wa-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
 }
 
 .pl-landing__cta-hint {
@@ -139,24 +164,7 @@
 }
 
 .pl-landing__cta-secondary:hover {
-  color: var(--pl-green-dark);
-}
-
-.pl-landing__footer {
-  padding: 1.25rem 0 1.5rem;
-  text-align: center;
-  border-top: 1px solid #eee;
-  font-size: 0.75rem;
-}
-
-.pl-landing__footer a {
-  color: #9ca3af;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.pl-landing__footer a:hover {
-  color: #6b7280;
+  color: var(--pl-navy-accent);
 }
 
 @media (min-width: 640px) {
