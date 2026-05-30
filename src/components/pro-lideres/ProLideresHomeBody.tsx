@@ -79,9 +79,6 @@ export function ProLideresHomeBody() {
             {PRO_LIDERES_LANDING_CTA_PRIMARY}
           </button>
           <p className="pl-landing__cta-hint">{PRO_LIDERES_LANDING_CTA_HINT}</p>
-          <Link href="/pro-lideres/entrar" className="pl-landing__cta-secondary">
-            {PRO_LIDERES_LANDING_SECONDARY_CTA}
-          </Link>
         </section>
       </div>
     </div>
