@@ -279,6 +279,38 @@ function MemberToolsDiagBlock({
   )
 }
 
+type StatusFilter = 'todos' | 'ativo' | 'pausado' | 'vencido'
+
+const STATUS_FILTER_LABELS: Record<StatusFilter, string> = {
+  todos: 'Todos',
+  ativo: 'Ativo',
+  pausado: 'Pausado',
+  vencido: 'Vencido',
+}
+
+/** Validade expirada (pagamento/plano) — independente de pausa manual. */
+function isMemberAccessExpired(m: ProLideresMemberListItem): boolean {
+  if (m.role !== 'member') return false
+  if (m.teamAccessState === 'pending_activation') return false
+  const exp = m.teamAccessExpiresAt
+  if (!exp) return false
+  const ms = new Date(exp).getTime()
+  return !Number.isNaN(ms) && ms <= Date.now()
+}
+
+function memberMatchesStatusFilter(m: ProLideresMemberListItem, filter: StatusFilter): boolean {
+  if (filter === 'todos') return true
+  if (m.role === 'leader') return false
+  if (filter === 'vencido') return isMemberAccessExpired(m)
+  if (filter === 'ativo') {
+    return m.teamAccessState === 'active' && !isMemberAccessExpired(m)
+  }
+  if (filter === 'pausado') {
+    return m.teamAccessState === 'paused' && !isMemberAccessExpired(m)
+  }
+  return true
+}
+
 function formatExpiryPt(iso: string | null): string | null {
   if (!iso) return null
   const d = new Date(iso)
@@ -291,6 +323,9 @@ function validadeResumo(m: ProLideresMemberListItem): string {
   if (m.role === 'leader') return '—'
   const exp = m.teamAccessExpiresAt
   const expLabel = formatExpiryPt(exp)
+  if (isMemberAccessExpired(m) && expLabel) {
+    return `Venceu em ${expLabel}`
+  }
   if (m.teamAccessState === 'pending_activation') {
     return expLabel ? `Após ativar (${expLabel})` : 'Após ativar'
   }
@@ -298,13 +333,51 @@ function validadeResumo(m: ProLideresMemberListItem): string {
     return m.teamAccessState === 'active' ? 'Sem data de fim' : '—'
   }
   if (m.teamAccessState === 'active') {
-    const past = exp && new Date(exp).getTime() <= Date.now()
-    return past ? `Expirou (${expLabel})` : expLabel
+    return expLabel
   }
   if (m.teamAccessState === 'paused') {
     return `Última validade: ${expLabel}`
   }
   return expLabel
+}
+
+function MemberAccessStatusBadge({ m }: { m: ProLideresMemberListItem }) {
+  if (m.role === 'leader') {
+    return (
+      <span className="inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+        {roleLabel(m.role)}
+      </span>
+    )
+  }
+  if (isMemberAccessExpired(m)) {
+    return (
+      <span className="inline-flex w-fit rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-900">
+        Vencido
+      </span>
+    )
+  }
+  if (m.teamAccessState === 'paused') {
+    return (
+      <span className="inline-flex w-fit rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900">
+        Pausado
+      </span>
+    )
+  }
+  if (m.teamAccessState === 'pending_activation') {
+    return (
+      <span className="inline-flex w-fit rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-semibold text-violet-900">
+        Aguarda ativação
+      </span>
+    )
+  }
+  if (m.teamAccessState === 'active') {
+    return (
+      <span className="inline-flex w-fit rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-900">
+        Ativo
+      </span>
+    )
+  }
+  return null
 }
 
 function isoToDateInputValue(iso: string | null | undefined): string {
@@ -331,6 +404,7 @@ export function ProLideresEquipeMembersCollapsible({
   const router = useRouter()
   const [open, setOpen] = useState(true)
   const [query, setQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('todos')
   const [busyUserId, setBusyUserId] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
 
@@ -345,16 +419,29 @@ export function ProLideresEquipeMembersCollapsible({
   const [copyCopied, setCopyCopied] = useState(false)
   const [copyError, setCopyError] = useState<string | null>(null)
 
+  const statusCounts = useMemo(() => {
+    const teamMembers = members.filter((m) => m.role === 'member')
+    return {
+      todos: members.length,
+      ativo: teamMembers.filter((m) => m.teamAccessState === 'active' && !isMemberAccessExpired(m)).length,
+      pausado: teamMembers.filter((m) => m.teamAccessState === 'paused' && !isMemberAccessExpired(m)).length,
+      vencido: teamMembers.filter((m) => isMemberAccessExpired(m)).length,
+    }
+  }, [members])
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return members
     return members.filter((m) => {
+      if (!memberMatchesStatusFilter(m, statusFilter)) return false
+      if (!q) return true
       const name = (m.displayName ?? '').toLowerCase()
       const email = (m.email ?? '').toLowerCase()
       const id = m.userId.toLowerCase()
       return name.includes(q) || email.includes(q) || id.includes(q)
     })
-  }, [members, query])
+  }, [members, query, statusFilter])
+
+  const hasActiveFilters = statusFilter !== 'todos' || query.trim().length > 0
 
   async function callAccessApi(targetUserId: string, action: 'pause' | 'resume' | 'remove') {
     setActionError(null)
@@ -683,7 +770,44 @@ export function ProLideresEquipeMembersCollapsible({
               autoComplete="off"
               className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
             />
-            {query.trim() ? (
+            <div
+              className="mt-2 flex flex-wrap gap-1.5"
+              role="group"
+              aria-label="Filtrar por status de acesso"
+            >
+              {(['todos', 'ativo', 'pausado', 'vencido'] as const).map((key) => {
+                const selected = statusFilter === key
+                const count = statusCounts[key]
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setStatusFilter(key)}
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold transition ${
+                      selected
+                        ? key === 'vencido'
+                          ? 'bg-red-600 text-white shadow-sm'
+                          : key === 'pausado'
+                            ? 'bg-amber-600 text-white shadow-sm'
+                            : key === 'ativo'
+                              ? 'bg-green-600 text-white shadow-sm'
+                              : 'bg-emerald-700 text-white shadow-sm'
+                        : key === 'vencido'
+                          ? 'border border-red-200 bg-red-50 text-red-900 hover:bg-red-100'
+                          : key === 'pausado'
+                            ? 'border border-amber-200 bg-amber-50 text-amber-950 hover:bg-amber-100'
+                            : key === 'ativo'
+                              ? 'border border-green-200 bg-green-50 text-green-900 hover:bg-green-100'
+                              : 'border border-gray-200 bg-gray-50 text-gray-800 hover:bg-gray-100'
+                    }`}
+                  >
+                    {STATUS_FILTER_LABELS[key]} ({count})
+                  </button>
+                )
+              })}
+            </div>
+            {hasActiveFilters ? (
               <p className="mt-1 text-[11px] text-gray-500">
                 {filtered.length === 0
                   ? 'Nenhum resultado.'
@@ -710,7 +834,11 @@ export function ProLideresEquipeMembersCollapsible({
             {members.length === 0 ? (
               <li className="px-4 py-6 text-sm text-gray-600">Nenhuma pessoa listada.</li>
             ) : filtered.length === 0 ? (
-              <li className="px-4 py-6 text-sm text-gray-600">Nenhum resultado para esta pesquisa.</li>
+              <li className="px-4 py-6 text-sm text-gray-600">
+                {statusFilter !== 'todos'
+                  ? `Nenhum membro com status «${STATUS_FILTER_LABELS[statusFilter]}».`
+                  : 'Nenhum resultado para esta pesquisa.'}
+              </li>
             ) : (
               filtered.map((m) => {
                 const title = m.displayName?.trim() || m.email?.trim() || 'Conta sem nome no perfil YLADA'
@@ -718,11 +846,14 @@ export function ProLideresEquipeMembersCollapsible({
                 const isCurrentUser = currentUserId != null && m.userId === currentUserId
                 const showActions = canManageMembers && m.role === 'member'
                 const isBusy = busyUserId === m.userId
+                const expired = isMemberAccessExpired(m)
                 const vText = validadeResumo(m)
-                const canPause = m.teamAccessState === 'active'
-                const canEditExpiry = m.teamAccessState === 'active'
+                const canPause = m.teamAccessState === 'active' && !expired
+                const canEditExpiry = m.teamAccessState === 'active' && !expired
                 const canAtivar =
-                  m.teamAccessState === 'pending_activation' || m.teamAccessState === 'paused'
+                  m.teamAccessState === 'pending_activation' ||
+                  m.teamAccessState === 'paused' ||
+                  expired
 
                 return (
                   <li key={m.userId} className="px-4 py-2.5">
@@ -731,64 +862,32 @@ export function ProLideresEquipeMembersCollapsible({
                         <p className="truncate text-sm font-medium text-gray-900">{title}</p>
                         <p className="truncate text-xs text-gray-500">{subtitle}</p>
                         <div className="mt-1 flex flex-wrap gap-1 sm:hidden">
-                          {m.role === 'leader' ? (
-                            <span className="inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
-                              {roleLabel(m.role)}
-                            </span>
-                          ) : null}
+                          <MemberAccessStatusBadge m={m} />
                           {isCurrentUser ? (
                             <span className="inline-flex w-fit rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-800">
                               Você
-                            </span>
-                          ) : null}
-                          {m.role === 'member' && m.teamAccessState === 'paused' ? (
-                            <span className="inline-flex w-fit rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900">
-                              Pausado
-                            </span>
-                          ) : null}
-                          {m.role === 'member' && m.teamAccessState === 'pending_activation' ? (
-                            <span className="inline-flex w-fit rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-semibold text-violet-900">
-                              Aguarda ativação
-                            </span>
-                          ) : null}
-                          {m.role === 'member' && m.teamAccessState === 'active' ? (
-                            <span className="inline-flex w-fit rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-900">
-                              Ativo
                             </span>
                           ) : null}
                         </div>
                       </div>
 
-                      <div className="text-xs text-gray-800 sm:border-l sm:border-gray-100 sm:pl-2">
+                      <div className="text-xs sm:border-l sm:border-gray-100 sm:pl-2">
                         <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 sm:hidden">Validade</p>
-                        <p className="font-medium leading-tight text-gray-900">{vText}</p>
+                        <p
+                          className={`font-medium leading-tight ${
+                            expired ? 'text-red-700' : 'text-gray-900'
+                          }`}
+                        >
+                          {vText}
+                        </p>
                       </div>
 
                       <div className="flex flex-col items-stretch gap-1.5 sm:items-end">
                         <div className="hidden flex-wrap justify-end gap-1.5 sm:flex">
-                          {m.role === 'leader' ? (
-                            <span className="inline-flex w-fit rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
-                              {roleLabel(m.role)}
-                            </span>
-                          ) : null}
+                          <MemberAccessStatusBadge m={m} />
                           {isCurrentUser ? (
                             <span className="inline-flex w-fit rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-800">
                               Você
-                            </span>
-                          ) : null}
-                          {m.role === 'member' && m.teamAccessState === 'paused' ? (
-                            <span className="inline-flex w-fit rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900">
-                              Pausado
-                            </span>
-                          ) : null}
-                          {m.role === 'member' && m.teamAccessState === 'pending_activation' ? (
-                            <span className="inline-flex w-fit rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-semibold text-violet-900">
-                              Aguarda ativação
-                            </span>
-                          ) : null}
-                          {m.role === 'member' && m.teamAccessState === 'active' ? (
-                            <span className="inline-flex w-fit rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-900">
-                              Ativo
                             </span>
                           ) : null}
                         </div>
@@ -827,8 +926,8 @@ export function ProLideresEquipeMembersCollapsible({
                               title={
                                 m.teamAccessState === 'pending_activation'
                                   ? 'Primeira liberação e validade'
-                                  : m.teamAccessState === 'paused'
-                                    ? 'Voltar a dar acesso'
+                                  : expired || m.teamAccessState === 'paused'
+                                    ? 'Renovar validade e voltar a dar acesso'
                                     : 'Já ativo'
                               }
                               disabled={isBusy || !canAtivar}
@@ -841,7 +940,7 @@ export function ProLideresEquipeMembersCollapsible({
                                   setActivateUserId(m.userId)
                                   return
                                 }
-                                if (m.teamAccessState === 'paused') {
+                                if (m.teamAccessState === 'paused' || expired) {
                                   setActionError(null)
                                   setActivateDays('30')
                                   setActivateNoEnd(false)
