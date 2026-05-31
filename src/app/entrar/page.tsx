@@ -111,7 +111,6 @@ export default function EntrarPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleDetectArea()}
                 placeholder="seuemail@exemplo.com"
-                autoFocus
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 disabled={step === 'loading'}
               />
@@ -171,9 +170,18 @@ export default function EntrarPage() {
 
       </main>
 
-      {/* Footer */}
-      <footer className="text-center pb-8">
+      {/* Footer — Privacy policy link required by Apple App Store guideline 5.1.1 */}
+      <footer className="text-center pb-8 space-y-1">
         <p className="text-xs text-gray-300">YLADA · ylada.com</p>
+        <div className="flex items-center justify-center gap-3">
+          <a href="/privacidade" className="text-xs text-gray-400 underline hover:text-gray-500 transition-colors">
+            Política de Privacidade
+          </a>
+          <span className="text-xs text-gray-300">·</span>
+          <a href="/termos" className="text-xs text-gray-400 underline hover:text-gray-500 transition-colors">
+            Termos de Uso
+          </a>
+        </div>
       </footer>
 
     </div>

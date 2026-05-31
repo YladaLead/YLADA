@@ -69,6 +69,11 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [erroAssinatura, setErroAssinatura] = useState<string | null>(null)
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [confirmacaoTexto, setConfirmacaoTexto] = useState('')
+  const [deletandoConta, setDeletandoConta] = useState(false)
+  const [erroDeletar, setErroDeletar] = useState<string | null>(null)
+
   const carregarPerfil = async () => {
     if (!user) return
     try {
@@ -202,6 +207,23 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
       setErroSenha(translateError(error))
     } finally {
       setSalvandoSenha(false)
+    }
+  }
+
+  const excluirConta = async () => {
+    if (confirmacaoTexto !== 'EXCLUIR') return
+    try {
+      setDeletandoConta(true)
+      setErroDeletar(null)
+      const response = await authenticatedFetch('/api/user/delete-account', {
+        method: 'DELETE',
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Erro ao excluir conta')
+      await signOut()
+    } catch (error: any) {
+      setErroDeletar(error.message || 'Erro ao excluir conta. Tente novamente.')
+      setDeletandoConta(false)
     }
   }
 
@@ -674,6 +696,73 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
           Encerrar sessão
         </button>
       </section>
+
+      {/* Excluir conta */}
+      <section className="bg-white rounded-xl shadow-sm border border-red-100 p-6 sm:p-8">
+        <h2 className="text-lg font-semibold text-red-700 mb-1">Excluir conta</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          A exclusão é permanente e irreversível. Todos os seus diagnósticos, leads e dados serão removidos definitivamente.
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowDeleteModal(true)}
+          className="px-4 py-2 text-sm font-medium text-red-600 border border-red-300 rounded-lg hover:bg-red-50"
+        >
+          Excluir minha conta
+        </button>
+      </section>
+
+      {/* Modal de confirmação de exclusão */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Excluir conta permanentemente?</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Esta ação é <strong>irreversível</strong>. Todos os seus diagnósticos, leads, configurações e dados serão excluídos permanentemente.
+            </p>
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              Digite <span className="font-mono font-bold text-red-600">EXCLUIR</span> para confirmar:
+            </p>
+            <input
+              type="text"
+              value={confirmacaoTexto}
+              onChange={(e) => setConfirmacaoTexto(e.target.value)}
+              placeholder="EXCLUIR"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 mb-4"
+            />
+            {erroDeletar && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 mb-4">
+                {erroDeletar}
+              </div>
+            )}
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => { setShowDeleteModal(false); setConfirmacaoTexto(''); setErroDeletar(null) }}
+                disabled={deletandoConta}
+                className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={excluirConta}
+                disabled={confirmacaoTexto !== 'EXCLUIR' || deletandoConta}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {deletandoConta ? (
+                  <>
+                    <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                    Excluindo...
+                  </>
+                ) : (
+                  'Excluir conta permanentemente'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
