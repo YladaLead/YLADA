@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { buildProfileResumo, type YladaNoelProfileRow } from '@/lib/ylada-profile-resumo'
+import { mergeUserProfileContactIntoAreaSpecific } from '@/lib/ylada-noel-profile-gate'
 import { validateProfessionForSegment } from '@/config/ylada-profile-flows'
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
 import { yladaApiRejectWellnessProductUser } from '@/lib/ylada-api-guard'
@@ -207,6 +208,21 @@ export async function PUT(request: NextRequest) {
 
     if (!supabaseAdmin) {
       return NextResponse.json({ success: false, error: 'Backend não configurado' }, { status: 503 })
+    }
+
+    const { data: userProfileRow } = await supabaseAdmin
+      .from('user_profiles')
+      .select('nome_completo, whatsapp')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (parsed.row.area_specific && typeof parsed.row.area_specific === 'object') {
+      parsed.row.area_specific = mergeUserProfileContactIntoAreaSpecific(
+        parsed.row.area_specific as Record<string, unknown>,
+        userProfileRow
+      )
+    } else if (userProfileRow) {
+      parsed.row.area_specific = mergeUserProfileContactIntoAreaSpecific({}, userProfileRow)
     }
 
     const { data, error } = await supabaseAdmin

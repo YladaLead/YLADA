@@ -13,6 +13,11 @@ import { YLADA_SEGMENT_CODES } from '@/config/ylada-areas'
 import { supabaseAdmin } from '@/lib/supabase'
 import { getNoelJoiasLinhaPlaybookBlock } from '@/config/noel-joias-playbook'
 import { buildProfileResumo, type YladaNoelProfileRow } from '@/lib/ylada-profile-resumo'
+import {
+  evaluateNoelProfileGate,
+  loadNoelProfileGateContext,
+  syncNoelProfileContactIfNeeded,
+} from '@/lib/ylada-noel-profile-gate'
 import { getNoelYladaLinks, formatLinksAtivosParaNoel } from '@/lib/noel-ylada-links'
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
 import { formatDisplayTitle } from '@/lib/ylada/strategic-intro'
@@ -828,48 +833,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Exigir perfil empresarial completo para usar o Noel (qualidade das respostas)
-    if (!simulateKey) {
-      // Normalizar area_specific (Supabase JSONB pode vir como objeto ou string)
-      let as: Record<string, unknown> = {}
-      const raw = profileRow?.area_specific
-      if (raw != null) {
-        if (typeof raw === 'string') {
-          try {
-            as = (JSON.parse(raw) as Record<string, unknown>) || {}
-          } catch {
-            as = {}
-          }
-        } else if (typeof raw === 'object' && !Array.isArray(raw)) {
-          as = raw as Record<string, unknown>
-        }
-      }
-      let temNome = as?.nome != null && String(as.nome).trim().length >= 2
-      let temWhatsapp = as?.whatsapp != null && String(as.whatsapp).replace(/\D/g, '').length >= 10
-      const temPerfilEmpresarial = profileRow?.profile_type && profileRow?.profession
+    if (!simulateKey && supabaseAdmin) {
+      const gateCtx = await loadNoelProfileGateContext(
+        supabaseAdmin,
+        user.id,
+        validSegment,
+        user.user_metadata as Record<string, unknown> | undefined
+      )
+      const gate = evaluateNoelProfileGate(gateCtx)
 
-      // Fallback: se o segmento atual não tem nome/whatsapp (ex.: coach-bem-estar sem onboarding próprio),
-      // buscar no perfil 'ylada' onde o onboarding padrão salva esses campos.
-      if ((!temNome || !temWhatsapp) && validSegment !== 'ylada' && supabaseAdmin) {
-        try {
-          const { data: yladaFallback } = await supabaseAdmin
-            .from('ylada_noel_profile')
-            .select('area_specific')
-            .eq('user_id', user.id)
-            .eq('segment', 'ylada')
-            .maybeSingle()
-          if (yladaFallback?.area_specific) {
-            const yAs = typeof yladaFallback.area_specific === 'string'
-              ? (JSON.parse(yladaFallback.area_specific) as Record<string, unknown>)
-              : (yladaFallback.area_specific as Record<string, unknown>)
-            if (!temNome) temNome = yAs?.nome != null && String(yAs.nome).trim().length >= 2
-            if (!temWhatsapp) temWhatsapp = yAs?.whatsapp != null && String(yAs.whatsapp).replace(/\D/g, '').length >= 10
-          }
-        } catch {
-          // silencioso — não bloquear o Noel por falha no fallback
-        }
+      if (gate.effectiveProfile) {
+        profileRow = gate.effectiveProfile
+        profileResumo = buildProfileResumo(profileRow)
       }
 
-      if (!temNome || !temWhatsapp || !temPerfilEmpresarial) {
+      if (!gate.ok) {
         const msg = (message ?? '').toLowerCase().trim()
         let profileRequiredMessage: string
         if (/próximo passo|o que fazer|o que faço agora/i.test(msg)) {
@@ -891,9 +869,15 @@ export async function POST(request: NextRequest) {
           {
             error: 'profile_required',
             message: profileRequiredMessage,
-            profile_url: '/pt/perfil-empresarial',
+            profile_url: gate.profileUrl,
           },
           { status: 403 }
+        )
+      }
+
+      if (gate.syncContact) {
+        void syncNoelProfileContactIfNeeded(supabaseAdmin, user.id, gate.syncContact).catch((e) =>
+          console.warn('[/api/ylada/noel] syncNoelProfileContactIfNeeded:', e)
         )
       }
     }
