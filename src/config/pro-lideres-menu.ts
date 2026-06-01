@@ -33,6 +33,7 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
         icon: '📲',
       },
       { key: 'tarefas', label: 'Tarefas diárias', path: 'tarefas', icon: '✅' },
+      { key: 'quadro-parceria', label: 'Quadro parceria', path: 'quadro-parceria', icon: '🖨️' },
       { key: 'noel', label: 'Noel líder', path: 'noel', icon: '💬', leaderOnly: true },
     ],
   },
