@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import {
-  analyzeConversationMessages,
+  analyzeConversationWithPause,
   type CarolMessageRow,
 } from '@/lib/carol/conversation-insights'
 
@@ -25,10 +25,7 @@ export async function GET(request: NextRequest) {
 
   const ids = (data || []).map((c) => c.id)
   let lastMessages: Record<string, { content: string; role: string; created_at: string }> = {}
-  const insightsMap: Record<
-    string,
-    ReturnType<typeof analyzeConversationMessages>
-  > = {}
+  const insightsMap: Record<string, ReturnType<typeof analyzeConversationWithPause>> = {}
 
   if (ids.length > 0) {
     const { data: msgs } = await supabaseAdmin
@@ -55,8 +52,11 @@ export async function GET(request: NextRequest) {
       byConv.set(msg.conversation_id, list)
     }
 
-    for (const id of ids) {
-      insightsMap[id] = analyzeConversationMessages(byConv.get(id) || [])
+    for (const c of data || []) {
+      insightsMap[c.id] = analyzeConversationWithPause(
+        byConv.get(c.id) || [],
+        Boolean(c.paused)
+      )
     }
   }
 
@@ -70,6 +70,7 @@ export async function GET(request: NextRequest) {
       follow_up_sent: ins?.follow_up_sent ?? false,
       awaiting_reply: ins?.awaiting_reply ?? false,
       pending_carol_reply: ins?.pending_carol_reply ?? false,
+      paused_awaiting_andre: ins?.paused_awaiting_andre ?? false,
     }
   })
 
@@ -79,6 +80,7 @@ export async function GET(request: NextRequest) {
     awaiting_reply: result.filter((c) => c.awaiting_reply).length,
     pending_carol_reply: result.filter((c) => c.pending_carol_reply).length,
     follow_up_sent: result.filter((c) => c.follow_up_sent).length,
+    paused_awaiting_andre: result.filter((c) => c.paused_awaiting_andre).length,
   }
 
   return NextResponse.json({ conversations: result, stats })

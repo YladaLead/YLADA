@@ -19,6 +19,8 @@ export type ConversationInsights = {
   awaiting_reply: boolean
   /** Lead respondeu de verdade mas Carol ainda não enviou resposta depois */
   pending_carol_reply: boolean
+  /** Carol pausada e última mensagem real é da lead — Andre ainda não respondeu */
+  paused_awaiting_andre: boolean
 }
 
 export type PendingCarolReply = {
@@ -63,6 +65,20 @@ export function isRealUserMessage(content: string): boolean {
   if (isIgnoredAutoReplyMessage(content)) return false
   if (isAutoResponse(raw)) return false
   return true
+}
+
+/** Carol pausada: lead mandou mensagem real por último (você ainda não respondeu no painel). */
+export function isPausedAwaitingAndreReply(
+  messages: CarolMessageRow[],
+  paused: boolean
+): boolean {
+  if (!paused || messages.length === 0) return false
+
+  const sorted = [...messages].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  )
+  const last = sorted[sorted.length - 1]
+  return last.role === 'user' && isRealUserMessage(last.content)
 }
 
 export function findPendingCarolReply(
@@ -125,5 +141,17 @@ export function analyzeConversationMessages(
     first_outbound_at: firstOutbound?.created_at ?? null,
     awaiting_reply: Boolean(firstOutbound) && !hasUserReply,
     pending_carol_reply: findPendingCarolReply(sorted) !== null,
+    paused_awaiting_andre: false,
+  }
+}
+
+export function analyzeConversationWithPause(
+  messages: CarolMessageRow[],
+  paused: boolean
+): ConversationInsights {
+  const base = analyzeConversationMessages(messages)
+  return {
+    ...base,
+    paused_awaiting_andre: isPausedAwaitingAndreReply(messages, paused),
   }
 }

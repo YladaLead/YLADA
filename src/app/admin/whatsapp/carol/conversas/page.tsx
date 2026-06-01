@@ -22,6 +22,7 @@ type Conversation = {
   has_outbound?: boolean
   follow_up_sent?: boolean
   awaiting_reply?: boolean
+  paused_awaiting_andre?: boolean
 }
 
 type ConversationStats = {
@@ -29,9 +30,10 @@ type ConversationStats = {
   responded: number
   awaiting_reply: number
   follow_up_sent: number
+  paused_awaiting_andre: number
 }
 
-type ReplyFilter = 'all' | 'responded' | 'awaiting' | 'follow_up'
+type ReplyFilter = 'all' | 'responded' | 'awaiting' | 'follow_up' | 'paused_awaiting_andre'
 
 type Message = {
   id: string
@@ -125,6 +127,20 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function ReplyBadge({ conversation: c }: { conversation: Conversation }) {
+  if (c.paused_awaiting_andre) {
+    return (
+      <span className="inline-block rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold text-orange-900">
+        Aguardando você
+      </span>
+    )
+  }
+  if (c.paused) {
+    return (
+      <span className="inline-block rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-semibold text-orange-700">
+        Pausada
+      </span>
+    )
+  }
   if (c.has_user_reply) {
     return (
       <span className="inline-block rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-800">
@@ -299,6 +315,7 @@ function ConversationList({
     if (filter === 'responded') return c.has_user_reply
     if (filter === 'awaiting') return c.awaiting_reply && !c.has_user_reply
     if (filter === 'follow_up') return c.follow_up_sent
+    if (filter === 'paused_awaiting_andre') return Boolean(c.paused_awaiting_andre)
     return true
   })
 
@@ -350,6 +367,7 @@ function ConversationList({
           {(
             [
               ['all', 'Todos'],
+              ['paused_awaiting_andre', 'Aguardando você'],
               ['responded', 'Respondeu'],
               ['awaiting', 'Sem resposta'],
               ['follow_up', 'Follow-up'],
@@ -361,12 +379,19 @@ function ConversationList({
               onClick={() => setFilter(key)}
               className={`rounded-full px-3 py-1 text-xs font-semibold ${
                 filter === key
-                  ? 'bg-[#075e54] text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? key === 'paused_awaiting_andre'
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-[#075e54] text-white'
+                  : key === 'paused_awaiting_andre'
+                    ? 'bg-orange-50 text-orange-800 hover:bg-orange-100'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               {label}
               {key === 'awaiting' && stats ? ` (${stats.awaiting_reply})` : ''}
+              {key === 'paused_awaiting_andre' && stats
+                ? ` (${stats.paused_awaiting_andre})`
+                : ''}
             </button>
           ))}
           <div className="ml-auto flex items-center gap-1">
@@ -417,16 +442,20 @@ function ConversationList({
             <p className="font-medium">
               {phoneQuery
                 ? 'Nenhum número encontrado'
-                : conversations.length === 0
-                  ? 'Nenhuma conversa ainda'
-                  : 'Nenhuma neste filtro'}
+                : filter === 'paused_awaiting_andre'
+                  ? 'Ninguém aguardando sua resposta'
+                  : conversations.length === 0
+                    ? 'Nenhuma conversa ainda'
+                    : 'Nenhuma neste filtro'}
             </p>
             <p className="text-sm mt-1">
               {phoneQuery
                 ? 'Tente os últimos dígitos ou o número com DDI 55'
-                : conversations.length === 0
-                  ? 'Quando alguém falar com a Carol aparece aqui'
-                  : 'Tente outro filtro acima'}
+                : filter === 'paused_awaiting_andre'
+                  ? 'Carol pausada e a última mensagem é da lead — responda pelo painel com a Carol pausada'
+                  : conversations.length === 0
+                    ? 'Quando alguém falar com a Carol aparece aqui'
+                    : 'Tente outro filtro acima'}
             </p>
             <button
               onClick={() => setShowModal(true)}
@@ -440,7 +469,11 @@ function ConversationList({
             <button
               key={c.id}
               onClick={() => onSelect(c)}
-              className="flex w-full items-start gap-3 bg-white px-4 py-3.5 text-left hover:bg-gray-50 active:bg-gray-100"
+              className={`flex w-full items-start gap-3 px-4 py-3.5 text-left hover:bg-gray-50 active:bg-gray-100 ${
+                c.paused_awaiting_andre
+                  ? 'border-l-4 border-orange-500 bg-orange-50/60'
+                  : 'bg-white'
+              }`}
             >
               {/* Avatar */}
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-600">
