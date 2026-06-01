@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
@@ -48,8 +49,12 @@ type Template = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+function phoneDigits(phone: string) {
+  return phone.replace(/\D/g, '')
+}
+
 function formatPhone(phone: string) {
-  const d = phone.replace(/\D/g, '')
+  const d = phoneDigits(phone)
   if (d.startsWith('55') && d.length >= 12) {
     const local = d.slice(2)
     const ddd = local.slice(0, 2)
@@ -57,6 +62,14 @@ function formatPhone(phone: string) {
     return `+55 (${ddd}) ${num.slice(0, 5)}-${num.slice(5)}`
   }
   return `+${phone}`
+}
+
+/** Busca por qualquer trecho do número (ex.: 4722, DDD, número completo). */
+function matchesPhoneSearch(phone: string, query: string) {
+  const q = phoneDigits(query)
+  if (!q) return true
+  const p = phoneDigits(phone)
+  return p.includes(q)
 }
 
 function relativeTime(iso: string) {
@@ -264,24 +277,40 @@ function ConversationList({
   conversations,
   stats,
   loading,
+  phoneQuery,
+  onPhoneQueryChange,
   onSelect,
   onRefresh,
 }: {
   conversations: Conversation[]
   stats: ConversationStats | null
   loading: boolean
+  phoneQuery: string
+  onPhoneQueryChange: (value: string) => void
   onSelect: (c: Conversation) => void
   onRefresh: () => void
 }) {
   const [showModal, setShowModal] = useState(false)
   const [filter, setFilter] = useState<ReplyFilter>('all')
+  const phoneInputRef = useRef<HTMLInputElement>(null)
 
   const filtered = conversations.filter((c) => {
+    if (!matchesPhoneSearch(c.phone, phoneQuery)) return false
     if (filter === 'responded') return c.has_user_reply
     if (filter === 'awaiting') return c.awaiting_reply && !c.has_user_reply
     if (filter === 'follow_up') return c.follow_up_sent
     return true
   })
+
+  function handlePhoneKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' && filtered.length === 1) {
+      onSelect(filtered[0])
+    }
+    if (e.key === 'Escape') {
+      onPhoneQueryChange('')
+      phoneInputRef.current?.blur()
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -317,7 +346,7 @@ function ConversationList({
             </button>
           </div>
         </div>
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap items-center gap-2">
           {(
             [
               ['all', 'Todos'],
@@ -340,7 +369,40 @@ function ConversationList({
               {key === 'awaiting' && stats ? ` (${stats.awaiting_reply})` : ''}
             </button>
           ))}
+          <div className="ml-auto flex items-center gap-1">
+            <input
+              ref={phoneInputRef}
+              type="search"
+              inputMode="tel"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              value={phoneQuery}
+              onChange={(e) => onPhoneQueryChange(e.target.value)}
+              onKeyDown={handlePhoneKeyDown}
+              placeholder="nº"
+              aria-label="Buscar por número de WhatsApp"
+              className="w-[72px] rounded-md border border-transparent bg-gray-100/80 px-2 py-1 text-center text-xs tracking-wide text-gray-700 placeholder:text-gray-400 focus:border-gray-300 focus:bg-white focus:outline-none"
+            />
+            {phoneQuery ? (
+              <button
+                type="button"
+                onClick={() => onPhoneQueryChange('')}
+                className="rounded px-1 text-[10px] text-gray-400 hover:text-gray-600"
+                aria-label="Limpar busca"
+              >
+                ✕
+              </button>
+            ) : null}
+          </div>
         </div>
+        {phoneQuery && filtered.length > 0 ? (
+          <p className="mt-1.5 text-[10px] text-gray-400">
+            {filtered.length === 1
+              ? 'Enter abre a conversa'
+              : `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''}`}
+          </p>
+        ) : null}
       </div>
 
       {/* Lista */}
@@ -353,12 +415,18 @@ function ConversationList({
           <div className="flex flex-col items-center justify-center py-20 text-center text-gray-400">
             <p className="text-4xl mb-2">💬</p>
             <p className="font-medium">
-              {conversations.length === 0 ? 'Nenhuma conversa ainda' : 'Nenhuma neste filtro'}
+              {phoneQuery
+                ? 'Nenhum número encontrado'
+                : conversations.length === 0
+                  ? 'Nenhuma conversa ainda'
+                  : 'Nenhuma neste filtro'}
             </p>
             <p className="text-sm mt-1">
-              {conversations.length === 0
-                ? 'Quando alguém falar com a Carol aparece aqui'
-                : 'Tente outro filtro acima'}
+              {phoneQuery
+                ? 'Tente os últimos dígitos ou o número com DDI 55'
+                : conversations.length === 0
+                  ? 'Quando alguém falar com a Carol aparece aqui'
+                  : 'Tente outro filtro acima'}
             </p>
             <button
               onClick={() => setShowModal(true)}
@@ -815,10 +883,16 @@ function ConversationDetail({
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 function CarolConversasContent() {
+  const searchParams = useSearchParams()
+  const initialPhoneQuery =
+    searchParams.get('tel') ?? searchParams.get('q') ?? searchParams.get('phone') ?? ''
+
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [stats, setStats] = useState<ConversationStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Conversation | null>(null)
+  const [phoneQuery, setPhoneQuery] = useState(initialPhoneQuery)
+  const autoOpenedFromUrl = useRef(false)
 
   const loadConversations = useCallback(async () => {
     setLoading(true)
@@ -839,6 +913,20 @@ function CarolConversasContent() {
     return () => clearInterval(interval)
   }, [loadConversations])
 
+  useEffect(() => {
+    setPhoneQuery(initialPhoneQuery)
+    autoOpenedFromUrl.current = false
+  }, [initialPhoneQuery])
+
+  useEffect(() => {
+    if (autoOpenedFromUrl.current || !phoneQuery.trim() || loading) return
+    const matches = conversations.filter((c) => matchesPhoneSearch(c.phone, phoneQuery))
+    if (matches.length === 1) {
+      autoOpenedFromUrl.current = true
+      setSelected(matches[0])
+    }
+  }, [conversations, phoneQuery, loading])
+
   if (selected) {
     return (
       <ConversationDetail
@@ -853,6 +941,8 @@ function CarolConversasContent() {
       conversations={conversations}
       stats={stats}
       loading={loading}
+      phoneQuery={phoneQuery}
+      onPhoneQueryChange={setPhoneQuery}
       onSelect={setSelected}
       onRefresh={loadConversations}
     />

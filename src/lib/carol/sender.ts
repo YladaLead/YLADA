@@ -56,7 +56,12 @@ export async function sendWhatsAppTemplate(
  * Usado na primeira resposta ao lead de anúncio (Click-to-WhatsApp).
  * Máximo 3 botões, texto de cada botão: até 20 chars.
  */
-export async function sendPainButtons(to: string): Promise<void> {
+export async function sendPainButtons(
+  to: string,
+  options?: { intro?: string }
+): Promise<void> {
+  const intro =
+    options?.intro?.trim() || 'Oi! 😊 Qual dessas mais te representa hoje?'
   const phoneId = process.env.WHATSAPP_PHONE_ID
   const token = process.env.WHATSAPP_TOKEN
 
@@ -80,7 +85,7 @@ export async function sendPainButtons(to: string): Promise<void> {
       interactive: {
         type: 'button',
         body: {
-          text: 'Oi! 😊 Qual dessas mais te representa hoje?',
+          text: intro,
         },
         action: {
           buttons: [

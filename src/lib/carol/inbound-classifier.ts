@@ -1,5 +1,6 @@
 import OpenAI from 'openai'
 import { getClassifierModel } from './carol-reply-profile'
+import { messageHasButtonReply } from './ad-lead-flow'
 import { isCarolInteractiveReply } from './parse-interactive'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
@@ -50,6 +51,7 @@ export function shouldClassifyWithAi(
   text: string,
   history: { role: string; content: string }[]
 ): boolean {
+  if (messageHasButtonReply(text)) return false
   if (isCarolInteractiveReply(text)) return false
   // Outbound ou mensagem longa/link — sempre classificar
   if (historyHasOutbound(history) || looksAmbiguousForRules(text)) return true
@@ -91,6 +93,10 @@ export async function classifyInboundMessage(
   text: string,
   history: { role: string; content: string }[]
 ): Promise<InboundKind> {
+  if (messageHasButtonReply(text)) {
+    console.log(`[Carol Classifier] humano (botão) — ${text.slice(0, 60)}…`)
+    return 'humano'
+  }
   if (isCarolInteractiveReply(text)) {
     console.log(`[Carol Classifier] humano (botão/lista) — ${text.slice(0, 60)}…`)
     return 'humano'

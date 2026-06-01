@@ -11,6 +11,15 @@ import {
   shouldClassifyWithAi,
   type InboundKind,
 } from './inbound-classifier'
+import {
+  applySchedulingLoopGuard,
+  extractButtonReply,
+  getPainButtonsIntro,
+  hasSentPainButtons,
+  historyHasButtonClick,
+  messageHasButtonReply,
+  POST_BUTTON_CLICK_PROMPT,
+} from './ad-lead-flow'
 import { isCarolInteractiveReply } from './parse-interactive'
 import {
   getOrCreateConversation,
@@ -78,22 +87,16 @@ function conversationHasAdLeadIntent(
     .some((m) => isMetaAdLeadMessage(m.content))
 }
 
-function assistantAlreadyReplied(
-  history: Array<{ role: string; content: string }>
-): boolean {
-  return history.some((m) => m.role === 'assistant')
-}
-
 const AD_LEAD_CONTEXT_PROMPT = `
 CONTEXTO OBRIGATÓRIO: LEAD DE ANÚNCIO (Meta Ads / Click to WhatsApp).
 A pessoa clicou no anúncio e pediu informações ou demonstrou interesse. Prioridade máxima sobre ETAPA 1 genérica.
 
 TRILHA CURTA (2 a 3 trocas até convite ao diagnóstico com o Andre, não espere 5 a 6 trocas):
-1) Primeira resposta — pergunta aberta sobre a dor principal. Modelo:
-   "Oi! 😊 Me conta — qual é seu maior desafio hoje na clínica?"
-   PROIBIDO: "Vi que você quer saber mais", "A gente ajuda quem tem clínica", pitch de serviço, qualificação prematura.
+0) Se o sistema já enviou os 3 botões de dor, a lead clicou — use o bloco PÓS-CLIQUE (máx. 2 perguntas → convite).
 
-2) Se a resposta for vaga, ofereça 3 opções em texto corrido (sem lista, sem bullet):
+1) Se ainda NÃO houve botões: o sistema envia botões primeiro (não descreva os botões no texto).
+
+2) Se a resposta for vaga SEM botões, ofereça 3 opções em texto corrido (sem lista, sem bullet):
    "Muitas donas de clínica me contam uma dessas três coisas: agenda que oscila todo mês, cansaço de fazer tudo sozinha, ou faturamento que não cresce mesmo com a agenda cheia. Qual mais parece o seu caso?"
 
 3) A partir da escolha dela, aprofunde naquela dor específica. Nunca salte para outra dor.
@@ -399,6 +402,27 @@ export async function ingestInboundMessage(
 
   const conversation = await getOrCreateConversation(from)
 
+  // Clique em botão — nunca tratar como auto-resposta da clínica (mesmo se vier misturado)
+  if (messageHasButtonReply(text)) {
+    const buttonText =
+      extractButtonReply(text) || (isCarolInteractiveReply(text) ? text.trim() : null)
+    if (buttonText) {
+      const rest = text.replace(buttonText, '').trim()
+      if (rest && isAutoResponse(rest)) {
+        await saveMessage(conversation.id, 'user', `[auto-resposta ignorada] ${rest}`)
+      }
+      await saveMessage(conversation.id, 'user', buttonText)
+      console.log(`[Carol] 📥 Clique em botão de ${from}: ${buttonText}`)
+      return {
+        status: 'saved',
+        payload: { ...payload, text: buttonText },
+        conversationId: conversation.id,
+        conversation,
+        inboundKind: 'humano',
+      }
+    }
+  }
+
   if (isCarolInteractiveReply(text)) {
     await saveMessage(conversation.id, 'user', text)
     console.log(`[Carol] 📥 Clique em botão/lista de ${from}: ${text}`)
@@ -505,16 +529,18 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
     // Se a mensagem é o CTA padrão do Meta ("Tenho interesse", "mais informações")
     // e Carol ainda não respondeu nesta conversa → envia botões das 3 dores.
     // Não usa OpenAI: resposta é determinística e engajamento com botões é 3x maior.
-    const isFirstAdLeadCta =
+    const shouldSendPainButtons =
       !isFlowResponse &&
       isAdLead &&
       isMetaAdLeadMessage(text) &&
-      !assistantAlreadyReplied(history)
+      !messageHasButtonReply(text) &&
+      !hasSentPainButtons(history)
 
-    if (isFirstAdLeadCta) {
+    if (shouldSendPainButtons) {
+      const intro = getPainButtonsIntro(text)
       console.log(`[Carol] 🎯 Lead de anúncio — enviando botões de dor para ${from}`)
       await humanDelay()
-      await sendPainButtons(from)
+      await sendPainButtons(from, { intro })
       await saveMessage(conversation.id, 'assistant', '[botões enviados: Agenda oscila | Faço tudo sozinha | Lucro não cresce]')
       return
     }
@@ -527,10 +553,18 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
 
     const duplicateCtaNote =
       isAdLead &&
-      assistantAlreadyReplied(history) &&
-      isMetaAdLeadMessage(text)
-        ? `\nA pessoa reenviou o mesmo CTA do anúncio. NÃO repita a abertura. Continue a conversa ou retome a última pergunta em 1 linha.\n`
+      hasSentPainButtons(history) &&
+      isMetaAdLeadMessage(text) &&
+      !messageHasButtonReply(text)
+        ? `\nA pessoa reenviou o mesmo CTA do anúncio. NÃO repita a abertura nem reenvie botões. Continue a conversa ou retome a última pergunta em 1 linha.\n`
         : ''
+
+    const postButtonNote =
+      hasSentPainButtons(history) &&
+      (messageHasButtonReply(text) || historyHasButtonClick(history))
+        ? POST_BUTTON_CLICK_PROMPT
+        : ''
+
     const basePrompt =
       channel === 'inbound' ? CAROL_INBOUND_MINI_PROMPT : CAROL_SYSTEM_PROMPT
     const replyModel = getCarolReplyModel(channel)
@@ -544,7 +578,11 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       basePrompt +
       (isFlowResponse
         ? FLOW_CONTEXT_PROMPT
-        : adLeadNote + outboundContextNote + classifierNote + duplicateCtaNote) +
+        : adLeadNote +
+          postButtonNote +
+          outboundContextNote +
+          classifierNote +
+          duplicateCtaNote) +
       notaAndreContext +
       statusContextNote
 
@@ -599,11 +637,13 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
     }
 
     // Limpa a resposta removendo todas as tags internas
-    const replyLimpo = reply
+    let replyLimpo = reply
       .replace(/\[NOME_DETECTADO:[^\]]*\]/g, '')
       .replace(/\[LEAD_DATA:.*?\]/s, '')
       .replace('[AGENDAMENTO_CONFIRMADO]', '')
       .trim()
+
+    replyLimpo = applySchedulingLoopGuard(replyLimpo, history)
 
     // Salva resposta da Carol
     await saveMessage(conversation.id, 'assistant', replyLimpo)
@@ -613,6 +653,15 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
 
     // Envia resposta para o usuário
     await sendWhatsAppMessage(from, replyLimpo)
+
+    // Status em andamento após clique nos botões + primeira resposta textual
+    if (
+      postButtonNote &&
+      convStatus === 'novo' &&
+      replyLimpo.length > 0
+    ) {
+      await updateConversationStatus(conversation.id, 'em_andamento')
+    }
 
     // ── NOTIFICAÇÃO 2: Nome capturado ────────────────────────────────────────
     if (nomeDetectado && !conversation.nome) {
