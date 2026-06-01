@@ -27,6 +27,7 @@ import { createClient } from '@/lib/supabase-client'
 import { parseProLideresMemberPathSegment } from '@/lib/ylada-public-link-path'
 import { dedupeQuizExpandedBody, splitQuizDescriptionForPublicResult } from '@/lib/split-quiz-result-description'
 import { shouldAdvanceConfigDrivenStepToResult } from '@/lib/ylada/public-link-quiz-flow'
+import { getRecruitmentFluxoPublicIntro } from '@/lib/recruitment-fluxo-public-intro'
 
 const publicLinkShareButtonClassName =
   'w-full rounded-xl border-2 border-sky-400 bg-sky-100 px-4 py-4 text-sm font-semibold leading-snug text-sky-900 shadow-md shadow-sky-400/30 transition-colors hover:border-sky-500 hover:bg-sky-200/70'
@@ -1269,7 +1270,15 @@ function ConfigDrivenLinkView({
   const introForDisplay = isProLideresRecruitmentLink
     ? {
         title: displayTitle,
-        subtitle: t.recruitmentIntroSubtitle,
+        subtitle: (() => {
+          const fluxoId =
+            typeof meta.pro_lideres_fluxo_id === 'string' ? meta.pro_lideres_fluxo_id.trim() : ''
+          if (fluxoId) {
+            return getRecruitmentFluxoPublicIntro(fluxoId, { nome: displayTitle })
+          }
+          const pageSubtitle = typeof page.subtitle === 'string' ? page.subtitle.trim() : ''
+          return pageSubtitle || t.recruitmentIntroSubtitle
+        })(),
         micro: t.recruitmentIntroMicro,
       }
     : isProLideresPreset

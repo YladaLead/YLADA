@@ -159,6 +159,7 @@ export default function CoachBemEstarRecrutamentoLinks() {
                 fluxo={preview}
                 whatsappNumber={profile?.whatsapp || ''}
                 countryCode="BR"
+                fluxoCategoria="recrutamento"
               />
             </div>
           </div>

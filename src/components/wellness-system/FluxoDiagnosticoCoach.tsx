@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import type { FluxoCliente, PerguntaFluxoCliente } from '@/types/wellness-system'
+import { getCoachBemEstarIntroObjetivo } from '@/lib/coach-bem-estar/coach-bem-estar-fluxo-copy'
 
 // ─── Sanitizer — remove referências a Herbalife / MLM / Wellness / Noel ─────
 
@@ -22,7 +23,14 @@ const SUBSTITUICOES: Array<[RegExp, string]> = [
   // Referências a Pro Líderes / recrutamento MLM
   [/pro.?líderes/gi, ''],
   [/oportunidade de negócio/gi, 'próximo passo'],
-  [/oportunidade herbalife/gi, 'oportunidade'],
+  [/apresentação de negócio/gi, 'conversa com quem te enviou o link'],
+  [/direcioná-las para apresentação de negócio/gi, 'orientar no próximo passo'],
+  [/direcioná-los para apresentação de negócio/gi, 'orientar no próximo passo'],
+  [/priorizar o próximo passo comercial/gi, 'priorizar o próximo passo'],
+  [/\s*Com leitura estratégica das inteligências (?:Noel|o coach)[^.]*\.?\s*/gi, ' '],
+  [/\s*A análise (?:Noel|do coach) ajuda[^.]*\.?\s*/gi, ' '],
+  [/\s*Com a inteligência (?:Noel|do coach)[^.]*\.?\s*/gi, ' '],
+  [/\s*Direcionamento com inteligência (?:Noel|do coach)[^.]*\.?\s*/gi, ' '],
   [/quero conhecer novas oportunidades/gi, 'Quero dar o próximo passo'],
   // Produtos Herbalife
   [/herbalife/gi, ''],
@@ -161,6 +169,8 @@ interface FluxoDiagnosticoCoachProps {
   fluxo: FluxoCliente
   whatsappNumber: string
   countryCode?: string
+  /** Vendas = saúde/bem-estar; recrutamento = perfil e conversa com quem enviou o link */
+  fluxoCategoria?: 'vendas' | 'recrutamento'
 }
 
 type Etapa = 'intro' | 'quiz' | 'resultado'
@@ -200,6 +210,7 @@ export default function FluxoDiagnosticoCoach({
   fluxo,
   whatsappNumber,
   countryCode = 'BR',
+  fluxoCategoria = 'vendas',
 }: FluxoDiagnosticoCoachProps) {
   const [etapa, setEtapa] = useState<Etapa>('intro')
   const [indiceAtual, setIndiceAtual] = useState(0)
@@ -218,7 +229,10 @@ export default function FluxoDiagnosticoCoach({
 
   // Conteúdo sanitizado (sem Herbalife / Wellness / Noel / MLM)
   const nomeFluxo = sanitizarTexto(fluxo.nome)
-  const objetivoFluxo = sanitizarTexto(fluxo.objetivo || '')
+  const objetivoFluxo =
+    fluxoCategoria === 'recrutamento'
+      ? getCoachBemEstarIntroObjetivo(fluxo)
+      : sanitizarTexto(fluxo.objetivo || '')
   const ctaFluxo = sanitizarTexto(fluxo.cta || '')
 
   const diag = {
@@ -310,13 +324,24 @@ export default function FluxoDiagnosticoCoach({
   // ── Tela de Intro ───────────────────────────────────────────────────────────
 
   if (etapa === 'intro') {
+    const badgeLabel =
+      fluxoCategoria === 'recrutamento' ? 'Avaliação rápida' : 'Diagnóstico de bem-estar'
+    const metaLinha =
+      fluxoCategoria === 'recrutamento'
+        ? total > 0
+          ? `${total} pergunta${total !== 1 ? 's' : ''} · Sem cadastro · Resultado na hora`
+          : 'Sem cadastro · Resultado na hora'
+        : total > 0
+          ? `${total} pergunta${total !== 1 ? 's' : ''} · Sem cadastro · Resultado imediato`
+          : 'Sem cadastro · Resultado imediato'
+
     return (
       <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100/80 p-6 sm:p-8">
           {/* Badge */}
           <div className="mb-4">
             <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
-              Diagnóstico de bem-estar
+              {badgeLabel}
             </span>
           </div>
 
@@ -340,9 +365,7 @@ export default function FluxoDiagnosticoCoach({
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            {total > 0
-              ? `${total} pergunta${total !== 1 ? 's' : ''} · Sem cadastro · Resultado imediato`
-              : 'Sem cadastro · Resultado imediato'}
+            {metaLinha}
           </p>
 
           {/* Botão Começar */}

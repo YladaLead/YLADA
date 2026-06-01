@@ -2046,6 +2046,11 @@ Você vai adorar! 😊`
                           fluxo={item.metadata.fluxo}
                           whatsappNumber={profile?.whatsapp || ''}
                           countryCode={profile?.countryCode || 'BR'}
+                          fluxoCategoria={
+                            item.tipo === 'fluxo-recrutamento' || item.tipo === 'recrutamento'
+                              ? 'recrutamento'
+                              : 'vendas'
+                          }
                         />
                       ) : (
                         <FluxoDiagnostico

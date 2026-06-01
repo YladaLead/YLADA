@@ -170,11 +170,14 @@ export default function FerramentaCoachBemEstarPage() {
   // Fluxos de vendas e recrutamento (renderizados pelo FluxoDiagnosticoCoach — formato Pro Líderes)
   if (tool.is_fluxo && tool.content?.fluxo) {
     const fluxo = tool.content.fluxo
+    const fluxoTipo = tool.fluxo_tipo || tool.content?.tipo
+    const fluxoCategoria = fluxoTipo === 'recrutamento' ? 'recrutamento' : 'vendas'
     return (
       <FluxoDiagnosticoCoach
         fluxo={fluxo}
         whatsappNumber={tool.whatsapp_number || ''}
         countryCode={tool.user_profiles?.country_code || 'BR'}
+        fluxoCategoria={fluxoCategoria}
       />
     )
   }

@@ -7,6 +7,7 @@ import { FLOW_IDS } from '@/config/ylada-flow-catalog'
 import { isHypeCalculadoraPresetFluxoId } from '@/lib/pro-lideres/pro-lideres-hype-calculadora-preset-fluxos'
 import { buildProLideresPresetOgDescription } from '@/lib/pro-lideres/pro-lideres-preset-og-description'
 import { isWellnessCalculadoraBasicaPresetFluxoId } from '@/lib/pro-lideres/pro-lideres-wellness-calculadoras-basicas-preset-fluxos'
+import { getRecruitmentFluxoPublicIntro } from '@/lib/recruitment-fluxo-public-intro'
 
 const DIAGNOSTICO_TEMPLATE_ID = 'a0000001-0001-4000-8000-000000000001' as const
 export { DIAGNOSTICO_TEMPLATE_ID }
@@ -15,9 +16,12 @@ export { DIAGNOSTICO_TEMPLATE_ID }
 export const PRO_LIDERES_PUBLIC_VISITOR_CONTEXTO_VENDAS =
   'O próximo passo é conversar com quem te enviou este link — hábitos, nutrição e bem-estar.'
 
-/** Recrutamento: mesmo princípio — linguagem genérica para quem preenche. */
-const PRO_LIDERES_PUBLIC_VISITOR_CONTEXTO_RECRUTAMENTO =
-  'O próximo passo é continuar no WhatsApp com quem te enviou este link.'
+function recruitmentPublicPageSubtitle(fluxo: FluxoCliente): string {
+  return getRecruitmentFluxoPublicIntro(fluxo.id, {
+    nome: fluxo.nome,
+    fallbackObjetivo: fluxo.objetivo,
+  })
+}
 
 function perguntaToFormField(p: FluxoCliente['perguntas'][number]) {
   switch (p.tipo) {
@@ -187,7 +191,7 @@ export function wellnessFluxoToYladaConfigJson(
     const pageObjetivo =
       kind === 'sales'
         ? `${objetivoBase}\n\n${PRO_LIDERES_PUBLIC_VISITOR_CONTEXTO_VENDAS}`
-        : `${objetivoBase}\n\n${PRO_LIDERES_PUBLIC_VISITOR_CONTEXTO_RECRUTAMENTO}`
+        : recruitmentPublicPageSubtitle(fluxo)
     const summary_bullets: string[] = [
       ...d.sintomas.slice(0, 5),
       ...d.beneficios.slice(0, 5),
@@ -239,7 +243,7 @@ export function wellnessFluxoToYladaConfigJson(
   const pageObjetivo =
     kind === 'sales'
       ? `${objetivoBase}\n\n${PRO_LIDERES_PUBLIC_VISITOR_CONTEXTO_VENDAS}`
-      : `${objetivoBase}\n\n${PRO_LIDERES_PUBLIC_VISITOR_CONTEXTO_RECRUTAMENTO}`
+      : recruitmentPublicPageSubtitle(fluxo)
   // Sem "•" no texto: `<ul class="list-disc">` já desenha o marcador (evita duas bolinhas).
   const summary_bullets: string[] = [
     ...d.sintomas.slice(0, 5),

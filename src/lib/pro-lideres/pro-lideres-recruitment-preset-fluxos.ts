@@ -2,6 +2,7 @@ import type { FluxoCliente } from '@/types/wellness-system'
 import { getFluxoRecrutamentoById } from '@/lib/wellness-system/fluxos-recrutamento'
 import { proLideresRecruitmentQuizFluxos } from '@/lib/pro-lideres/pro-lideres-recruitment-quiz-fluxos'
 import { PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS } from '@/lib/pro-lideres/pro-lideres-recruitment-unified-perguntas'
+import { getRecruitmentFluxoPublicIntro } from '@/lib/recruitment-fluxo-public-intro'
 
 /**
  * Presets de Recrutamento Pro Líderes:
@@ -27,7 +28,6 @@ const PRO_LIDERES_RECRUITMENT_CLASSIC_IDS = [
 ] as const
 
 function upgradeFluxoForNoel(fluxo: FluxoCliente): FluxoCliente {
-  const objetivosNoel = `${fluxo.objetivo} Com leitura estratégica das inteligências Noel para priorizar o próximo passo comercial.`
   const descricaoNoel = `${fluxo.diagnostico.descricao} A análise Noel ajuda a transformar esse perfil em plano de ação simples e rápido.`
   const ctaNoel = 'Quero conhecer novas oportunidades'
 
@@ -35,7 +35,11 @@ function upgradeFluxoForNoel(fluxo: FluxoCliente): FluxoCliente {
     ...fluxo,
     /** Mesmo questionário que o quiz Ganhos no Wellness (5 MCQs) — comparação de diagnóstico por `flow_id` só. */
     perguntas: PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS,
-    objetivo: objetivosNoel,
+    /** Intro pública: tom para quem responde o link (lead), não instrução ao líder. */
+    objetivo: getRecruitmentFluxoPublicIntro(fluxo.id, {
+      nome: fluxo.nome,
+      fallbackObjetivo: fluxo.objetivo,
+    }),
     diagnostico: {
       ...fluxo.diagnostico,
       descricao: descricaoNoel,
