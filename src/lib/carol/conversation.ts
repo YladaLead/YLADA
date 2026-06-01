@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { isLikelyBusinessDisplayName, usableFirstName } from './lead-name'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,6 +16,31 @@ export interface Conversation {
   hubspot_id: string | null
   created_at: string
   updated_at: string
+}
+
+/** Salva nome do perfil WhatsApp quando ainda não temos nome de pessoa no cadastro */
+export async function syncLeadProfileName(
+  conversationId: string,
+  currentNome: string | null,
+  profileName: string
+): Promise<void> {
+  const trimmed = profileName.trim()
+  if (!trimmed || isLikelyBusinessDisplayName(trimmed)) return
+  if (currentNome && usableFirstName(currentNome)) return
+
+  const { error } = await supabase
+    .from('carol_conversations')
+    .update({
+      nome: trimmed,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', conversationId)
+
+  if (error) {
+    console.error('[Carol] Erro ao salvar nome do perfil:', error)
+  } else {
+    console.log(`[Carol] 👤 Nome do perfil WhatsApp: ${trimmed}`)
+  }
 }
 
 export async function getOrCreateConversation(phone: string): Promise<Conversation> {

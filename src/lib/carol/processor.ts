@@ -20,12 +20,14 @@ import {
   messageHasButtonReply,
   POST_BUTTON_CLICK_PROMPT,
 } from './ad-lead-flow'
+import { buildLeadNameContextNote, usableFirstName } from './lead-name'
 import { isCarolInteractiveReply } from './parse-interactive'
 import {
   getOrCreateConversation,
   saveMessage,
   getConversationHistory,
   updateConversationStatus,
+  syncLeadProfileName,
 } from './conversation'
 import { isAutoResponse } from './auto-response'
 
@@ -370,6 +372,8 @@ export type CarolInboundPayload = {
   messageId: string
   timestamp: string
   isFlowResponse?: boolean
+  /** Nome do perfil WhatsApp (contacts[].profile.name no webhook Meta) */
+  profileName?: string
 }
 
 export type IngestInboundResult =
@@ -400,7 +404,14 @@ export async function ingestInboundMessage(
     processedMessageIds.delete(first)
   }
 
-  const conversation = await getOrCreateConversation(from)
+  let conversation = await getOrCreateConversation(from)
+
+  if (payload.profileName?.trim()) {
+    await syncLeadProfileName(conversation.id, conversation.nome, payload.profileName)
+    if (!usableFirstName(conversation.nome) && usableFirstName(payload.profileName)) {
+      conversation = { ...conversation, nome: payload.profileName.trim() }
+    }
+  }
 
   // Clique em botão — nunca tratar como auto-resposta da clínica (mesmo se vier misturado)
   if (messageHasButtonReply(text)) {
@@ -574,6 +585,11 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       ? `\n\n⚠️ CONTEXTO DO ANDRE (leia antes de responder):\n"${(conversation as any).nota_andre}"\nUse esse contexto para personalizar sua resposta. Não mencione que recebeu essa nota.\n`
       : ''
 
+    const nomeContextNote = buildLeadNameContextNote({
+      storedNome: (conversation as any).nome ?? conversation.nome,
+      profileName: payload.profileName,
+    })
+
     const systemContent =
       basePrompt +
       (isFlowResponse
@@ -583,6 +599,7 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
           outboundContextNote +
           classifierNote +
           duplicateCtaNote) +
+      nomeContextNote +
       notaAndreContext +
       statusContextNote
 

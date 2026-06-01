@@ -59,6 +59,15 @@ function parseFlowResponse(responseJson: string): string {
   }
 }
 
+function profileNameFromWebhook(value: {
+  contacts?: Array<{ profile?: { name?: string } }>
+}): string | undefined {
+  const name = value?.contacts?.[0]?.profile?.name
+  if (typeof name !== 'string') return undefined
+  const trimmed = name.trim()
+  return trimmed || undefined
+}
+
 function scheduleCarolReply(ingest: Extract<IngestInboundResult, { status: 'saved' }>): void {
   waitUntil(
     generateCarolReply(ingest).catch((err) => {
@@ -111,6 +120,9 @@ export async function POST(request: NextRequest) {
           continue
         }
 
+        const value = change.value
+        const profileName = profileNameFromWebhook(value)
+
         for (const message of messages) {
           messageCount++
           const from = message.from
@@ -118,6 +130,7 @@ export async function POST(request: NextRequest) {
             from,
             messageId: message.id,
             timestamp: message.timestamp,
+            profileName,
           }
 
           if (message.type === 'text') {
