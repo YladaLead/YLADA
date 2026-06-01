@@ -34,6 +34,13 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
       },
       { key: 'tarefas', label: 'Tarefas diárias', path: 'tarefas', icon: '✅' },
       { key: 'quadro-parceria', label: 'Quadro parceria', path: 'quadro-parceria', icon: '🖨️' },
+      {
+        key: 'noel-membro',
+        label: 'Noel - mentor',
+        path: 'noel-membro',
+        icon: '💬',
+        requireNoelMemberNav: true,
+      },
       { key: 'noel', label: 'Noel líder', path: 'noel', icon: '💬', leaderOnly: true },
     ],
   },
@@ -70,13 +77,6 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
   {
     label: 'Configurações',
     items: [
-      {
-        key: 'noel-membro',
-        label: 'Noel para equipe',
-        path: 'noel-membro',
-        icon: '💬',
-        requireNoelMemberNav: true,
-      },
       {
         key: 'configuracao',
         label: 'Configurar Noel equipe',
