@@ -10,10 +10,13 @@ export function ProLideresHeader() {
 
   if (isLandingHome) {
     return (
-      <header className="shrink-0 border-b border-gray-100 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-3">
-          <Link href="/pro-lideres" className="inline-flex shrink-0 touch-manipulation items-center" aria-label="Pro Líderes">
+      <header className="pl-site-header">
+        <div className="pl-site-header__inner">
+          <Link href="/pro-lideres" className="pl-site-header__logo" aria-label="Pro Líderes">
             <YLADALogo size="md" responsive className="bg-transparent" />
+          </Link>
+          <Link href="/pro-lideres/entrar" className="pl-site-header__enter">
+            Entrar
           </Link>
         </div>
       </header>
