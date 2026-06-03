@@ -139,18 +139,18 @@ export default function QuizEnergiaFoco({ config = defaultConfig }: { config?: T
         descricao: 'Seu perfil indica necessidade de apoio em energia e foco.',
         cor: 'orange',
         recomendacoes: [
-          'Bebidas funcionais como o Hype Drink podem ajudar na sua rotina.',
-          'O Hype Drink combina cafeína natural, vitaminas do complexo B e hidratação.'
+          'Bebidas funcionais como a bebida funcional podem ajudar na sua rotina.',
+          'A bebida funcional combina cafeína natural, vitaminas do complexo B e hidratação.'
         ],
         resultadoId: 'energiaBaixa',
         diagnostico: diagnostico || {
           diagnostico: '📋 DIAGNÓSTICO: Sua energia está baixa e precisa de apoio para se manter estável ao longo do dia',
           causaRaiz: '🔍 CAUSA RAIZ: Queda de energia constante pode estar relacionada a desequilíbrios nutricionais, falta de hidratação adequada ou necessidade de suporte energético funcional. Muitas pessoas recorrem a excesso de café ou estimulantes fortes, mas isso gera ansiedade e queda brusca depois.',
-          acaoImediata: '⚡ AÇÃO IMEDIATA: Considere uma bebida funcional com cafeína natural, vitaminas do complexo B e hidratação para apoiar sua energia de forma mais estável. O Hype Drink combina esses elementos em uma solução prática para o dia a dia.',
-          plano7Dias: '📅 PLANO 7 DIAS: Inclua o Hype Drink na sua rotina matinal ou no período de maior queda de energia. Ele pode ajudar a manter energia e foco sem os picos e quedas bruscas do café excessivo.',
-          suplementacao: '💊 SUPLEMENTAÇÃO: O Hype Drink é uma bebida funcional que combina cafeína natural (chá verde e preto), vitaminas do complexo B, taurina e hidratação. Ele não substitui refeições, mas pode apoiar energia e foco dentro de um estilo de vida saudável.',
-          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada com carboidratos complexos, proteínas e hidratação adequada. O Hype Drink pode complementar sua rotina, especialmente nos momentos de maior demanda energética.',
-          proximoPasso: '🎯 PRÓXIMO PASSO: Seu perfil indica necessidade de apoio em energia e foco. O Hype Drink pode ajudar na sua rotina. Quer experimentar?'
+          acaoImediata: '⚡ AÇÃO IMEDIATA: Considere uma bebida funcional com cafeína natural, vitaminas do complexo B e hidratação para apoiar sua energia de forma mais estável. A bebida funcional combina esses elementos em uma solução prática para o dia a dia.',
+          plano7Dias: '📅 PLANO 7 DIAS: Inclua a bebida funcional na sua rotina matinal ou no período de maior queda de energia. Ele pode ajudar a manter energia e foco sem os picos e quedas bruscas do café excessivo.',
+          suplementacao: '💊 SUPLEMENTAÇÃO: A bebida funcional é uma bebida funcional que combina cafeína natural (chá verde e preto), vitaminas do complexo B, taurina e hidratação. Ele não substitui refeições, mas pode apoiar energia e foco dentro de um estilo de vida saudável.',
+          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada com carboidratos complexos, proteínas e hidratação adequada. A bebida funcional pode complementar sua rotina, especialmente nos momentos de maior demanda energética.',
+          proximoPasso: '🎯 PRÓXIMO PASSO: Seu perfil indica necessidade de apoio em energia e foco. A bebida funcional pode ajudar na sua rotina. Quer experimentar?'
         }
       }
     } else if (score <= 10) {
@@ -161,18 +161,18 @@ export default function QuizEnergiaFoco({ config = defaultConfig }: { config?: T
         descricao: 'Você tem altos e baixos de energia ao longo do dia.',
         cor: 'yellow',
         recomendacoes: [
-          'O Hype Drink pode ajudar a manter energia mais estável.',
+          'A bebida funcional pode ajudar a manter energia mais estável.',
           'Com cafeína natural e vitaminas, ele apoia foco e disposição.'
         ],
         resultadoId: 'energiaInstavel',
         diagnostico: diagnostico || {
           diagnostico: '📋 DIAGNÓSTICO: Você tem altos e baixos de energia ao longo do dia que podem ser equilibrados',
           causaRaiz: '🔍 CAUSA RAIZ: Energia instável geralmente está relacionada a consumo excessivo de cafeína, falta de hidratação ou necessidade de suporte energético mais equilibrado. Alternativas com cafeína natural e dosagem controlada podem ajudar a manter energia mais estável.',
-          acaoImediata: '⚡ AÇÃO IMEDIATA: Considere uma alternativa ao café excessivo. O Hype Drink pode ajudar a manter energia mais estável, com cafeína natural e vitaminas do complexo B, sem os picos e quedas bruscas.',
-          plano7Dias: '📅 PLANO 7 DIAS: Substitua parte do seu consumo de café pelo Hype Drink nos momentos de maior necessidade. Ele pode ajudar a manter energia e foco de forma mais equilibrada.',
-          suplementacao: '💊 SUPLEMENTAÇÃO: O Hype Drink combina cafeína natural (chá verde e preto), vitaminas do complexo B e hidratação. Ele pode ser uma alternativa mais equilibrada ao café excessivo.',
-          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada e hidratação adequada. O Hype Drink pode complementar sua rotina, especialmente para manter energia mais estável.',
-          proximoPasso: '🎯 PRÓXIMO PASSO: Seu perfil indica necessidade de energia mais estável. O Hype Drink pode ajudar. Quer experimentar?'
+          acaoImediata: '⚡ AÇÃO IMEDIATA: Considere uma alternativa ao café excessivo. A bebida funcional pode ajudar a manter energia mais estável, com cafeína natural e vitaminas do complexo B, sem os picos e quedas bruscas.',
+          plano7Dias: '📅 PLANO 7 DIAS: Substitua parte do seu consumo de café pela bebida funcional nos momentos de maior necessidade. Ele pode ajudar a manter energia e foco de forma mais equilibrada.',
+          suplementacao: '💊 SUPLEMENTAÇÃO: A bebida funcional combina cafeína natural (chá verde e preto), vitaminas do complexo B e hidratação. Ele pode ser uma alternativa mais equilibrada ao café excessivo.',
+          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada e hidratação adequada. A bebida funcional pode complementar sua rotina, especialmente para manter energia mais estável.',
+          proximoPasso: '🎯 PRÓXIMO PASSO: Seu perfil indica necessidade de energia mais estável. A bebida funcional pode ajudar. Quer experimentar?'
         }
       }
     } else {
@@ -183,18 +183,18 @@ export default function QuizEnergiaFoco({ config = defaultConfig }: { config?: T
         descricao: 'Sua rotina exige muita energia e foco.',
         cor: 'red',
         recomendacoes: [
-          'O Hype Drink é ideal para quem precisa de performance constante.',
+          'A bebida funcional é ideal para quem precisa de performance constante.',
           'Ele combina energia, foco e hidratação em uma bebida funcional.'
         ],
         resultadoId: 'altaDemanda',
         diagnostico: diagnostico || {
           diagnostico: '📋 DIAGNÓSTICO: Sua rotina exige muita energia e foco, e você precisa de suporte funcional',
           causaRaiz: '🔍 CAUSA RAIZ: Rotinas intensas exigem suporte energético constante e foco mental. Bebidas funcionais com cafeína natural, vitaminas e hidratação podem ajudar a manter performance ao longo do dia, especialmente em momentos de alta demanda.',
-          acaoImediata: '⚡ AÇÃO IMEDIATA: Para rotinas intensas, soluções práticas que apoiem energia e foco ajudam na constância diária. O Hype Drink é ideal para quem precisa de performance constante.',
-          plano7Dias: '📅 PLANO 7 DIAS: Use o Hype Drink pela manhã ou nos momentos de maior demanda. Ele combina energia, foco e hidratação em uma solução prática para rotinas intensas.',
-          suplementacao: '💊 SUPLEMENTAÇÃO: O Hype Drink é uma bebida funcional desenvolvida para apoiar energia, foco e hidratação. Ele combina cafeína natural, vitaminas do complexo B e hidratação em uma solução prática.',
-          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada e hidratação adequada. O Hype Drink pode complementar sua rotina, especialmente em momentos de alta demanda física ou mental.',
-          proximoPasso: '🎯 PRÓXIMO PASSO: Para rotinas intensas como a sua, o Hype Drink pode ajudar a manter energia e foco. Quer experimentar?'
+          acaoImediata: '⚡ AÇÃO IMEDIATA: Para rotinas intensas, soluções práticas que apoiem energia e foco ajudam na constância diária. A bebida funcional é ideal para quem precisa de performance constante.',
+          plano7Dias: '📅 PLANO 7 DIAS: Use a bebida funcional pela manhã ou nos momentos de maior demanda. Ele combina energia, foco e hidratação em uma solução prática para rotinas intensas.',
+          suplementacao: '💊 SUPLEMENTAÇÃO: A bebida funcional é uma bebida funcional desenvolvida para apoiar energia, foco e hidratação. Ele combina cafeína natural, vitaminas do complexo B e hidratação em uma solução prática.',
+          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada e hidratação adequada. A bebida funcional pode complementar sua rotina, especialmente em momentos de alta demanda física ou mental.',
+          proximoPasso: '🎯 PRÓXIMO PASSO: Para rotinas intensas como a sua, a bebida funcional pode ajudar a manter energia e foco. Quer experimentar?'
         }
       }
     }
@@ -285,15 +285,15 @@ export default function QuizEnergiaFoco({ config = defaultConfig }: { config?: T
             {/* CTA Forte - Foco em Conversão */}
             <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border-2 border-yellow-300 mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-                🚀 Quer Experimentar o Hype Drink?
+                🚀 Quer Experimentar a bebida funcional?
               </h3>
               <p className="text-gray-700 text-center mb-4">
-                Baseado no seu resultado, o Hype Drink pode ajudar você a ter mais energia e foco no dia a dia!
+                Baseado no seu resultado, a bebida funcional pode ajudar você a ter mais energia e foco no dia a dia!
               </p>
               <HypeDrinkCTA
                 config={config}
                 resultado={resultado.perfil}
-                mensagemPersonalizada={`Olá! Completei o Quiz de Energia & Foco e meu resultado foi: ${resultado.perfil}. Gostaria de saber mais sobre o Hype Drink!`}
+                mensagemPersonalizada={`Olá! Completei o Quiz de Energia & Foco e meu resultado foi: ${resultado.perfil}. Gostaria de saber mais sobre a bebida funcional!`}
               />
             </div>
 

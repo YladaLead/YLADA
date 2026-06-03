@@ -136,18 +136,18 @@ export default function QuizRotinaProdutiva({ config = defaultConfig }: { config
         descricao: 'Sua rotina está bem organizada!',
         cor: 'green',
         recomendacoes: [
-          'O Hype Drink pode ajudar a manter essa constância.',
+          'A bebida funcional pode ajudar a manter essa constância.',
           'Ele pode ser útil nos dias mais puxados.'
         ],
         resultadoId: 'rotinaOrganizada',
         diagnostico: diagnostico || {
           diagnostico: '📋 DIAGNÓSTICO: Sua rotina está bem organizada!',
-          causaRaiz: '🔍 CAUSA RAIZ: Você já tem uma boa estrutura de rotina. O Hype Drink pode ajudar a manter essa constância, especialmente nos dias mais puxados.',
-          acaoImediata: '⚡ AÇÃO IMEDIATA: Continue mantendo sua rotina organizada. O Hype Drink pode ser um aliado nos momentos de maior demanda.',
-          plano7Dias: '📅 PLANO 7 DIAS: Use o Hype Drink nos dias mais intensos para manter energia e foco constantes.',
-          suplementacao: '💊 SUPLEMENTAÇÃO: O Hype Drink pode complementar sua rotina já organizada, especialmente em momentos de maior demanda.',
-          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha sua alimentação equilibrada. O Hype Drink pode ajudar a manter energia e hidratação nos dias mais puxados.',
-          proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns pela organização! O Hype Drink pode ajudar a manter essa constância. Quer experimentar?'
+          causaRaiz: '🔍 CAUSA RAIZ: Você já tem uma boa estrutura de rotina. A bebida funcional pode ajudar a manter essa constância, especialmente nos dias mais puxados.',
+          acaoImediata: '⚡ AÇÃO IMEDIATA: Continue mantendo sua rotina organizada. A bebida funcional pode ser um aliado nos momentos de maior demanda.',
+          plano7Dias: '📅 PLANO 7 DIAS: Use a bebida funcional nos dias mais intensos para manter energia e foco constantes.',
+          suplementacao: '💊 SUPLEMENTAÇÃO: A bebida funcional pode complementar sua rotina já organizada, especialmente em momentos de maior demanda.',
+          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha sua alimentação equilibrada. A bebida funcional pode ajudar a manter energia e hidratação nos dias mais puxados.',
+          proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns pela organização! A bebida funcional pode ajudar a manter essa constância. Quer experimentar?'
         }
       }
     } else if (score <= 11) {
@@ -158,18 +158,18 @@ export default function QuizRotinaProdutiva({ config = defaultConfig }: { config
         descricao: 'Sua rotina é intensa e exige muita energia e foco.',
         cor: 'yellow',
         recomendacoes: [
-          'O Hype Drink pode ajudar a manter produtividade constante.',
+          'A bebida funcional pode ajudar a manter produtividade constante.',
           'Ele combina energia, foco e hidratação em uma solução prática.'
         ],
         resultadoId: 'rotinaCorrida',
         diagnostico: diagnostico || {
           diagnostico: '📋 DIAGNÓSTICO: Sua rotina é intensa e exige muita energia e foco',
-          causaRaiz: '🔍 CAUSA RAIZ: Rotinas corridas precisam de suporte constante para manter produtividade. O Hype Drink pode ajudar a manter energia e foco ao longo do dia.',
-          acaoImediata: '⚡ AÇÃO IMEDIATA: Para rotinas intensas, soluções práticas que apoiem energia e foco ajudam na constância diária. O Hype Drink é ideal para isso.',
-          plano7Dias: '📅 PLANO 7 DIAS: Use o Hype Drink pela manhã ou nos momentos de maior demanda. Ele pode ajudar a manter produtividade constante.',
-          suplementacao: '💊 SUPLEMENTAÇÃO: O Hype Drink combina cafeína natural, vitaminas e hidratação em uma solução prática para rotinas corridas.',
-          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada. O Hype Drink pode complementar sua rotina, especialmente nos momentos de maior demanda.',
-          proximoPasso: '🎯 PRÓXIMO PASSO: Para rotinas intensas como a sua, o Hype Drink pode ajudar. Quer experimentar?'
+          causaRaiz: '🔍 CAUSA RAIZ: Rotinas corridas precisam de suporte constante para manter produtividade. A bebida funcional pode ajudar a manter energia e foco ao longo do dia.',
+          acaoImediata: '⚡ AÇÃO IMEDIATA: Para rotinas intensas, soluções práticas que apoiem energia e foco ajudam na constância diária. A bebida funcional é ideal para isso.',
+          plano7Dias: '📅 PLANO 7 DIAS: Use a bebida funcional pela manhã ou nos momentos de maior demanda. Ele pode ajudar a manter produtividade constante.',
+          suplementacao: '💊 SUPLEMENTAÇÃO: A bebida funcional combina cafeína natural, vitaminas e hidratação em uma solução prática para rotinas corridas.',
+          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada. A bebida funcional pode complementar sua rotina, especialmente nos momentos de maior demanda.',
+          proximoPasso: '🎯 PRÓXIMO PASSO: Para rotinas intensas como a sua, a bebida funcional pode ajudar. Quer experimentar?'
         }
       }
     } else {
@@ -180,18 +180,18 @@ export default function QuizRotinaProdutiva({ config = defaultConfig }: { config
         descricao: 'Para rotinas intensas, soluções simples que apoiem energia e foco ajudam na constância diária.',
         cor: 'red',
         recomendacoes: [
-          'O Hype Drink é ideal para quem precisa de performance mental constante.',
+          'A bebida funcional é ideal para quem precisa de performance mental constante.',
           'Muitas pessoas usam o Hype pela manhã para começar o dia com mais disposição.'
         ],
         resultadoId: 'altaDemandaMental',
         diagnostico: diagnostico || {
           diagnostico: '📋 DIAGNÓSTICO: Sua rotina exige performance mental constante',
-          causaRaiz: '🔍 CAUSA RAIZ: Rotinas muito intensas precisam de suporte constante para energia e foco. O Hype Drink pode ajudar a manter performance mental ao longo do dia.',
-          acaoImediata: '⚡ AÇÃO IMEDIATA: Para rotinas intensas, o Hype Drink pode ajudar a manter energia e foco constantes. Ele é ideal para quem precisa de performance mental.',
-          plano7Dias: '📅 PLANO 7 DIAS: Use o Hype Drink pela manhã para começar o dia com mais disposição e foco. Ele pode ajudar a manter produtividade constante.',
-          suplementacao: '💊 SUPLEMENTAÇÃO: O Hype Drink é uma bebida funcional desenvolvida para apoiar energia, foco e hidratação. Ele é ideal para rotinas intensas.',
-          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada. O Hype Drink pode complementar sua rotina, especialmente para manter energia e foco constantes.',
-          proximoPasso: '🎯 PRÓXIMO PASSO: Para rotinas intensas como a sua, o Hype Drink pode ajudar a manter energia e foco. Quer experimentar?'
+          causaRaiz: '🔍 CAUSA RAIZ: Rotinas muito intensas precisam de suporte constante para energia e foco. A bebida funcional pode ajudar a manter performance mental ao longo do dia.',
+          acaoImediata: '⚡ AÇÃO IMEDIATA: Para rotinas intensas, a bebida funcional pode ajudar a manter energia e foco constantes. Ele é ideal para quem precisa de performance mental.',
+          plano7Dias: '📅 PLANO 7 DIAS: Use a bebida funcional pela manhã para começar o dia com mais disposição e foco. Ele pode ajudar a manter produtividade constante.',
+          suplementacao: '💊 SUPLEMENTAÇÃO: A bebida funcional é uma bebida funcional desenvolvida para apoiar energia, foco e hidratação. Ele é ideal para rotinas intensas.',
+          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada. A bebida funcional pode complementar sua rotina, especialmente para manter energia e foco constantes.',
+          proximoPasso: '🎯 PRÓXIMO PASSO: Para rotinas intensas como a sua, a bebida funcional pode ajudar a manter energia e foco. Quer experimentar?'
         }
       }
     }
@@ -282,15 +282,15 @@ export default function QuizRotinaProdutiva({ config = defaultConfig }: { config
             {/* CTA Forte - Foco em Conversão */}
             <div className="bg-gradient-to-r from-green-50 to-yellow-50 rounded-xl p-6 border-2 border-green-300 mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-                🚀 Quer Experimentar o Hype Drink?
+                🚀 Quer Experimentar a bebida funcional?
               </h3>
               <p className="text-gray-700 text-center mb-4">
-                Para rotinas intensas como a sua, o Hype Drink pode ajudar a manter produtividade constante!
+                Para rotinas intensas como a sua, a bebida funcional pode ajudar a manter produtividade constante!
               </p>
               <HypeDrinkCTA
                 config={config}
                 resultado={resultado.perfil}
-                mensagemPersonalizada={`Olá! Completei o Quiz de Rotina Produtiva e meu resultado foi: ${resultado.perfil}. Gostaria de saber mais sobre o Hype Drink!`}
+                mensagemPersonalizada={`Olá! Completei o Quiz de Rotina Produtiva e meu resultado foi: ${resultado.perfil}. Gostaria de saber mais sobre a bebida funcional!`}
               />
             </div>
 

@@ -26,7 +26,7 @@ export default function HypeDrinkCTA({
   // Obter mensagem WhatsApp: personalizada (com diagnóstico) > específica da ferramenta > padrão
   // Priorizar mensagemPersonalizada para que link e QR entreguem a mensagem com resultado/diagnóstico (paridade com WellnessCTAButton)
   let mensagemWhatsApp = ''
-  let botaoTexto = config?.cta_button_text || 'Quero saber mais sobre o Hype Drink'
+  let botaoTexto = config?.cta_button_text || 'Quero falar no WhatsApp'
   
   if (mensagemPersonalizada) {
     mensagemWhatsApp = mensagemPersonalizada
@@ -85,11 +85,11 @@ export default function HypeDrinkCTA({
           className="w-full inline-flex items-center justify-center px-8 py-5 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 text-white font-bold text-xl rounded-xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 animate-pulse-once"
         >
           <span className="mr-3 text-2xl">🚀</span>
-          <span>{config.cta_button_text || 'Quero saber mais sobre o Hype Drink'}</span>
+          <span>{config.cta_button_text || 'Quero falar no WhatsApp'}</span>
           <span className="ml-3">→</span>
         </a>
         <p className="text-center text-sm text-gray-600 mt-3">
-          ⚡ Clique para saber mais sobre o Hype Drink
+          ⚡ Clique para continuar
         </p>
       </div>
     )
@@ -109,7 +109,7 @@ export default function HypeDrinkCTA({
           <span className="ml-3">→</span>
         </a>
         <p className="text-center text-sm text-gray-600 mt-3">
-          ⚡ Clique para saber mais sobre o Hype Drink
+          ⚡ Clique para continuar
         </p>
       </div>
     )
@@ -125,7 +125,7 @@ export default function HypeDrinkCTA({
           className="w-full inline-flex items-center justify-center px-8 py-5 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 text-white font-bold text-xl rounded-xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300"
         >
           <span className="mr-3 text-2xl">🚀</span>
-          <span>{config.cta_button_text || 'Quero saber mais sobre o Hype Drink'}</span>
+          <span>{config.cta_button_text || 'Quero falar no WhatsApp'}</span>
           <span className="ml-3">{mostrarOpcoes ? '↑' : '↓'}</span>
         </button>
 
@@ -139,7 +139,7 @@ export default function HypeDrinkCTA({
               className="w-full inline-flex items-center justify-center px-6 py-4 bg-white border-2 border-yellow-500 text-yellow-600 font-bold rounded-lg hover:bg-yellow-50 transition-all shadow-md hover:shadow-lg"
             >
               <span className="mr-2 text-xl">🌐</span>
-              Ver mais informações sobre o Hype Drink
+              Ver mais informações
             </a>
             <a
               href={`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagemWhatsApp)}`}
@@ -148,7 +148,7 @@ export default function HypeDrinkCTA({
               className="w-full inline-flex items-center justify-center px-6 py-4 bg-[#25D366] text-white font-bold rounded-lg hover:bg-[#20BA5A] transition-all shadow-md hover:shadow-lg"
             >
               <span className="mr-2 text-xl">💬</span>
-              Quero saber mais sobre o Hype Drink
+              Quero falar no WhatsApp
             </a>
           </div>
         )}

@@ -60,7 +60,7 @@ export default function CalculadoraConsumoCafeina({ config = defaultConfig }: { 
       descricao = 'Seu consumo de cafeína está elevado e pode estar causando dependência ou efeitos colaterais.'
       recomendacoes = [
         'Considere reduzir gradualmente o consumo de café',
-        'O Hype Drink pode ser uma alternativa mais equilibrada',
+        'A bebida funcional pode ser uma alternativa mais equilibrada',
         'Ele oferece cafeína natural com dosagem controlada',
         'Ajuda a evitar picos e quedas bruscas de energia'
       ]
@@ -70,7 +70,7 @@ export default function CalculadoraConsumoCafeina({ config = defaultConfig }: { 
       cor = 'orange'
       descricao = 'Seu consumo de cafeína está moderado, mas pode ser otimizado.'
       recomendacoes = [
-        'O Hype Drink pode ajudar a distribuir melhor a cafeína ao longo do dia',
+        'A bebida funcional pode ajudar a distribuir melhor a cafeína ao longo do dia',
         'Ele combina cafeína natural com vitaminas e hidratação',
         'Pode reduzir a dependência de café excessivo'
       ]
@@ -78,9 +78,9 @@ export default function CalculadoraConsumoCafeina({ config = defaultConfig }: { 
     } else {
       categoria = 'Consumo Baixo'
       cor = 'green'
-      descricao = 'Seu consumo de cafeína está baixo. O Hype Drink pode ser uma boa opção para aumentar energia e foco.'
+      descricao = 'Seu consumo de cafeína está baixo. A bebida funcional pode ser uma boa opção para aumentar energia e foco.'
       recomendacoes = [
-        'O Hype Drink pode ajudar a aumentar energia e foco',
+        'A bebida funcional pode ajudar a aumentar energia e foco',
         'Ele oferece cafeína natural com dosagem controlada',
         'Ideal para quem não consome muito café'
       ]
@@ -90,11 +90,11 @@ export default function CalculadoraConsumoCafeina({ config = defaultConfig }: { 
     const diagnostico = calcConsumoCafeinaDiagnosticos.wellness?.[diagnosticoId as keyof typeof calcConsumoCafeinaDiagnosticos.wellness] || {
       diagnostico: `📋 DIAGNÓSTICO: Seu consumo de cafeína está ${categoria.toLowerCase()}`,
       causaRaiz: '🔍 CAUSA RAIZ: O consumo de cafeína pode estar elevado ou mal distribuído ao longo do dia. Alternativas com cafeína natural e dosagem controlada podem ajudar a manter energia mais estável.',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: O Hype Drink pode ser uma alternativa mais equilibrada ao café excessivo. Ele combina cafeína natural, vitaminas e hidratação em uma solução prática.',
-      plano7Dias: '📅 PLANO 7 DIAS: Substitua parte do seu consumo de café pelo Hype Drink. Ele pode ajudar a manter energia mais estável ao longo do dia.',
-      suplementacao: '💊 SUPLEMENTAÇÃO: O Hype Drink combina cafeína natural (chá verde e preto), vitaminas do complexo B e hidratação. Ele pode ser uma alternativa mais equilibrada ao café excessivo.',
-      alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada. O Hype Drink pode complementar sua rotina, especialmente para manter energia mais estável.',
-      proximoPasso: '🎯 PRÓXIMO PASSO: O Hype Drink pode ajudar a equilibrar seu consumo de cafeína. Quer experimentar?'
+      acaoImediata: '⚡ AÇÃO IMEDIATA: A bebida funcional pode ser uma alternativa mais equilibrada ao café excessivo. Ele combina cafeína natural, vitaminas e hidratação em uma solução prática.',
+      plano7Dias: '📅 PLANO 7 DIAS: Substitua parte do seu consumo de café pela bebida funcional. Ele pode ajudar a manter energia mais estável ao longo do dia.',
+      suplementacao: '💊 SUPLEMENTAÇÃO: A bebida funcional combina cafeína natural (chá verde e preto), vitaminas do complexo B e hidratação. Ele pode ser uma alternativa mais equilibrada ao café excessivo.',
+      alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada. A bebida funcional pode complementar sua rotina, especialmente para manter energia mais estável.',
+      proximoPasso: '🎯 PRÓXIMO PASSO: A bebida funcional pode ajudar a equilibrar seu consumo de cafeína. Quer experimentar?'
     }
 
     setResultado({
@@ -186,15 +186,15 @@ export default function CalculadoraConsumoCafeina({ config = defaultConfig }: { 
             {/* CTA Forte - Foco em Conversão */}
             <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-6 border-2 border-amber-300 mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-                🚀 Quer Experimentar o Hype Drink?
+                🚀 Quer Experimentar a bebida funcional?
               </h3>
               <p className="text-gray-700 text-center mb-4">
-                O Hype Drink pode ser uma alternativa mais equilibrada ao café excessivo, com cafeína natural e dosagem controlada!
+                A bebida funcional pode ser uma alternativa mais equilibrada ao café excessivo, com cafeína natural e dosagem controlada!
               </p>
               <HypeDrinkCTA
                 config={config}
                 resultado={resultado.categoria}
-                mensagemPersonalizada={`Olá! Calculei meu consumo de cafeína e o resultado foi: ${resultado.categoria}. Gostaria de saber mais sobre o Hype Drink como alternativa!`}
+                mensagemPersonalizada={`Olá! Calculei meu consumo de cafeína e o resultado foi: ${resultado.categoria}. Gostaria de saber mais sobre a bebida funcional como alternativa!`}
               />
             </div>
 

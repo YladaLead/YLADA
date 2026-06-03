@@ -2,7 +2,7 @@ import type { FluxoCliente } from '@/types/wellness-system'
 import { PRO_LIDERES_HYPE_UNIFIED_PERGUNTAS } from '@/lib/pro-lideres/pro-lideres-hype-unified-perguntas'
 
 /**
- * Quizzes HYPE Drink na biblioteca Pro Líderes.
+ * Quizzes de bebida funcional na biblioteca Pro Líderes.
  * Perguntas unificadas — ver `pro-lideres-hype-unified-perguntas.ts`.
  */
 export function getProLideresHypeQuizPresetFluxos(): FluxoCliente[] {
@@ -23,13 +23,13 @@ export function getProLideresHypeQuizPresetFluxos(): FluxoCliente[] {
       },
       kitRecomendado: 'energia',
       cta: 'Quero falar no WhatsApp',
-      tags: ['hype', 'energia', 'foco', 'wellness'],
+      tags: ['energia', 'foco', 'wellness', 'bebida-funcional'],
     },
     {
       id: 'pre-treino',
       nome: 'Quiz: Pré-Treino Ideal',
       objetivo:
-        'Entrada temática pré-treino — mesmo questionário padrão HYPE; o resultado continua específico deste fluxo.',
+        'Entrada temática pré-treino — mesmo questionário padrão; o resultado continua específico deste fluxo.',
       perguntas: PRO_LIDERES_HYPE_UNIFIED_PERGUNTAS,
       diagnostico: {
         titulo: 'Perfil pré-treino',
@@ -41,13 +41,13 @@ export function getProLideresHypeQuizPresetFluxos(): FluxoCliente[] {
       },
       kitRecomendado: 'energia',
       cta: 'Quero falar no WhatsApp',
-      tags: ['hype', 'pre-treino', 'treino', 'wellness'],
+      tags: ['pre-treino', 'treino', 'wellness', 'bebida-funcional'],
     },
     {
       id: 'rotina-produtiva',
       nome: 'Quiz: Rotina Produtiva',
       objetivo:
-        'Entrada temática produtividade — mesmo questionário padrão HYPE; o resultado continua específico deste fluxo.',
+        'Entrada temática produtividade — mesmo questionário padrão; o resultado continua específico deste fluxo.',
       perguntas: PRO_LIDERES_HYPE_UNIFIED_PERGUNTAS,
       diagnostico: {
         titulo: 'Perfil de rotina e produtividade',
@@ -59,13 +59,13 @@ export function getProLideresHypeQuizPresetFluxos(): FluxoCliente[] {
       },
       kitRecomendado: 'energia',
       cta: 'Quero falar no WhatsApp',
-      tags: ['hype', 'produtividade', 'rotina', 'wellness'],
+      tags: ['produtividade', 'rotina', 'wellness', 'bebida-funcional'],
     },
     {
       id: 'constancia',
       nome: 'Quiz: Constância & Rotina',
       objetivo:
-        'Entrada temática constância — mesmo questionário padrão HYPE; o resultado continua específico deste fluxo.',
+        'Entrada temática constância — mesmo questionário padrão; o resultado continua específico deste fluxo.',
       perguntas: PRO_LIDERES_HYPE_UNIFIED_PERGUNTAS,
       diagnostico: {
         titulo: 'Perfil de constância',
@@ -77,7 +77,7 @@ export function getProLideresHypeQuizPresetFluxos(): FluxoCliente[] {
       },
       kitRecomendado: 'energia',
       cta: 'Quero falar no WhatsApp',
-      tags: ['hype', 'constancia', 'rotina', 'wellness'],
+      tags: ['constancia', 'rotina', 'wellness', 'bebida-funcional'],
     },
   ]
 }

@@ -132,18 +132,18 @@ export default function QuizPreTreino({ config = defaultConfig }: { config?: Tem
       descricao: 'Para o seu perfil, uma bebida funcional com cafeína natural e hidratação pode ser mais adequada.',
       cor: 'orange',
       recomendacoes: [
-        'O Hype Drink é uma alternativa mais leve aos pré-treinos agressivos.',
-        'Ele combina cafeína natural, vitaminas e hidratação sem excessos.'
+        'Uma bebida funcional leve pode ser uma alternativa mais adequada aos pré-treinos agressivos.',
+        'Combina cafeína natural, vitaminas e hidratação sem excessos.'
       ],
       resultadoId: 'preTreinoLeve',
       diagnostico: diagnostico || {
         diagnostico: '📋 DIAGNÓSTICO: Para o seu perfil, uma bebida funcional leve pode ser mais adequada do que pré-treinos agressivos',
         causaRaiz: '🔍 CAUSA RAIZ: Pré-treinos muito estimulantes podem causar taquicardia, ansiedade ou desconforto. Uma alternativa mais leve, com cafeína natural e hidratação, pode ser ideal para quem busca desempenho sem exageros.',
-        acaoImediata: '⚡ AÇÃO IMEDIATA: O Hype Drink é uma alternativa mais leve aos pré-treinos agressivos. Ele combina cafeína natural, vitaminas e hidratação sem excessos.',
-        plano7Dias: '📅 PLANO 7 DIAS: Use o Hype Drink antes do treino. Ele pode ajudar a manter energia e hidratação durante o exercício, sem os efeitos colaterais de pré-treinos muito fortes.',
-        suplementacao: '💊 SUPLEMENTAÇÃO: O Hype Drink combina cafeína natural (chá verde e preto), vitaminas do complexo B e hidratação. Ele pode ser uma alternativa mais leve aos pré-treinos tradicionais.',
-        alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada antes do treino. O Hype Drink pode complementar sua rotina, especialmente para quem não se adapta bem a pré-treinos muito fortes.',
-        proximoPasso: '🎯 PRÓXIMO PASSO: Para o seu perfil, o Hype Drink pode ser uma alternativa mais adequada. Quer aprender como usar antes do treino?'
+        acaoImediata: '⚡ AÇÃO IMEDIATA: Uma bebida funcional leve pode ser uma alternativa mais adequada aos pré-treinos agressivos. Combina cafeína natural, vitaminas e hidratação sem excessos.',
+        plano7Dias: '📅 PLANO 7 DIAS: Experimente uma bebida funcional leve antes do treino. Pode ajudar a manter energia e hidratação durante o exercício, sem os efeitos colaterais de estimulantes muito fortes.',
+        suplementacao: '💊 SUPLEMENTAÇÃO: Uma bebida funcional com cafeína natural (chá verde e preto), vitaminas do complexo B e hidratação pode ser uma alternativa mais leve aos pré-treinos tradicionais.',
+        alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada antes do treino. Uma bebida funcional pode complementar sua rotina, especialmente para quem não se adapta bem a pré-treinos muito fortes.',
+        proximoPasso: '🎯 PRÓXIMO PASSO: Para o seu perfil, uma bebida funcional leve pode ser a alternativa certa. Fale com quem te enviou este link para entender as opções disponíveis.'
       }
     }
 
@@ -233,15 +233,15 @@ export default function QuizPreTreino({ config = defaultConfig }: { config?: Tem
             {/* CTA Forte - Foco em Conversão */}
             <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-300 mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-                🚀 Quer Experimentar o Hype Drink?
+                🚀 Quer Experimentar a bebida funcional?
               </h3>
               <p className="text-gray-700 text-center mb-4">
-                Para o seu perfil, o Hype Drink é uma alternativa mais leve e adequada aos pré-treinos agressivos!
+                Para o seu perfil, a bebida funcional é uma alternativa mais leve e adequada aos pré-treinos agressivos!
               </p>
               <HypeDrinkCTA
                 config={config}
                 resultado={resultado.perfil}
-                mensagemPersonalizada={`Olá! Completei o Quiz de Pré-Treino e meu resultado foi: ${resultado.perfil}. Gostaria de saber mais sobre o Hype Drink!`}
+                mensagemPersonalizada={`Olá! Completei o Quiz de Pré-Treino e meu resultado foi: ${resultado.perfil}. Gostaria de saber mais sobre a bebida funcional!`}
               />
             </div>
 

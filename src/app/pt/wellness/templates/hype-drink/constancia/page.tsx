@@ -112,18 +112,18 @@ export default function QuizConstancia({ config = defaultConfig }: { config?: Te
         descricao: 'Ótimo! Você já tem uma rotina estabelecida.',
         cor: 'green',
         recomendacoes: [
-          'O Hype Drink pode ajudar a manter essa constância nos dias mais puxados.',
+          'A bebida funcional pode ajudar a manter essa constância nos dias mais puxados.',
           'Ele pode ser útil para manter energia e foco constantes.'
         ],
         resultadoId: 'rotinaEstabelecida',
         diagnostico: diagnostico || {
           diagnostico: '📋 DIAGNÓSTICO: Você já tem uma rotina estabelecida',
-          causaRaiz: '🔍 CAUSA RAIZ: Parabéns! Você já consegue manter uma rotina saudável. O Hype Drink pode ajudar a manter essa constância, especialmente nos dias mais puxados.',
-          acaoImediata: '⚡ AÇÃO IMEDIATA: Continue mantendo sua rotina. O Hype Drink pode ser um aliado nos momentos de maior demanda.',
-          plano7Dias: '📅 PLANO 7 DIAS: Use o Hype Drink nos dias mais intensos para manter energia e foco constantes.',
-          suplementacao: '💊 SUPLEMENTAÇÃO: O Hype Drink pode complementar sua rotina já estabelecida, especialmente em momentos de maior demanda.',
-          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha sua alimentação equilibrada. O Hype Drink pode ajudar a manter energia e hidratação nos dias mais puxados.',
-          proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns pela constância! O Hype Drink pode ajudar a manter isso. Quer experimentar?'
+          causaRaiz: '🔍 CAUSA RAIZ: Parabéns! Você já consegue manter uma rotina saudável. A bebida funcional pode ajudar a manter essa constância, especialmente nos dias mais puxados.',
+          acaoImediata: '⚡ AÇÃO IMEDIATA: Continue mantendo sua rotina. A bebida funcional pode ser um aliado nos momentos de maior demanda.',
+          plano7Dias: '📅 PLANO 7 DIAS: Use a bebida funcional nos dias mais intensos para manter energia e foco constantes.',
+          suplementacao: '💊 SUPLEMENTAÇÃO: A bebida funcional pode complementar sua rotina já estabelecida, especialmente em momentos de maior demanda.',
+          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha sua alimentação equilibrada. A bebida funcional pode ajudar a manter energia e hidratação nos dias mais puxados.',
+          proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns pela constância! A bebida funcional pode ajudar a manter isso. Quer experimentar?'
         }
       }
     } else {
@@ -134,18 +134,18 @@ export default function QuizConstancia({ config = defaultConfig }: { config?: Te
         descricao: 'Sem energia e foco, a rotina não se sustenta.',
         cor: 'orange',
         recomendacoes: [
-          'O Hype Drink entra como um facilitador de constância, ajudando nos dias mais puxados.',
+          'A bebida funcional entra como um facilitador de constância, ajudando nos dias mais puxados.',
           'Ele combina energia, foco e hidratação em uma solução prática para o dia a dia.'
         ],
         resultadoId: 'dificuldadeConstancia',
         diagnostico: diagnostico || {
           diagnostico: '📋 DIAGNÓSTICO: Você tem dificuldade em manter constância na rotina',
-          causaRaiz: '🔍 CAUSA RAIZ: Sem energia e foco, a rotina não se sustenta. O Hype Drink pode ajudar a facilitar a constância, especialmente nos dias mais puxados.',
-          acaoImediata: '⚡ AÇÃO IMEDIATA: O Hype Drink pode ser um facilitador de constância. Ele ajuda a manter energia e foco, especialmente nos dias mais difíceis.',
-          plano7Dias: '📅 PLANO 7 DIAS: Use o Hype Drink pela manhã para começar o dia com mais energia e foco. Ele pode ajudar a manter a rotina todos os dias.',
-          suplementacao: '💊 SUPLEMENTAÇÃO: O Hype Drink combina cafeína natural, vitaminas e hidratação em uma solução prática que pode facilitar a constância diária.',
-          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada. O Hype Drink pode complementar sua rotina, especialmente para manter energia e foco constantes.',
-          proximoPasso: '🎯 PRÓXIMO PASSO: O Hype Drink pode ajudar a facilitar a constância na sua rotina. Quer experimentar?'
+          causaRaiz: '🔍 CAUSA RAIZ: Sem energia e foco, a rotina não se sustenta. A bebida funcional pode ajudar a facilitar a constância, especialmente nos dias mais puxados.',
+          acaoImediata: '⚡ AÇÃO IMEDIATA: A bebida funcional pode ser um facilitador de constância. Ele ajuda a manter energia e foco, especialmente nos dias mais difíceis.',
+          plano7Dias: '📅 PLANO 7 DIAS: Use a bebida funcional pela manhã para começar o dia com mais energia e foco. Ele pode ajudar a manter a rotina todos os dias.',
+          suplementacao: '💊 SUPLEMENTAÇÃO: A bebida funcional combina cafeína natural, vitaminas e hidratação em uma solução prática que pode facilitar a constância diária.',
+          alimentacao: '🍎 ALIMENTAÇÃO: Mantenha uma alimentação equilibrada. A bebida funcional pode complementar sua rotina, especialmente para manter energia e foco constantes.',
+          proximoPasso: '🎯 PRÓXIMO PASSO: A bebida funcional pode ajudar a facilitar a constância na sua rotina. Quer experimentar?'
         }
       }
     }
@@ -236,15 +236,15 @@ export default function QuizConstancia({ config = defaultConfig }: { config?: Te
             {/* CTA Forte - Foco em Conversão */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-300 mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-                🚀 Quer Experimentar o Hype Drink?
+                🚀 Quer Experimentar a bebida funcional?
               </h3>
               <p className="text-gray-700 text-center mb-4">
-                O Hype Drink pode ajudar a facilitar a constância na sua rotina, especialmente nos dias mais difíceis!
+                A bebida funcional pode ajudar a facilitar a constância na sua rotina, especialmente nos dias mais difíceis!
               </p>
               <HypeDrinkCTA
                 config={config}
                 resultado={resultado.perfil}
-                mensagemPersonalizada={`Olá! Completei o Quiz de Constância e meu resultado foi: ${resultado.perfil}. Gostaria de saber mais sobre o Hype Drink!`}
+                mensagemPersonalizada={`Olá! Completei o Quiz de Constância e meu resultado foi: ${resultado.perfil}. Gostaria de saber mais sobre a bebida funcional!`}
               />
             </div>
 

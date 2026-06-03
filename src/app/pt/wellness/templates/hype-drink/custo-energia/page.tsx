@@ -124,7 +124,7 @@ export default function CalculadoraCustoEnergia({ config = defaultConfig }: { co
       descricao = `Cerca de ${percentualImprodutivo.toFixed(0)}% do expediente some em baixa energia — dá para recuperar com ajustes pequenos.`
       recomendacoes = [
         'Experimente pausas curtas + hidratação antes de aumentar cafeína.',
-        'Se quiser um plano alinhado ao seu dia, fale com quem compartilhou o link sobre opções de apoio (incluindo Hype Drink, se fizer sentido).',
+        'Se quiser um plano alinhado ao seu dia, fale com quem compartilhou o link sobre opções de apoio (incluinda bebida funcional, se fizer sentido).',
       ]
       diagnosticoId = 'impactoModerado'
     } else {
@@ -185,7 +185,7 @@ export default function CalculadoraCustoEnergia({ config = defaultConfig }: { co
             'Entenda o recorte: horas improdutivas em relação ao total que você trabalha.',
             'Opcional: traduza em R$/dia e R$/mês (~22 dias úteis) com o valor da sua hora.',
             'Leitura por tipo de trabalho (mental, físico ou misto) + hábitos antes de falar de produto.',
-            'Próximo passo: conversar com quem te enviou o link, inclusive sobre Hype Drink se fizer sentido.',
+            'Próximo passo: conversar com quem te enviou o link, inclusive sobre bebida funcional se fizer sentido.',
           ]}
           onStart={iniciarCalculo}
           ctaText="Começar estimativa"
@@ -264,13 +264,13 @@ export default function CalculadoraCustoEnergia({ config = defaultConfig }: { co
             <div className="bg-gradient-to-r from-sky-50 to-orange-50 rounded-xl p-6 border border-orange-200/60 mb-6">
               <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Quer ir além com apoio?</h3>
               <p className="text-gray-700 text-center text-sm mb-4">
-                O Hype Drink pode entrar como complemento quando sono, refeições e pausas já estão em discussão — a
+                A bebida funcional pode entrar como complemento quando sono, refeições e pausas já estão em discussão — a
                 conversa com quem te enviou o link ajuda a ver se combina com você.
               </p>
               <HypeDrinkCTA
                 config={config}
                 resultado={resultado.impacto}
-                mensagemPersonalizada={`Olá! Usei a calculadora de energia/produtividade: impacto ${resultado.impacto}, ${resultado.percentualImprodutivo.toFixed(0)}% do dia em baixa energia. Quero alinhar o que faz sentido pra mim (rotina e, se couber, Hype Drink).`}
+                mensagemPersonalizada={`Olá! Usei a calculadora de energia/produtividade: impacto ${resultado.impacto}, ${resultado.percentualImprodutivo.toFixed(0)}% do dia em baixa energia. Quero alinhar o que faz sentido pra mim (rotina e, se couber, bebida funcional).`}
               />
             </div>
 

@@ -128,11 +128,11 @@ export default function FerramentaPersonalizadaPage() {
         countryCode = data.profile?.countryCode || 'BR'
       }
       
-      // Criar objeto mock para templates do Hype Drink
+      // Criar objeto mock para templates de bebida funcional
       setTool({
         id: `hype-${toolSlug}`,
-        title: 'Hype Drink',
-        description: 'Template Hype Drink',
+        title: 'Bebida Funcional',
+        description: 'Template de energia e bem-estar',
         emoji: '🥤',
         custom_colors: {
           principal: '#fbbf24',
@@ -140,7 +140,7 @@ export default function FerramentaPersonalizadaPage() {
         },
         cta_type: 'whatsapp',
         whatsapp_number: whatsapp,
-        cta_button_text: 'Quero saber mais sobre o Hype Drink',
+        cta_button_text: 'Quero falar no WhatsApp',
         template_slug: toolSlug,
         user_profiles: {
           user_slug: userSlug,
@@ -152,15 +152,15 @@ export default function FerramentaPersonalizadaPage() {
       // Criar tool básico mesmo em caso de erro
       setTool({
         id: `hype-${toolSlug}`,
-        title: 'Hype Drink',
-        description: 'Template Hype Drink',
+        title: 'Bebida Funcional',
+        description: 'Template de energia e bem-estar',
         emoji: '🥤',
         custom_colors: {
           principal: '#fbbf24',
           secundaria: '#f59e0b'
         },
         cta_type: 'whatsapp',
-        cta_button_text: 'Quero saber mais sobre o Hype Drink',
+        cta_button_text: 'Quero falar no WhatsApp',
         template_slug: toolSlug,
         user_profiles: {
           user_slug: userSlug,

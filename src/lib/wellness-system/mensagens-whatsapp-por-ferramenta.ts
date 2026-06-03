@@ -411,68 +411,68 @@ export const mensagensWhatsAppPorFerramenta: Record<string, MensagemWhatsApp> = 
   // ============================================
   
   'energia-foco': {
-    mensagem: 'Olá! Descubra seu perfil de energia e foco e aprenda como ter mais energia estável ao longo do dia, sem os picos e quedas do café excessivo.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem: 'Olá! Acabei de descobrir meu perfil de energia e foco. Quero entender como melhorar minha disposição ao longo do dia.',
+    botaoTexto: 'Quero falar no WhatsApp'
   },
   'quiz-energia-foco': {
-    mensagem: 'Olá! Descubra seu perfil de energia e foco e aprenda como ter mais energia estável ao longo do dia, sem os picos e quedas do café excessivo.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem: 'Olá! Acabei de descobrir meu perfil de energia e foco. Quero entender como melhorar minha disposição ao longo do dia.',
+    botaoTexto: 'Quero falar no WhatsApp'
   },
-  
+
   'pre-treino': {
-    mensagem: 'Olá! Descubra qual é o pré-treino ideal para você e conheça uma alternativa leve e natural que não causa ansiedade ou taquicardia.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem: 'Olá! Acabei de descobrir meu perfil de pré-treino. Quero entender qual suporte combina melhor com meu estilo de treino.',
+    botaoTexto: 'Quero falar no WhatsApp'
   },
   'quiz-pre-treino': {
-    mensagem: 'Olá! Descubra qual é o pré-treino ideal para você e conheça uma alternativa leve e natural que não causa ansiedade ou taquicardia.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem: 'Olá! Acabei de descobrir meu perfil de pré-treino. Quero entender qual suporte combina melhor com meu estilo de treino.',
+    botaoTexto: 'Quero falar no WhatsApp'
   },
-  
+
   'rotina-produtiva': {
-    mensagem: 'Olá! Descubra o que está sabotando sua produtividade e aprenda como manter energia e foco constantes ao longo do dia.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem: 'Olá! Acabei de fazer o quiz de rotina e produtividade. Quero entender o que está travando minha energia e foco no trabalho.',
+    botaoTexto: 'Quero falar no WhatsApp'
   },
   'quiz-rotina-produtiva': {
-    mensagem: 'Olá! Descubra o que está sabotando sua produtividade e aprenda como manter energia e foco constantes ao longo do dia.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem: 'Olá! Acabei de fazer o quiz de rotina e produtividade. Quero entender o que está travando minha energia e foco no trabalho.',
+    botaoTexto: 'Quero falar no WhatsApp'
   },
-  
+
   'constancia': {
-    mensagem: 'Olá! Descubra o que está impedindo você de manter uma rotina constante e aprenda estratégias práticas para facilitar seus hábitos diários.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem: 'Olá! Acabei de fazer o quiz de constância e rotina. Quero entender o que está dificultando manter meus hábitos de forma consistente.',
+    botaoTexto: 'Quero falar no WhatsApp'
   },
   'quiz-constancia': {
-    mensagem: 'Olá! Descubra o que está impedindo você de manter uma rotina constante e aprenda estratégias práticas para facilitar seus hábitos diários.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem: 'Olá! Acabei de fazer o quiz de constância e rotina. Quero entender o que está dificultando manter meus hábitos de forma consistente.',
+    botaoTexto: 'Quero falar no WhatsApp'
   },
-  
+
   'consumo-cafeina': {
-    mensagem: 'Olá! Descubra se seu consumo de cafeína está acima do recomendado e conheça alternativas mais equilibradas que não causam ansiedade ou dependência.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem: 'Olá! Acabei de calcular meu consumo de cafeína. Quero entender meu perfil de energia e alternativas mais equilibradas.',
+    botaoTexto: 'Quero entender meu perfil de energia'
   },
   'calc-consumo-cafeina': {
-    mensagem: 'Olá! Descubra se seu consumo de cafeína está acima do recomendado e conheça alternativas mais equilibradas que não causam ansiedade ou dependência.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem: 'Olá! Acabei de calcular meu consumo de cafeína. Quero entender meu perfil de energia e alternativas mais equilibradas.',
+    botaoTexto: 'Quero entender meu perfil de energia'
   },
   'calculadora-consumo-cafeina': {
-    mensagem: 'Olá! Descubra se seu consumo de cafeína está acima do recomendado e conheça alternativas mais equilibradas que não causam ansiedade ou dependência.',
-    botaoTexto: 'Quero saber mais sobre o Hype Drink'
+    mensagem: 'Olá! Acabei de calcular meu consumo de cafeína. Quero entender meu perfil de energia e alternativas mais equilibradas.',
+    botaoTexto: 'Quero entender meu perfil de energia'
   },
   
   'custo-energia': {
     mensagem:
-      'Olá! Quero ver quanto do meu dia some em baixa energia e, se fizer sentido, uma estimativa em reais — e alinhar hábitos (e se couber, Hype Drink) com quem me enviou o link.',
-    botaoTexto: 'Quero falar sobre energia e rotina',
+      'Olá! Acabei de calcular quanto do meu dia some em baixa energia. Quero entender como melhorar minha disposição e produtividade.',
+    botaoTexto: 'Quero entender meu perfil de energia',
   },
   'calc-custo-energia': {
     mensagem:
-      'Olá! Quero ver quanto do meu dia some em baixa energia e, se fizer sentido, uma estimativa em reais — e alinhar hábitos (e se couber, Hype Drink) com quem me enviou o link.',
-    botaoTexto: 'Quero falar sobre energia e rotina',
+      'Olá! Acabei de calcular quanto do meu dia some em baixa energia. Quero entender como melhorar minha disposição e produtividade.',
+    botaoTexto: 'Quero entender meu perfil de energia',
   },
   'calculadora-custo-energia': {
     mensagem:
-      'Olá! Quero ver quanto do meu dia some em baixa energia e, se fizer sentido, uma estimativa em reais — e alinhar hábitos (e se couber, Hype Drink) com quem me enviou o link.',
-    botaoTexto: 'Quero falar sobre energia e rotina',
+      'Olá! Acabei de calcular quanto do meu dia some em baixa energia. Quero entender como melhorar minha disposição e produtividade.',
+    botaoTexto: 'Quero entender meu perfil de energia',
   },
   
   // ============================================

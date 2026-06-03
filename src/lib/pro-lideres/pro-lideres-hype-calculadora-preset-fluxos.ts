@@ -56,7 +56,7 @@ export function getProLideresHypeCalculadoraPresetFluxos(): FluxoCliente[] {
       },
       kitRecomendado: 'energia',
       cta: 'Quero falar no WhatsApp',
-      tags: ['hype', 'cafeina', 'wellness'],
+      tags: ['cafeina', 'wellness', 'bebida-funcional'],
     },
     {
       id: 'custo-energia',
@@ -110,7 +110,7 @@ export function getProLideresHypeCalculadoraPresetFluxos(): FluxoCliente[] {
       },
       kitRecomendado: 'energia',
       cta: 'Quero falar no WhatsApp',
-      tags: ['hype', 'produtividade', 'energia', 'wellness'],
+      tags: ['produtividade', 'energia', 'wellness', 'bebida-funcional'],
     },
   ]
 }
