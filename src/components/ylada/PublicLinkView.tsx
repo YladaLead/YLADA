@@ -3147,17 +3147,20 @@ function buildCalculatorWhatsAppPrefill(
   values: Record<string, number | undefined>,
   resultNum: number,
   resultLabel: string,
-  locale: Language
+  locale: Language,
+  resultSuffix?: string
 ): string {
   const loc = locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : 'pt-BR'
-  const n = resultNum.toLocaleString(loc, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  // Sem casas decimais desnecessárias: 13 em vez de 13,00; 2,5 em vez de 2,50
+  const n = resultNum.toLocaleString(loc, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+  const unit = resultSuffix?.trim() ? ` ${resultSuffix.trim()}` : ''
   const head =
     locale === 'en'
       ? `Hi! I used your calculator "${title}".`
       : locale === 'es'
         ? `¡Hola! Usé tu calculadora "${title}".`
         : `Oi! Usei sua calculadora "${title}".`
-  const lines = [head, `${resultLabel.trim()} ${n}`.trim()]
+  const lines = [head, `${resultLabel.trim()} ${n}${unit}`.trim()]
   for (const f of fields) {
     const v = values[f.id]
     if (v === undefined || v === null || Number.isNaN(v)) continue
@@ -3358,7 +3361,7 @@ function CalculatorBlock({
   const numLocale = locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : 'pt-BR'
   const whatsappPrefillResult =
     showResult && whatsappUrl
-      ? buildCalculatorWhatsAppPrefill(title, fieldsParaCalculadora, values, resultNum, resultLabel, locale)
+      ? buildCalculatorWhatsAppPrefill(title, fieldsParaCalculadora, values, resultNum, resultLabel, locale, resultSuffix)
       : ''
 
   return (
