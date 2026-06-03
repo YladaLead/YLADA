@@ -14,6 +14,14 @@ export default function PrecosCheckoutPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isIOS, setIsIOS] = useState(false)
+
+  useEffect(() => {
+    const cap = (window as any).Capacitor
+    const isiOS = cap?.getPlatform?.() === 'ios' ||
+      (!!(cap) && /iPhone|iPad|iPod/.test(navigator.userAgent))
+    setIsIOS(!!isiOS)
+  }, [])
 
   useEffect(() => {
     if (!user?.email) return
@@ -87,6 +95,25 @@ export default function PrecosCheckoutPage() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+        {isIOS ? (
+          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+            <div className="text-4xl mb-4">🔒</div>
+            <h1 className="text-xl font-bold text-gray-900 mb-3">
+              Assinaturas pelo site
+            </h1>
+            <p className="text-gray-600 text-sm mb-6">
+              Para assinar o plano Pro, acesse o YLADA no navegador do seu celular ou computador.
+            </p>
+            <p className="text-sm font-semibold text-blue-700 mb-6">ylada.com</p>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="text-sm text-gray-500 underline"
+            >
+              Voltar
+            </button>
+          </div>
+        ) : (
         <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8">
           <h1 className="text-2xl font-bold text-gray-900 text-center">
             Você está a um passo de ativar o Pro.
@@ -203,6 +230,7 @@ export default function PrecosCheckoutPage() {
             {loading ? 'Processando...' : 'Assinar Pro'}
           </button>
         </div>
+        )}
       </main>
     </div>
   )

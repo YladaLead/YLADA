@@ -1,9 +1,20 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
+
+function useIsIOS() {
+  const [isIOS, setIsIOS] = useState(false)
+  useEffect(() => {
+    const cap = (window as any).Capacitor
+    const isiOS = cap?.getPlatform?.() === 'ios' ||
+      (!!(cap) && /iPhone|iPad|iPod/.test(navigator.userAgent))
+    setIsIOS(!!isiOS)
+  }, [])
+  return isIOS
+}
 
 function PrecosPageFallback() {
   return (
@@ -29,8 +40,8 @@ function PrecosPageContent() {
   const searchParams = useSearchParams()
   const fromDiagnostico = searchParams.get('source') === 'diagnostico'
   const perfilTitulo = searchParams.get('perfil_titulo') || ''
-
   const mostraBlocoResultado = fromDiagnostico && perfilTitulo
+  const isIOS = useIsIOS()
 
   return (
     <div className="min-h-screen bg-white">
@@ -106,12 +117,18 @@ function PrecosPageContent() {
                     </li>
                   ))}
                 </ul>
-                <Link
-                  href="/pt/precos/checkout?plan=monthly"
-                  className="block w-full text-center py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-xl transition-colors border border-gray-200"
-                >
-                  Assinar Pro
-                </Link>
+                {isIOS ? (
+                  <p className="text-center text-sm text-gray-500 py-3.5 border border-gray-200 rounded-xl bg-gray-50">
+                    Assine em ylada.com no seu navegador
+                  </p>
+                ) : (
+                  <Link
+                    href="/pt/precos/checkout?plan=monthly"
+                    className="block w-full text-center py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-xl transition-colors border border-gray-200"
+                  >
+                    Assinar Pro
+                  </Link>
+                )}
                 <ul className="mt-4 space-y-1.5 text-xs text-gray-500">
                   <li className="flex items-center gap-2">✔ Cancelamento fácil</li>
                   <li className="flex items-center gap-2">✔ Sem fidelidade no plano mensal</li>
@@ -141,12 +158,18 @@ function PrecosPageContent() {
                     </li>
                   ))}
                 </ul>
-                <Link
-                  href="/pt/precos/checkout?plan=annual"
-                  className="block w-full text-center py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors"
-                >
-                  Assinar Pro
-                </Link>
+                {isIOS ? (
+                  <p className="text-center text-sm text-white py-3.5 rounded-xl bg-blue-400 font-bold">
+                    Assine em ylada.com no seu navegador
+                  </p>
+                ) : (
+                  <Link
+                    href="/pt/precos/checkout?plan=annual"
+                    className="block w-full text-center py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors"
+                  >
+                    Assinar Pro
+                  </Link>
+                )}
                 <ul className="mt-4 space-y-1.5 text-xs text-gray-500">
                   <li className="flex items-center gap-2">✔ Cancelamento fácil</li>
                   <li className="flex items-center gap-2">✔ Garantia de 7 dias</li>
