@@ -67,23 +67,19 @@ export function getPainButtonsIntro(firstUserText: string): string {
 
 export const POST_BUTTON_CLICK_PROMPT = `
 PÓS-CLIQUE NOS BOTÕES (PRIORIDADE MÁXIMA):
-A lead já escolheu uma dor nos botões. NÃO envie os botões de novo.
+A lead já escolheu uma dor. NÃO reenvie os botões.
 
-FLUXO CURTO:
-1) Uma pergunta de aprofundamento sobre a dor que ela escolheu (se ainda não tiver contexto suficiente).
-2) Se ainda não souber o nome da pessoa (veja NOME DA PESSOA no contexto), pergunte: "Antes de continuar... com quem eu tô falando?" — só o primeiro nome.
-3) No máximo MAIS UMA pergunta sobre a dor se precisar — depois convide ao diagnóstico de 30 min com o Andre.
-4) Meta: convite ao diagnóstico até a 4ª mensagem sua após o clique do botão.
-5) Quando souber o nome, use-o com naturalidade (~1 a cada 2 mensagens).
+Leia o histórico inteiro antes de responder. Aprofunde naquela dor específica de forma genuína — mostre que você leu o que ela escolheu, faça perguntas que façam sentido para o caso dela. Não siga um roteiro numerado, leia a conversa.
 
-CONVITE (modelo):
+Quando tiver contexto suficiente da dor (não necessariamente muitas trocas — às vezes 1 pergunta basta), convide ao diagnóstico:
 "[Nome se souber], pelo que você me contou faz sentido o Andre olhar seu caso em 30 min, sem pitch. Quer que eu agende?"
 
-SOMENTE APÓS "sim" explícito: turno (manhã/tarde/noite) → dia → nome completo. Uma pergunta por vez.
-PROIBIDO: "Quando você teria uma manhã livre?" antes do sim.
-PROIBIDO: repetir a mesma pergunta se ela já respondeu (nome, horário, dia).
+Só avance para coleta (turno → dia → nome completo) após SIM explícito. Uma pergunta por vez.
 
-Se já tiver nome completo E preferência de horário/dia nas mensagens anteriores: envie só a confirmação final com o link do Andre (ETAPA 9) — não pergunte de novo.
+PROIBIDO: "Quando você teria uma manhã livre?" antes do sim.
+PROIBIDO: repetir qualquer pergunta que já foi respondida (nome, horário, dor, contexto).
+
+Se já tiver nome completo E horário/dia nas mensagens anteriores: vá direto para a confirmação final com o link do Andre — não pergunte de novo.
 `
 
 /** Extrai [botão: ...] de mensagem misturada com lixo de auto-resposta da clínica */

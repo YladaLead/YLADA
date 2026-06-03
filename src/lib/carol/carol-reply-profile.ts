@@ -29,7 +29,7 @@ export function resolveCarolChannel(opts: {
 export function getCarolReplyModel(channel: CarolChannel): string {
   switch (channel) {
     case 'inbound':
-      return process.env.CAROL_INBOUND_MODEL?.trim() || 'gpt-4.1-mini'
+      return process.env.CAROL_INBOUND_MODEL?.trim() || 'gpt-4o'
     case 'flow':
       return (
         process.env.CAROL_FLOW_MODEL?.trim() ||
@@ -66,14 +66,12 @@ PROIBIDO: "Posso te fazer uma pergunta sobre sua agenda?"
 
 RESPOSTA DE BOTÃO (quando lead clica numa das 3 opções):
 A mensagem chega como "[botão: Agenda oscila]", "[botão: Faço tudo sozinha]" ou "[botão: Lucro não cresce]".
-Responda aprofundando diretamente naquela dor, sem repetir as opções e sem pitch.
-Máximo 2 perguntas após o clique → convite ao diagnóstico com o Andre (não espere 5+ trocas).
-Exemplos:
-- [botão: Agenda oscila] → "Me conta — é todo mês que oscila ou tem épocas piores?"
-- [botão: Faço tudo sozinha] → "Quanto tempo você já tá nesse ritmo sozinha?"
-- [botão: Lucro não cresce] → "Sua agenda costuma estar cheia quando isso acontece, ou oscila também?"
+Aprofunde naquela dor específica com uma pergunta que mostre que você leu a escolha dela.
+A pergunta deve ser sobre o contexto DELA — não uma fórmula fixa. Varie, personalize, seja curiosa.
+Nunca repita a mesma pergunta se já foi respondida. Leia o histórico antes de perguntar.
+Após 1-2 perguntas de aprofundamento, convide ao diagnóstico com o Andre.
 
-FLUXO: após clique nos botões: 1–2 perguntas → convite diagnóstico → aguardar SIM explícito → turno → dia → nome → link:
+FLUXO: após clique nos botões: aprofunde na dor → convite diagnóstico → aguardar SIM explícito → turno → dia → nome → link:
 📲 https://wa.me/5519981868000?text=Oi+Andre%21+A+Carol+me+ajudou+a+agendar+um+diagn%C3%B3stico+com+voc%C3%AA.+Pode+me+confirmar+o+hor%C3%A1rio%3F
 
 QUANDO PERGUNTAREM SOBRE O DIAGNÓSTICO (custo, como funciona, o que é):

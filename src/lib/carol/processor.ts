@@ -536,6 +536,11 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       isMetaAdLeadMessage(text) ||
       conversationHasAdLeadIntent(history)
 
+    // Lead de anúncio Meta que chegou pelo canal inbound (Click-to-WhatsApp).
+    // Esses leads são os mais qualificados (pagaram pra clicar) — merecem o
+    // prompt completo e o modelo melhor, não o mini.
+    const isInboundAdLead = isAdLead && channel === 'inbound'
+
     // ── BOTÕES INTERATIVOS: primeiro contato de lead de anúncio genérico ─────
     // Se a mensagem é o CTA padrão do Meta ("Tenho interesse", "mais informações")
     // e Carol ainda não respondeu nesta conversa → envia botões das 3 dores.
@@ -557,9 +562,8 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
     }
     // ─────────────────────────────────────────────────────────────────────────
 
-    // Inbound já traz trilha de anúncio no prompt mini — evita duplicar tokens
-    const adLeadNote =
-      isAdLead && channel !== 'inbound' ? AD_LEAD_CONTEXT_PROMPT : ''
+    // Ad leads sempre recebem as instruções detalhadas do fluxo — inbound ou outbound
+    const adLeadNote = isAdLead ? AD_LEAD_CONTEXT_PROMPT : ''
     const classifierNote = inboundKindContextNote(inboundKind)
 
     const duplicateCtaNote =
@@ -576,9 +580,17 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
         ? POST_BUTTON_CLICK_PROMPT
         : ''
 
+    // Leads de anúncio inbound → prompt completo (gpt-4o garante qualidade)
+    // Inbound puro (direto, sem ad) → prompt mini ainda funciona para triagem
+    // Outbound / flow → prompt completo já era
     const basePrompt =
-      channel === 'inbound' ? CAROL_INBOUND_MINI_PROMPT : CAROL_SYSTEM_PROMPT
-    const replyModel = getCarolReplyModel(channel)
+      channel === 'inbound' && !isInboundAdLead
+        ? CAROL_INBOUND_MINI_PROMPT
+        : CAROL_SYSTEM_PROMPT
+
+    const replyModel = isInboundAdLead
+      ? (process.env.CAROL_OUTBOUND_MODEL?.trim() || 'gpt-4o')
+      : getCarolReplyModel(channel)
 
     // Nota do Andre — contexto manual para esta conversa
     const notaAndreContext = (conversation as any).nota_andre
