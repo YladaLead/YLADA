@@ -216,10 +216,10 @@ function generateShareImage(
   const dateFull = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })
 
   // Cor do cabeçalho igual ao popup
-  const hColor = pct >= 100 ? '#059669' : pct >= 60 ? '#0891b2' : pct >= 33 ? '#d97706' : pct > 0 ? '#7c3aed' : '#6b7280'
-  const emoji  = pct >= 100 ? '🏆' : pct >= 60 ? '⚡' : pct >= 33 ? '🔥' : pct > 0 ? '💪' : '🌅'
-  const titleText = pct >= 100 ? 'Dia completo!' : pct >= 60 ? 'Ótimo progresso!' : pct >= 33 ? 'Na metade!' : pct > 0 ? 'Começando!' : 'Registrado!'
-  const subText   = pct >= 100 ? 'Todas as tarefas concluídas' : `${completedCount} de ${tasks.length} tarefas`
+  const hColor = pct >= 100 ? '#059669' : pct >= 81 ? '#16a34a' : pct >= 61 ? '#0891b2' : pct >= 41 ? '#d97706' : pct >= 21 ? '#4f46e5' : pct > 0 ? '#7c3aed' : '#6b7280'
+  const emoji  = pct >= 100 ? '🏆' : pct >= 81 ? '🎯' : pct >= 61 ? '💥' : pct >= 41 ? '🔥' : pct >= 21 ? '⚡' : pct > 0 ? '🚀' : '🌱'
+  const titleText = pct >= 100 ? 'Dia lendário!' : pct >= 81 ? 'Um passo para o dia perfeito!' : pct >= 61 ? 'Dia forte! Continue assim!' : pct >= 41 ? 'Passou da metade!' : pct >= 21 ? 'Você está em movimento!' : pct > 0 ? 'O primeiro passo está dado!' : 'Amanhã é uma nova chance!'
+  const subText   = pct >= 100 ? 'Isso é consistência. É assim que líderes são feitos.' : pct >= 81 ? 'Finaliza forte — você chegou até aqui.' : pct >= 61 ? 'Você está construindo algo real. Falta pouco.' : pct >= 41 ? 'A segunda metade é onde os líderes se revelam.' : pct >= 21 ? 'Quem começa já está na frente. Não para.' : pct > 0 ? 'Cada ação planta uma semente. Continue.' : 'Reflita o que travou hoje. Amanhã você recomeça.'
 
   // Fundo geral branco
   ctx.fillStyle = '#fff'
@@ -703,27 +703,33 @@ export function ProLideresDailyTasksClient() {
     applicableToday.length > 0 ? Math.round((todayDraftCount / applicableToday.length) * 100) : 0
 
   function headerGradient(pct: number): string {
-    if (pct === 100) return 'linear-gradient(135deg,#059669 0%,#047857 55%,#065f46 100%)'
-    if (pct >= 67)   return 'linear-gradient(135deg,#16a34a 0%,#15803d 40%,#14532d 100%)'
-    if (pct >= 34)   return 'linear-gradient(135deg,#0891b2 0%,#0e7490 40%,#164e63 100%)'
-    if (pct > 0)     return 'linear-gradient(135deg,#2563eb 0%,#7c3aed 55%,#4c1d95 100%)'
-    return 'linear-gradient(135deg,#1d4ed8 0%,#1e40af 55%,#312e81 100%)'
+    if (pct >= 100) return 'linear-gradient(135deg,#059669 0%,#047857 55%,#065f46 100%)'
+    if (pct >= 81)  return 'linear-gradient(135deg,#16a34a 0%,#15803d 55%,#14532d 100%)'
+    if (pct >= 61)  return 'linear-gradient(135deg,#0891b2 0%,#0e7490 55%,#164e63 100%)'
+    if (pct >= 41)  return 'linear-gradient(135deg,#d97706 0%,#b45309 55%,#92400e 100%)'
+    if (pct >= 21)  return 'linear-gradient(135deg,#4f46e5 0%,#4338ca 55%,#3730a3 100%)'
+    if (pct > 0)    return 'linear-gradient(135deg,#7c3aed 0%,#6d28d9 55%,#5b21b6 100%)'
+    return 'linear-gradient(135deg,#6b7280 0%,#4b5563 55%,#374151 100%)'
   }
 
   function barGradient(pct: number): string {
-    if (pct === 100) return 'linear-gradient(90deg,#6ee7b7,#fff)'
-    if (pct >= 67)   return 'linear-gradient(90deg,#86efac,#fff)'
-    if (pct >= 34)   return 'linear-gradient(90deg,#67e8f9,#fff)'
-    if (pct > 0)     return 'linear-gradient(90deg,#c4b5fd,#fff)'
+    if (pct >= 100) return 'linear-gradient(90deg,#6ee7b7,#fff)'
+    if (pct >= 81)  return 'linear-gradient(90deg,#86efac,#fff)'
+    if (pct >= 61)  return 'linear-gradient(90deg,#67e8f9,#fff)'
+    if (pct >= 41)  return 'linear-gradient(90deg,#fed7aa,#fff)'
+    if (pct >= 21)  return 'linear-gradient(90deg,#c4b5fd,#fff)'
+    if (pct > 0)    return 'linear-gradient(90deg,#ddd6fe,#fff)'
     return 'none'
   }
 
   function scoreColor(pct: number): string {
-    if (pct === 100) return '#059669'
-    if (pct >= 67)   return '#15803d'
-    if (pct >= 34)   return '#0e7490'
-    if (pct > 0)     return '#7c3aed'
-    return '#1e40af'
+    if (pct >= 100) return '#059669'
+    if (pct >= 81)  return '#16a34a'
+    if (pct >= 61)  return '#0891b2'
+    if (pct >= 41)  return '#d97706'
+    if (pct >= 21)  return '#4f46e5'
+    if (pct > 0)    return '#7c3aed'
+    return '#6b7280'
   }
 
   const execucaoHref = `${painelBasePath.replace(/\/$/, '')}/tarefas/execucao`
@@ -741,9 +747,9 @@ export function ProLideresDailyTasksClient() {
   const celebrationPoints = applicableToday.filter(t => todaySaved.has(t.id)).reduce((s, t) => s + t.points, 0)
   const celebrationMax = applicableToday.reduce((s, t) => s + t.points, 0)
   const celebrationPct = celebrationMax > 0 ? Math.round((celebrationPoints / celebrationMax) * 100) : 0
-  const celebrationEmoji = celebrationPct >= 100 ? '🏆' : celebrationPct >= 60 ? '⚡' : celebrationPct >= 33 ? '🔥' : celebrationPct > 0 ? '💪' : '🌅'
-  const celebrationTitle = celebrationPct >= 100 ? 'Dia completo!' : celebrationPct >= 60 ? 'Ótimo progresso!' : celebrationPct >= 33 ? 'Na metade!' : celebrationPct > 0 ? 'Começando!' : 'Registrado!'
-  const celebrationSub = celebrationPct >= 100 ? 'Todas as tarefas concluídas' : celebrationPct > 0 ? `${applicableToday.filter(t => todaySaved.has(t.id)).length} de ${applicableToday.length} tarefas concluídas` : 'Amanhã é uma nova chance'
+  const celebrationEmoji = celebrationPct >= 100 ? '🏆' : celebrationPct >= 81 ? '🎯' : celebrationPct >= 61 ? '💥' : celebrationPct >= 41 ? '🔥' : celebrationPct >= 21 ? '⚡' : celebrationPct > 0 ? '🚀' : '🌱'
+  const celebrationTitle = celebrationPct >= 100 ? 'Dia lendário!' : celebrationPct >= 81 ? 'Um passo para o dia perfeito!' : celebrationPct >= 61 ? 'Dia forte! Continue assim!' : celebrationPct >= 41 ? 'Passou da metade!' : celebrationPct >= 21 ? 'Você está em movimento!' : celebrationPct > 0 ? 'O primeiro passo está dado!' : 'Amanhã é uma nova chance!'
+  const celebrationSub = celebrationPct >= 100 ? 'Isso é consistência. É assim que líderes são feitos.' : celebrationPct >= 81 ? 'Finaliza forte — você chegou até aqui.' : celebrationPct >= 61 ? 'Você está construindo algo real. Falta pouco.' : celebrationPct >= 41 ? 'A segunda metade é onde os líderes se revelam.' : celebrationPct >= 21 ? 'Quem começa já está na frente. Não para.' : celebrationPct > 0 ? 'Cada ação planta uma semente. Continue.' : 'Reflita o que travou hoje. Amanhã você recomeça.'
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -885,10 +891,12 @@ export function ProLideresDailyTasksClient() {
                 {applicableToday.length > 0 && (
                   <p className="mt-1 text-sm font-semibold text-white">
                     {todayProgressPct === 0 && '👆 Toque para marcar cada tarefa'}
-                    {todayProgressPct > 0 && todayProgressPct < 34 && '💪 Bom início! Continue!'}
-                    {todayProgressPct >= 34 && todayProgressPct < 67 && '🔥 Na metade — não para agora!'}
-                    {todayProgressPct >= 67 && todayProgressPct < 100 && '⚡ Quase lá! Falta pouco!'}
-                    {todayProgressPct === 100 && '🏆 Dia completo! Parabéns!'}
+                    {todayProgressPct > 0 && todayProgressPct < 21 && '🚀 O primeiro passo está dado!'}
+                    {todayProgressPct >= 21 && todayProgressPct < 41 && '⚡ Você está em movimento!'}
+                    {todayProgressPct >= 41 && todayProgressPct < 61 && '🔥 Passou da metade — não para agora!'}
+                    {todayProgressPct >= 61 && todayProgressPct < 81 && '💥 Dia forte! Continue assim!'}
+                    {todayProgressPct >= 81 && todayProgressPct < 100 && '🎯 Um passo para o dia perfeito!'}
+                    {todayProgressPct === 100 && '🏆 Dia lendário! Parabéns!'}
                   </p>
                 )}
               </div>
@@ -1014,7 +1022,7 @@ export function ProLideresDailyTasksClient() {
                   : 'bg-gray-400'
               }`}
             >
-              {savingToday ? 'Salvando…' : todayProgressPct === 100 ? '🏆 Salvar — dia completo!' : 'Salvar execução de hoje'}
+              {savingToday ? 'Salvando…' : todayProgressPct === 100 ? '🏆 Salvar — dia lendário!' : 'Salvar execução de hoje'}
             </button>
 
             {/* Botão compartilhar — gera imagem PNG e usa Web Share API / download */}
