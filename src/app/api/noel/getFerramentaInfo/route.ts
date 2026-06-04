@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { buildWellnessToolUrl } from '@/lib/url-utils'
+import { buildWellnessToolUrl, buildCoachBemEstarToolUrl } from '@/lib/url-utils'
 import { validateNoelFunctionAuth } from '@/lib/noel-functions-auth'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
 
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
         console.log('🔍 [getFerramentaInfo] Buscando user_slug para user_id:', user_id)
         const { data: profileData, error: profileError } = await supabaseAdmin
           .from('user_profiles')
-          .select('user_slug')
+          .select('user_slug, profession')
           .eq('user_id', user_id)
           .maybeSingle()
         
@@ -122,45 +122,48 @@ export async function POST(request: NextRequest) {
             })
             
             // Fazer múltiplas queries e combinar resultados para garantir que encontramos todas
+            // Inclui 'coach-bem-estar' para cobrir usuários dessa área
+            const professions = ['wellness', 'coach-bem-estar']
+
             const [result1, result2, result3, result4, result5] = await Promise.all([
               // 1. Buscar por template_slug original (ex: "calculadora-agua")
               supabaseAdmin
                 .from('user_templates')
-                .select('slug, template_slug, title, custom_whatsapp_message, description, created_at')
+                .select('slug, template_slug, title, custom_whatsapp_message, description, created_at, profession')
                 .eq('user_id', user_id)
-                .eq('profession', 'wellness')
+                .in('profession', professions)
                 .eq('status', 'active')
                 .eq('template_slug', ferramenta_slug),
               // 2. Buscar por template_slug normalizado (ex: "calc-hidratacao")
               supabaseAdmin
                 .from('user_templates')
-                .select('slug, template_slug, title, custom_whatsapp_message, description, created_at')
+                .select('slug, template_slug, title, custom_whatsapp_message, description, created_at, profession')
                 .eq('user_id', user_id)
-                .eq('profession', 'wellness')
+                .in('profession', professions)
                 .eq('status', 'active')
                 .eq('template_slug', templateSlugNormalizado),
               // 3. Buscar por slug original (ex: "calculadora-agua")
               supabaseAdmin
                 .from('user_templates')
-                .select('slug, template_slug, title, custom_whatsapp_message, description, created_at')
+                .select('slug, template_slug, title, custom_whatsapp_message, description, created_at, profession')
                 .eq('user_id', user_id)
-                .eq('profession', 'wellness')
+                .in('profession', professions)
                 .eq('status', 'active')
                 .eq('slug', ferramenta_slug),
               // 4. Buscar por slug normalizado (ex: "calc-hidratacao")
               supabaseAdmin
                 .from('user_templates')
-                .select('slug, template_slug, title, custom_whatsapp_message, description, created_at')
+                .select('slug, template_slug, title, custom_whatsapp_message, description, created_at, profession')
                 .eq('user_id', user_id)
-                .eq('profession', 'wellness')
+                .in('profession', professions)
                 .eq('status', 'active')
                 .eq('slug', templateSlugNormalizado),
               // 5. Buscar TODAS as ferramentas do usuário (fallback - para garantir que não perdemos nenhuma)
               supabaseAdmin
                 .from('user_templates')
-                .select('slug, template_slug, title, custom_whatsapp_message, description, created_at')
+                .select('slug, template_slug, title, custom_whatsapp_message, description, created_at, profession')
                 .eq('user_id', user_id)
-                .eq('profession', 'wellness')
+                .in('profession', professions)
                 .eq('status', 'active')
             ])
             
@@ -249,12 +252,14 @@ export async function POST(request: NextRequest) {
             if (ferramentaEscolhida && ferramentaEscolhida.slug) {
               try {
                 // ✅ CRÍTICO: SEMPRE usar o slug da ferramenta (NUNCA usar template_slug no link)
-                // A rota /pt/wellness/[user-slug]/[tool-slug] busca pelo campo 'slug' da user_templates
-                // Exemplo: se ferramenta tem slug='agua' e template_slug='calc-hidratacao'
-                //          link correto: /pt/wellness/andre/agua
-                //          link ERRADO: /pt/wellness/andre/calc-hidratacao
-                const toolSlugParaLink = ferramentaEscolhida.slug // ✅ SEMPRE usar o slug da ferramenta
-                link = buildWellnessToolUrl(profile.user_slug, toolSlugParaLink)
+                const toolSlugParaLink = ferramentaEscolhida.slug
+                // Usar URL builder correto conforme a área do usuário
+                const isCoachBemEstar =
+                  ferramentaEscolhida.profession === 'coach-bem-estar' ||
+                  (profile as any)?.profession === 'coach-bem-estar'
+                link = isCoachBemEstar
+                  ? buildCoachBemEstarToolUrl(profile.user_slug, toolSlugParaLink)
+                  : buildWellnessToolUrl(profile.user_slug, toolSlugParaLink)
                 console.log('✅ [getFerramentaInfo] Link gerado com ferramenta escolhida:', {
                   user_slug: profile.user_slug,
                   tool_slug_usado: toolSlugParaLink, // ✅ Slug usado no link
@@ -308,9 +313,12 @@ export async function POST(request: NextRequest) {
           .maybeSingle()
         
         if (ferramentaGenerica?.id && ferramentaGenerica?.slug) {
-          // Se tiver user_slug, usar formato personalizado
+          // Se tiver user_slug, usar formato personalizado com URL builder correto
           if (profile?.user_slug) {
-            link = buildWellnessToolUrl(profile.user_slug, ferramentaGenerica.slug)
+            const isCoachFallback = (profile as any)?.profession === 'coach-bem-estar'
+            link = isCoachFallback
+              ? buildCoachBemEstarToolUrl(profile.user_slug, ferramentaGenerica.slug)
+              : buildWellnessToolUrl(profile.user_slug, ferramentaGenerica.slug)
             console.log('✅ [getFerramentaInfo] Link genérico encontrado com user_slug:', link)
           } else {
             // Sem user_slug, usar formato de fallback com ID

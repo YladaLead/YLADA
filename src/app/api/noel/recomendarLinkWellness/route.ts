@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateNoelFunctionAuth } from '@/lib/noel-functions-auth'
 import { recommendLink, type RecomendacaoContext } from '@/lib/noel-wellness/links-recommender'
 import { supabaseAdmin } from '@/lib/supabase'
-import { buildWellnessToolUrl } from '@/lib/url-utils'
+import { buildWellnessToolUrl, buildCoachBemEstarToolUrl } from '@/lib/url-utils'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
 
 /**
@@ -59,13 +59,19 @@ export async function POST(request: NextRequest) {
       // Buscar user_slug
       const { data: profile } = await supabaseAdmin
         .from('user_profiles')
-        .select('user_slug')
+        .select('user_slug, profession')
         .eq('user_id', user_id)
         .maybeSingle()
-      
+
+      const isCoachBemEstar = (profile as any)?.profession === 'coach-bem-estar'
+      const buildToolUrl = (slug: string, toolSlug: string) =>
+        isCoachBemEstar
+          ? buildCoachBemEstarToolUrl(slug, toolSlug)
+          : buildWellnessToolUrl(slug, toolSlug)
+
       if (profile?.user_slug) {
         if (isHOM) {
-          // Link da HOM: /pt/wellness/[user-slug]/hom
+          // Link da HOM: /pt/wellness/[user-slug]/hom (HOM não existe em coach-bem-estar)
           linkPersonalizado = buildWellnessToolUrl(profile.user_slug, 'hom')
           console.log('✅ [recomendarLinkWellness] Link HOM personalizado gerado:', linkPersonalizado)
         } else if (!linkPersonalizado) {
@@ -95,7 +101,7 @@ export async function POST(request: NextRequest) {
                 .from('user_templates')
                 .select('slug, template_slug, created_at, title')
                 .eq('user_id', user_id)
-                .eq('profession', 'wellness')
+                .in('profession', ['wellness', 'coach-bem-estar'])
                 .eq('status', 'active')
                 .or(orParts.join(','))
 
@@ -133,7 +139,7 @@ export async function POST(request: NextRequest) {
             console.warn('⚠️ [recomendarLinkWellness] Falha ao buscar tool slug do usuário:', err)
           }
 
-          linkPersonalizado = buildWellnessToolUrl(profile.user_slug, toolSlugParaLink)
+          linkPersonalizado = buildToolUrl(profile.user_slug, toolSlugParaLink)
         }
       }
     }
