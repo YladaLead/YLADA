@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin, getSupabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
 import { isPerfilMatrizYlada, PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 
@@ -150,8 +150,18 @@ export async function DELETE(
     const resolvedParams = await Promise.resolve(params)
     const userId = resolvedParams.id
 
+    // Usar getSupabaseAdmin() para garantir inicialização correta em serverless
+    const adminClient = getSupabaseAdmin()
+    if (!adminClient) {
+      console.error('❌ Supabase Admin não inicializado (SUPABASE_SERVICE_ROLE_KEY ausente?)')
+      return NextResponse.json(
+        { error: 'Configuração do servidor inválida' },
+        { status: 500 }
+      )
+    }
+
     // Deletar usuário do Supabase Auth (isso vai deletar automaticamente o perfil por CASCADE)
-    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+    const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId)
 
     if (deleteError) {
       console.error('❌ Erro ao deletar usuário:', deleteError)
