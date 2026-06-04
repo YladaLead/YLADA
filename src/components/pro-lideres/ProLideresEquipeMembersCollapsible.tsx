@@ -64,12 +64,14 @@ function MemberToolsDiagBlock({
   memberUserId,
   memberLabel,
   tabulatorName,
+  alwaysOpen = false,
 }: {
   memberUserId: string
   memberLabel: string
   tabulatorName: string | null
+  alwaysOpen?: boolean
 }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(alwaysOpen)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [rows, setRows] = useState<MemberDiagRow[]>([])
@@ -139,15 +141,17 @@ function MemberToolsDiagBlock({
   }, [used])
 
   return (
-    <div className="mt-3 border-t border-gray-100 pt-3">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="text-left text-xs font-semibold text-blue-700 underline-offset-2 hover:underline"
-        aria-expanded={open}
-      >
-        {open ? 'Ocultar' : 'Ver'} uso das ferramentas (30 dias) — {memberLabel}
-      </button>
+    <div className={alwaysOpen ? '' : 'mt-3 border-t border-gray-100 pt-3'}>
+      {!alwaysOpen && (
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="text-left text-xs font-semibold text-blue-700 underline-offset-2 hover:underline"
+          aria-expanded={open}
+        >
+          {open ? 'Ocultar' : 'Ver'} uso das ferramentas (30 dias) — {memberLabel}
+        </button>
+      )}
       {open ? (
         <div className="mt-2 rounded-xl border border-gray-200/90 bg-gradient-to-b from-white to-gray-50/80 p-3 shadow-sm">
           {tabulatorName ? (
@@ -508,6 +512,11 @@ export function ProLideresEquipeMembersCollapsible({
   const [copyMessage, setCopyMessage] = useState<string | null>(null)
   const [copyCopied, setCopyCopied] = useState(false)
   const [copyError, setCopyError] = useState<string | null>(null)
+  const [toolsModal, setToolsModal] = useState<{
+    userId: string
+    label: string
+    tabulatorName: string | null
+  } | null>(null)
 
   const statusCounts = useMemo(() => {
     const teamMembers = members.filter((m) => m.role === 'member')
@@ -639,6 +648,43 @@ export function ProLideresEquipeMembersCollapsible({
 
   return (
     <div className="overflow-hidden rounded-xl border border-emerald-200/80 bg-white shadow-sm ring-1 ring-emerald-100/60">
+      {toolsModal ? (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Ferramentas de ${toolsModal.label}`}
+          onClick={(e) => { if (e.target === e.currentTarget) setToolsModal(null) }}
+        >
+          <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-5 py-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Uso das ferramentas · 30 dias</p>
+                <p className="text-base font-bold text-gray-900">{toolsModal.label}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setToolsModal(null)}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100"
+                aria-label="Fechar"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto p-5">
+              <MemberToolsDiagBlock
+                memberUserId={toolsModal.userId}
+                memberLabel={toolsModal.label}
+                tabulatorName={toolsModal.tabulatorName}
+                alwaysOpen
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {activateUserId && activateFlow ? (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
@@ -1093,24 +1139,26 @@ export function ProLideresEquipeMembersCollapsible({
                             />
                           </>
                         )}
+                        {(m.teamAccessState === 'active' || isCurrentUser) && (
+                          <button
+                            type="button"
+                            onClick={() => setToolsModal({
+                              userId: m.userId,
+                              label: isCurrentUser ? `${title} (você)` : title,
+                              tabulatorName: m.tabulatorName,
+                            })}
+                            className="inline-flex min-h-[28px] items-center gap-1 rounded-md border border-indigo-300 bg-indigo-50 px-2 py-1 text-xs font-semibold text-indigo-900 transition hover:bg-indigo-100"
+                          >
+                            📊 Ver ferramentas
+                          </button>
+                        )}
                         {!m.whatsapp && (
-                          <span className="text-[10px] text-gray-400 self-center">
-                            (sem WA cadastrado — clique para copiar)
+                          <span className="self-center text-[10px] text-gray-400">
+                            (sem WA — clique para copiar)
                           </span>
                         )}
                       </div>
                     )}
-
-                    {canManageMembers && (
-                      (m.role === 'member' && m.teamAccessState === 'active') ||
-                      isCurrentUser
-                    ) ? (
-                      <MemberToolsDiagBlock
-                        memberUserId={m.userId}
-                        memberLabel={isCurrentUser ? `${title} (você)` : title}
-                        tabulatorName={m.tabulatorName}
-                      />
-                    ) : null}
                   </li>
                 )
               })
