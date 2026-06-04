@@ -308,6 +308,7 @@ export function ProLideresDailyTasksClient() {
   const [taskRows, setTaskRows] = useState<TaskRowEdit[]>([])
   const [savingEdits, setSavingEdits] = useState(false)
   const [savingToday, setSavingToday] = useState(false)
+  const [showCelebration, setShowCelebration] = useState(false)
   const [generatingShare, setGeneratingShare] = useState(false)
   const [shareImageUrl, setShareImageUrl] = useState<string | null>(null)
   const [shareError, setShareError] = useState<string | null>(null)
@@ -438,6 +439,12 @@ export function ProLideresDailyTasksClient() {
       setTodaySaved(new Set(completedIds))
       setTodaySaveOk(true)
       void load()
+      // Popup de conquista quando completa 100%
+      const maxPts = applicableToday.reduce((s, t) => s + t.points, 0)
+      const earnedPts = applicableToday.filter(t => completedIds.has(t.id)).reduce((s, t) => s + t.points, 0)
+      if (maxPts > 0 && earnedPts === maxPts) {
+        setTimeout(() => setShowCelebration(true), 400)
+      }
       return true
     } catch {
       setError('Erro de rede.')
@@ -629,6 +636,30 @@ export function ProLideresDailyTasksClient() {
   const todayProgressPct =
     applicableToday.length > 0 ? Math.round((todayDraftCount / applicableToday.length) * 100) : 0
 
+  function headerGradient(pct: number): string {
+    if (pct === 100) return 'linear-gradient(135deg,#059669 0%,#047857 55%,#065f46 100%)'
+    if (pct >= 67)   return 'linear-gradient(135deg,#16a34a 0%,#15803d 40%,#14532d 100%)'
+    if (pct >= 34)   return 'linear-gradient(135deg,#0891b2 0%,#0e7490 40%,#164e63 100%)'
+    if (pct > 0)     return 'linear-gradient(135deg,#2563eb 0%,#7c3aed 55%,#4c1d95 100%)'
+    return 'linear-gradient(135deg,#1d4ed8 0%,#1e40af 55%,#312e81 100%)'
+  }
+
+  function barGradient(pct: number): string {
+    if (pct === 100) return 'linear-gradient(90deg,#6ee7b7,#fff)'
+    if (pct >= 67)   return 'linear-gradient(90deg,#86efac,#fff)'
+    if (pct >= 34)   return 'linear-gradient(90deg,#67e8f9,#fff)'
+    if (pct > 0)     return 'linear-gradient(90deg,#c4b5fd,#fff)'
+    return 'none'
+  }
+
+  function scoreColor(pct: number): string {
+    if (pct === 100) return '#059669'
+    if (pct >= 67)   return '#15803d'
+    if (pct >= 34)   return '#0e7490'
+    if (pct > 0)     return '#7c3aed'
+    return '#1e40af'
+  }
+
   const execucaoHref = `${painelBasePath.replace(/\/$/, '')}/tarefas/execucao`
 
   const navPill =
@@ -641,8 +672,65 @@ export function ProLideresDailyTasksClient() {
     setTaskRows((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } : r)))
   }
 
+  const celebrationPoints = applicableToday.filter(t => todaySaved.has(t.id)).reduce((s, t) => s + t.points, 0)
+
   return (
     <div className="max-w-4xl space-y-6">
+      {/* Popup de conquista — 100% salvo */}
+      {showCelebration && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowCelebration(false) }}
+        >
+          <div className="w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl">
+            {/* Cabeçalho verde */}
+            <div className="flex flex-col items-center px-6 pt-8 pb-6" style={{ background: headerGradient(100) }}>
+              <span className="text-5xl leading-none mb-2">🏆</span>
+              <p className="text-2xl font-black text-white">Dia completo!</p>
+              <p className="mt-1 text-sm font-semibold text-white/80">Você concluiu todas as tarefas</p>
+              <div className="mt-4 rounded-2xl bg-white px-6 py-3 text-center shadow-lg">
+                <p className="text-4xl font-black leading-none" style={{ color: scoreColor(100) }}>{celebrationPoints}</p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-wide text-gray-400">pontos hoje</p>
+              </div>
+            </div>
+            {/* Lista de tarefas concluídas */}
+            <div className="divide-y divide-gray-100 bg-gray-50">
+              {applicableToday.filter(t => todaySaved.has(t.id)).map(t => (
+                <div key={t.id} className="flex items-center gap-3 px-4 py-2.5">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500">
+                    <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
+                    </svg>
+                  </div>
+                  <span className="flex-1 text-sm font-medium text-gray-700">{t.title}</span>
+                  <span className="text-xs font-bold text-emerald-600">+{t.points} pts</span>
+                </div>
+              ))}
+            </div>
+            {/* Botões */}
+            <div className="space-y-2 p-4">
+              <button
+                type="button"
+                disabled={generatingShare}
+                onClick={() => { void handleShare() }}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 py-3.5 text-sm font-bold text-white hover:bg-green-600 disabled:opacity-50"
+              >
+                <svg className="h-5 w-5 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                </svg>
+                {generatingShare ? 'Gerando…' : 'Compartilhar no WhatsApp'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCelebration(false)}
+                className="w-full rounded-xl bg-gray-100 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-200"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {isLeader ? (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -699,19 +787,11 @@ export function ProLideresDailyTasksClient() {
       )}
 
       {data && myUserId && (
-        <div className={`overflow-hidden rounded-2xl shadow-xl ${
-          todayProgressPct === 100
-            ? 'shadow-emerald-200'
-            : 'shadow-blue-200'
-        }`}>
-          {/* Cabeçalho com progresso */}
+        <div className="overflow-hidden rounded-2xl shadow-xl shadow-blue-100">
+          {/* Cabeçalho com progresso — cor muda conforme progresso */}
           <div
             className="relative overflow-hidden px-4 pb-6 pt-5 sm:px-5"
-            style={{
-              background: todayProgressPct === 100
-                ? 'linear-gradient(135deg, #059669 0%, #047857 60%, #065f46 100%)'
-                : 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 50%, #312e81 100%)',
-            }}
+            style={{ background: headerGradient(todayProgressPct) }}
           >
             {/* Círculos decorativos de fundo */}
             <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full opacity-10"
@@ -741,9 +821,7 @@ export function ProLideresDailyTasksClient() {
               {/* Placar — fundo branco com texto colorido */}
               {applicableToday.length > 0 && (
                 <div className="shrink-0 rounded-2xl bg-white px-3 py-2.5 text-center shadow-lg">
-                  <p className={`text-2xl font-black tabular-nums leading-none ${
-                    todayProgressPct === 100 ? 'text-emerald-600' : 'text-blue-700'
-                  }`}>
+                  <p className="text-2xl font-black tabular-nums leading-none" style={{ color: scoreColor(todayProgressPct) }}>
                     {todayDraftPoints}
                   </p>
                   <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-400">
@@ -767,9 +845,7 @@ export function ProLideresDailyTasksClient() {
                     className="h-full rounded-full transition-all duration-700 ease-out"
                     style={{
                       width: `${Math.max(todayProgressPct, todayProgressPct > 0 ? 4 : 0)}%`,
-                      background: todayProgressPct === 100
-                        ? 'linear-gradient(90deg, #6ee7b7, #fff)'
-                        : 'linear-gradient(90deg, #93c5fd, #fff)',
+                      background: barGradient(todayProgressPct),
                     }}
                   />
                 </div>
