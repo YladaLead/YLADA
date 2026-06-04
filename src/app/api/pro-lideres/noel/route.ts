@@ -10,6 +10,7 @@ import {
 } from '@/lib/pro-lideres-noel-prompt'
 import { formatLinksAtivosParaNoel, getNoelYladaLinks } from '@/lib/noel-ylada-links'
 import { formatProLideresCatalogForNoel } from '@/lib/pro-lideres-noel-catalog-context'
+import { getFlowBuilderMethodologyBlock } from '@/lib/ylada-flow-builder-methodology'
 import {
   buildCanonicalQuizMarkdownForProLideresResponse,
   isProLideresNoelShortApprovalAfterQuizDraft,
@@ -204,6 +205,7 @@ export async function POST(request: NextRequest) {
       painelTarefasDiariasUrl,
     }) +
     `\n\n${catalogContext}\n` +
+    getFlowBuilderMethodologyBlock() +
     massaPresetAppendix +
     extraSystemParts.join('\n')
 

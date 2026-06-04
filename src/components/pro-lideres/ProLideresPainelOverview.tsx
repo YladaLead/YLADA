@@ -18,8 +18,10 @@ function addDaysYmd(ymd: string, delta: number): string {
   return dt.toISOString().slice(0, 10)
 }
 
+type LocalPreset = PainelOverviewPreset | 'today'
+
 export function ProLideresPainelOverview() {
-  const [preset, setPreset] = useState<PainelOverviewPreset>('7d')
+  const [preset, setPreset] = useState<LocalPreset>('yesterday')
   const [customFrom, setCustomFrom] = useState(() => addDaysYmd(spToday(), -6))
   const [customTo, setCustomTo] = useState(() => spToday())
   const [data, setData] = useState<ProLideresPainelOverviewPayload | null>(null)
@@ -34,6 +36,10 @@ export function ProLideresPainelOverview() {
       if (preset === 'custom') {
         params.set('from', customFrom)
         params.set('to', customTo)
+      } else if (preset === 'today') {
+        const td = spToday()
+        params.set('from', td)
+        params.set('to', td)
       } else {
         params.set('preset', preset)
       }
@@ -98,29 +104,35 @@ export function ProLideresPainelOverview() {
   const focusWord = data.focusDayShortLabel
   const maxDate = spToday()
   const activeLabel =
-    data.preset === 'yesterday'
-      ? 'Ativos ontem'
-      : data.preset === 'custom'
-        ? data.rangeFrom === data.rangeTo
-          ? 'Ativos neste dia'
-          : `Ativos (${data.focusDayShortLabel})`
-        : 'Ativos hoje'
-  const inactiveLabel =
-    data.preset === 'yesterday'
-      ? 'Inativos ontem'
-      : data.preset === 'custom'
-        ? data.rangeFrom === data.rangeTo
-          ? 'Inativos neste dia'
-          : `Inativos (${data.focusDayShortLabel})`
-        : 'Inativos hoje'
-  const vsHint =
-    data.preset === 'yesterday'
-      ? 'Conclusões vs anteontem'
-      : data.preset === '30d'
-        ? 'Conclusões vs 30 dias anteriores'
+    preset === 'today'
+      ? 'Ativos hoje'
+      : data.preset === 'yesterday'
+        ? 'Ativos ontem'
         : data.preset === 'custom'
-          ? 'Conclusões vs período anterior'
-          : 'Conclusões vs semana anterior'
+          ? data.rangeFrom === data.rangeTo
+            ? 'Ativos neste dia'
+            : `Ativos (${data.focusDayShortLabel})`
+          : 'Ativos hoje'
+  const inactiveLabel =
+    preset === 'today'
+      ? 'Inativos hoje'
+      : data.preset === 'yesterday'
+        ? 'Inativos ontem'
+        : data.preset === 'custom'
+          ? data.rangeFrom === data.rangeTo
+            ? 'Inativos neste dia'
+            : `Inativos (${data.focusDayShortLabel})`
+          : 'Inativos hoje'
+  const vsHint =
+    preset === 'today'
+      ? 'Conclusões vs ontem'
+      : data.preset === 'yesterday'
+        ? 'Conclusões vs anteontem'
+        : data.preset === '30d'
+          ? 'Conclusões vs 30 dias anteriores'
+          : data.preset === 'custom'
+            ? 'Conclusões vs período anterior'
+            : 'Conclusões vs semana anterior'
 
   return (
     <div className="space-y-8">
@@ -140,11 +152,12 @@ export function ProLideresPainelOverview() {
             <select
               id="painel-periodo"
               value={preset}
-              onChange={(e) => setPreset(e.target.value as PainelOverviewPreset)}
+              onChange={(e) => setPreset(e.target.value as LocalPreset)}
               disabled={loading}
               aria-busy={loading}
               className="rounded-lg border border-gray-200/90 bg-white/95 px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm outline-none ring-blue-100 transition hover:border-gray-300 focus:ring-2 focus:ring-blue-200 disabled:opacity-60"
             >
+              <option value="today">Hoje</option>
               <option value="yesterday">Ontem</option>
               <option value="7d">7 dias</option>
               <option value="30d">30 dias</option>

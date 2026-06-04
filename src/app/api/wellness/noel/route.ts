@@ -41,6 +41,7 @@ import { checkRateLimit } from '@/lib/noel-wellness/rate-limiter'
 import { logSecurityFromFlags } from '@/lib/noel-wellness/security-logger'
 import { calcularMetasAutomaticas, formatarMetasParaNoel } from '@/lib/noel-wellness/goals-calculator'
 import { addExchange, getRecentMessages } from '@/lib/noel-wellness/noel-conversation-memory'
+import { getFlowBuilderMethodologyBlock } from '@/lib/ylada-flow-builder-methodology'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -205,7 +206,9 @@ async function generateAIResponse(
   const baseCtx = knowledgeBaseContext ?? (knowledgeContext ?? null)
 
   // Construir system prompt baseado no módulo (com contexto do consultor, perfil estratégico e insights)
-  const systemPrompt = buildSystemPrompt(module, libraryCtx, baseCtx, consultantContext, strategicProfileContext, message, detectedStrategicProfileText ?? null, diagnosisInsightsText ?? null)
+  const systemPrompt =
+    buildSystemPrompt(module, libraryCtx, baseCtx, consultantContext, strategicProfileContext, message, detectedStrategicProfileText ?? null, diagnosisInsightsText ?? null) +
+    getFlowBuilderMethodologyBlock()
   
   // Construir mensagens
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [

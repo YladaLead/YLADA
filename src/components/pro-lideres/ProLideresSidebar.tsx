@@ -74,6 +74,12 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
     [pathname, itemHref, painelBasePath]
   )
 
+  const [openGroup, setOpenGroup] = useState<string | null>('Meu trabalho')
+
+  const toggleGroup = useCallback((label: string) => {
+    setOpenGroup((prev) => (prev === label ? null : label))
+  }, [])
+
   const perfilPath = `${painelBasePath.replace(/\/$/, '')}/perfil`
   const perfilActive = pathname === perfilPath || pathname?.startsWith(`${perfilPath}/`)
 
@@ -151,16 +157,35 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
 
       <nav className="flex min-h-0 flex-1 flex-col">
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-2">
-          {filteredMenu.map((group) => (
-            <div key={group.label || 'menu'}>
-              {group.label ? (
-                <p className="mb-1 px-2 text-[11px] font-medium uppercase tracking-wide text-gray-500">
-                  {group.label}
-                </p>
-              ) : null}
-              <div className="space-y-0.5">{group.items.map((item) => renderItemLink(item))}</div>
-            </div>
-          ))}
+          {filteredMenu.map((group) => {
+            const hasActiveItem = group.items.some((item) => itemIsActive(item))
+            const isCollapsed = !!group.label && openGroup !== group.label && !hasActiveItem
+            return (
+              <div key={group.label || 'menu'}>
+                {group.label ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.label)}
+                    className="mb-1 flex w-full items-center justify-between px-2 text-[11px] font-medium uppercase tracking-wide text-gray-500 hover:text-gray-700"
+                  >
+                    <span>{group.label}</span>
+                    <svg
+                      className={`h-3 w-3 transition-transform duration-150 ${isCollapsed ? '-rotate-90' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                ) : null}
+                {!isCollapsed ? (
+                  <div className="space-y-0.5">{group.items.map((item) => renderItemLink(item))}</div>
+                ) : null}
+              </div>
+            )
+          })}
         </div>
 
         <div className="shrink-0 space-y-1 border-t border-gray-200 p-2">
