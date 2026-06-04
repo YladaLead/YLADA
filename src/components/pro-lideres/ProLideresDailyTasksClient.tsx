@@ -128,8 +128,50 @@ function diplomaLabel(pct: number): string {
   if (pct >= 100) return 'Dia perfeito!'
   if (pct >= 80)  return 'Excelente!'
   if (pct >= 60)  return 'Muito bem!'
-  if (pct >= 40)  return 'Em progresso'
-  return 'Começando'
+  if (pct >= 33)  return 'Em progresso'
+  if (pct > 0)    return 'Começando'
+  return 'Amanhã recomeça'
+}
+
+/** Classe CSS do badge de pontos conforme valor — escala visual de valor. */
+function ptsBadgeClass(points: number, done: boolean): string {
+  if (done) return 'bg-emerald-100 text-emerald-700'
+  if (points >= 20) return 'bg-amber-100 text-amber-700'   // dourado — alta pontuação
+  if (points >= 15) return 'bg-indigo-100 text-indigo-700' // índigo — média-alta
+  if (points >= 10) return 'bg-sky-100 text-sky-700'       // azul claro — padrão
+  return 'bg-gray-100 text-gray-500'                       // cinza — baixo valor
+}
+
+/** Cor hex do badge de pontos para o canvas. */
+function ptsCanvasColor(points: number, done: boolean): string {
+  if (done) return '#22c55e'
+  if (points >= 20) return '#d97706'  // âmbar
+  if (points >= 15) return '#6366f1'  // índigo
+  if (points >= 10) return '#0ea5e9'  // sky
+  return '#9ca3af'                    // cinza
+}
+
+/** Título do certificado baseado no progresso. */
+function certTitle(pct: number): string {
+  return pct === 0 ? 'Registro do Dia' : 'Certificado do Dia'
+}
+
+/** Cor principal do certificado (hex) baseada no progresso. */
+function certColor(pct: number): string {
+  if (pct >= 100) return '#92400e'   // dourado — dia perfeito
+  if (pct >= 60)  return '#0e7490'   // teal
+  if (pct >= 33)  return '#c2410c'   // laranja
+  if (pct > 0)    return '#6d28d9'   // roxo
+  return '#6b7280'                    // cinza — zero
+}
+
+/** Cor de fundo do certificado. */
+function certBg(pct: number): string {
+  if (pct >= 100) return '#fffbeb'
+  if (pct >= 60)  return '#ecfeff'
+  if (pct >= 33)  return '#fff7ed'
+  if (pct > 0)    return '#f5f3ff'
+  return '#f9fafb'
 }
 
 /** Converte dataUrl → Blob sem usar fetch (funciona em todos os browsers). */
@@ -142,7 +184,7 @@ function dataUrlToBlob(dataUrl: string): Blob {
   return new Blob([u8], { type: mime })
 }
 
-/** Gera PNG: logo YLADA + certificado de pontos + lista de tarefas (feitas e pendentes). */
+/** Gera PNG no estilo do popup: header colorido + logo + emoji + score + lista de tarefas. */
 function generateShareImage(
   tasks: ProLideresDailyTaskRow[],
   completedIds: Set<string>,
@@ -150,12 +192,11 @@ function generateShareImage(
 ): string {
   const SCALE    = 2
   const W        = 480
-  const PAD      = 16
-  const LOGO_H   = 52
-  const CERT_H   = 88          // certificado compacto (era 112)
-  const ROW_H    = 40
-  const FOOTER_H = 28
-  const H = LOGO_H + CERT_H + tasks.length * ROW_H + FOOTER_H
+  const PAD      = 20
+  const HEADER_H = 220  // cabeçalho colorido (logo + emoji + título + pontos)
+  const ROW_H    = 48
+  const FOOTER_H = 36
+  const H = HEADER_H + tasks.length * ROW_H + FOOTER_H
 
   const canvas = document.createElement('canvas')
   canvas.width  = W * SCALE
@@ -173,104 +214,131 @@ function generateShareImage(
   const pct      = maxPts > 0 ? Math.round((totalPts / maxPts) * 100) : 0
   const d        = new Date(`${dateStr}T12:00:00`)
   const dateFull = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })
-  const dateShort = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 
-  ctx.fillStyle = '#ffffff'
+  // Cor do cabeçalho igual ao popup
+  const hColor = pct >= 100 ? '#059669' : pct >= 60 ? '#0891b2' : pct >= 33 ? '#d97706' : pct > 0 ? '#7c3aed' : '#6b7280'
+  const emoji  = pct >= 100 ? '🏆' : pct >= 60 ? '⚡' : pct >= 33 ? '🔥' : pct > 0 ? '💪' : '🌅'
+  const titleText = pct >= 100 ? 'Dia completo!' : pct >= 60 ? 'Ótimo progresso!' : pct >= 33 ? 'Na metade!' : pct > 0 ? 'Começando!' : 'Registrado!'
+  const subText   = pct >= 100 ? 'Todas as tarefas concluídas' : `${completedCount} de ${tasks.length} tarefas`
+
+  // Fundo geral branco
+  ctx.fillStyle = '#fff'
   ctx.fillRect(0, 0, W, H)
 
-  // ── Logo ──────────────────────────────────────────────────────────────────
-  const lY = LOGO_H / 2
-  const r  = 10
-  ctx.beginPath(); ctx.arc(PAD + r, lY, r, 0, Math.PI * 2)
-  ctx.fillStyle = '#60a5fa'; ctx.fill()
-  ctx.beginPath(); ctx.arc(PAD + r + r * 1.15, lY, r, 0, Math.PI * 2)
+  // ── Header colorido ───────────────────────────────────────────────────────
+  ctx.fillStyle = hColor
+  ctx.fillRect(0, 0, W, HEADER_H)
+
+  // Círculos decorativos de fundo (como no app)
+  ctx.beginPath(); ctx.arc(W + 20, -20, 90, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.10)'; ctx.fill()
+  ctx.beginPath(); ctx.arc(-10, HEADER_H + 10, 70, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fill()
+
+  // ── Logo YLADA (dois círculos sobrepostos + texto) ────────────────────────
+  const logoY = 26
+  const r = 11
+  ctx.beginPath(); ctx.arc(PAD + r, logoY, r, 0, Math.PI * 2)
+  ctx.fillStyle = '#93c5fd'; ctx.fill()
+  ctx.beginPath(); ctx.arc(PAD + r + r * 1.1, logoY, r, 0, Math.PI * 2)
   ctx.fillStyle = '#1d4ed8'; ctx.fill()
-  ctx.fillStyle = '#1e3a5f'; ctx.font = f(16, 'bold')
-  ctx.fillText('YLADA', PAD + r * 2.3 + 10, lY + 6)
-  canvasRoundRect(ctx, W - 96, lY - 11, 80, 22, 6)
-  ctx.fillStyle = '#eff6ff'; ctx.fill()
-  ctx.fillStyle = '#1d4ed8'; ctx.font = f(9, 'bold')
+  ctx.fillStyle = '#fff'
+  ctx.font = f(16, 'bold')
+  ctx.textAlign = 'left'
+  ctx.fillText('YLADA', PAD + r * 2.3 + 10, logoY + 6)
+
+  // Badge "Pro Líderes"
+  canvasRoundRect(ctx, W - 106, logoY - 12, 90, 24, 6)
+  ctx.fillStyle = 'rgba(255,255,255,0.20)'; ctx.fill()
+  ctx.fillStyle = '#fff'; ctx.font = f(10, 'bold')
   ctx.textAlign = 'right'
-  ctx.fillText('Pro Líderes', W - PAD, lY + 4)
-  ctx.textAlign = 'left'
-  ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1
-  ctx.beginPath(); ctx.moveTo(0, LOGO_H); ctx.lineTo(W, LOGO_H); ctx.stroke()
+  ctx.fillText('Pro Líderes', W - PAD, logoY + 5)
 
-  // ── Certificado ──────────────────────────────────────────────────────────
-  const CY = LOGO_H
-  ctx.fillStyle = '#fffbeb'
-  ctx.fillRect(0, CY, W, CERT_H)
-  // Borda dupla
-  ctx.strokeStyle = '#d97706'; ctx.lineWidth = 1.5
-  ctx.strokeRect(8, CY + 8, W - 16, CERT_H - 16)
-  ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 0.75
-  ctx.strokeRect(13, CY + 13, W - 26, CERT_H - 26)
-  // Título
-  ctx.fillStyle = '#92400e'; ctx.font = f(8, 'bold')
+  // ── Emoji ─────────────────────────────────────────────────────────────────
+  ctx.font = f(44)
   ctx.textAlign = 'center'
-  ctx.fillText('C E R T I F I C A D O  D O  D I A', W / 2, CY + 26)
-  // Score grande
-  ctx.font = f(32, 'bold')
-  ctx.fillStyle = '#92400e'
-  const sw = ctx.measureText(String(totalPts)).width
-  ctx.fillText(String(totalPts), W / 2 - sw / 2, CY + 64)
-  ctx.font = f(12)
-  ctx.fillStyle = '#b45309'
-  ctx.fillText(' pts', W / 2 + sw / 2, CY + 60)
-  // Classificação
-  ctx.font = f(9)
-  ctx.fillText(`de ${maxPts} pts  ·  ${diplomaLabel(pct)}`, W / 2, CY + CERT_H - 14)
-  ctx.textAlign = 'left'
+  ctx.fillText(emoji, W / 2, 100)
 
-  // ── Tarefas ───────────────────────────────────────────────────────────────
-  let y = CY + CERT_H
+  // ── Título ────────────────────────────────────────────────────────────────
+  ctx.fillStyle = '#fff'
+  ctx.font = f(26, 'bold')
+  ctx.fillText(titleText, W / 2, 136)
+
+  // ── Subtítulo ─────────────────────────────────────────────────────────────
+  ctx.fillStyle = 'rgba(255,255,255,0.80)'
+  ctx.font = f(13)
+  ctx.fillText(subText, W / 2, 158)
+
+  // ── Score pill (fundo branco, número colorido) ────────────────────────────
+  const pillW = 130, pillH = 52
+  const pillX = (W - pillW) / 2
+  const pillY = 168
+  canvasRoundRect(ctx, pillX, pillY, pillW, pillH, 14)
+  ctx.fillStyle = '#fff'; ctx.fill()
+  ctx.fillStyle = hColor
+  ctx.font = f(28, 'bold')
+  ctx.fillText(String(totalPts), W / 2, pillY + 34)
+  ctx.fillStyle = '#9ca3af'
+  ctx.font = f(10, 'bold')
+  ctx.fillText(`DE ${maxPts} PTS`, W / 2, pillY + 48)
+
+  // ── Lista de tarefas ──────────────────────────────────────────────────────
+  let y = HEADER_H
+  ctx.textAlign = 'left'
   for (const t of tasks) {
     const done = completedIds.has(t.id)
-    ctx.fillStyle = done ? '#eff6ff' : '#f9fafb'
+    ctx.fillStyle = done ? '#f0fdf4' : '#fff'
     ctx.fillRect(0, y, W, ROW_H)
-    ctx.strokeStyle = '#f3f4f6'; ctx.lineWidth = 1
-    ctx.beginPath(); ctx.moveTo(0, y + ROW_H - 1); ctx.lineTo(W, y + ROW_H - 1); ctx.stroke()
+    ctx.strokeStyle = '#f3f4f6'; ctx.lineWidth = 0.5
+    ctx.beginPath(); ctx.moveTo(0, y + ROW_H); ctx.lineTo(W, y + ROW_H); ctx.stroke()
 
     const cy = y + ROW_H / 2
-    ctx.beginPath(); ctx.arc(PAD + 10, cy, 10, 0, Math.PI * 2)
-    ctx.fillStyle = done ? '#3b82f6' : '#e5e7eb'; ctx.fill()
 
-    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2
-    ctx.lineCap = 'round'; ctx.lineJoin = 'round'
+    // Círculo check
+    ctx.beginPath(); ctx.arc(PAD + 11, cy, 11, 0, Math.PI * 2)
+    ctx.fillStyle = done ? '#22c55e' : '#e5e7eb'; ctx.fill()
+
+    // Checkmark
     if (done) {
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round'
       ctx.beginPath()
-      ctx.moveTo(PAD + 5, cy); ctx.lineTo(PAD + 9, cy + 4); ctx.lineTo(PAD + 16, cy - 4)
-      ctx.stroke()
-    } else {
-      ctx.beginPath()
-      ctx.moveTo(PAD + 5, cy - 3); ctx.lineTo(PAD + 15, cy + 3)
-      ctx.moveTo(PAD + 15, cy - 3); ctx.lineTo(PAD + 5, cy + 3)
+      ctx.moveTo(PAD + 5.5, cy); ctx.lineTo(PAD + 10, cy + 4.5); ctx.lineTo(PAD + 17, cy - 4.5)
       ctx.stroke()
     }
 
-    ctx.fillStyle = done ? '#1e40af' : '#9ca3af'
-    ctx.font = done ? f(12, '600') : f(12)
-    ctx.fillText(t.title, PAD + 26, cy + 5)
+    // Texto
+    ctx.fillStyle = done ? '#6b7280' : '#374151'
+    ctx.font = f(13, done ? '500' : 'normal')
+    ctx.fillText(t.title, PAD + 28, cy + 5)
 
-    ctx.fillStyle = done ? '#2563eb' : '#d1d5db'
-    ctx.font = f(10, 'bold')
+    // Risco no texto (done)
+    if (done) {
+      const tw = ctx.measureText(t.title).width
+      ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 1
+      ctx.lineCap = 'butt'
+      ctx.beginPath(); ctx.moveTo(PAD + 28, cy + 1); ctx.lineTo(PAD + 28 + tw, cy + 1); ctx.stroke()
+    }
+
+    // Pontos — cor reflete o valor
+    ctx.fillStyle = ptsCanvasColor(t.points, done)
+    ctx.font = f(12, 'bold')
     ctx.textAlign = 'right'
-    ctx.fillText(`+${t.points}pts`, W - PAD, cy + 5)
+    ctx.fillText(`+${t.points}`, W - PAD, cy + 5)
     ctx.textAlign = 'left'
+
     y += ROW_H
   }
 
   // ── Footer ────────────────────────────────────────────────────────────────
-  ctx.fillStyle = '#f8fafc'
+  ctx.fillStyle = '#f9fafb'
   ctx.fillRect(0, y, W, FOOTER_H)
-  ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1
+  ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 0.5
   ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke()
-  ctx.fillStyle = '#9ca3af'; ctx.font = f(9)
+  ctx.fillStyle = '#9ca3af'; ctx.font = f(10)
   ctx.textAlign = 'center'
-  ctx.fillText(
-    `${completedCount}/${tasks.length} tarefas · ${dateFull.charAt(0).toUpperCase() + dateFull.slice(1)} · ${dateShort} · ylada.com`,
-    W / 2, y + FOOTER_H / 2 + 4
-  )
+  const dl = dateFull.charAt(0).toUpperCase() + dateFull.slice(1)
+  ctx.fillText(`${dl}  ·  ylada.com`, W / 2, y + FOOTER_H / 2 + 4)
   ctx.textAlign = 'left'
 
   const dataUrl = canvas.toDataURL('image/png')
@@ -439,10 +507,8 @@ export function ProLideresDailyTasksClient() {
       setTodaySaved(new Set(completedIds))
       setTodaySaveOk(true)
       void load()
-      // Popup de conquista quando completa 100%
-      const maxPts = applicableToday.reduce((s, t) => s + t.points, 0)
-      const earnedPts = applicableToday.filter(t => completedIds.has(t.id)).reduce((s, t) => s + t.points, 0)
-      if (maxPts > 0 && earnedPts === maxPts) {
+      // Popup aparece sempre que salva (com ou sem tarefas)
+      if (applicableToday.length > 0) {
         setTimeout(() => setShowCelebration(true), 400)
       }
       return true
@@ -673,6 +739,11 @@ export function ProLideresDailyTasksClient() {
   }
 
   const celebrationPoints = applicableToday.filter(t => todaySaved.has(t.id)).reduce((s, t) => s + t.points, 0)
+  const celebrationMax = applicableToday.reduce((s, t) => s + t.points, 0)
+  const celebrationPct = celebrationMax > 0 ? Math.round((celebrationPoints / celebrationMax) * 100) : 0
+  const celebrationEmoji = celebrationPct >= 100 ? '🏆' : celebrationPct >= 60 ? '⚡' : celebrationPct >= 33 ? '🔥' : celebrationPct > 0 ? '💪' : '🌅'
+  const celebrationTitle = celebrationPct >= 100 ? 'Dia completo!' : celebrationPct >= 60 ? 'Ótimo progresso!' : celebrationPct >= 33 ? 'Na metade!' : celebrationPct > 0 ? 'Começando!' : 'Registrado!'
+  const celebrationSub = celebrationPct >= 100 ? 'Todas as tarefas concluídas' : celebrationPct > 0 ? `${applicableToday.filter(t => todaySaved.has(t.id)).length} de ${applicableToday.length} tarefas concluídas` : 'Amanhã é uma nova chance'
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -683,27 +754,31 @@ export function ProLideresDailyTasksClient() {
           onClick={(e) => { if (e.target === e.currentTarget) setShowCelebration(false) }}
         >
           <div className="w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl">
-            {/* Cabeçalho verde */}
-            <div className="flex flex-col items-center px-6 pt-8 pb-6" style={{ background: headerGradient(100) }}>
-              <span className="text-5xl leading-none mb-2">🏆</span>
-              <p className="text-2xl font-black text-white">Dia completo!</p>
-              <p className="mt-1 text-sm font-semibold text-white/80">Você concluiu todas as tarefas</p>
+            {/* Cabeçalho — cor muda conforme progresso */}
+            <div className="flex flex-col items-center px-6 pt-8 pb-6" style={{ background: headerGradient(celebrationPct) }}>
+              <span className="text-5xl leading-none mb-2">{celebrationEmoji}</span>
+              <p className="text-2xl font-black text-white">{celebrationTitle}</p>
+              <p className="mt-1 text-sm font-semibold text-white/80">{celebrationSub}</p>
               <div className="mt-4 rounded-2xl bg-white px-6 py-3 text-center shadow-lg">
-                <p className="text-4xl font-black leading-none" style={{ color: scoreColor(100) }}>{celebrationPoints}</p>
-                <p className="mt-1 text-xs font-bold uppercase tracking-wide text-gray-400">pontos hoje</p>
+                <p className="text-4xl font-black leading-none" style={{ color: scoreColor(celebrationPct) }}>{celebrationPoints}</p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-wide text-gray-400">de {celebrationMax} pts</p>
               </div>
             </div>
-            {/* Lista de tarefas concluídas */}
+            {/* Lista de tarefas — feitas e não feitas */}
             <div className="divide-y divide-gray-100 bg-gray-50">
-              {applicableToday.filter(t => todaySaved.has(t.id)).map(t => (
-                <div key={t.id} className="flex items-center gap-3 px-4 py-2.5">
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500">
-                    <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
-                    </svg>
-                  </div>
-                  <span className="flex-1 text-sm font-medium text-gray-700">{t.title}</span>
-                  <span className="text-xs font-bold text-emerald-600">+{t.points} pts</span>
+              {applicableToday.map(t => (
+                <div key={t.id} className={`flex items-center gap-3 px-4 py-2.5 ${todaySaved.has(t.id) ? 'bg-emerald-50/50' : ''}`}>
+                  {todaySaved.has(t.id) ? (
+                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500">
+                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
+                      </svg>
+                    </div>
+                  ) : (
+                    <div className="h-5 w-5 shrink-0 rounded-full border-2 border-gray-200 bg-white" />
+                  )}
+                  <span className={`flex-1 text-sm font-medium ${todaySaved.has(t.id) ? 'text-gray-700 line-through decoration-emerald-400' : 'text-gray-400'}`}>{t.title}</span>
+                  <span className={`text-xs font-bold ${todaySaved.has(t.id) ? 'text-emerald-600' : 'text-gray-300'}`}>+{t.points}</span>
                 </div>
               ))}
             </div>
@@ -902,12 +977,8 @@ export function ProLideresDailyTasksClient() {
                       )}
                     </div>
 
-                    {/* Badge de pontos */}
-                    <span className={`shrink-0 self-start rounded-full px-2.5 py-1 text-xs font-bold transition-colors ${
-                      checked
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-blue-100 text-blue-700'
-                    }`}>
+                    {/* Badge de pontos — cor reflete o valor */}
+                    <span className={`shrink-0 self-start rounded-full px-2.5 py-1 text-xs font-bold transition-colors ${ptsBadgeClass(t.points, checked)}`}>
                       +{t.points} pts
                     </span>
                   </li>
