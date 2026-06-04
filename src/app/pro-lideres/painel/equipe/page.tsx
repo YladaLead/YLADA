@@ -29,6 +29,8 @@ export default async function ProLideresEquipePage() {
         members={members}
         canManageMembers={isLeader}
         currentUserId={gate.tenant.owner_user_id}
+        paymentUrl={gate.tenant.team_bank_payment_url ?? null}
+        pixUrl={gate.tenant.team_bank_pix_payment_url ?? null}
       />
 
       {isLeader ? <ProLideresEquipeAttributionPanel /> : null}

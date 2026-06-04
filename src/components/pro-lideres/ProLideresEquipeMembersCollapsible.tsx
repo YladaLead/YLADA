@@ -279,6 +279,90 @@ function MemberToolsDiagBlock({
   )
 }
 
+// ─── WhatsApp helpers ────────────────────────────────────────────────────────
+
+function buildWaUrl(rawPhone: string | null | undefined, text: string): string | null {
+  if (!rawPhone) return null
+  const digits = rawPhone.replace(/\D/g, '')
+  if (digits.length < 10) return null
+  const e164 = digits.startsWith('55') && digits.length >= 12 ? digits : `55${digits}`
+  return `https://wa.me/${e164}?text=${encodeURIComponent(text)}`
+}
+
+function buildContactText(
+  m: ProLideresMemberListItem,
+  paymentUrl: string | null,
+  pixUrl: string | null,
+  type: 'renovar' | 'orientar' | 'parabenizar'
+): string {
+  const primeiroNome = (m.displayName ?? '').split(' ')[0].trim() || 'tudo bem'
+
+  if (type === 'orientar') {
+    return `Oi ${primeiroNome}! Queria te dar um retorno rápido sobre seus números esta semana. Você tem 5 minutinhos?`
+  }
+  if (type === 'parabenizar') {
+    return `Oi ${primeiroNome}! 🔥 Vi seus números e queria te parabenizar! Continue assim!`
+  }
+
+  // renovar (vencido ou pausado)
+  const expired = isMemberAccessExpired(m)
+  const intro = expired
+    ? `Oi ${primeiroNome}! 👋 Sua assinatura do Pró Líderes venceu. Clique no link e renove agora para continuar com todos os benefícios:`
+    : `Oi ${primeiroNome}, sua assinatura está pausada. Clique no link e renove agora para ter todos os benefícios:`
+  const parts = [intro]
+  if (paymentUrl) parts.push(`💳 Cartão/assinatura: ${paymentUrl}`)
+  if (pixUrl) parts.push(`📱 Pix: ${pixUrl}`)
+  return parts.join('\n')
+}
+
+function WaButton({
+  phone,
+  text,
+  label,
+  variant,
+  onCopy,
+}: {
+  phone: string | null | undefined
+  text: string
+  label: string
+  variant: 'renovar' | 'orientar' | 'parabenizar'
+  onCopy: (msg: string) => void
+}) {
+  const url = buildWaUrl(phone, text)
+  const colorClass =
+    variant === 'renovar'
+      ? 'border-green-500 bg-green-50 text-green-900 hover:bg-green-100'
+      : variant === 'parabenizar'
+        ? 'border-amber-400 bg-amber-50 text-amber-900 hover:bg-amber-100'
+        : 'border-sky-400 bg-sky-50 text-sky-900 hover:bg-sky-100'
+
+  if (url) {
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`inline-flex min-h-[28px] items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold transition ${colorClass}`}
+      >
+        {label}
+      </a>
+    )
+  }
+  // Fallback: sem telefone → copia mensagem
+  return (
+    <button
+      type="button"
+      title="WhatsApp não cadastrado — clique para copiar a mensagem"
+      onClick={() => onCopy(text)}
+      className={`inline-flex min-h-[28px] items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold transition border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100`}
+    >
+      📋 {label}
+    </button>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 type StatusFilter = 'todos' | 'ativo' | 'pausado' | 'vencido'
 
 const STATUS_FILTER_LABELS: Record<StatusFilter, string> = {
@@ -394,12 +478,18 @@ export function ProLideresEquipeMembersCollapsible({
   members,
   canManageMembers = false,
   currentUserId,
+  paymentUrl = null,
+  pixUrl = null,
 }: {
   members: ProLideresMemberListItem[]
   /** Só o líder no painel real (não preview) altera pausa / remoção. */
   canManageMembers?: boolean
   /** ID do utilizador logado — mostra badge "Você" e métricas próprias do líder. */
   currentUserId?: string
+  /** Link de pagamento por cartão/assinatura configurado pelo líder. */
+  paymentUrl?: string | null
+  /** Link de pagamento Pix configurado pelo líder. */
+  pixUrl?: string | null
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(true)
@@ -974,6 +1064,42 @@ export function ProLideresEquipeMembersCollapsible({
                         ) : null}
                       </div>
                     </div>
+
+                    {canManageMembers && m.role === 'member' && (
+                      <div className="mt-2 flex flex-wrap gap-1.5 border-t border-gray-100 pt-2">
+                        {(expired || m.teamAccessState === 'paused') ? (
+                          <WaButton
+                            phone={m.whatsapp}
+                            text={buildContactText(m, paymentUrl, pixUrl, 'renovar')}
+                            label="📲 Renovar via WA"
+                            variant="renovar"
+                            onCopy={(msg) => { setCopyCopied(false); setCopyError(null); setCopyMessage(msg) }}
+                          />
+                        ) : (
+                          <>
+                            <WaButton
+                              phone={m.whatsapp}
+                              text={buildContactText(m, paymentUrl, pixUrl, 'orientar')}
+                              label="💬 Orientar"
+                              variant="orientar"
+                              onCopy={(msg) => { setCopyCopied(false); setCopyError(null); setCopyMessage(msg) }}
+                            />
+                            <WaButton
+                              phone={m.whatsapp}
+                              text={buildContactText(m, paymentUrl, pixUrl, 'parabenizar')}
+                              label="⭐ Parabenizar"
+                              variant="parabenizar"
+                              onCopy={(msg) => { setCopyCopied(false); setCopyError(null); setCopyMessage(msg) }}
+                            />
+                          </>
+                        )}
+                        {!m.whatsapp && (
+                          <span className="text-[10px] text-gray-400 self-center">
+                            (sem WA cadastrado — clique para copiar)
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     {canManageMembers && (
                       (m.role === 'member' && m.teamAccessState === 'active') ||

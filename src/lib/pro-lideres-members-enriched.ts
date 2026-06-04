@@ -30,6 +30,8 @@ export type ProLideresMemberListItem = {
   createdAt: string
   displayName: string | null
   email: string | null
+  /** WhatsApp do membro (de user_profiles.whatsapp). */
+  whatsapp: string | null
   /** Nome do tabulador escolhido no convite (sub-equipa), se existir. */
   tabulatorName: string | null
 }
@@ -52,7 +54,7 @@ export async function fetchProLideresMembersEnriched(
   const ids = rows.map((r) => r.user_id as string)
   const { data: profiles } = await supabaseAdmin
     .from('user_profiles')
-    .select('user_id, nome_completo, email')
+    .select('user_id, nome_completo, email, whatsapp')
     .in('user_id', ids)
 
   const byId = new Map((profiles ?? []).map((p) => [p.user_id as string, p]))
@@ -78,6 +80,7 @@ export async function fetchProLideresMembersEnriched(
       createdAt: r.created_at as string,
       displayName: (p?.nome_completo as string | null) ?? null,
       email: (p?.email as string | null) ?? null,
+      whatsapp: (p?.whatsapp as string | null) ?? null,
       tabulatorName,
     }
   })
