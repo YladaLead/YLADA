@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { PRO_LIDERES_MENU_GROUPS, proLideresItemHrefWithBase, type ProLideresMenuItem } from '@/config/pro-lideres-menu'
 import { useAuth } from '@/hooks/useAuth'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
@@ -74,10 +74,29 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
     [pathname, itemHref, painelBasePath]
   )
 
-  const [openGroup, setOpenGroup] = useState<string | null>('Meu trabalho')
+  // Toggle independente — cada seção abre/fecha sem depender das outras
+  const [openGroups, setOpenGroups] = useState<Set<string>>(() => new Set(['Meu trabalho']))
+  const didAutoExpand = useRef(false)
+
+  // Na primeira renderização, auto-abre a seção que contém o item ativo
+  useEffect(() => {
+    if (didAutoExpand.current) return
+    didAutoExpand.current = true
+    filteredMenu.forEach((group) => {
+      if (group.label && group.items.some((item) => itemIsActive(item))) {
+        setOpenGroups((prev) => new Set([...prev, group.label]))
+      }
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const toggleGroup = useCallback((label: string) => {
-    setOpenGroup((prev) => (prev === label ? null : label))
+    setOpenGroups((prev) => {
+      const next = new Set(prev)
+      if (next.has(label)) next.delete(label)
+      else next.add(label)
+      return next
+    })
   }, [])
 
   const perfilPath = `${painelBasePath.replace(/\/$/, '')}/perfil`
@@ -158,8 +177,7 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
       <nav className="flex min-h-0 flex-1 flex-col">
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-2">
           {filteredMenu.map((group) => {
-            const hasActiveItem = group.items.some((item) => itemIsActive(item))
-            const isCollapsed = !!group.label && openGroup !== group.label && !hasActiveItem
+            const isCollapsed = !!group.label && !openGroups.has(group.label)
             return (
               <div key={group.label || 'menu'}>
                 {group.label ? (
