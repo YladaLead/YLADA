@@ -24,17 +24,120 @@ type MemberDiagRow = {
 
 type MemberDiagRowScored = MemberDiagRow & { score: number }
 
+// ─── Período ─────────────────────────────────────────────────────────────────
+
+type PeriodPreset = 'hoje' | 'ontem' | '7d' | '30d' | '90d' | 'custom'
+
+const PERIOD_LABELS: Record<PeriodPreset, string> = {
+  hoje: 'Hoje', ontem: 'Ontem', '7d': '7 dias', '30d': '30 dias', '90d': '90 dias', custom: 'Datas',
+}
+
+/** Retorna query string para a API: "days=N" ou "from=ISO&to=ISO" */
+function buildPeriodParams(preset: PeriodPreset, customFrom: string, customTo: string): string {
+  if (preset === '7d') return 'days=7'
+  if (preset === '30d') return 'days=30'
+  if (preset === '90d') return 'days=90'
+  // SP = UTC-3 (sem DST desde 2019)
+  const SP_MS = 3 * 60 * 60 * 1000
+  const ymdMidnightUTC = (ymd: string) => {
+    const [y, m, d] = ymd.split('-').map(Number)
+    return new Date(Date.UTC(y, m - 1, d) + SP_MS).toISOString()
+  }
+  const ymdEndUTC = (ymd: string) => {
+    const [y, m, d] = ymd.split('-').map(Number)
+    return new Date(Date.UTC(y, m - 1, d + 1) + SP_MS - 1).toISOString()
+  }
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
+  const yest = (() => {
+    const [y, m, d] = today.split('-').map(Number)
+    return new Date(Date.UTC(y, m - 1, d - 1)).toISOString().slice(0, 10)
+  })()
+  if (preset === 'hoje') {
+    return `from=${encodeURIComponent(ymdMidnightUTC(today))}&to=${encodeURIComponent(new Date().toISOString())}`
+  }
+  if (preset === 'ontem') {
+    return `from=${encodeURIComponent(ymdMidnightUTC(yest))}&to=${encodeURIComponent(ymdEndUTC(yest))}`
+  }
+  if (preset === 'custom' && customFrom && customTo) {
+    return `from=${encodeURIComponent(ymdMidnightUTC(customFrom))}&to=${encodeURIComponent(ymdEndUTC(customTo))}`
+  }
+  return 'days=30'
+}
+
+// ─── Diagnóstico por proporção ────────────────────────────────────────────────
+
+type DiagLevel = 'ok' | 'warn' | 'alert'
+type DiagInsight = { level: DiagLevel; text: string }
+
+function buildMemberDiagnosis(rows: MemberDiagRow[]): DiagInsight[] {
+  const used = rows.filter((r) => r.views + r.starts + r.completions + r.whatsappClicks > 0)
+  if (used.length === 0) {
+    return [{
+      level: 'alert',
+      text: 'Nenhuma atividade rastreada — provavelmente está compartilhando o link geral em vez do link personalizado com seu código.',
+    }]
+  }
+  const tot = used.reduce(
+    (acc, r) => ({ v: acc.v + r.views, s: acc.s + r.starts, c: acc.c + r.completions, w: acc.w + r.whatsappClicks }),
+    { v: 0, s: 0, c: 0, w: 0 }
+  )
+  const out: DiagInsight[] = []
+  if (tot.v >= 5) {
+    const r = tot.s / tot.v
+    if (r < 0.20) out.push({ level: 'alert', text: `Vistas sem entrada: ${pct(r)} de quem vê está entrando no diagnóstico (esperado ≥ 35%). Trabalhar com ela o contexto de envio do link.` })
+    else if (r >= 0.35) out.push({ level: 'ok', text: `Boa abertura: ${pct(r)} de quem recebe o link entra no diagnóstico.` })
+  }
+  if (tot.s >= 3) {
+    const r = tot.c / tot.s
+    if (r < 0.40) out.push({ level: 'alert', text: `Conclusão baixa: ${pct(r)} de quem entra chega ao resultado (esperado ≥ 60%). O fluxo pode estar longo ou uma pergunta específica está travando.` })
+    else if (r >= 0.60) out.push({ level: 'ok', text: `Bom fluxo: ${pct(r)} de quem entra chega ao resultado.` })
+  }
+  if (tot.c >= 3) {
+    const r = tot.w / tot.c
+    if (r < 0.15) out.push({ level: 'warn', text: `Poucos cliques no WhatsApp após o resultado (${pct(r)}, esperado ≥ 25%). A conversa pode já estar acontecendo por outro canal. Sugestão: pedir para ela incluir no envio "Depois de ver o resultado, me chama no botão do WhatsApp que te passo uma orientação personalizada".` })
+    else if (r >= 0.25) out.push({ level: 'ok', text: `Boa conversão para WhatsApp: ${pct(r)} de quem vê o resultado clica para conversar.` })
+  }
+  if (out.length === 0) out.push({ level: 'ok', text: 'Atividade rastreada no período — acompanhar os números conforme o volume crescer.' })
+  return out
+}
+
+function pct(n: number) { return `${Math.round(n * 100)}%` }
+
+function DiagCard({ insights }: { insights: DiagInsight[] }) {
+  if (insights.length === 0) return null
+  return (
+    <div className="mb-4 space-y-2">
+      {insights.map((ins, i) => (
+        <div
+          key={i}
+          className={`rounded-xl px-3 py-2.5 text-sm leading-relaxed ${
+            ins.level === 'alert'
+              ? 'border border-red-200 bg-red-50 text-red-900'
+              : ins.level === 'warn'
+                ? 'border border-amber-200 bg-amber-50 text-amber-900'
+                : 'border border-emerald-200 bg-emerald-50 text-emerald-900'
+          }`}
+        >
+          <span className="mr-1.5">{ins.level === 'alert' ? '🔴' : ins.level === 'warn' ? '⚠️' : '✅'}</span>
+          {ins.text}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ─── Insight por link ─────────────────────────────────────────────────────────
+
 function rowInsight(r: MemberDiagRow): string | null {
   if (r.views === 0) return null
-  if (r.views >= 2 && r.whatsappClicks === 0 && r.completions > 0) {
-    return 'Chegou ao resultado, mas ainda sem WhatsApp'
-  }
-  if (r.views >= 2 && r.starts === 0) {
-    return 'Muitas vistas, poucos inícios de fluxo'
-  }
-  if (r.starts > 0 && r.completions === 0) {
-    return 'Início sem conclusão / resultado'
-  }
+  // Proportion-based com amostra suficiente
+  if (r.views >= 5 && r.starts / r.views < 0.20) return `${pct(r.starts / r.views)} de entrada — revisar contexto de envio`
+  if (r.starts >= 3 && r.completions / r.starts < 0.40) return `${pct(r.completions / r.starts)} de conclusão — fluxo pode estar travando`
+  if (r.completions >= 3 && r.whatsappClicks / r.completions < 0.15) return `${pct(r.whatsappClicks / r.completions)} clicaram no WA — reforçar CTA ou avisar antes do envio`
+  // Fallback para amostras pequenas
+  if (r.views >= 2 && r.starts === 0) return 'Muitas vistas, ninguém entrou no diagnóstico'
+  if (r.starts > 0 && r.completions === 0) return 'Início sem conclusão'
+  if (r.completions > 0 && r.whatsappClicks === 0) return 'Resultado sem clique no WhatsApp'
   return null
 }
 
@@ -72,20 +175,26 @@ function MemberToolsDiagBlock({
   alwaysOpen?: boolean
 }) {
   const [open, setOpen] = useState(alwaysOpen)
+  const [period, setPeriod] = useState<PeriodPreset>('30d')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [rows, setRows] = useState<MemberDiagRow[]>([])
   const [truncated, setTruncated] = useState(false)
+  const todayYmd = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
 
   useEffect(() => {
     if (!open) return
+    if (period === 'custom' && (!customFrom || !customTo)) return
     let cancelled = false
     ;(async () => {
       setLoading(true)
       setError(null)
       try {
+        const periodQ = buildPeriodParams(period, customFrom, customTo)
         const res = await fetch(
-          `/api/pro-lideres/equipe/links-diagnostics?days=30&member_user_id=${encodeURIComponent(memberUserId)}`,
+          `/api/pro-lideres/equipe/links-diagnostics?${periodQ}&member_user_id=${encodeURIComponent(memberUserId)}`,
           { credentials: 'include' }
         )
         const data = await res.json().catch(() => ({}))
@@ -114,7 +223,7 @@ function MemberToolsDiagBlock({
     return () => {
       cancelled = true
     }
-  }, [open, memberUserId])
+  }, [open, memberUserId, period, customFrom, customTo])
 
   const ranked = useMemo((): MemberDiagRowScored[] => {
     const withScore = rows.map((r) => ({
@@ -154,6 +263,48 @@ function MemberToolsDiagBlock({
       )}
       {open ? (
         <div className="mt-2 rounded-xl border border-gray-200/90 bg-gradient-to-b from-white to-gray-50/80 p-3 shadow-sm">
+          {/* Seletor de período — sempre visível no modal (alwaysOpen) */}
+          {alwaysOpen && (
+            <div className="mb-4">
+              <div className="flex flex-wrap gap-1.5">
+                {(Object.keys(PERIOD_LABELS) as PeriodPreset[]).map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setPeriod(p)}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                      period === p
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {PERIOD_LABELS[p]}
+                  </button>
+                ))}
+              </div>
+              {period === 'custom' && (
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-700">
+                  <span className="text-gray-500">De</span>
+                  <input
+                    type="date"
+                    value={customFrom}
+                    max={customTo || todayYmd}
+                    onChange={(e) => setCustomFrom(e.target.value)}
+                    className="rounded border border-gray-200 bg-white px-2 py-1 text-xs"
+                  />
+                  <span className="text-gray-500">até</span>
+                  <input
+                    type="date"
+                    value={customTo}
+                    min={customFrom}
+                    max={todayYmd}
+                    onChange={(e) => setCustomTo(e.target.value)}
+                    className="rounded border border-gray-200 bg-white px-2 py-1 text-xs"
+                  />
+                </div>
+              )}
+            </div>
+          )}
           {tabulatorName ? (
             <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[11px] font-medium text-gray-800">
               <span className="text-gray-500">Tabulador</span>
@@ -220,6 +371,9 @@ function MemberToolsDiagBlock({
                 </>
               ) : null}
 
+              {alwaysOpen && (
+                <DiagCard insights={buildMemberDiagnosis(ranked)} />
+              )}
               {used.length > 0 ? (
                 <div>
                   <p className="text-[11px] font-semibold text-gray-600">
@@ -1149,7 +1303,7 @@ export function ProLideresEquipeMembersCollapsible({
                             })}
                             className="inline-flex min-h-[28px] items-center gap-1 rounded-md border border-indigo-300 bg-indigo-50 px-2 py-1 text-xs font-semibold text-indigo-900 transition hover:bg-indigo-100"
                           >
-                            📊 Ver ferramentas
+                            🔗 Ver links usados
                           </button>
                         )}
                         {!m.whatsapp && (

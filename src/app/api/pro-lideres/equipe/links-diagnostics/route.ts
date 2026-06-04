@@ -36,6 +36,8 @@ export async function GET(request: NextRequest) {
 
   const daysRaw = request.nextUrl.searchParams.get('days')?.trim()
   const days = Math.min(365, Math.max(1, parseInt(daysRaw || '30', 10) || 30))
+  const fromParam = request.nextUrl.searchParams.get('from')?.trim() || undefined
+  const toParam = request.nextUrl.searchParams.get('to')?.trim() || undefined
 
   const memberParam = request.nextUrl.searchParams.get('member_user_id')?.trim() || null
   let memberUserId: string | null = null
@@ -61,6 +63,8 @@ export async function GET(request: NextRequest) {
       ownerUserId: ownerId,
       memberUserId,
       days,
+      fromIso: fromParam,
+      toIso: toParam,
     })
     return NextResponse.json({
       days,

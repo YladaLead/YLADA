@@ -20,6 +20,10 @@ export type FetchProLideresCatalogLinkDiagnosticsArgs = {
   /** Quando definido, só contam eventos com `utm_json.pl_member_user_id` e `pl_tenant_id` correspondentes. */
   memberUserId: string | null
   days: number
+  /** Override: início do período (ISO). Quando fornecido, substitui o cálculo por `days`. */
+  fromIso?: string
+  /** Override: fim do período (ISO). Usado em conjunto com `fromIso`. */
+  toIso?: string
 }
 
 /**
@@ -40,9 +44,11 @@ export async function fetchProLideresCatalogLinkDiagnosticRows(
   rows: ProLideresCatalogLinkDiagnosticRow[]
 }> {
   const days = Math.min(365, Math.max(1, args.days || 30))
-  const from = new Date()
-  from.setUTCDate(from.getUTCDate() - days)
-  const sinceIso = from.toISOString()
+  const sinceIso = args.fromIso ?? (() => {
+    const from = new Date()
+    from.setUTCDate(from.getUTCDate() - days)
+    return from.toISOString()
+  })()
   const memberUserId = args.memberUserId
 
   const { data: linkRows, error: linkErr } = await admin
@@ -87,12 +93,18 @@ export async function fetchProLideresCatalogLinkDiagnosticRows(
     return { days, sinceIso, memberUserId, truncated: false, rows: [] }
   }
 
-  const { data: events, error: evErr } = await admin
+  // Build query — conditionally add upper bound when toIso is provided
+  let eventsQ = admin
     .from('ylada_link_events')
     .select('link_id, event_type, utm_json')
     .in('link_id', linkIds)
     .gte('created_at', sinceIso)
-    .limit(MAX_EVENTS)
+
+  if (args.toIso) {
+    eventsQ = eventsQ.lte('created_at', args.toIso)
+  }
+
+  const { data: events, error: evErr } = await eventsQ.limit(MAX_EVENTS)
 
   if (evErr) {
     console.error('[catalog-link-diagnostics] events', evErr)
