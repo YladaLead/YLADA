@@ -97,6 +97,50 @@ function buildMemberRows(data: ApiGet): MemberRow[] {
   })
 }
 
+type OrientLevel = 'alert' | 'warn' | 'ok'
+
+function teamOrientation(rows: MemberRow[]): { level: OrientLevel; text: string } | null {
+  if (rows.length === 0) return null
+  const withTasks = rows.filter(r => r.completionCount > 0).length
+  const zero = rows.filter(r => r.completionCount === 0).length
+  const pct = Math.round((withTasks / rows.length) * 100)
+  if (withTasks === 0) return {
+    level: 'alert',
+    text: `Ninguém executou tarefas no período. Envie uma mensagem de motivação agora — de preferência relembrando o objetivo comum e reconhecendo quem estava se esforçando antes.`
+  }
+  if (pct < 30) return {
+    level: 'alert',
+    text: `Menos de 30% da equipe executou (${withTasks} de ${rows.length}). Considere uma mensagem em grupo — às vezes o problema é de compreensão do processo, não de falta de vontade.`
+  }
+  if (pct < 60) return {
+    level: 'warn',
+    text: `${pct}% da equipe executou. Toque nos nomes com 0 tarefas para entender o caso de cada um — ${zero} pessoas ainda não executaram no período.`
+  }
+  if (pct < 90) return {
+    level: 'warn',
+    text: `${pct}% de engajamento — resultado razoável. Reconheça os top 3 do ranking e acompanhe de perto os ${zero} que ainda não executaram.`
+  }
+  return {
+    level: 'ok',
+    text: `Equipe excelente — ${pct}% de engajamento! Momento ideal para parabenizar publicamente e reforçar a cultura de execução diária.`
+  }
+}
+
+function TeamOrientCard({ orient }: { orient: { level: OrientLevel; text: string } }) {
+  const styles = {
+    alert: 'border-red-200 bg-red-50 text-red-900',
+    warn: 'border-amber-200 bg-amber-50 text-amber-900',
+    ok: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+  }
+  const icon = { alert: '🔴', warn: '⚠️', ok: '✅' }
+  return (
+    <div className={`rounded-xl border px-3 py-2.5 text-sm ${styles[orient.level]}`}>
+      <span className="font-semibold">{icon[orient.level]} Orientação: </span>
+      {orient.text}
+    </div>
+  )
+}
+
 function sortMemberRows(rows: MemberRow[], mode: MemberSortMode): MemberRow[] {
   const copy = [...rows]
   copy.sort((a, b) => {
@@ -386,6 +430,16 @@ export function ProLideresDailyTasksExecucaoClient() {
                     </ol>
                   </div>
                 ) : null}
+
+                {/* Orientação da equipe — logo abaixo do ranking */}
+                {!focusUserId && (() => {
+                  const orient = teamOrientation(rankedMembers)
+                  return orient ? (
+                    <div className="border-t border-gray-100 px-3 py-3 sm:px-4">
+                      <TeamOrientCard orient={orient} />
+                    </div>
+                  ) : null
+                })()}
 
                 {focusUserId && focusedMemberName ? (
                   <ProLideresMemberExecutionDetail
