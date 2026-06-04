@@ -699,41 +699,78 @@ export function ProLideresDailyTasksClient() {
       )}
 
       {data && myUserId && (
-        <div className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-md">
+        <div className={`overflow-hidden rounded-2xl shadow-xl ${
+          todayProgressPct === 100
+            ? 'shadow-emerald-200'
+            : 'shadow-blue-200'
+        }`}>
           {/* Cabeçalho com progresso */}
-          <div className="bg-gradient-to-br from-blue-400 to-blue-500 px-4 pb-4 pt-5 sm:px-5">
-            <div className="flex items-start justify-between gap-3">
+          <div
+            className="relative overflow-hidden px-4 pb-6 pt-5 sm:px-5"
+            style={{
+              background: todayProgressPct === 100
+                ? 'linear-gradient(135deg, #059669 0%, #047857 60%, #065f46 100%)'
+                : 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 50%, #312e81 100%)',
+            }}
+          >
+            {/* Círculos decorativos de fundo */}
+            <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full opacity-10"
+              style={{ background: 'white' }} />
+            <div className="pointer-events-none absolute -bottom-10 -left-4 h-32 w-32 rounded-full opacity-10"
+              style={{ background: 'white' }} />
+
+            <div className="relative flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-base font-bold text-white">
-                  {isLeader ? 'Minhas tarefas de hoje' : 'Tarefas de hoje'}
-                </p>
-                <p className="mt-0.5 text-sm text-blue-200">
+                <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.65)' }}>
                   {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
                 </p>
+                <p className="mt-1 text-xl font-extrabold text-white drop-shadow-sm">
+                  {isLeader ? 'Minhas tarefas de hoje' : 'Tarefas de hoje'}
+                </p>
+                {applicableToday.length > 0 && (
+                  <p className="mt-1 text-sm font-semibold text-white">
+                    {todayProgressPct === 0 && '👆 Toque para marcar cada tarefa'}
+                    {todayProgressPct > 0 && todayProgressPct < 34 && '💪 Bom início! Continue!'}
+                    {todayProgressPct >= 34 && todayProgressPct < 67 && '🔥 Na metade — não para agora!'}
+                    {todayProgressPct >= 67 && todayProgressPct < 100 && '⚡ Quase lá! Falta pouco!'}
+                    {todayProgressPct === 100 && '🏆 Dia completo! Parabéns!'}
+                  </p>
+                )}
               </div>
-              {/* Placar ao vivo */}
+
+              {/* Placar — fundo branco com texto colorido */}
               {applicableToday.length > 0 && (
-                <div className="shrink-0 rounded-xl bg-white/15 px-3 py-2 text-center backdrop-blur-sm">
-                  <p className="text-xl font-black tabular-nums leading-none text-white">
+                <div className="shrink-0 rounded-2xl bg-white px-3 py-2.5 text-center shadow-lg">
+                  <p className={`text-2xl font-black tabular-nums leading-none ${
+                    todayProgressPct === 100 ? 'text-emerald-600' : 'text-blue-700'
+                  }`}>
                     {todayDraftPoints}
                   </p>
-                  <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-200">
+                  <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-400">
                     de {todayMaxPoints} pts
                   </p>
                 </div>
               )}
             </div>
+
             {/* Barra de progresso */}
             {applicableToday.length > 0 && (
-              <div className="mt-3">
-                <div className="flex items-center justify-between text-xs text-blue-200 mb-1.5">
-                  <span>{todayDraftCount} de {applicableToday.length} tarefas</span>
-                  <span className="font-semibold">{todayProgressPct}%</span>
+              <div className="relative mt-5">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-semibold text-white/80">{todayDraftCount} de {applicableToday.length} tarefas</span>
+                  <span className="text-xs font-extrabold text-white">{todayProgressPct}%</span>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-white/20">
+                {/* Track */}
+                <div className="h-3 w-full overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.18)' }}>
+                  {/* Fill */}
                   <div
-                    className="h-full rounded-full bg-white transition-all duration-500 ease-out"
-                    style={{ width: `${todayProgressPct}%` }}
+                    className="h-full rounded-full transition-all duration-700 ease-out"
+                    style={{
+                      width: `${Math.max(todayProgressPct, todayProgressPct > 0 ? 4 : 0)}%`,
+                      background: todayProgressPct === 100
+                        ? 'linear-gradient(90deg, #6ee7b7, #fff)'
+                        : 'linear-gradient(90deg, #93c5fd, #fff)',
+                    }}
                   />
                 </div>
               </div>
@@ -741,9 +778,11 @@ export function ProLideresDailyTasksClient() {
           </div>
 
           {/* Lista de tarefas */}
-          <ul className="divide-y divide-gray-100">
+          <ul className="space-y-2 bg-gray-50/80 p-3 sm:p-4">
             {applicableToday.length === 0 ? (
-              <li className="px-4 py-10 text-center text-sm text-gray-500 sm:px-5">Sem tarefas para hoje.</li>
+              <li className="rounded-xl border border-dashed border-gray-200 px-4 py-10 text-center text-sm text-gray-400">
+                Sem tarefas para hoje.
+              </li>
             ) : (
               applicableToday.map((t) => {
                 const checked = todayDraft.has(t.id)
@@ -751,35 +790,50 @@ export function ProLideresDailyTasksClient() {
                   <li
                     key={t.id}
                     onClick={() => !savingToday && void toggleTodayTask(t.id)}
-                    className={`flex cursor-pointer gap-3 px-4 py-4 transition-colors sm:px-5 ${
-                      checked ? 'bg-blue-50' : 'hover:bg-gray-50'
+                    className={`relative flex min-h-[64px] cursor-pointer select-none items-start gap-3 overflow-hidden rounded-xl border p-4 transition-all active:scale-[0.985] ${
+                      checked
+                        ? 'border-emerald-200 bg-emerald-50/70 shadow-sm'
+                        : 'border-gray-200 bg-white shadow-sm hover:border-blue-200 hover:shadow-md'
                     }`}
                   >
-                    {/* Checkbox custom */}
-                    <div className={`mt-0.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border-2 transition-all ${
+                    {/* Barra esquerda de status */}
+                    <div className={`absolute inset-y-0 left-0 w-1 transition-all ${
+                      checked ? 'bg-emerald-400' : 'bg-transparent'
+                    }`} />
+
+                    {/* Checkbox */}
+                    <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
                       checked
-                        ? 'border-blue-500 bg-blue-500'
+                        ? 'border-emerald-500 bg-emerald-500'
                         : 'border-gray-300 bg-white'
                     }`}>
                       {checked && (
-                        <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
+                        <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
                         </svg>
                       )}
                     </div>
-                    <div className="flex min-w-0 flex-1 gap-3">
-                      <span className={`shrink-0 text-[15px] font-bold transition-colors ${checked ? 'text-blue-600' : 'text-blue-700'}`}>
-                        {t.points} pts
-                      </span>
-                      <div className="min-w-0">
-                        <p className={`text-[15px] leading-snug transition-colors ${checked ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
-                          {t.title}
-                        </p>
-                        {t.description && !checked ? (
-                          <p className="mt-1.5 text-sm leading-relaxed text-blue-600">{t.description}</p>
-                        ) : null}
-                      </div>
+
+                    {/* Texto */}
+                    <div className="min-w-0 flex-1">
+                      <p className={`text-[15px] font-medium leading-snug transition-colors ${
+                        checked ? 'text-gray-400 line-through decoration-emerald-400' : 'text-gray-900'
+                      }`}>
+                        {t.title}
+                      </p>
+                      {t.description && !checked && (
+                        <p className="mt-1.5 text-sm leading-relaxed text-blue-600">{t.description}</p>
+                      )}
                     </div>
+
+                    {/* Badge de pontos */}
+                    <span className={`shrink-0 self-start rounded-full px-2.5 py-1 text-xs font-bold transition-colors ${
+                      checked
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      +{t.points} pts
+                    </span>
                   </li>
                 )
               })
@@ -787,29 +841,33 @@ export function ProLideresDailyTasksClient() {
           </ul>
 
           {/* Rodapé: status + botões */}
-          <div className="space-y-3 border-t border-gray-100 p-4 sm:p-5">
+          <div className="space-y-3 border-t border-gray-100 bg-gray-50/60 p-4 sm:p-5">
             {/* Status de salvamento */}
-            <p className="text-center text-xs">
-              {savingToday ? (
-                <span className="text-blue-600 font-medium">Salvando…</span>
-              ) : !todaySaveOk ? (
-                <span className="text-red-600 font-medium">Não foi possível salvar. Tente novamente.</span>
-              ) : todayHasUnsavedChanges ? (
-                <span className="text-amber-600 font-medium">Alterações não salvas</span>
-              ) : todaySaved.size > 0 ? (
-                <span className="text-green-600 font-medium">✓ Salvo com sucesso</span>
-              ) : (
-                <span className="text-gray-400">Marque as tarefas e salve</span>
-              )}
-            </p>
+            {(savingToday || !todaySaveOk || todayHasUnsavedChanges || todaySaved.size > 0) && (
+              <p className="text-center text-xs font-medium">
+                {savingToday ? (
+                  <span className="text-blue-600">Salvando…</span>
+                ) : !todaySaveOk ? (
+                  <span className="text-red-600">Não foi possível salvar. Tente novamente.</span>
+                ) : todayHasUnsavedChanges ? (
+                  <span className="text-amber-600">⚠️ Alterações não salvas</span>
+                ) : (
+                  <span className="text-emerald-600">✅ Salvo com sucesso</span>
+                )}
+              </p>
+            )}
 
             <button
               type="button"
               disabled={savingToday || applicableToday.length === 0 || !todayHasUnsavedChanges}
               onClick={() => void saveTodayDraft()}
-              className="w-full min-h-[48px] rounded-xl bg-blue-500 px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className={`w-full min-h-[52px] rounded-xl px-4 py-3 text-sm font-bold text-white shadow-md transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${
+                todayHasUnsavedChanges && !savingToday
+                  ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
+                  : 'bg-gray-400'
+              }`}
             >
-              {savingToday ? 'Salvando…' : 'Salvar execução de hoje'}
+              {savingToday ? 'Salvando…' : todayProgressPct === 100 ? '🏆 Salvar — dia completo!' : 'Salvar execução de hoje'}
             </button>
 
             {/* Botão compartilhar — gera imagem PNG e usa Web Share API / download */}
