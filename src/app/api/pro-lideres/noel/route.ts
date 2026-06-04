@@ -203,6 +203,7 @@ export async function POST(request: NextRequest) {
       linksAtivosContext,
       painelTarefasDiariasUrl,
     }) +
+    `\n\n${catalogContext}\n` +
     massaPresetAppendix +
     extraSystemParts.join('\n')
 

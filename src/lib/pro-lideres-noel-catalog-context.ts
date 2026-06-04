@@ -36,8 +36,17 @@ const CATALOG_RECRUTAMENTO = [
  * Formata o catálogo disponível para injeção no system prompt do Noel.
  * Recebe os slugs dos links já ativos do líder para marcar o que já foi ativado.
  */
+/**
+ * Extrai o fluxo_id de um slug Pro Líderes (ex: "pl-abc123-v-calc-hidratacao" → "calc-hidratacao").
+ * Retorna o slug original se não corresponder ao padrão.
+ */
+function extractFluxoId(slug: string): string {
+  const m = slug.trim().match(/^pl-[a-f0-9]+-(?:v|r)-(.+)$/i)
+  return m?.[1] ?? slug.toLowerCase()
+}
+
 export function formatProLideresCatalogForNoel(activeSlugs: string[]): string {
-  const activeSet = new Set(activeSlugs.map((s) => s.toLowerCase()))
+  const activeSet = new Set(activeSlugs.map(extractFluxoId))
 
   const formatGroup = (items: typeof CATALOG_VENDAS, heading: string): string => {
     const lines = items.map((item) => {

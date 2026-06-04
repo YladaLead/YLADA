@@ -590,7 +590,64 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       await humanDelay()
       await sendPainButtons(from, { intro })
       await saveMessage(conversation.id, 'assistant', '[botões enviados: Agenda oscila | Faço tudo sozinha | Lucro não cresce]')
+
+      // 🔔 NOTIFICAÇÃO 1: nova lead de anúncio engajou (primeiro contato real)
+      const nomeLabel = conversation.nome ? ` · ${conversation.nome}` : ''
+      await sendWhatsAppMessage(
+        ANDRE_NUMBER,
+        `👋 *Nova lead do anúncio!*\n📱 +${from}${nomeLabel}\n\nCarol enviou os botões de dor. Aguardando escolha dela.\n_Painel: ylada.com/admin/whatsapp/carol/conversas_`
+      )
       return
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // ── NOTIFICAÇÕES DE ENGAJAMENTO ───────────────────────────────────────────
+    const nomeDisplay = conversation.nome ?? `+${from}`
+
+    // 🔔 NOTIFICAÇÃO 2: lead clicou num botão de dor (primeira escolha)
+    const isFirstButtonClick =
+      messageHasButtonReply(text) &&
+      !history
+        .slice(0, -1) // exclui a mensagem atual
+        .some((m) => m.role === 'user' && m.content.includes('[botão:'))
+
+    if (isFirstButtonClick) {
+      const dorEscolhida = text
+        .replace(/\[botão:\s*/i, '')
+        .replace(/\]/g, '')
+        .trim()
+      await sendWhatsAppMessage(
+        ANDRE_NUMBER,
+        `🎯 *${nomeDisplay} escolheu a dor!*\n"${dorEscolhida}"\n📱 +${from}\n\nCarol está aprofundando agora.\n_Painel: ylada.com/admin/whatsapp/carol/conversas_`
+      )
+    }
+
+    // 🔔 NOTIFICAÇÃO 3: conversa ativa — lead respondeu pela 3ª vez (sem botão, qualquer canal)
+    const isActiveConversationMilestone =
+      userMsgCount === 3 &&
+      !messageHasButtonReply(text) &&
+      !isFirstButtonClick
+
+    if (isActiveConversationMilestone) {
+      const preview = text.slice(0, 120)
+      await sendWhatsAppMessage(
+        ANDRE_NUMBER,
+        `💬 *Conversa ativa: ${nomeDisplay}*\n📱 +${from}\n\n"${preview}"\n\n_Painel: ylada.com/admin/whatsapp/carol/conversas_`
+      )
+    }
+
+    // 🔔 NOTIFICAÇÃO 4: lead outbound respondeu pela primeira vez (real, não bot)
+    const isFirstOutboundResponse =
+      channel === 'outbound' &&
+      userMsgCount === 1 &&
+      inboundKind !== 'auto_resposta'
+
+    if (isFirstOutboundResponse) {
+      const preview = text.slice(0, 120)
+      await sendWhatsAppMessage(
+        ANDRE_NUMBER,
+        `📲 *Lead do scraper respondeu!*\n📱 +${from}\n\n"${preview}"\n\n_Painel: ylada.com/admin/whatsapp/carol/conversas_`
+      )
     }
     // ─────────────────────────────────────────────────────────────────────────
 
