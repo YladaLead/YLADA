@@ -374,6 +374,17 @@
     .body { padding: 32px 20px 48px; }
     .footer { padding: 20px 24px; flex-direction: column; gap: 12px; text-align: center; }
   }
+
+  @media print {
+    .section-label { break-after: avoid; page-break-after: avoid; }
+    .section-title  { break-after: avoid; page-break-after: avoid; }
+    .obj-grid, .frentes-grid, .timeline, .inv-block, .plataforma-box, .passos { break-inside: avoid; page-break-inside: avoid; }
+    .obj-card, .frente-item, .passo { break-inside: avoid; page-break-inside: avoid; }
+    .body > div { break-inside: avoid; page-break-inside: avoid; }
+
+    /* Entregáveis e Investimento começam sempre em página nova */
+    .section-entregaveis, .section-investimento { break-before: page; page-break-before: always; }
+  }
 </style>
 </head>
 <body>
@@ -458,7 +469,7 @@
   </div>
 
   <!-- ENTREGÁVEIS -->
-  <div>
+  <div class="section-entregaveis">
     <div class="section-label">O que a Majuli recebe</div>
     <div class="section-title">Entregáveis do projeto</div>
     <div style="height:16px"></div>
@@ -519,7 +530,7 @@
   </div>
 
   <!-- INVESTIMENTO -->
-  <div>
+  <div class="section-investimento">
     <div class="section-label">Investimento</div>
     <div class="section-title">Consultoria e Plataforma</div>
     <div style="height:16px"></div>

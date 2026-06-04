@@ -9,6 +9,7 @@ import {
   resolveProLideresNoelProfileId,
 } from '@/lib/pro-lideres-noel-prompt'
 import { formatLinksAtivosParaNoel, getNoelYladaLinks } from '@/lib/noel-ylada-links'
+import { formatProLideresCatalogForNoel } from '@/lib/pro-lideres-noel-catalog-context'
 import {
   buildCanonicalQuizMarkdownForProLideresResponse,
   isProLideresNoelShortApprovalAfterQuizDraft,
@@ -124,6 +125,20 @@ export async function POST(request: NextRequest) {
   const painelTarefasDiariasUrl = `${baseUrl}/pro-lideres/painel/tarefas`
   const linksRows = await getNoelYladaLinks(t.owner_user_id, baseUrl)
   const linksAtivosContext = linksRows.length ? formatLinksAtivosParaNoel(linksRows) : null
+
+  // Buscar slugs dos links ativos para marcar ferramentas já ativadas no catálogo
+  // O slug tem o formato: pl-{hash}-v-{fluxo_id} ou pl-{hash}-r-{fluxo_id}
+  const { data: activeLinkSlugs } = supabaseAdmin
+    ? await supabaseAdmin
+        .from('ylada_links')
+        .select('slug')
+        .eq('user_id', t.owner_user_id)
+        .eq('status', 'active')
+        .limit(100)
+    : { data: [] }
+  const catalogContext = formatProLideresCatalogForNoel(
+    (activeLinkSlugs ?? []).map((r: { slug: string }) => r.slug)
+  )
 
   const lastLinkContext =
     body.lastLinkContext &&
