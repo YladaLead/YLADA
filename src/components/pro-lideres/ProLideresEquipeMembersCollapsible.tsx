@@ -84,18 +84,33 @@ function buildMemberDiagnosis(rows: MemberDiagRow[]): DiagInsight[] {
   const out: DiagInsight[] = []
   if (tot.v >= 5) {
     const r = tot.s / tot.v
-    if (r < 0.20) out.push({ level: 'alert', text: `Vistas sem entrada: ${pct(r)} de quem vê está entrando no diagnóstico (esperado ≥ 35%). Trabalhar com ela o contexto de envio do link.` })
-    else if (r >= 0.35) out.push({ level: 'ok', text: `Boa abertura: ${pct(r)} de quem recebe o link entra no diagnóstico.` })
+    if (r < 0.20) {
+      out.push({ level: 'alert', text: `Entrada baixa: só ${pct(r)} de quem vê o link entra no diagnóstico (esperado ≥ 35%). Trabalhar com ela o contexto de envio — ela pode estar mandando o link sem preparar a conversa antes.` })
+    } else if (r < 0.35) {
+      out.push({ level: 'warn', text: `Entrada moderada: ${pct(r)} de abertura (meta ≥ 35%). Há espaço para melhorar — orientar ela a criar curiosidade antes de enviar o link, ex: "Achei um diagnóstico que combina com o seu caso".` })
+    } else {
+      out.push({ level: 'ok', text: `Boa abertura: ${pct(r)} de quem recebe o link entra no diagnóstico. Para chegar a 60%+, incentivar uma abordagem mais personalizada antes do envio.` })
+    }
   }
   if (tot.s >= 3) {
     const r = tot.c / tot.s
-    if (r < 0.40) out.push({ level: 'alert', text: `Conclusão baixa: ${pct(r)} de quem entra chega ao resultado (esperado ≥ 60%). O fluxo pode estar longo ou uma pergunta específica está travando.` })
-    else if (r >= 0.60) out.push({ level: 'ok', text: `Bom fluxo: ${pct(r)} de quem entra chega ao resultado.` })
+    if (r < 0.40) {
+      out.push({ level: 'alert', text: `Conclusão baixa: ${pct(r)} de quem entra chega ao resultado (esperado ≥ 60%). O fluxo pode estar longo ou uma pergunta específica está travando — pedir para ela fazer o teste ela mesma e ver onde trava.` })
+    } else if (r < 0.60) {
+      out.push({ level: 'warn', text: `Conclusão moderada: ${pct(r)} chegam ao resultado (meta ≥ 60%). Há algum ponto de atrito no fluxo — verificar se o diagnóstico tem muitas perguntas ou alguma confusa.` })
+    } else {
+      out.push({ level: 'ok', text: `Bom fluxo: ${pct(r)} de quem entra chega ao resultado. Manter o padrão.` })
+    }
   }
   if (tot.c >= 3) {
     const r = tot.w / tot.c
-    if (r < 0.15) out.push({ level: 'warn', text: `Poucos cliques no WhatsApp após o resultado (${pct(r)}, esperado ≥ 25%). A conversa pode já estar acontecendo por outro canal. Sugestão: pedir para ela incluir no envio "Depois de ver o resultado, me chama no botão do WhatsApp que te passo uma orientação personalizada".` })
-    else if (r >= 0.25) out.push({ level: 'ok', text: `Boa conversão para WhatsApp: ${pct(r)} de quem vê o resultado clica para conversar.` })
+    if (r < 0.15) {
+      out.push({ level: 'alert', text: `Poucos cliques no WA após o resultado: ${pct(r)} (esperado ≥ 25%). A conversa pode já estar acontecendo por outro canal, ou a CTA final está fraca. Orientar ela a incluir no envio: "Depois de ver o resultado, me chama no botão do WhatsApp que te passo uma orientação personalizada".` })
+    } else if (r < 0.25) {
+      out.push({ level: 'warn', text: `Conversão para WA moderada: ${pct(r)} (meta ≥ 25%). Pedir para ela reforçar o convite antes de enviar o link — ex: "Já que vais ver, me fala o resultado que eu te dou um retorno".` })
+    } else {
+      out.push({ level: 'ok', text: `Boa conversão para WA: ${pct(r)} de quem vê o resultado clica para conversar. Bom padrão — incentivar ela a usar este link como modelo.` })
+    }
   }
   if (out.length === 0) out.push({ level: 'ok', text: 'Atividade rastreada no período — acompanhar os números conforme o volume crescer.' })
   return out
@@ -311,11 +326,14 @@ function MemberToolsDiagBlock({
               <span className="max-w-[12rem] truncate text-gray-900">{tabulatorName}</span>
             </p>
           ) : null}
-          <div className="rounded-lg border border-blue-100 bg-blue-50/90 px-2.5 py-2 text-[11px] leading-relaxed text-blue-950">
-            <strong className="font-semibold">Como isto é contado:</strong> só entra tráfego feito com o{' '}
-            <strong>link rastreado</strong> desta pessoa (código na partilha). Se ela ainda não partilhou o link
-            pessoal, os números ficam em zero mesmo que use ferramentas por dentro da conta.
-          </div>
+          {/* Caixa explicativa só no modo inline (não no modal) */}
+          {!alwaysOpen && (
+            <div className="rounded-lg border border-blue-100 bg-blue-50/90 px-2.5 py-2 text-[11px] leading-relaxed text-blue-950">
+              <strong className="font-semibold">Como isto é contado:</strong> só entra tráfego feito com o{' '}
+              <strong>link rastreado</strong> desta pessoa (código na partilha). Se ela ainda não partilhou o link
+              pessoal, os números ficam em zero mesmo que use ferramentas por dentro da conta.
+            </div>
+          )}
           {error ? (
             <p className="mt-2 text-xs font-medium text-red-600" role="alert">
               {error}
@@ -670,6 +688,7 @@ export function ProLideresEquipeMembersCollapsible({
     userId: string
     label: string
     tabulatorName: string | null
+    whatsapp: string | null
   } | null>(null)
 
   const statusCounts = useMemo(() => {
@@ -811,21 +830,40 @@ export function ProLideresEquipeMembersCollapsible({
           onClick={(e) => { if (e.target === e.currentTarget) setToolsModal(null) }}
         >
           <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
-            <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-5 py-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Uso das ferramentas · 30 dias</p>
-                <p className="text-base font-bold text-gray-900">{toolsModal.label}</p>
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-gray-200 px-4 py-3">
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Links usados</p>
+                <p className="truncate text-base font-bold text-gray-900">{toolsModal.label}</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setToolsModal(null)}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100"
-                aria-label="Fechar"
-              >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex shrink-0 items-center gap-2">
+                {(() => {
+                  const waDirectUrl = buildWaUrl(toolsModal.whatsapp, '')
+                    ?.replace('?text=', '') // sem texto pré-definido
+                  return waDirectUrl ? (
+                    <a
+                      href={waDirectUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex h-9 items-center gap-1.5 rounded-lg bg-green-500 px-3 text-sm font-semibold text-white hover:bg-green-600"
+                    >
+                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                      </svg>
+                      Falar via WA
+                    </a>
+                  ) : null
+                })()}
+                <button
+                  type="button"
+                  onClick={() => setToolsModal(null)}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100"
+                  aria-label="Fechar"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto p-5">
               <MemberToolsDiagBlock
@@ -1300,17 +1338,35 @@ export function ProLideresEquipeMembersCollapsible({
                               userId: m.userId,
                               label: isCurrentUser ? `${title} (você)` : title,
                               tabulatorName: m.tabulatorName,
+                              whatsapp: m.whatsapp,
                             })}
                             className="inline-flex min-h-[28px] items-center gap-1 rounded-md border border-indigo-300 bg-indigo-50 px-2 py-1 text-xs font-semibold text-indigo-900 transition hover:bg-indigo-100"
                           >
                             🔗 Ver links usados
                           </button>
                         )}
-                        {!m.whatsapp && (
-                          <span className="self-center text-[10px] text-gray-400">
-                            (sem WA — clique para copiar)
-                          </span>
-                        )}
+                        {/* Botão de contato direto — sempre visível */}
+                        {(() => {
+                          const directUrl = m.whatsapp
+                            ? buildWaUrl(m.whatsapp, '')?.replace('?text=', '')
+                            : null
+                          return directUrl ? (
+                            <a
+                              href={directUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="Abrir conversa no WhatsApp"
+                              className="inline-flex min-h-[28px] items-center gap-1 rounded-md border border-green-500 bg-green-500 px-2 py-1 text-xs font-semibold text-white transition hover:bg-green-600"
+                            >
+                              <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                              </svg>
+                              Falar
+                            </a>
+                          ) : (
+                            <span className="self-center text-[10px] text-gray-400">(sem WA cadastrado)</span>
+                          )
+                        })()}
                       </div>
                     )}
                   </li>
