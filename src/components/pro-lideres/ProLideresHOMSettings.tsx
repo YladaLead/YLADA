@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { PRO_LIDERES_HOM_DEFAULT_VIDEO_URL } from '@/lib/pro-lideres-reset-content'
+import { copyYladaLinkQrAsPng } from '@/lib/ylada-link-share-actions'
 
 type HOMConfig = {
   videoUrl: string | null
@@ -30,6 +31,7 @@ export default function ProLideresHOMSettings() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saveOk, setSaveOk] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [copiedQrId, setCopiedQrId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -98,6 +100,14 @@ export default function ProLideresHOMSettings() {
       setTimeout(() => setCopiedId(null), 2000)
     } catch {
       // fallback
+    }
+  }
+
+  const copyQr = async (url: string, id: string) => {
+    const ok = await copyYladaLinkQrAsPng(url)
+    if (ok) {
+      setCopiedQrId(id)
+      setTimeout(() => setCopiedQrId(null), 2000)
     }
   }
 
@@ -228,6 +238,13 @@ export default function ProLideresHOMSettings() {
             >
               👁️ Visualizar
             </a>
+            <button
+              type="button"
+              onClick={() => copyQr(leaderUrl, '__leader__')}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-teal-300/60 bg-teal-50 px-5 py-3 text-sm font-semibold text-teal-900 transition hover:bg-teal-100"
+            >
+              {copiedQrId === '__leader__' ? '✅ QR copiado!' : '🔳 Copiar QR'}
+            </button>
           </div>
         </div>
       )}
@@ -255,17 +272,26 @@ export default function ProLideresHOMSettings() {
                     <p className="mt-0.5 text-xs text-amber-600">⚠️ WhatsApp não cadastrado</p>
                   )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => m.homUrl && copyLink(m.homUrl, m.userId)}
-                  className="flex shrink-0 items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200 transition hover:bg-emerald-50"
-                >
-                  {copiedId === m.userId ? (
-                    <>✅ Copiado!</>
-                  ) : (
-                    <>📋 Copiar link</>
-                  )}
-                </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => m.homUrl && copyLink(m.homUrl, m.userId)}
+                    className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200 transition hover:bg-emerald-50"
+                  >
+                    {copiedId === m.userId ? (
+                      <>✅ Copiado!</>
+                    ) : (
+                      <>📋 Copiar link</>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => m.homUrl && copyQr(m.homUrl, m.userId)}
+                    className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-teal-800 shadow-sm ring-1 ring-teal-300/60 transition hover:bg-teal-50"
+                  >
+                    {copiedQrId === m.userId ? <>✅ QR</> : <>🔳 QR</>}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
