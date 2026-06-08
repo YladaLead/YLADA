@@ -154,6 +154,20 @@ export default function YladaSidebar({
             <div className="px-3 pt-1">
               <p className="mb-1 px-3 text-[10px] font-medium uppercase tracking-wide text-gray-400">Extra</p>
               <Link
+                href={`${prefix}/quadro-parceria`}
+                onClick={onMobileClose}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors ${
+                  pathname?.startsWith(`${prefix}/quadro-parceria`)
+                    ? 'bg-slate-100 font-medium text-slate-800'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                }`}
+              >
+                <span className="text-base opacity-80" aria-hidden>
+                  🖨️
+                </span>
+                <span className="flex-1 leading-snug">Quadro parceria</span>
+              </Link>
+              <Link
                 href={`${prefix}/recrutamento`}
                 onClick={onMobileClose}
                 className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors ${
