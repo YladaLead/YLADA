@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
+import { copyYladaLinkQrAsPng } from '@/lib/ylada-link-share-actions'
+
 type CompletaLinkData = {
   resetCompletaUrl: string | null
   shareSlug: string | null
@@ -17,6 +19,7 @@ export default function ProLideresResetCompletaLinksPanel({
   const [data, setData] = useState<CompletaLinkData | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [copiedQr, setCopiedQr] = useState(false)
 
   useEffect(() => {
     fetch('/api/pro-lideres/reset/meu-link')
@@ -34,6 +37,15 @@ export default function ProLideresResetCompletaLinksPanel({
       setTimeout(() => setCopied(false), 2500)
     } catch {
       //
+    }
+  }
+
+  const copyQr = async () => {
+    if (!data?.resetCompletaUrl) return
+    const ok = await copyYladaLinkQrAsPng(data.resetCompletaUrl)
+    if (ok) {
+      setCopiedQr(true)
+      setTimeout(() => setCopiedQr(false), 2500)
     }
   }
 
@@ -84,6 +96,13 @@ export default function ProLideresResetCompletaLinksPanel({
             >
               👁️ Visualizar
             </Link>
+            <button
+              type="button"
+              onClick={copyQr}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-teal-300/60 bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-900"
+            >
+              {copiedQr ? '✅ QR copiado!' : '🔳 Copiar QR'}
+            </button>
           </div>
         </div>
       ) : (

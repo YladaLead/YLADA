@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
+import { copyYladaLinkQrAsPng } from '@/lib/ylada-link-share-actions'
+
 type ResetData = {
   resetUrl: string | null
   shareSlug: string | null
@@ -17,6 +19,7 @@ export default function ProLideresResetMembroClient() {
   const [data, setData] = useState<ResetData | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [copiedQr, setCopiedQr] = useState(false)
 
   useEffect(() => {
     fetch('/api/pro-lideres/reset/meu-link')
@@ -34,6 +37,15 @@ export default function ProLideresResetMembroClient() {
       setTimeout(() => setCopied(false), 2500)
     } catch {
       //
+    }
+  }
+
+  const copyQr = async () => {
+    if (!data?.resetUrl) return
+    const ok = await copyYladaLinkQrAsPng(data.resetUrl)
+    if (ok) {
+      setCopiedQr(true)
+      setTimeout(() => setCopiedQr(false), 2500)
     }
   }
 
@@ -97,6 +109,13 @@ export default function ProLideresResetMembroClient() {
             >
               👁️ Visualizar página
             </Link>
+            <button
+              type="button"
+              onClick={copyQr}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-teal-300/60 bg-teal-50 px-5 py-3 text-sm font-semibold text-teal-900"
+            >
+              {copiedQr ? '✅ QR copiado!' : '🔳 Copiar QR'}
+            </button>
           </div>
 
           {!data.hasWhatsapp ? (
