@@ -198,6 +198,33 @@ function clampWhatsAppPrefill(text: string, max: number): string {
   return `${text.slice(0, max - 1).trimEnd()}…`
 }
 
+/**
+ * Calculadora de água: calcula o volume diário (litros e copos de 250ml) a partir das respostas p1/p2/p3.
+ * p1 = peso kg (número), p2 = atividade (índice 0-4), p3 = clima (índice 0-2).
+ */
+export function calcWaterVolume(answers: Record<string, unknown>): { liters: number; cups: number } | null {
+  const peso = typeof answers.p1 === 'number' ? answers.p1 : parseFloat(String(answers.p1 ?? ''))
+  if (!peso || isNaN(peso) || peso <= 0) return null
+  let ml = peso * 35
+  const p2 = typeof answers.p2 === 'number' ? answers.p2 : parseInt(String(answers.p2 ?? ''), 10)
+  // índices: 0=sedentário, 1=leve, 2=moderado, 3=intenso, 4=muito intenso
+  if (!isNaN(p2)) {
+    if (p2 === 1) ml += 300
+    else if (p2 === 2) ml += 600
+    else if (p2 === 3) ml += 1000
+    else if (p2 >= 4) ml += 1500
+  }
+  const p3 = typeof answers.p3 === 'number' ? answers.p3 : parseInt(String(answers.p3 ?? ''), 10)
+  // índices: 0=temperado, 1=quente, 2=muito quente
+  if (!isNaN(p3)) {
+    if (p3 === 1) ml += 500
+    else if (p3 >= 2) ml += 1000
+  }
+  const liters = Math.round(ml / 100) / 10 // 1 casa decimal (ex: 2.5)
+  const cups = Math.round(ml / 250)
+  return { liters, cups }
+}
+
 /** Calculadora de água: evita próximos passos de refeição (fallback RISK genérico) e “pele” solta na consequência. */
 function applyWaterCalculatorCopyGuards(
   meta: Record<string, unknown>,
@@ -816,6 +843,11 @@ export async function POST(
       ? (diagnosis.causa_provavel || diagnosis.consequence || profileSummary || diagnosis.main_blocker || '').trim()
       : (diagnosis.main_blocker || '').trim()
 
+    // Calculadora de água: calcular e injetar volume no payload
+    const flowIdForWater = typeof metaRaw?.pro_lideres_fluxo_id === 'string' ? metaRaw.pro_lideres_fluxo_id.trim() : ''
+    const isWaterCalc = flowIdForWater === 'agua' || flowIdForWater === 'calc-hidratacao'
+    const waterVolume = isWaterCalc ? calcWaterVolume(visitor_answers) : null
+
     const diagnosisPayload = {
       profile_title: diagnosis.profile_title,
       profile_summary: profileSummary,
@@ -833,6 +865,7 @@ export async function POST(
       ...((diagnosis as Record<string, unknown>).perfume_usage && {
         perfume_usage: (diagnosis as Record<string, unknown>).perfume_usage,
       }),
+      ...(waterVolume && { water_volume_l: waterVolume.liters, water_cups: waterVolume.cups }),
     }
     await supabaseAdmin
       .from('ylada_diagnosis_cache')

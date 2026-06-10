@@ -1565,6 +1565,20 @@ function ConfigDrivenLinkView({
               {profileTitleForUi}
             </h1>
 
+            {/* Calculadora de água: exibir volume calculado em destaque */}
+            {typeof (diagnosis as Record<string, unknown>).water_volume_l === 'number' && (
+              <div className="mb-5 rounded-2xl bg-gradient-to-br from-cyan-50 to-sky-50 border border-cyan-200 p-5 text-center">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-cyan-700 mb-1">Sua meta diária</p>
+                <p className="text-4xl font-extrabold text-cyan-700 leading-none">
+                  {String((diagnosis as Record<string, unknown>).water_volume_l)}L
+                </p>
+                <p className="text-sm text-cyan-600 mt-1">
+                  de água por dia — aproximadamente{' '}
+                  <strong>{String((diagnosis as Record<string, unknown>).water_cups)} copos de 250ml</strong>
+                </p>
+              </div>
+            )}
+
             <div className="relative mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-sky-50 to-white border border-sky-100/80 shadow-sm">
               <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-sky-400 to-sky-600 rounded-l-2xl" />
               <div className="pl-5 pr-5 py-5 sm:pl-6 sm:pr-6 sm:py-6">
