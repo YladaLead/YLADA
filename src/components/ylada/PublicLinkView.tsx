@@ -1573,7 +1573,7 @@ function ConfigDrivenLinkView({
                   {String((diagnosis as Record<string, unknown>).water_volume_l)}L
                 </p>
                 <p className="text-sm text-cyan-600 mt-1">
-                  de água por dia — aproximadamente{' '}
+                  de água por dia, aproximadamente{' '}
                   <strong>{String((diagnosis as Record<string, unknown>).water_cups)} copos de 250ml</strong>
                 </p>
               </div>
