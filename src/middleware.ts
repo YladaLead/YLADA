@@ -15,6 +15,15 @@ const SEGMENT_V2_TO_PROGRESSIVE: Record<string, string> = {
   '/pt/fitnessv2': '/pt/fitness',
 }
 
+/** Detecta idioma preferido do browser via Accept-Language header. */
+function detectLocale(request: NextRequest): 'pt' | 'en' | 'es' {
+  const acceptLanguage = request.headers.get('accept-language') ?? ''
+  const primary = acceptLanguage.split(',')[0]?.split(';')[0]?.trim().toLowerCase() ?? ''
+  if (primary.startsWith('pt')) return 'pt'
+  if (primary.startsWith('es')) return 'es'
+  return 'en'
+}
+
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
@@ -35,11 +44,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308)
   }
 
-  // Raiz → /pt (primeira tela só “Explique menos”; segmentos em /pt/segmentos após CTA).
+  // Raiz → detecta idioma do browser (307 = temporário, não cachear no browser — destino varia por usuário).
   if (pathname === '/' || pathname === '') {
     const url = request.nextUrl.clone()
-    url.pathname = '/pt'
-    return NextResponse.redirect(url, 308)
+    url.pathname = `/${detectLocale(request)}`
+    return NextResponse.redirect(url, 307)
   }
 
   // Pesquisa wellness: URL canônica sem /pt (evita /pt/uso-wellness-v1)
@@ -111,7 +120,10 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/images/') || // Arquivos de imagem estáticos
     pathname.startsWith('/logos/') || // Arquivos de logo estáticos
     pathname.includes('.') || // Qualquer arquivo com extensão
-    pathname === '/favicon.ico'
+    pathname === '/favicon.ico' ||
+    pathname === '/conviccao' ||                // Funil leitor PT — canônico sem prefixo de idioma
+    pathname === '/conviccao-gera-performance' || // Alias funil PT
+    pathname === '/conviction'                  // Funil leitor EN — canônico sem prefixo de idioma
   ) {
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set('x-pathname', pathname)
