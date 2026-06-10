@@ -57,6 +57,34 @@ function PrecosPageContent() {
       </header>
 
       <main className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+
+        {/* iOS: não exibir preços nem opções de compra — direcionar ao site */}
+        {isIOS ? (
+          <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
+            <div className="w-16 h-16 rounded-full bg-sky-100 flex items-center justify-center mb-6">
+              <svg className="w-8 h-8 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-3">Assine pelo site</h2>
+            <p className="text-gray-600 text-sm mb-6 max-w-xs">
+              Para assinar o YLADA, acesse <strong>ylada.com</strong> no navegador do seu celular ou computador.
+            </p>
+            <a
+              href="https://www.ylada.com/pt/precos"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-colors"
+            >
+              Abrir ylada.com
+            </a>
+            <p className="mt-6 text-xs text-gray-400">
+              Já assinante? Entre com sua conta normalmente.
+            </p>
+          </div>
+        ) : (
+        <>
+
         {/* Bloco resultado — só quando veio do diagnóstico com perfil */}
         {mostraBlocoResultado && (
           <div className="mb-10 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 p-6 sm:p-8">
@@ -215,6 +243,8 @@ function PrecosPageContent() {
             </div>
           </div>
         </section>
+        </>
+        )}
       </main>
     </div>
   )
