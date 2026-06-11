@@ -41,8 +41,11 @@ export interface BookFunnelConfig {
   profiles: FunnelProfile[]
 
   form: {
+    intro: string
     namePlaceholder: string
     whatsappPlaceholder: string
+    challengeLabel: string
+    challengePlaceholder: string
     submitLabel: string
   }
 

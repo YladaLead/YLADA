@@ -103,13 +103,16 @@ export const conviccaoConfig: BookFunnelConfig = {
   ],
 
   form: {
+    intro: 'Fale um pouco do seu caso e o time Ylada entra em contato para orientação.',
     namePlaceholder: 'Seu nome',
-    whatsappPlaceholder: 'WhatsApp (com DDD)',
-    submitLabel: 'Receber meu diagnóstico →',
+    whatsappPlaceholder: 'WhatsApp com DDD',
+    challengeLabel: 'Qual é o seu maior desafio hoje?',
+    challengePlaceholder: 'Descreva brevemente o que está travando — quanto mais contexto, mais útil o contato.',
+    submitLabel: 'Quero orientação do time Ylada →',
   },
 
   confirmation: {
     headline: 'Recebido.',
-    body: 'André vai entrar em contato com você pelo WhatsApp em breve.\n\nA conversa não vai ser um pitch. Vai ser uma pergunta. A mesma lógica do livro, aplicada ao seu caso.',
+    body: 'O time Ylada vai entrar em contato pelo WhatsApp em breve.\n\nA conversa não vai ser um pitch. Vai ser uma pergunta. A mesma lógica do livro, aplicada ao seu caso.',
   },
 }

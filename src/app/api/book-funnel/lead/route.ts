@@ -33,7 +33,7 @@ const OPTION_LABELS: Record<string, string> = {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { slug, nome, whatsapp, perfil, respostas } = body
+    const { slug, nome, whatsapp, perfil, respostas, desafio } = body
 
     if (!nome || !whatsapp || !slug) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
       resposta_q1: respostas?.q1 ?? null,
       resposta_q2: respostas?.q2 ?? null,
       resposta_q3: respostas?.q3 ?? null,
+      desafio: desafio?.trim() || null,
       origin,
       referer,
       created_at: new Date().toISOString(),
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Notificar Andre via WhatsApp
-    await notifyAndre({ nome, whatsapp: formattedPhone, perfil, respostas, slug })
+    await notifyAndre({ nome, whatsapp: formattedPhone, perfil, respostas, desafio: desafio?.trim(), slug })
 
     return NextResponse.json({ success: true })
   } catch (err) {
@@ -81,6 +82,7 @@ async function notifyAndre(data: {
   whatsapp: string
   perfil: string
   respostas: Record<string, string>
+  desafio?: string
   slug: string
 }) {
   const token = process.env.WHATSAPP_TOKEN
@@ -99,7 +101,9 @@ async function notifyAndre(data: {
     })
     .join('\n')
 
-  const msg = `📚 *Novo leitor do livro* — /conviccao\n\n👤 *${data.nome}*\n📱 ${data.whatsapp}\n\n🎯 Perfil: *${perfilLabel}*\n\n${resumoRespostas}`
+  const desafioBlock = data.desafio ? `\n\n💬 *Desafio:*\n${data.desafio}` : ''
+
+  const msg = `📚 *Novo leitor do livro* — /conviccao\n\n👤 *${data.nome}*\n📱 ${data.whatsapp}\n\n🎯 Perfil: *${perfilLabel}*\n\n${resumoRespostas}${desafioBlock}`
 
   try {
     await fetch(`https://graph.facebook.com/v21.0/${phoneId}/messages`, {

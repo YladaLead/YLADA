@@ -23,6 +23,7 @@ export default function BookFunnelPage({ config }: BookFunnelPageProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
+  const [desafio, setDesafio] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const topRef = useRef<HTMLDivElement>(null)
@@ -86,6 +87,7 @@ export default function BookFunnelPage({ config }: BookFunnelPageProps) {
           whatsapp: formatWhatsApp(digits),
           perfil: profile.id,
           respostas: answers,
+          desafio: desafio.trim(),
         }),
       })
 
@@ -210,8 +212,8 @@ export default function BookFunnelPage({ config }: BookFunnelPageProps) {
               </div>
 
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                <p className="text-sm font-semibold text-gray-800 mb-4">
-                  {profile.cta}
+                <p className="text-sm text-gray-500 mb-5 leading-relaxed">
+                  {form.intro}
                 </p>
                 <form onSubmit={handleSubmit} className="space-y-3">
                   <input
@@ -230,6 +232,18 @@ export default function BookFunnelPage({ config }: BookFunnelPageProps) {
                     className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
                     required
                   />
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                      {form.challengeLabel}
+                    </label>
+                    <textarea
+                      placeholder={form.challengePlaceholder}
+                      value={desafio}
+                      onChange={(e) => setDesafio(e.target.value)}
+                      rows={4}
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 resize-none"
+                    />
+                  </div>
                   {error && <p className="text-xs text-red-500">{error}</p>}
                   <button
                     type="submit"
