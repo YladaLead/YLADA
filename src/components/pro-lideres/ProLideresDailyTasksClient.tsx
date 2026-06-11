@@ -81,6 +81,20 @@ function taskIdSetsEqual(a: Set<string>, b: Set<string>): boolean {
   return true
 }
 
+function todaySubmitStorageKey(userId: string, date: string): string {
+  return `pl-daily-tasks-submitted:${userId}:${date}`
+}
+
+function readTodaySubmitted(userId: string, date: string): boolean {
+  if (typeof window === 'undefined' || !userId) return false
+  return localStorage.getItem(todaySubmitStorageKey(userId, date)) === '1'
+}
+
+function writeTodaySubmitted(userId: string, date: string): void {
+  if (typeof window === 'undefined' || !userId) return
+  localStorage.setItem(todaySubmitStorageKey(userId, date), '1')
+}
+
 function buildWhatsAppShareMessage(
   tasks: ProLideresDailyTaskRow[],
   completedIds: Set<string>,
@@ -382,6 +396,7 @@ export function ProLideresDailyTasksClient() {
   const [shareError, setShareError] = useState<string | null>(null)
   const [todayDraft, setTodayDraft] = useState<Set<string>>(() => new Set())
   const [todaySaved, setTodaySaved] = useState<Set<string>>(() => new Set())
+  const [todaySubmitted, setTodaySubmitted] = useState(false)
   const [todaySaveOk, setTodaySaveOk] = useState(true)
 
   const now = new Date()
@@ -431,6 +446,7 @@ export function ProLideresDailyTasksClient() {
       )
       setTodayDraft(done)
       setTodaySaved(new Set(done))
+      setTodaySubmitted(done.size > 0 || readTodaySubmitted(myUserId, todayStr))
       setTodaySaveOk(true)
     } catch {
       /* mantém rascunho local */
@@ -505,6 +521,8 @@ export function ProLideresDailyTasksClient() {
         return false
       }
       setTodaySaved(new Set(completedIds))
+      setTodaySubmitted(true)
+      writeTodaySubmitted(myUserId, todayStr)
       setTodaySaveOk(true)
       void load()
       // Popup aparece sempre que salva (com ou sem tarefas)
@@ -692,6 +710,9 @@ export function ProLideresDailyTasksClient() {
     () => !taskIdSetsEqual(todayDraft, todaySaved),
     [todayDraft, todaySaved]
   )
+
+  const canSaveToday =
+    applicableToday.length > 0 && !savingToday && (!todaySubmitted || todayHasUnsavedChanges)
 
   // Progresso ao vivo: pontos e contagem das tarefas marcadas no draft
   const todayDraftCount = applicableToday.filter((t) => todayDraft.has(t.id)).length
@@ -998,7 +1019,7 @@ export function ProLideresDailyTasksClient() {
           {/* Rodapé: status + botões */}
           <div className="space-y-3 border-t border-gray-100 bg-gray-50/60 p-4 sm:p-5">
             {/* Status de salvamento */}
-            {(savingToday || !todaySaveOk || todayHasUnsavedChanges || todaySaved.size > 0) && (
+            {(savingToday || !todaySaveOk || todayHasUnsavedChanges || todaySubmitted) && (
               <p className="text-center text-xs font-medium">
                 {savingToday ? (
                   <span className="text-blue-600">Salvando…</span>
@@ -1006,23 +1027,31 @@ export function ProLideresDailyTasksClient() {
                   <span className="text-red-600">Não foi possível salvar. Tente novamente.</span>
                 ) : todayHasUnsavedChanges ? (
                   <span className="text-amber-600">⚠️ Alterações não salvas</span>
-                ) : (
+                ) : todaySaved.size > 0 ? (
                   <span className="text-emerald-600">✅ Salvo com sucesso</span>
+                ) : (
+                  <span className="text-emerald-600">✅ Salvo — 0 pontos hoje</span>
                 )}
               </p>
             )}
 
             <button
               type="button"
-              disabled={savingToday || applicableToday.length === 0 || !todayHasUnsavedChanges}
+              disabled={!canSaveToday}
               onClick={() => void saveTodayDraft()}
               className={`w-full min-h-[52px] rounded-xl px-4 py-3 text-sm font-bold text-white shadow-md transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${
-                todayHasUnsavedChanges && !savingToday
+                canSaveToday
                   ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
                   : 'bg-gray-400'
               }`}
             >
-              {savingToday ? 'Salvando…' : todayProgressPct === 100 ? '🏆 Salvar — dia lendário!' : 'Salvar execução de hoje'}
+              {savingToday
+                ? 'Salvando…'
+                : todayProgressPct === 100
+                  ? '🏆 Salvar — dia lendário!'
+                  : todayDraftCount === 0 && !todaySubmitted
+                    ? 'Salvar — 0 pontos hoje'
+                    : 'Salvar execução de hoje'}
             </button>
 
             {/* Botão compartilhar — gera imagem PNG e usa Web Share API / download */}
