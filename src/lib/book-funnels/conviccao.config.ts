@@ -103,11 +103,11 @@ export const conviccaoConfig: BookFunnelConfig = {
   ],
 
   form: {
-    intro: 'Fale um pouco do seu caso e o time Ylada entra em contato para orientação.',
+    intro: 'Fale um pouco do seu caso e o time Ylada entra em contato para uma orientação.',
     namePlaceholder: 'Seu nome',
     whatsappPlaceholder: 'WhatsApp com DDD',
-    challengeLabel: 'Qual é o seu maior desafio hoje?',
-    challengePlaceholder: 'Descreva brevemente o que está travando — quanto mais contexto, mais útil o contato.',
+    challengeLabel: 'Quem você é, qual é o seu problema hoje e o que quer alcançar?',
+    challengePlaceholder: 'Ex: Lidero uma equipe de 12 vendedores. A maioria sabe o processo mas não bate meta. Quero entender o que está travando e como reverter isso nos próximos 90 dias.',
     submitLabel: 'Quero orientação do time Ylada →',
   },
 
