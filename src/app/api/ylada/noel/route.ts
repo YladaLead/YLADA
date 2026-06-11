@@ -73,7 +73,7 @@ import {
 } from '@/lib/platform-support-from-nina'
 
 type FormField = { id?: string; label?: string; type?: string; options?: string[] }
-type NoelResponseMode = 'modo_link' | 'modo_mentor' | 'modo_copy' | 'modo_execucao'
+type NoelResponseMode = 'modo_link' | 'modo_mentor' | 'modo_copy' | 'modo_execucao' | 'modo_espelho'
 
 function extractRequestedTitleFromMessage(message: string): string | null {
   const raw = (message || '').trim()
@@ -622,6 +622,31 @@ Quando perguntarem "qual o melhor diagnóstico para começar a conversar?", "qua
 Quando perguntarem "como organizar minha semana?", "rotina para atrair leads" ou similar: responda CURTO (3–5 tópicos objetivos, não calendário longo dia a dia). Inclua uma "próxima ação em 24h" clara. Se fizer sentido, ofereça 1 link da lista para compartilhar hoje. Priorize formato: diagnóstico rápido + ajuste + ação imediata.
 `
 
+/**
+ * ETAPA 1 — CONVICÇÃO. Noel modo Espelho.
+ * Conduz o profissional (Sujeito A) a ver o próprio ciclo de convicção antes de
+ * qualquer ferramenta. NÃO gera link, quiz ou copy aqui. Constrói convicção por
+ * repetição com método, não por motivação. Base: livro Convicção Gera Performance.
+ */
+const NOEL_MODO_ESPELHO = `
+[MODO ESPELHO — ETAPA 1 (CONVICÇÃO) — OBRIGATÓRIO]
+Você está na fundação do método: a convicção. O profissional acabou de fazer (ou está retomando) o diagnóstico do próprio negócio. Seu papel aqui NÃO é entregar ferramenta, link, quiz, calculadora ou copy. É conduzir um espelho: ajudar a pessoa a enxergar o próprio ciclo e dar UM primeiro passo de ação com método.
+
+PRINCÍPIOS (não recitar, conduzir):
+1. A mente mente. A pessoa costuma ler a própria falha como incapacidade ("não levo jeito") ou culpar o mercado, quando o que falta é um sistema de comunicação. Mostre isso com cuidado, sem julgar.
+2. O ciclo: evita → não pratica → não melhora → sem resultado → crê menos → evita de novo. Ajude a pessoa a ver onde ela está nesse ciclo.
+3. Convicção não se constrói com motivação (acaba rápido). Se constrói com repetição com método. Nunca prometa virada mágica.
+4. Movimento antes da certeza. O primeiro ato é pequeno e concreto: uma conversa conduzida com um caminho na mão, em vez do improviso. A segurança vem depois da prática, não antes.
+5. Honestidade acima do efeito. Não invente resultado, não force final feliz. Convicção é processo.
+
+COMO RESPONDER:
+- Tom de conversa, não de relatório. Frase curta. Palavra simples. "você".
+- Comece reconhecendo onde a pessoa está (use o perfil de convicção e a semente abaixo, se houver).
+- Faça no máximo UMA pergunta por vez, que faça a pessoa se enxergar (não interrogatório).
+- Feche com UM primeiro ato concreto e pequeno para hoje, e o convite de voltar amanhã para o próximo passo.
+- NÃO gere link/quiz/calculadora/copy. Se a pessoa pedir ferramenta, diga que o próximo passo dela já está claro e que, quando ela der esse primeiro movimento, vocês montam a ferramenta certa juntos. A ferramenta vem DEPOIS da convicção, nunca antes.
+`
+
 const SEGMENT_CONTEXT: Record<string, string> = {
   ylada: 'Você é o Noel, mentor da YLADA (motor de conversas). Oriente qualquer profissional ou vendedor sobre rotina, links inteligentes, trilha empresarial e geração de conversas qualificadas no WhatsApp. Tom direto e prático.',
   med: 'Você é o Noel, mentor da YLADA para médicos. Oriente sobre rotina, links inteligentes, captação de pacientes e formação empresarial. Tom direto e prático.',
@@ -667,6 +692,7 @@ export async function POST(request: NextRequest) {
       locale,
       channel,
       supportUi,
+      mode,
     } = body as {
       message?: string
       conversationHistory?: { role: 'user' | 'assistant'; content: string }[]
@@ -676,6 +702,8 @@ export async function POST(request: NextRequest) {
       locale?: 'pt' | 'en' | 'es'
       channel?: string
       supportUi?: 'matrix' | 'wellness'
+      /** Força um modo de resposta. 'espelho' = Etapa 1 (convicção), sem gerar link. */
+      mode?: 'espelho'
     }
 
     const isSupportChannel = channel === 'support'
@@ -683,7 +711,9 @@ export async function POST(request: NextRequest) {
     if (!message || typeof message !== 'string' || !message.trim()) {
       return NextResponse.json({ error: 'Mensagem é obrigatória.' }, { status: 400 })
     }
-    const noelResponseMode = classifyNoelResponseMode(message, conversationHistory)
+    // Modo Espelho (Etapa 1): forçado pelo handoff do diagnóstico de convicção. Nunca gera link.
+    const noelResponseMode: NoelResponseMode =
+      mode === 'espelho' ? 'modo_espelho' : classifyNoelResponseMode(message, conversationHistory)
     const linkModeEnabled = noelResponseMode === 'modo_link'
 
     // Freemium: verificar limite de análises avançadas antes de chamar IA (mentor; Nina não consome cota)
@@ -1167,8 +1197,37 @@ export async function POST(request: NextRequest) {
       NOEL_CONTATO_FRIO,
     ]
     parts.push(
-      `\n[MODO DA RESPOSTA — CAMADA 0]\nModo atual detectado: ${noelResponseMode}.\n- modo_link: pode criar/ajustar link, quiz e anexar bloco oficial.\n- modo_mentor: foco em direção estratégica; NÃO gerar/anexar link.\n- modo_copy: foco em texto/script/CTA; NÃO gerar/anexar link.\n- modo_execucao: foco em ação prática e rotina; NÃO gerar/anexar link.`
+      `\n[MODO DA RESPOSTA — CAMADA 0]\nModo atual detectado: ${noelResponseMode}.\n- modo_link: pode criar/ajustar link, quiz e anexar bloco oficial.\n- modo_mentor: foco em direção estratégica; NÃO gerar/anexar link.\n- modo_copy: foco em texto/script/CTA; NÃO gerar/anexar link.\n- modo_execucao: foco em ação prática e rotina; NÃO gerar/anexar link.\n- modo_espelho: Etapa 1 (convicção). Conduz o profissional a ver o próprio ciclo e dar um primeiro passo; NUNCA gera link/quiz/copy.`
     )
+
+    // ETAPA 1 — modo Espelho: injeta a camada de condução + o perfil de convicção salvo.
+    if (noelResponseMode === 'modo_espelho') {
+      parts.push(NOEL_MODO_ESPELHO)
+      if (supabaseAdmin) {
+        try {
+          const { data: convRow } = await supabaseAdmin
+            .from('ylada_conviccao_diagnostico')
+            .select('perfil, devolutiva')
+            .eq('user_id', user.id)
+            .eq('segment', validSegment)
+            .maybeSingle()
+          const dev = (convRow?.devolutiva ?? null) as
+            | { titulo?: string; oCiclo?: string; oGap?: string; primeiroAto?: string; noelSeed?: string }
+            | null
+          if (convRow?.perfil && dev) {
+            parts.push(
+              '\n[PERFIL DE CONVICÇÃO DO PROFISSIONAL — use para conduzir o espelho]\n' +
+                `Perfil: ${dev.titulo ?? convRow.perfil}.\n` +
+                (dev.noelSeed ? `Como conduzir: ${dev.noelSeed}\n` : '') +
+                (dev.oGap ? `O gap dele: ${dev.oGap}\n` : '') +
+                (dev.primeiroAto ? `Primeiro ato sugerido: ${dev.primeiroAto}` : '')
+            )
+          }
+        } catch (e) {
+          console.warn('[/api/ylada/noel] perfil de convicção (modo espelho):', e)
+        }
+      }
+    }
 
     // Detecção de contato frio: Uber, recrutar, link de recrutamento — injeta alerta para forçar diagnóstico primeiro
     const m = message.toLowerCase().trim()

@@ -5,7 +5,7 @@ export default function EsteticaOnboardingPage() {
     <OnboardingPageContent
       areaCodigo="estetica"
       areaLabel="Estética"
-      redirectAfterSave="/pt/estetica/home"
+      redirectAfterSave="/pt/diagnostico-conviccao?area=estetica"
       minimal
     />
   )
