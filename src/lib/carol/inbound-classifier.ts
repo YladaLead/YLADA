@@ -1,7 +1,8 @@
 import OpenAI from 'openai'
-import { getClassifierModel } from './carol-reply-profile'
+import { getClassifierModel, historyHasOutbound } from './carol-reply-profile'
 import { messageHasButtonReply } from './ad-lead-flow'
 import { isCarolInteractiveReply } from './parse-interactive'
+import { isAutoResponse } from './auto-response'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -11,16 +12,6 @@ export type InboundKind =
   | 'humano'
   | 'lead_anuncio'
   | 'possivel_nao_icp'
-
-const OUTBOUND_PREFIX = '[TEMPLATE OUTBOUND:'
-
-function historyHasOutbound(
-  history: { role: string; content: string }[]
-): boolean {
-  return history.some(
-    (m) => m.role === 'assistant' && m.content.includes(OUTBOUND_PREFIX)
-  )
-}
 
 function looksAmbiguousForRules(text: string): boolean {
   const t = text.toLowerCase()
@@ -46,6 +37,20 @@ function carolAlreadySpoke(
   return history.some((m) => m.role === 'assistant')
 }
 
+/** Resposta humana curta pós-outbound — regras bastam (economiza classificador). */
+function isSimpleOutboundHumanReply(
+  text: string,
+  history: { role: string; content: string }[]
+): boolean {
+  if (!historyHasOutbound(history)) return false
+  if (looksAmbiguousForRules(text)) return false
+  if (isAutoResponse(text)) return false
+  const t = text.trim()
+  if (t.length > 120) return false
+  if (/\[botão:/i.test(t)) return false
+  return true
+}
+
 /** Evita custo de IA em conversas inbound simples sem outbound */
 export function shouldClassifyWithAi(
   text: string,
@@ -53,6 +58,7 @@ export function shouldClassifyWithAi(
 ): boolean {
   if (messageHasButtonReply(text)) return false
   if (isCarolInteractiveReply(text)) return false
+  if (isSimpleOutboundHumanReply(text, history)) return false
   // Outbound ou mensagem longa/link — sempre classificar
   if (historyHasOutbound(history) || looksAmbiguousForRules(text)) return true
   // Carol já falou (template ou resposta) — próxima msg pode ser bot curto do WhatsApp Business

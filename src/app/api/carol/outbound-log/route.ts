@@ -27,8 +27,9 @@ export async function POST(request: NextRequest) {
     phone?: string
     template?: string
     nome?: string
+    cidade?: string
     source?: 'ylada_outbound' | 'admin'
-    items?: Array<{ phone: string; template: string; nome?: string }>
+    items?: Array<{ phone: string; template: string; nome?: string; cidade?: string }>
   }
   try {
     body = await request.json()
@@ -49,6 +50,7 @@ export async function POST(request: NextRequest) {
           phone: item.phone,
           template: item.template,
           nome: item.nome,
+          cidade: item.cidade,
           source: body.source ?? 'ylada_outbound',
         })
         results.push({ phone: item.phone, ok: true })
@@ -61,7 +63,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, synced: ok, failed: results.length - ok, results })
   }
 
-  const { phone, template, nome, source } = body
+  const { phone, template, nome, cidade, source } = body
   if (!phone || !template) {
     return NextResponse.json(
       { error: 'Campos obrigatórios: phone, template' },
@@ -74,6 +76,7 @@ export async function POST(request: NextRequest) {
       phone,
       template,
       nome,
+      cidade,
       source: source ?? 'ylada_outbound',
     })
     return NextResponse.json({ success: true, ...result })

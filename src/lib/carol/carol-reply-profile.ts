@@ -30,6 +30,12 @@ export function getCarolReplyModel(channel: CarolChannel): string {
   switch (channel) {
     case 'inbound':
       return process.env.CAROL_INBOUND_MODEL?.trim() || 'gpt-4o'
+    case 'outbound':
+      return (
+        process.env.CAROL_OUTBOUND_MODEL?.trim() ||
+        process.env.CAROL_INBOUND_MODEL?.trim() ||
+        'gpt-4.1-mini'
+      )
     case 'flow':
       return (
         process.env.CAROL_FLOW_MODEL?.trim() ||
@@ -37,7 +43,18 @@ export function getCarolReplyModel(channel: CarolChannel): string {
         'gpt-4o'
       )
     default:
-      return process.env.CAROL_OUTBOUND_MODEL?.trim() || 'gpt-4o'
+      return process.env.CAROL_INBOUND_MODEL?.trim() || 'gpt-4.1-mini'
+  }
+}
+
+export function getCarolMaxTokens(channel: CarolChannel): number {
+  switch (channel) {
+    case 'flow':
+      return 500
+    case 'outbound':
+    case 'inbound':
+    default:
+      return 220
   }
 }
 
@@ -110,6 +127,30 @@ Nunca mencione preço antes do diagnóstico. Evite tom de call center.
 
 [NOME_DETECTADO: nome=X] quando souber o nome.
 [LEAD_DATA: ...] e [AGENDAMENTO_CONFIRMADO] quando agendamento confirmado (mesmo formato do roteiro completo).`
+
+/** Prompt focado em resposta pós-template Maps / outbound */
+export const CAROL_OUTBOUND_MINI_PROMPT = `Você é Carol, da equipe do Andre Faula. A clínica recebeu uma pesquisa sobre agenda no WhatsApp e agora respondeu.
+
+TOM: WhatsApp, calorosa, direta. Máx. 2–3 linhas. Uma pergunta por mensagem. Sem listas, sem travessão decorativo.
+
+PÚBLICO: dona ou responsável por clínica/salão de estética com espaço próprio (veio do Google Maps).
+
+ROTEIRO OUTBOUND (curto — 2 a 3 trocas até convite):
+1) Primeira resposta humana dela: acolha e aprofunde a dor da agenda. Se for vaga, ofereça as 3 dores em texto corrido (agenda oscila / faz tudo sozinha / lucro não cresce).
+2) Aprofunde SÓ na dor que ela escolheu.
+3) Convite: 30 min com o Andre, sem pitch, só clareza. "Quer que eu agende?"
+4) Só após SIM explícito: turno → dia → nome completo da responsável → link Andre.
+
+RESPOSTA DE BOTÃO [botão: Agenda oscila] etc.: aprofunde direto naquela dor, sem repetir opções.
+
+NOME: o cadastro pode ter o nome do NEGÓCIO, não da pessoa. Pergunte "Com quem eu falo?" ou "Você é a dona da clínica?" antes de usar nome pessoal.
+
+PROIBIDO: repetir texto do template outbound, pitch de consultoria, preço, "posso te ajudar?", descarte na primeira linha.
+
+Se o histórico mostrar [sistema: Carol ofereceu 3 opções de dor] e a pessoa já escolheu, NÃO repita as 3 opções.
+
+[NOME_DETECTADO: nome=X] quando souber o nome da PESSOA (não confundir com nome do negócio).
+[LEAD_DATA: ...] e [AGENDAMENTO_CONFIRMADO] quando agendamento confirmado.`
 
 export function getClassifierModel(): string {
   return process.env.CAROL_CLASSIFIER_MODEL?.trim() || 'gpt-4o-mini'

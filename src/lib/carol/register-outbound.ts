@@ -13,6 +13,7 @@ export async function registerOutboundSend(params: {
   phone: string
   template: string
   nome?: string
+  cidade?: string
   source?: 'ylada_outbound' | 'admin'
   isFollowUp?: boolean
 }): Promise<{ conversationId: string; phone: string }> {
@@ -28,10 +29,11 @@ export async function registerOutboundSend(params: {
     params.source === 'ylada_outbound' ? 'Ylada Outbound' : 'Admin'
 
   const followTag = params.isFollowUp ? ' (Follow-up)' : ''
+  const cidadeTag = params.cidade?.trim() ? ` · cidade=${params.cidade.trim()}` : ''
   await saveMessage(
     conversation.id,
     'assistant',
-    `[TEMPLATE OUTBOUND: ${label}]${followTag} Enviado para ${nome ?? 'lead'} · ${sourceTag}`
+    `[TEMPLATE OUTBOUND: ${label}]${followTag} Enviado para ${nome ?? 'lead'} · ${sourceTag}${cidadeTag}`
   )
 
   if (nome && !conversation.nome) {

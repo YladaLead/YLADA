@@ -58,10 +58,13 @@ export async function sendWhatsAppTemplate(
  */
 export async function sendPainButtons(
   to: string,
-  options?: { intro?: string }
+  opts?: { intro?: string; nomeNegocio?: string | null }
 ): Promise<void> {
   const intro =
-    options?.intro?.trim() || 'Oi! 😊 Qual dessas mais te representa hoje?'
+    opts?.intro?.trim() ||
+    (opts?.nomeNegocio?.trim()
+      ? `Oi! 😊 Vi a ${opts.nomeNegocio.trim()} aqui. Qual dessas mais representa o dia a dia de vocês?`
+      : 'Oi! 😊 Qual dessas mais te representa hoje?')
   const phoneId = process.env.WHATSAPP_PHONE_ID
   const token = process.env.WHATSAPP_TOKEN
 

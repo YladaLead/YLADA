@@ -2,9 +2,22 @@ import OpenAI from 'openai'
 import { sendWhatsAppMessage, sendPainButtons } from './sender'
 import {
   CAROL_INBOUND_MINI_PROMPT,
+  CAROL_OUTBOUND_MINI_PROMPT,
+  getCarolMaxTokens,
   getCarolReplyModel,
   resolveCarolChannel,
 } from './carol-reply-profile'
+import {
+  buildOutboundPromptContext,
+  getOutboundLeadContext,
+  shouldSendOutboundPainButtons,
+} from './outbound-context'
+import {
+  detectPainFromText,
+  getDeterministicPainReply,
+  isPainButtonMessage,
+} from './pain-detection'
+import { compactHistoryForPrompt } from './prompt-history'
 import {
   classifyInboundMessage,
   inboundKindContextNote,
@@ -30,64 +43,29 @@ import {
   syncLeadProfileName,
 } from './conversation'
 import { isAutoResponse } from './auto-response'
+import {
+  conversationHasAdLeadIntent,
+  isMetaAdLeadMessage,
+} from './meta-ad-lead'
+import {
+  getCarolAndreNotifyPhone,
+  notifyConversationAdvanceOnInbound,
+  notifyDiagnosticoAgendado,
+  notifyNomeCapturado,
+} from './andre-notifications'
+import { carolHasConversationalReply } from './outbound-context'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
-// ── Delay humanizado antes de enviar resposta (~15 segundos) ────────────────
-async function humanDelay(): Promise<void> {
-  const ms = 13000 + Math.random() * 4000 // 13 a 17s, média ~15s
-  await new Promise(resolve => setTimeout(resolve, ms))
+// ── Delay humanizado (1ª msg mais lenta; continuação outbound mais rápida) ───
+async function humanDelay(opts?: { firstInConversation?: boolean }): Promise<void> {
+  const ms = opts?.firstInConversation
+    ? 13000 + Math.random() * 4000
+    : 5000 + Math.random() * 4000
+  await new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-/** CTA típico de anúncio Meta (Click to WhatsApp). */
-export function isMetaAdLeadMessage(text: string): boolean {
-  const t = String(text || '').toLowerCase()
-  const patterns = [
-    'tenho interesse',
-    'queria mais inform',
-    'quero mais inform',
-    'gostaria de mais inform',
-    'mais informações',
-    'mais informacoes',
-    'quero saber mais',
-    'gostaria de saber',
-    'vi o anúncio',
-    'vi o anuncio',
-    'vi seu anúncio',
-    'vi seu anuncio',
-    'cliquei no anúncio',
-    'cliquei no anuncio',
-    'vim pelo anúncio',
-    'vim pelo anuncio',
-    'vim do anúncio',
-    'vim do anuncio',
-    'quero informações',
-    'quero informacoes',
-    // Perguntas frequentes (FAQ chips) configuradas no anúncio Meta
-    'minha agenda oscila',
-    'agenda oscila todo',
-    'faço tudo sozinha',
-    'faz tudo sozinha',
-    'cansa demais',
-    'trabalho muito e não sobra',
-    'trabalho muito e nao sobra',
-    'não sobra dinheiro',
-    'nao sobra dinheiro',
-    'meu faturamento não cresce',
-    'meu faturamento nao cresce',
-    'faturamento não cresce',
-    'faturamento nao cresce',
-  ]
-  return patterns.some((p) => t.includes(p))
-}
-
-function conversationHasAdLeadIntent(
-  history: Array<{ role: string; content: string }>
-): boolean {
-  return history
-    .filter((m) => m.role === 'user' && !m.content.startsWith('[auto-resposta ignorada]'))
-    .some((m) => isMetaAdLeadMessage(m.content))
-}
+export { isMetaAdLeadMessage } from './meta-ad-lead'
 
 const AD_LEAD_CONTEXT_PROMPT = `
 CONTEXTO OBRIGATÓRIO: LEAD DE ANÚNCIO (Meta Ads / Click to WhatsApp).
@@ -516,45 +494,50 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
   const { from, text, isFlowResponse = false } = payload
 
   try {
-    const ANDRE_NUMBER = '5519981868000'
+    const ANDRE_NUMBER = getCarolAndreNotifyPhone()
 
     // ── PAUSA: Se Andre assumiu a conversa, Carol não responde ──────────────
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((conversation as any).paused === true) {
-      console.log(`[Carol] ⏸️ Conversa pausada para ${from} — Andre está respondendo manualmente`)
-      // Notifica Andre que chegou nova mensagem enquanto estava pausado
-      await sendWhatsAppMessage(
-        ANDRE_NUMBER,
-        `📩 *Nova mensagem de ${conversation.nome ?? from}* (conversa pausada)\n"${text.slice(0, 200)}"\n\n_Responda pelo painel: ylada.com/admin/whatsapp/carol/conversas_`
-      )
-      return
-    }
+    const paused = (conversation as any).paused === true
 
     // Busca histórico (já inclui a mensagem que acabou de salvar) — limite maior para evitar perda de contexto
     const history = await getConversationHistory(conversation.id, 40)
 
-    // ── Lead novo: log apenas — sem notificação (muito cedo, pessoa ainda não qualificou) ──
+    await notifyConversationAdvanceOnInbound({
+      conversationId: conversation.id,
+      phone: from,
+      nome: conversation.nome,
+      text,
+      history,
+      isFlowResponse,
+      paused,
+    })
+
+    if (paused) {
+      console.log(`[Carol] ⏸️ Conversa pausada para ${from} — Andre está respondendo manualmente`)
+      return
+    }
+
     const userMsgCount = history.filter((m) => m.role === 'user').length
     if (userMsgCount === 1) {
       console.log(`[Carol] 🆕 Novo lead: ${from}`)
-      // Flow é exceção — já tem dados valiosos desde o início
-      if (isFlowResponse) {
-        await sendWhatsAppMessage(
-          ANDRE_NUMBER,
-          `🆕 *Novo lead via Flow de Diagnóstico!*\n📱 +${from}\n\n${text}\n\n_Acompanhe em: ylada.com/admin/whatsapp/carol/conversas_`
-        )
-      }
     }
 
-    // Detecta se houve auto-respostas anteriores (contexto outbound)
-    const temAutoResposta = history.some((m) =>
-      m.role === 'user' && m.content.startsWith('[auto-resposta ignorada]')
-    )
-    const outboundContextNote = temAutoResposta
-      ? `\n\nCONTEXTO: conversa outbound. Enviamos template antes; o bot da clínica respondeu ([auto-resposta ignorada]). Use ETAPA 1 CASO B na primeira mensagem real, ou ETAPA 0 se for CTA de anúncio.\n`
-      : ''
-
     const channel = resolveCarolChannel({ history, isFlowResponse })
+    const outboundLead = getOutboundLeadContext(history, conversation.nome)
+    const temAutoResposta = history.some(
+      (m) => m.role === 'user' && m.content.startsWith('[auto-resposta ignorada]')
+    )
+    const outboundContextNote =
+      channel === 'outbound'
+        ? buildOutboundPromptContext({
+            nomeNegocio: outboundLead.nomeNegocio,
+            cidade: outboundLead.cidade,
+            temAutoRespostaBot: temAutoResposta,
+          })
+        : temAutoResposta
+          ? `\n\nCONTEXTO: conversa outbound. Enviamos template antes; o bot da clínica respondeu ([auto-resposta ignorada]). Use ETAPA 1 CASO B na primeira mensagem real, ou ETAPA 0 se for CTA de anúncio.\n`
+          : ''
 
     // ── Nota de status: impede re-perguntar horário quando já agendado ─────────
     const convStatus = (conversation as any).status as string | undefined
@@ -587,8 +570,11 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
     if (shouldSendPainButtons) {
       const intro = getPainButtonsIntro(text)
       console.log(`[Carol] 🎯 Lead de anúncio — enviando botões de dor para ${from}`)
-      await humanDelay()
-      await sendPainButtons(from, { intro })
+      await humanDelay({ firstInConversation: true })
+      await sendPainButtons(from, {
+        intro,
+        nomeNegocio: outboundLead.nomeNegocio,
+      })
       await saveMessage(conversation.id, 'assistant', '[botões enviados: Agenda oscila | Faço tudo sozinha | Lucro não cresce]')
 
       // 🔔 NOTIFICAÇÃO 1: nova lead de anúncio engajou (primeiro contato real)
@@ -598,6 +584,41 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
         `👋 *Nova lead do anúncio!*\n📱 +${from}${nomeLabel}\n\nCarol enviou os botões de dor. Aguardando escolha dela.\n_Painel: ylada.com/admin/whatsapp/carol/conversas_`
       )
       return
+    }
+
+    // ── OUTBOUND: 1ª resposta humana → botões de dor (igual anúncio Meta) ───
+    if (shouldSendOutboundPainButtons(text, history)) {
+      console.log(`[Carol] 🎯 Outbound — 1ª resposta humana, botões de dor para ${from}`)
+      await humanDelay({ firstInConversation: true })
+      await sendPainButtons(from, { nomeNegocio: outboundLead.nomeNegocio })
+      await saveMessage(conversation.id, 'assistant', '[botões enviados: Agenda oscila | Faço tudo sozinha | Lucro não cresce]')
+      return
+    }
+
+    // ── Clique no botão de dor → resposta determinística (sem OpenAI) ─────────
+    const painFromButton = isPainButtonMessage(text) ? detectPainFromText(text) : null
+    if (painFromButton) {
+      const replyBtn = getDeterministicPainReply(
+        painFromButton.hipotese,
+        outboundLead.nomeNegocio
+      )
+      await updateConversationStatus(conversation.id, 'em_andamento', {
+        hipotese: painFromButton.hipotese,
+      })
+      await saveMessage(conversation.id, 'assistant', replyBtn)
+      await humanDelay({ firstInConversation: false })
+      await sendWhatsAppMessage(from, replyBtn)
+      console.log(
+        `[Carol] 🎯 Botão dor (${painFromButton.label}) — resposta determinística para ${from}`
+      )
+      return
+    }
+
+    const painInText = detectPainFromText(text)
+    if (painInText && channel === 'outbound' && !(conversation as { hipotese?: string }).hipotese) {
+      await updateConversationStatus(conversation.id, 'em_andamento', {
+        hipotese: painInText.hipotese,
+      })
     }
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -673,13 +694,17 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
     // Inbound puro (direto, sem ad) → prompt mini ainda funciona para triagem
     // Outbound / flow → prompt completo já era
     const basePrompt =
-      channel === 'inbound' && !isInboundAdLead
-        ? CAROL_INBOUND_MINI_PROMPT
-        : CAROL_SYSTEM_PROMPT
+      channel === 'outbound'
+        ? CAROL_OUTBOUND_MINI_PROMPT
+        : channel === 'inbound' && !isInboundAdLead
+          ? CAROL_INBOUND_MINI_PROMPT
+          : CAROL_SYSTEM_PROMPT
 
     const replyModel = isInboundAdLead
       ? (process.env.CAROL_OUTBOUND_MODEL?.trim() || 'gpt-4o')
       : getCarolReplyModel(channel)
+    const maxTokens = getCarolMaxTokens(channel)
+    const isFirstCarolReply = !carolHasConversationalReply(history)
 
     // Nota do Andre — contexto manual para esta conversa
     const notaAndreContext = (conversation as any).nota_andre
@@ -704,16 +729,18 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       notaAndreContext +
       statusContextNote
 
+    const promptHistory = compactHistoryForPrompt(history)
+
     console.log(`[Carol] Canal=${channel} modelo=${replyModel} de ${from}`)
 
     const response = await openai.chat.completions.create({
       model: replyModel,
       messages: [
         { role: 'system', content: systemContent },
-        ...history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+        ...promptHistory,
       ],
-      temperature: 0.7,
-      max_tokens: 900,
+      temperature: channel === 'outbound' ? 0.65 : 0.7,
+      max_tokens: maxTokens,
     })
 
     let reply = response.choices[0].message.content!
@@ -730,10 +757,10 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
               systemContent +
               '\n\n⚠️ ATENÇÃO: Sua última resposta foi detectada como muito repetitiva. Você DEVE responder de forma COMPLETAMENTE DIFERENTE da mensagem anterior — ângulo diferente, progressão no fluxo, nunca repita a mesma pergunta.',
           },
-          ...history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+          ...promptHistory,
         ],
         temperature: 0.9,
-        max_tokens: 900,
+        max_tokens: maxTokens,
       })
       reply = variationResponse.choices[0].message.content!
     }
@@ -766,13 +793,11 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
     // Salva resposta da Carol
     await saveMessage(conversation.id, 'assistant', replyLimpo)
 
-    // Delay humanizado (~15s) antes de enviar — evita parecer bot
-    await humanDelay()
+    await humanDelay({ firstInConversation: isFirstCarolReply })
 
     // Envia resposta para o usuário
     await sendWhatsAppMessage(from, replyLimpo)
 
-    // Status em andamento após clique nos botões + primeira resposta textual
     if (
       postButtonNote &&
       convStatus === 'novo' &&
@@ -781,22 +806,18 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
       await updateConversationStatus(conversation.id, 'em_andamento')
     }
 
-    // ── NOTIFICAÇÃO 2: Nome capturado ────────────────────────────────────────
     if (nomeDetectado && !conversation.nome) {
-      await updateConversationStatus(conversation.id, 'em_andamento', { nome: nomeDetectado })
       console.log(`[Carol] 👤 Nome capturado: ${nomeDetectado} (${from})`)
-      await sendWhatsAppMessage(
-        ANDRE_NUMBER,
-        `👤 *${nomeDetectado}* entrou em contato com a Carol\n📱 +${from}\n\n_Acompanhe em: ylada.com/admin/whatsapp/carol/conversas_`
-      )
+      const historyAfterReply = await getConversationHistory(conversation.id, 40)
+      await notifyNomeCapturado({
+        conversationId: conversation.id,
+        phone: from,
+        nome: nomeDetectado,
+        history: historyAfterReply,
+      })
     }
 
-    // ── NOTIFICAÇÃO 3: Diagnóstico agendado ──────────────────────────────────
     if (isAgendamento) {
-      await updateConversationStatus(conversation.id, 'diagnostico_agendado')
-
-      // Salva marcador visível ao LLM no histórico — impede que future mensagens
-      // causem re-pergunta de horário mesmo que o status não seja injetado corretamente
       const leadNomeTemp = parseField('nome')
       const leadHorarioTemp = parseField('horario')
       await saveMessage(
@@ -815,19 +836,19 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
 
       console.log(`[Carol] 🗓️ Diagnóstico agendado — ${leadNome} | ${leadEmail} | ${from}`)
 
-      await sendWhatsAppMessage(
-        ANDRE_NUMBER,
-        `🗓️ *Diagnóstico agendado!*\n\n` +
-        `👤 *Nome:* ${leadNome}\n` +
-        `📧 *Email:* ${leadEmail}\n` +
-        `📱 *WhatsApp:* +${from}\n` +
-        `⏰ *Horário preferido:* ${leadHorario}\n` +
-        `🏢 *Segmento:* ${leadSegmento}\n` +
-        `💰 *Faturamento:* ${leadFaturamento}\n` +
-        `👥 *Equipe:* ${leadEquipe}\n` +
-        `💬 *Dor principal:* ${leadDor}\n\n` +
-        `🔗 _Conversa completa: ylada.com/admin/whatsapp/carol/conversas_`
-      )
+      const historyAfterReply = await getConversationHistory(conversation.id, 40)
+      await notifyDiagnosticoAgendado({
+        conversationId: conversation.id,
+        phone: from,
+        leadNome,
+        leadEmail,
+        leadHorario,
+        leadSegmento,
+        leadFaturamento,
+        leadEquipe,
+        leadDor,
+        history: historyAfterReply,
+      })
     }
 
     console.log(`[Carol] Resposta enviada para ${from}`)

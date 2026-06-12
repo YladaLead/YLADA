@@ -8,6 +8,7 @@ import {
   type CarolMessageRow,
 } from './conversation-insights'
 import { outboundTemplateLabel } from './outbound-templates'
+import { getOutboundLeadContext } from './outbound-context'
 
 /** Meta: 2º template MARKETING sem resposta costuma cobrar de novo após ~24h da 1ª mensagem */
 export const META_MARKETING_WINDOW_MINUTES = 23 * 60 // margem de 1h antes das 24h
@@ -50,6 +51,8 @@ export type FollowUpCandidate = {
   conversationId: string
   phone: string
   nome: string | null
+  nomeNegocio: string | null
+  cidade: string | null
   firstOutboundAt: string
   minutesSinceOutbound: number
 }
@@ -127,10 +130,17 @@ export async function getFollowUpCandidates(
     const conv = convMap.get(conversationId)
     if (!conv?.phone) continue
 
+    const leadCtx = getOutboundLeadContext(
+      msgsByConv.get(conversationId) || [],
+      conv.nome
+    )
+
     candidates.push({
       conversationId,
       phone: conv.phone,
       nome: conv.nome,
+      nomeNegocio: leadCtx.nomeNegocio,
+      cidade: leadCtx.cidade,
       firstOutboundAt: first.created_at,
       minutesSinceOutbound: Math.floor(elapsed / 60000),
     })
@@ -162,7 +172,7 @@ export async function runFollowUpBatch(config: FollowUpConfig): Promise<{
 
   for (const c of batch) {
     const phone = normalizeCarolPhone(c.phone)
-    const nome = c.nome?.trim() || 'você'
+    const nome = c.nomeNegocio?.trim() || c.nome?.trim() || 'você'
     try {
       const vars = config.useNomeVariable ? [nome] : []
       await sendWhatsAppTemplate(phone, config.followUpTemplate, vars)
@@ -170,6 +180,7 @@ export async function runFollowUpBatch(config: FollowUpConfig): Promise<{
         phone,
         template: config.followUpTemplate,
         nome,
+        cidade: c.cidade ?? undefined,
         source: 'ylada_outbound',
         isFollowUp: true,
       })
