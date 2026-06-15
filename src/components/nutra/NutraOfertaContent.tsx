@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { nutraOfertaTranslations, type NutraLocale } from '@/lib/nutra-i18n'
+import { useIsIOSNativeApp } from '@/lib/native-app'
+import NativeAppNotice from '@/components/ylada/NativeAppNotice'
 
 interface NutraOfertaContentProps {
   locale: NutraLocale
@@ -15,6 +17,10 @@ export default function NutraOfertaContent({ locale, basePath }: NutraOfertaCont
   const handleCheckout = (plan: 'monthly' | 'annual') => {
     window.location.href = `${basePath}/checkout?plan=${plan}`
   }
+
+  // App iOS: sem página de oferta/preços (guideline 3.1.1 Apple).
+  const isIOSApp = useIsIOSNativeApp()
+  if (isIOSApp) return <NativeAppNotice homeHref={basePath} />
 
   return (
     <div className="min-h-screen bg-white">

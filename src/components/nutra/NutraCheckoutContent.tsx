@@ -6,6 +6,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
 import { nutraCheckoutTranslations, type NutraLocale } from '@/lib/nutra-i18n'
+import { useIsIOSNativeApp } from '@/lib/native-app'
+import NativeAppNotice from '@/components/ylada/NativeAppNotice'
 
 interface NutraCheckoutContentProps {
   locale: NutraLocale
@@ -23,6 +25,7 @@ export default function NutraCheckoutContent({ locale, basePath }: NutraCheckout
 
   const t = nutraCheckoutTranslations[locale]
   const apiLanguage = locale === 'pt' ? 'pt' : locale === 'es' ? 'es' : 'en'
+  const isIOSApp = useIsIOSNativeApp()
 
   useEffect(() => {
     if (loading) {
@@ -101,6 +104,8 @@ export default function NutraCheckoutContent({ locale, basePath }: NutraCheckout
       setLoading(false)
     }
   }
+
+  if (isIOSApp) return <NativeAppNotice homeHref={basePath} />
 
   return (
     <div className="min-h-screen bg-gray-50">

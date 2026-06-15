@@ -5,10 +5,13 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
+import { useIsIOSNativeApp } from '@/lib/native-app'
+import NativeAppNotice from '@/components/ylada/NativeAppNotice'
 
 export default function WellnessCheckoutPage() {
   const router = useRouter()
   const { user, userProfile, loading: authLoading } = useAuth()
+  const isIOSApp = useIsIOSNativeApp()
   const planType = 'monthly' as const
   const [showAnnualSunsetNotice, setShowAnnualSunsetNotice] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -236,6 +239,8 @@ export default function WellnessCheckoutPage() {
     period: 'mês',
     description: 'Plano mensal',
   }
+
+  if (isIOSApp) return <NativeAppNotice homeHref="/pt/wellness" />
 
   return (
     <div className="min-h-screen bg-gray-50">

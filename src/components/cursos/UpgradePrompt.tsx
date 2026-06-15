@@ -1,6 +1,8 @@
 'use client'
 
 import Link from 'next/link'
+import { useIsIOSNativeApp } from '@/lib/native-app'
+import NativeAppNotice from '@/components/ylada/NativeAppNotice'
 
 interface UpgradePromptProps {
   area: 'nutri' | 'coach' | 'nutra'
@@ -23,6 +25,10 @@ export default function UpgradePrompt({
       : 'Completo'
 
   const defaultMessage = message || `Você precisa do plano com acesso a ${featureName} para acessar esta área.`
+
+  // App iOS: sem CTA de planos/preços (guideline 3.1.1 Apple).
+  const isIOSApp = useIsIOSNativeApp()
+  if (isIOSApp) return <NativeAppNotice homeHref={`/pt/${area}/home`} />
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">

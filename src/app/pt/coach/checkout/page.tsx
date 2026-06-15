@@ -4,10 +4,13 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
+import { useIsIOSNativeApp } from '@/lib/native-app'
+import NativeAppNotice from '@/components/ylada/NativeAppNotice'
 
 export default function CoachCheckoutPage() {
   const router = useRouter()
   const { user } = useAuth()
+  const isIOSApp = useIsIOSNativeApp()
   const [planType, setPlanType] = useState<'monthly' | 'annual'>('annual')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -91,6 +94,8 @@ export default function CoachCheckoutPage() {
       setLoading(false)
     }
   }
+
+  if (isIOSApp) return <NativeAppNotice homeHref="/pt/coach" />
 
   return (
     <div className="min-h-screen bg-gray-50">

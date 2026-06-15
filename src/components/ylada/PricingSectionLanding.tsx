@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useIsIOSNativeApp } from '@/lib/native-app'
 
 /**
  * Seção de planos igual à da página de preços, para usar nas landings de cada profissional.
@@ -15,6 +16,10 @@ export function PricingSectionLanding({
   checkoutBasePath?: string
   hideAnnualPlan?: boolean
 }) {
+  // No app iOS não exibimos preços nem botões de assinatura (guideline 3.1.1).
+  const isIOSApp = useIsIOSNativeApp()
+  if (isIOSApp) return null
+
   const hrefMonthly = checkoutBasePath === '/pt/precos' ? '/pt/precos' : `${checkoutBasePath}?plan=monthly`
   const hrefAnnual = checkoutBasePath === '/pt/precos' ? '/pt/precos' : `${checkoutBasePath}?plan=annual`
 

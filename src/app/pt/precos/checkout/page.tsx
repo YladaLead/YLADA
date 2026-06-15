@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
+import { isIOSNativeApp } from '@/lib/native-app'
 
 export default function PrecosCheckoutPage() {
   const router = useRouter()
@@ -17,10 +18,7 @@ export default function PrecosCheckoutPage() {
   const [isIOS, setIsIOS] = useState(false)
 
   useEffect(() => {
-    const cap = (window as any).Capacitor
-    const isiOS = cap?.getPlatform?.() === 'ios' ||
-      (!!(cap) && /iPhone|iPad|iPod/.test(navigator.userAgent))
-    setIsIOS(!!isiOS)
+    setIsIOS(isIOSNativeApp())
   }, [])
 
   useEffect(() => {
@@ -97,20 +95,23 @@ export default function PrecosCheckoutPage() {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
         {isIOS ? (
           <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-            <div className="text-4xl mb-4">🔒</div>
+            <div className="w-14 h-14 rounded-full bg-sky-100 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
             <h1 className="text-xl font-bold text-gray-900 mb-3">
-              Assinaturas pelo site
+              Tudo pronto por aqui
             </h1>
             <p className="text-gray-600 text-sm mb-6">
-              Para assinar o plano Pro, acesse o YLADA no navegador do seu celular ou computador.
+              Use o YLADA normalmente com a sua conta. Se precisar de ajuda, fale com o suporte pelo app.
             </p>
-            <p className="text-sm font-semibold text-blue-700 mb-6">ylada.com</p>
             <button
               type="button"
-              onClick={() => router.back()}
-              className="text-sm text-gray-500 underline"
+              onClick={() => router.push('/pt')}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-colors"
             >
-              Voltar
+              Ir para o início
             </button>
           </div>
         ) : (

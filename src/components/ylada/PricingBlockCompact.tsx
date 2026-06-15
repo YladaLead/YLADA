@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useIsIOSNativeApp } from '@/lib/native-app'
 
 /**
  * Bloco compacto de preços para landings de área.
@@ -13,6 +14,10 @@ export function PricingBlockCompact({
   ctaHref?: string
   ctaLabel?: string
 }) {
+  // App iOS: sem preços nem CTA de assinatura (guideline 3.1.1 Apple).
+  const isIOSApp = useIsIOSNativeApp()
+  if (isIOSApp) return null
+
   return (
     <>
       <div className="grid grid-cols-2 gap-4 mb-6">

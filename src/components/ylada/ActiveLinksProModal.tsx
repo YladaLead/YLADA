@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { trackFreemiumConversionEvent } from '@/lib/ylada-freemium-client'
 import { YLADA_FREEMIUM_ACTIVE_LINK_EXPLANATION_SHORT, YLADA_PRO_UPGRADE_PITCH } from '@/config/freemium-limits'
+import { useIsIOSNativeApp } from '@/lib/native-app'
 
 /**
  * Modal quando o usuário Free atinge o limite de diagnósticos ativos (freemium).
@@ -20,6 +21,8 @@ export function ActiveLinksProModal({
   message: string
 }) {
   void _legacyMessageFromApi
+  // App iOS: não exibir paywall com preços (guideline 3.1.1 Apple).
+  const isIOSApp = useIsIOSNativeApp()
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
@@ -41,7 +44,7 @@ export function ActiveLinksProModal({
     }
   }, [open])
 
-  if (!open) return null
+  if (!open || isIOSApp) return null
 
   return (
     <div

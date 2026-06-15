@@ -11,6 +11,7 @@ import { UseCasesSection } from '@/components/ylada/UseCasesSection'
 import { HeroBeforeAfter } from '@/components/ylada/HeroBeforeAfter'
 import { DiagnosticoExemploSection } from '@/components/ylada/DiagnosticoExemploSection'
 import { PricingSectionLanding } from '@/components/ylada/PricingSectionLanding'
+import { useIsIOSNativeApp } from '@/lib/native-app'
 import { useRouter } from 'next/navigation'
 import type { Language } from '@/lib/i18n'
 import { landingPageVideos } from '@/lib/landing-pages-assets'
@@ -241,6 +242,9 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
 
   const c = COMMON[locale]
   const label = AREA_LABELS[area]?.[locale] ?? AREA_LABELS[area]?.pt ?? area
+
+  // App iOS: ocultar seções de preço e CTAs de pagamento (guideline 3.1.1 Apple).
+  const isIOSApp = useIsIOSNativeApp()
 
   useEffect(() => {
     setMounted(true)
@@ -579,6 +583,7 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
 
         <UseCasesSection area={area === 'nutra' ? 'nutra' : componentArea} locale={locale} />
 
+        {!isIOSApp && (
         <section className="py-12 sm:py-16 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto">
@@ -589,7 +594,9 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
             </div>
           </div>
         </section>
+        )}
 
+        {!isIOSApp && (
         <section className="py-14 sm:py-20 bg-blue-600">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-xl mx-auto text-center">
@@ -624,6 +631,7 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
             </div>
           </div>
         </section>
+        )}
       </main>
 
       <footer className="border-t border-gray-200 bg-white py-10">

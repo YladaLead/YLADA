@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
+import { useIsIOSNativeApp } from '@/lib/native-app'
 
 export function PrecosPageFallback() {
   return (
@@ -34,6 +35,11 @@ export default function PrecosPageContent({ isIOSApp }: Props) {
   const perfilTitulo = searchParams.get('perfil_titulo') || ''
   const mostraBlocoResultado = fromDiagnostico && perfilTitulo
 
+  // Detecção server-side (UA) é frágil no iPad; combinamos com a detecção
+  // client-side via Capacitor para garantir que o app iOS nunca veja preços.
+  const clientIOSApp = useIsIOSNativeApp()
+  const hideStore = isIOSApp || clientIOSApp
+
   return (
     <div className="min-h-screen bg-white">
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
@@ -49,29 +55,26 @@ export default function PrecosPageContent({ isIOSApp }: Props) {
 
       <main className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
 
-        {/* iOS app (WKWebView / Capacitor): não exibir preços — direcionar ao site */}
-        {isIOSApp ? (
+        {/* App iOS (WKWebView / Capacitor): sem preços, sem planos e sem
+            link para compra externa (guideline 3.1.1 da Apple). Tela neutra
+            que apenas leva o usuário de volta a usar o app com a conta dele. */}
+        {hideStore ? (
           <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
             <div className="w-16 h-16 rounded-full bg-sky-100 flex items-center justify-center mb-6">
               <svg className="w-8 h-8 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">Assine pelo site</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-3">Tudo pronto por aqui</h2>
             <p className="text-gray-600 text-sm mb-6 max-w-xs">
-              Para assinar o YLADA, acesse <strong>ylada.com</strong> no navegador do seu celular ou computador.
+              Use o YLADA normalmente com a sua conta. Se precisar de ajuda, fale com o suporte pelo app.
             </p>
-            <a
-              href="https://www.ylada.com/pt/precos"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/pt"
               className="inline-flex items-center gap-2 px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-colors"
             >
-              Abrir ylada.com
-            </a>
-            <p className="mt-6 text-xs text-gray-400">
-              Já assinante? Entre com sua conta normalmente.
-            </p>
+              Ir para o início
+            </Link>
           </div>
         ) : (
         <>
