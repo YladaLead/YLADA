@@ -95,11 +95,11 @@ export const CONVICCAO_PERGUNTAS: ConviccaoPergunta[] = [
   },
   {
     id: 'q5_repeticao',
-    texto: 'Com que frequência você pratica abordagem ou conversa de venda de propósito?',
+    texto: 'Com que frequência você puxa conversa de venda por conta própria, sem esperar o cliente aparecer?',
     opcoes: [
-      { label: 'Quase nunca, só quando aparece sozinho', conv: 0 },
+      { label: 'Quase nunca, só quando o cliente aparece sozinho', conv: 0 },
       { label: 'De vez em quando, sem constância', conv: 1 },
-      { label: 'Toda semana, de propósito, mesmo sem aparecer', conv: 2 },
+      { label: 'Toda semana, de propósito, mesmo sem ninguém me procurar', conv: 2 },
     ],
   },
   {
