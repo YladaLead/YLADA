@@ -166,7 +166,7 @@ export const CONVICCAO_DEVOLUTIVAS: Record<ConviccaoPerfilCode, ConviccaoDevolut
     oCiclo:
       'Tem um ciclo rodando aí, e ele se alimenta sozinho. Você evita a conversa. Por evitar, não pratica. Sem praticar, não melhora. Sem melhorar, o resultado não vem. E sem resultado, você acredita ainda menos que dá certo. Aí evita de novo. Não é preguiça e não é falta de informação. É a convicção que ainda não foi construída.',
     oGap:
-      'É comum olhar pra fora e pensar que o problema é o mercado, o preço, a concorrência. Na grande maioria das vezes não é. O que falta não é cliente lá fora. É um jeito de conduzir a conversa que caiba em você. O gap não está no mercado. Está no sistema de comunicação que ninguém te deu.',
+      'É comum olhar pra fora e pensar que o problema é o mercado, o preço, a concorrência. Na grande maioria das vezes não é. O que falta não é cliente lá fora. É um jeito de conduzir a conversa que caiba em você. O que trava não está no mercado. Está no sistema de comunicação que ninguém te deu.',
     primeiroAto:
       'O primeiro passo não é grande. É uma conversa só, conduzida com um caminho na mão, em vez do improviso. O movimento vem antes da certeza, nunca depois. É por aí que a convicção começa a virar.',
     noelSeed:
@@ -190,7 +190,7 @@ export const CONVICCAO_DEVOLUTIVAS: Record<ConviccaoPerfilCode, ConviccaoDevolut
     oCiclo:
       'Você já saiu do lugar onde a maioria trava. Age, pratica, e quando algo não dá certo, olha pro próprio jeito antes de culpar o mercado. Isso é raro e é o caminho certo. O que falta agora não é começar. É deixar o que funciona organizado, pra repetir sem depender da sua memória ou do seu dia.',
     oGap:
-      'No seu caso o gap não é de convicção, é de escala. O que você faz bem ainda mora muito na sua cabeça e na sua energia. Quando isso vira um sistema de comunicação claro, você consegue repetir com firmeza e, mais pra frente, até passar pra outras pessoas sem perder a qualidade.',
+      'No seu caso o que trava não é a convicção, é a escala. O que você faz bem ainda mora muito na sua cabeça e na sua energia. Quando isso vira um sistema de comunicação claro, você consegue repetir com firmeza e, mais pra frente, até passar pra outras pessoas sem perder a qualidade.',
     primeiroAto:
       'O próximo passo é registrar o caminho que já te dá resultado e transformar em algo repetível. É aqui que o Ylada entra: organizar o que você já faz pra você fazer mais, com menos esforço.',
     noelSeed:

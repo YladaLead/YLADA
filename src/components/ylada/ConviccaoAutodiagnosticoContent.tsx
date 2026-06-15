@@ -88,7 +88,7 @@ export default function ConviccaoAutodiagnosticoContent({ areaCodigo, areaLabel 
       setChat([
         {
           role: 'assistant',
-          content: `${dev.fraseEspelho.replace(' / ', '\n')}\n\n${dev.oCiclo}\n\nPosso te fazer uma pergunta? O que mais te trava hoje na hora de chegar num cliente novo?`,
+          content: `Li o seu diagnóstico aqui. Deixa eu te fazer uma pergunta, então: o que mais te trava hoje na hora de chegar num cliente novo?`,
         },
       ])
       setEtapa('resultado')
@@ -269,7 +269,7 @@ export default function ConviccaoAutodiagnosticoContent({ areaCodigo, areaLabel 
 
             <div className="mb-4 rounded-xl border border-orange-100 bg-orange-50/60 p-4">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-orange-600 mb-2">
-                Onde está o gap de verdade
+                O que realmente te trava
               </p>
               <p className="text-sm leading-relaxed text-gray-800">{devolutiva.oGap}</p>
             </div>
