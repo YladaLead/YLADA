@@ -2275,17 +2275,17 @@ export async function POST(request: NextRequest) {
     try {
       console.log('📦 Importando módulos do novo motor...')
       // Importar módulos do novo sistema
-      const { processarMensagem } = await import('@/lib/wellness-system/noel-engine/core/reasoning')
+      const { processarMensagem } = await import('@/lib/ylada-flow/noel-engine/core/reasoning')
       console.log('✅ processarMensagem importado')
-      const { selecionarModo } = await import('@/lib/wellness-system/noel-engine/modes/mode-selector')
+      const { selecionarModo } = await import('@/lib/ylada-flow/noel-engine/modes/mode-selector')
       console.log('✅ selecionarModo importado')
-      const { processarScript } = await import('@/lib/wellness-system/noel-engine/scripts/script-engine')
+      const { processarScript } = await import('@/lib/ylada-flow/noel-engine/scripts/script-engine')
       console.log('✅ processarScript importado')
-      const { tratarObjeção } = await import('@/lib/wellness-system/noel-engine/objections/objection-handler')
+      const { tratarObjeção } = await import('@/lib/ylada-flow/noel-engine/objections/objection-handler')
       console.log('✅ tratarObjeção importado')
-      const { construirResposta } = await import('@/lib/wellness-system/noel-engine/response/response-builder')
+      const { construirResposta } = await import('@/lib/ylada-flow/noel-engine/response/response-builder')
       console.log('✅ construirResposta importado')
-      const { formatarParaAPI } = await import('@/lib/wellness-system/noel-engine/response/response-formatter')
+      const { formatarParaAPI } = await import('@/lib/ylada-flow/noel-engine/response/response-formatter')
       console.log('✅ formatarParaAPI importado')
       console.log('✅ Todos os módulos importados com sucesso!')
       
@@ -2327,7 +2327,7 @@ export async function POST(request: NextRequest) {
           // Gerar embedding uma vez para reutilizar
           sharedQueryEmbedding = await generateEmbedding(message)
           
-          const { buscarObjeçõesPorSimilaridade } = await import('@/lib/wellness-system/noel-engine/objections/objection-semantic-search')
+          const { buscarObjeçõesPorSimilaridade } = await import('@/lib/ylada-flow/noel-engine/objections/objection-semantic-search')
           const resultadoSemantico = await buscarObjeçõesPorSimilaridade(message, {
             limite: 3,
             threshold: 0.4, // 40% de similaridade mínimo
@@ -2452,7 +2452,7 @@ export async function POST(request: NextRequest) {
               sharedQueryEmbedding = await generateEmbedding(message)
             }
             
-            const { buscarScriptsPorSimilaridade } = await import('@/lib/wellness-system/noel-engine/scripts/script-semantic-search')
+            const { buscarScriptsPorSimilaridade } = await import('@/lib/ylada-flow/noel-engine/scripts/script-semantic-search')
             const resultadoSemantico = await buscarScriptsPorSimilaridade(message, {
               categoria: categoriaScript,
               limite: 3,
@@ -2468,7 +2468,7 @@ export async function POST(request: NextRequest) {
               })
               
               // Adaptar o script encontrado
-              const scriptAdaptor = await import('@/lib/wellness-system/noel-engine/scripts/script-adaptor')
+              const scriptAdaptor = await import('@/lib/ylada-flow/noel-engine/scripts/script-adaptor')
               const conteudoAdaptado = scriptAdaptor.adaptarScript(resultadoSemantico.melhorMatch, ctxProcessado)
               
               scriptResultado = {
@@ -2521,7 +2521,7 @@ export async function POST(request: NextRequest) {
           
           try {
             // Extrair contexto para criação
-            const { extrairContextoParaScript, detectarFerramentaMencionada } = await import('@/lib/wellness-system/noel-engine/scripts/script-context-extractor')
+            const { extrairContextoParaScript, detectarFerramentaMencionada } = await import('@/lib/ylada-flow/noel-engine/scripts/script-context-extractor')
             const contextoCriacao = extrairContextoParaScript(message, ctxProcessado)
             const ferramentaSlug = detectarFerramentaMencionada(message)
             
