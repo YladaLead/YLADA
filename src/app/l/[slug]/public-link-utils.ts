@@ -10,6 +10,7 @@ import {
   resolvePublicLinkConfigJson,
   rewriteProLideresVendasCalculadoraPresetToLibraryTemplate,
 } from '@/lib/ylada-canonical-flow-config'
+import { maybeApplyYladaFlowNativeConfig } from '@/lib/ylada-flow/apply-ylada-flow-native-config'
 import { normalizeYladaPublicLinkPathSegment } from '@/lib/ylada-public-link-path-normalize'
 
 export type PublicLinkPayload = {
@@ -85,6 +86,7 @@ export async function fetchPublicLinkPayload(
 
   const configRaw = (link.config_json as Record<string, unknown>) ?? {}
   let config = await resolvePublicLinkConfigJson(supabaseAdmin, configRaw)
+  config = await maybeApplyYladaFlowNativeConfig(supabaseAdmin, config, link)
   const meta = config.meta as Record<string, unknown> | undefined
   /**
    * Links criados pelo Noel / generate (Etapa 6) trazem `meta.flow_id` + `meta.architecture`.
