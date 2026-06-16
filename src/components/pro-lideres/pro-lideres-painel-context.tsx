@@ -2,6 +2,7 @@
 
 import { createContext, useContext, type ReactNode } from 'react'
 import type { ProLideresTenantRole } from '@/types/leader-tenant'
+import type { ProLideresMemberAccessExpiryUi } from '@/lib/pro-lideres-team-access-expiry-ui'
 
 export type ProLideresPainelContextValue = {
   role: ProLideresTenantRole
@@ -37,6 +38,8 @@ export type ProLideresPainelContextValue = {
    * Links do menu, logo e perfil usam isto.
    */
   painelBasePath: string
+  /** Aviso de validade do acesso (área do membro). */
+  memberAccessExpiry?: ProLideresMemberAccessExpiryUi | null
 }
 
 const ProLideresPainelContext = createContext<ProLideresPainelContextValue | null>(null)

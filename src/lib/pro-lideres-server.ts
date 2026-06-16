@@ -242,13 +242,16 @@ function pickEnsureRedirectAmongMemberships(rows: LeaderMemberLite[]): string | 
   const hasPending = rows.some((r) => accessStateOf(r) === 'pending_activation')
   if (hasPending) return '/pro-lideres/membro/ativacao'
 
+  const hasExpiredAccess = rows.some(
+    (r) =>
+      r.team_access_expires_at &&
+      !membershipExpiryStillValid(r.team_access_expires_at) &&
+      (accessStateOf(r) === 'active' || accessStateOf(r) === 'paused')
+  )
+  if (hasExpiredAccess) return '/pro-lideres/membro/acesso-expirado'
+
   const hasPaused = rows.some((r) => accessStateOf(r) === 'paused')
   if (hasPaused) return '/pro-lideres/acesso-pausado'
-
-  const hasExpiredWhileActive = rows.some(
-    (r) => accessStateOf(r) === 'active' && !membershipExpiryStillValid(r.team_access_expires_at)
-  )
-  if (hasExpiredWhileActive) return '/pro-lideres/membro/acesso-expirado'
 
   return null
 }
@@ -789,6 +792,20 @@ export async function ensureLeaderTenantAccess(): Promise<
    */
   if (!ctx && admin) {
     ctx = await resolveProLideresTenantContext(admin, user)
+  }
+
+  if (!ctx && admin) {
+    const { data: adminMemberships } = await admin
+      .from('leader_tenant_members')
+      .select('leader_tenant_id, role, team_access_state, team_access_expires_at, created_at')
+      .eq('user_id', user.id)
+
+    const adminRedirect = pickEnsureRedirectAmongMemberships(
+      (adminMemberships ?? []) as LeaderMemberLite[]
+    )
+    if (adminRedirect) {
+      return { ok: false, redirect: adminRedirect }
+    }
   }
 
   if (!ctx && shouldProvisionProLideresTenant(user)) {

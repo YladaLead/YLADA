@@ -8,6 +8,7 @@ import { ProLideresPainelProvider, type ProLideresPainelContextValue } from './p
 import { useAuth } from '@/hooks/useAuth'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 import { PRO_LIDERES_MEMBER_BASE_PATH } from '@/config/pro-lideres-menu'
+import { ProLideresMembroAccessExpiryBanner } from './ProLideresMembroAccessExpiryBanner'
 
 const YLADA_LOGO = YLADA_OG_FALLBACK_LOGO_PATH
 
@@ -34,7 +35,14 @@ export default function ProLideresAreaShell({
       .toUpperCase()
       .slice(0, 2) || 'L'
 
-  const { isLeaderWorkspace, operationLabel, devStubPanel, teamViewPreview, painelBasePath } = painelContext
+  const {
+    isLeaderWorkspace,
+    operationLabel,
+    devStubPanel,
+    teamViewPreview,
+    painelBasePath,
+    memberAccessExpiry,
+  } = painelContext
   const base = painelBasePath.replace(/\/$/, '')
   const memberBase = PRO_LIDERES_MEMBER_BASE_PATH.replace(/\/$/, '')
   const isMemberAreaShell = base === memberBase
@@ -64,6 +72,9 @@ export default function ProLideresAreaShell({
             <span className="font-medium">voltar ao ambiente do líder</span> quando terminar.
           </div>
         )}
+        {isMemberAreaShell && !teamViewPreview && memberAccessExpiry?.showBanner ? (
+          <ProLideresMembroAccessExpiryBanner ui={memberAccessExpiry} />
+        ) : null}
         {/* Única barra de marca: mobile-first (44px mín. toque no menu) */}
         <header className="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-2 border-b border-gray-200 bg-white px-3 sm:gap-3 sm:px-4 lg:px-6">
           <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">

@@ -9,6 +9,7 @@ import {
 } from '@/lib/pro-lideres-server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { getProLideresMemberMandatoryProfileGap } from '@/lib/pro-lideres-member-mandatory-profile'
+import { loadProLideresMemberAccessExpiryBanner } from '@/lib/pro-lideres-membro-renovacao'
 import { resolveProLideresNoelMemberSurface } from '@/lib/pro-lideres-noel-member-access'
 import ProLideresAreaShell from '@/components/pro-lideres/ProLideresAreaShell'
 import {
@@ -76,6 +77,11 @@ export default async function ProLideresMembroAreaLayout({ children }: { childre
     noelMemberShowSidebarNav = nm.showSidebarNav
   }
 
+  let memberAccessExpiry = null
+  if (user?.id && ui.isActiveMemberRow && !ui.teamViewPreview) {
+    memberAccessExpiry = await loadProLideresMemberAccessExpiryBanner(user.id, gate.tenant.id)
+  }
+
   return (
     <ProLideresAreaShell
       painelContext={{
@@ -89,6 +95,7 @@ export default async function ProLideresMembroAreaLayout({ children }: { childre
         dailyTasksVisibleToTeam,
         noelMemberShowSidebarNav,
         painelBasePath: PRO_LIDERES_MEMBER_BASE_PATH,
+        memberAccessExpiry,
       }}
     >
       {children}

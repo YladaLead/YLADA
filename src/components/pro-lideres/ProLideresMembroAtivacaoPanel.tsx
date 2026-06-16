@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 
+import { ProLideresMembroPaymentLinksCard } from '@/components/pro-lideres/ProLideresMembroPaymentLinksCard'
 import {
   clearProLideresAtivacaoPaymentSession,
   readProLideresAtivacaoPaymentSession,
@@ -69,34 +70,13 @@ export function ProLideresMembroAtivacaoPanel({
         </p>
 
         {hasPayment ? (
-          <div className="mt-6 space-y-3">
-            <p className="text-center text-sm font-medium text-gray-800">Escolha como pagar</p>
-            {pixUrl ? (
-              <a
-                href={pixUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800"
-              >
-                Pix
-              </a>
-            ) : null}
-            {cardUrl ? (
-              <a
-                href={cardUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-amber-700 px-4 text-sm font-semibold text-white hover:bg-amber-800"
-              >
-                Cartão ou Mercado Pago
-              </a>
-            ) : null}
+          <div className="mt-6">
+            <ProLideresMembroPaymentLinksCard cardUrl={cardUrl} pixUrl={pixUrl} />
           </div>
         ) : (
-          <p className="mt-6 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center text-sm text-gray-700">
-            Não encontramos link de pagamento configurado para esta equipe. Fale com quem te convidou para combinar o
-            pagamento; depois o acesso é liberado pelo líder.
-          </p>
+          <div className="mt-6">
+            <ProLideresMembroPaymentLinksCard cardUrl={null} pixUrl={null} />
+          </div>
         )}
 
         <p className="mt-6 text-center text-sm text-gray-500">Você pode fechar esta página e voltar quando quiser.</p>
