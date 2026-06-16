@@ -254,6 +254,25 @@ function isIntencaoRecuperarLinkExistente(message: string): boolean {
   )
 }
 
+/**
+ * Detecta pedido de CONTEÚDO (postagem, legenda, carrossel, reels, story, texto para o feed).
+ * Isso é copy — NÃO é pedido de gerar quiz/calculadora. Tem prioridade sobre isIntencaoCriarLink
+ * porque o post pode citar um tema ("energia") ou uma ferramenta ("o link da calculadora") sem que
+ * o profissional esteja pedindo para o sistema GERAR esse link.
+ */
+function isIntencaoCriarConteudo(message: string): boolean {
+  const m = message.toLowerCase().trim()
+  const substantivoConteudo =
+    /\b(postagem|publica[çc][ãa]o|carross?[eé]l|reels?|legenda|story|stories)\b/.test(m) ||
+    /\b(post|conte[úu]do|texto)\s+(para|pro|pra|no|de|do)\s+(o\s+|a\s+)?(feed|instagram|insta|stories?|redes|whats|whatsapp)\b/.test(m)
+  const verboCriacao =
+    /\b(crie|cria|criar|escreve|escreva|escrever|faz|fa[çc]a|fazer|gera|gere|gerar|monta|monte|montar|prepara|prepare|me d[áa]|sugere|sugira)\b/.test(m)
+  // Exceção: se o profissional pede explicitamente para CRIAR a ferramenta em si, isso é link, não conteúdo.
+  const pedeFerramentaExplicita =
+    /\b(cria|criar|crie|gera|gere|gerar|quero|preciso de)\s+(um|uma|o|a)?\s*(quiz|calculadora|diagn[óo]stico|fluxo|formul[áa]rio|question[áa]rio)\b/.test(m)
+  return substantivoConteudo && verboCriacao && !pedeFerramentaExplicita
+}
+
 function classifyNoelResponseMode(
   message: string,
   conversationHistory?: Array<{ role: string; content: string }>
@@ -267,11 +286,18 @@ function classifyNoelResponseMode(
     return 'modo_mentor'
   }
 
+  // Pedido de conteúdo (postagem, legenda, carrossel, reels) tem prioridade sobre gerar link,
+  // mesmo quando a frase cita um tema ("energia") ou uma ferramenta ("link da calculadora").
+  // Ajuste de link explícito ainda manda em modo_link (ex.: "troca a pergunta 2 do quiz").
+  if (isIntencaoCriarConteudo(message) && !isIntencaoAjustarLink(message)) {
+    return 'modo_copy'
+  }
+
   if (isIntencaoCriarLink(message, conversationHistory) || isIntencaoAjustarLink(message)) {
     return 'modo_link'
   }
 
-  if (/script|mensagem|copy|cta|story|legenda|humaniza|menos vendedor|tom/.test(m)) return 'modo_copy'
+  if (/script|mensagem|copy|cta|story|legenda|humaniza|menos vendedor|tom|postagem|publica|carrossel|carrosel|reels|conteúdo|conteudo|feed|instagram/.test(m)) return 'modo_copy'
   if (/ação|acao|executa|execute|tarefa|métrica|metrica|hoje|amanhã|amanha|próximo passo|proximo passo/.test(m)) {
     return 'modo_execucao'
   }
