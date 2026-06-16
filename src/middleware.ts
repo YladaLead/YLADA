@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isIOSNativeAppUserAgent } from '@/lib/purchase-routes'
 import { isPerfilFluxoPublicPath } from '@/lib/ylada-flow/perfil-fluxo-path'
+import { resolveLegacyPublicUrlRedirect } from '@/lib/ylada-flow/legacy-url-redirect'
 
 /** Rollbacks *v2 (landing minimal) → fluxo progressivo canónico. */
 const SEGMENT_V2_TO_PROGRESSIVE: Record<string, string> = {
@@ -101,6 +102,14 @@ export function middleware(request: NextRequest) {
   if (pathname === '/pt/pro-joias' || pathname.startsWith('/pt/pro-joias/')) {
     const url = request.nextUrl.clone()
     url.pathname = pathname.replace(/^\/pt(?=\/pro-joias)/, '') || '/pro-joias'
+    return NextResponse.redirect(url, 308)
+  }
+
+  // Legado público → /[perfil]/[fluxo] ou /l/[slug] (Chat 4 passo 3)
+  const legacyRedirect = resolveLegacyPublicUrlRedirect(pathname)
+  if (legacyRedirect) {
+    const url = request.nextUrl.clone()
+    url.pathname = legacyRedirect
     return NextResponse.redirect(url, 308)
   }
 
