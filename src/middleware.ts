@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isIOSNativeAppUserAgent } from '@/lib/purchase-routes'
+import { isPerfilFluxoPublicPath } from '@/lib/ylada-flow/perfil-fluxo-path'
 
 /** Rollbacks *v2 (landing minimal) → fluxo progressivo canónico. */
 const SEGMENT_V2_TO_PROGRESSIVE: Record<string, string> = {
@@ -116,6 +117,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/uso-wellness-v1/') ||
     pathname.startsWith('/p/') || // IMPORTANTE: Links curtos (/p/code) - não redirecionar
     pathname.startsWith('/l/') || // Links inteligentes YLADA (/l/[slug]) - público, sem /pt
+    isPerfilFluxoPublicPath(pathname) || // /[perfil]/[fluxo] — camada fina pública, sem /pt
     pathname.startsWith('/f/') || // IMPORTANTE: Formulários públicos (/f/formId) - não redirecionar
     pathname.startsWith('/templates-environment') ||
     pathname.startsWith('/template/') ||
