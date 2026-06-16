@@ -2,6 +2,7 @@ import type { Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProviderWrapper } from '@/components/providers/AuthProviderWrapper'
+import NativeAppPurchaseGuard from '@/components/ylada/NativeAppPurchaseGuard'
 import CookieConsentBanner from '@/components/legal/CookieConsentBanner'
 import PWAInitializer from '@/components/pwa/PWAInitializer'
 import FacebookPixel from '@/components/analytics/FacebookPixel'
@@ -103,7 +104,9 @@ export default function RootLayout({
         <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col">
           <FacebookPixel pixelId={pixelId} />
           <PWAInitializer />
-          <AuthProviderWrapper>{children}</AuthProviderWrapper>
+          <AuthProviderWrapper>
+            <NativeAppPurchaseGuard>{children}</NativeAppPurchaseGuard>
+          </AuthProviderWrapper>
         </div>
         <CookieConsentBanner />
       </body>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { isIOSNativeAppUserAgent } from '@/lib/purchase-routes'
 
 /** Rollbacks *v2 (landing minimal) → fluxo progressivo canónico. */
 const SEGMENT_V2_TO_PROGRESSIVE: Record<string, string> = {
@@ -26,6 +27,22 @@ function detectLocale(request: NextRequest): 'pt' | 'en' | 'es' {
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
+
+  // Apple 3.1.1: o app iOS não pode comprar assinatura fora do IAP.
+  // Bloqueamos a criação de pagamento (qualquer API .../checkout) quando a
+  // requisição vem do nosso app iOS. Denylist de in-app browsers (IG/FB) já
+  // está em isIOSNativeAppUserAgent, então tráfego de anúncios não é afetado.
+  if (pathname.startsWith('/api/') && pathname.endsWith('/checkout')) {
+    const ua = request.headers.get('user-agent') ?? ''
+    if (isIOSNativeAppUserAgent(ua)) {
+      return NextResponse.json(
+        { error: 'As assinaturas são gerenciadas fora do aplicativo.' },
+        { status: 403 },
+      )
+    }
+    // Demais origens (web, Android, Safari, IG/FB): seguem normalmente.
+    return NextResponse.next()
+  }
 
   const normalized =
     pathname.length > 1 && pathname.endsWith('/') ? pathname.replace(/\/+$/, '') : pathname
@@ -214,5 +231,7 @@ export const config = {
      * - favicon.ico (favicon file)
      */
     '/((?!api|_next/static|_next/image|videos|images|logos|favicon.ico).*)',
+    // Inclui as APIs de checkout para podermos bloquear compra no app iOS (3.1.1).
+    '/api/:path*/checkout',
   ],
 }
