@@ -190,7 +190,7 @@ export const CONVICCAO_DEVOLUTIVAS: Record<ConviccaoPerfilCode, ConviccaoDevolut
     oCiclo:
       'Você já saiu do lugar onde a maioria trava. Age, pratica, e quando algo não dá certo, olha pro próprio jeito antes de culpar o mercado. Isso é raro e é o caminho certo. O que falta agora não é começar. É deixar o que funciona organizado, pra repetir sem depender da sua memória ou do seu dia.',
     oGap:
-      'No seu caso o que trava não é a convicção, é a escala. O que você faz bem ainda mora muito na sua cabeça e na sua energia. Quando isso vira um sistema de comunicação claro, você consegue repetir com firmeza e, mais pra frente, até passar pra outras pessoas sem perder a qualidade.',
+      'No seu caso, a convicção já não é o problema. Você já age e já tem método. O que limita o seu crescimento agora é a escala. Hoje o resultado depende demais do seu esforço e da sua energia, todo dia, na sua mão. O que você precisa é de algo mais duplicável: um jeito de manter e otimizar o que já dá certo sem depender tanto de você.',
     primeiroAto:
       'O próximo passo é registrar o caminho que já te dá resultado e transformar em algo repetível. É aqui que o Ylada entra: organizar o que você já faz pra você fazer mais, com menos esforço.',
     noelSeed:
