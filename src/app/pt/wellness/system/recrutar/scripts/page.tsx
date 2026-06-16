@@ -12,8 +12,8 @@ import {
   type ScriptRecrutamento,
   type MomentoConversa,
   type TipoContato
-} from '@/lib/wellness-system/scripts-recrutamento'
-import { fluxosRecrutamento } from '@/lib/wellness-system/fluxos-recrutamento'
+} from '@/lib/ylada-flow/scripts-recrutamento'
+import { fluxosRecrutamento } from '@/lib/ylada-flow/fluxos-recrutamento'
 
 type EstiloAbordagem = 'direto' | 'curiosidade' | 'emocional' | 'consultivo' | 'leve' | 'reconhecimento'
 

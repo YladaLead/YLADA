@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
-import FluxoDiagnosticoCoach from '@/components/wellness-system/FluxoDiagnosticoCoach'
+import FluxoDiagnosticoCoach from '@/components/ylada-flow/FluxoDiagnosticoCoach'
 
 interface Tool {
   id: string
@@ -27,7 +27,7 @@ interface Tool {
       enabled?: boolean
       fields?: { name?: boolean; email?: boolean; phone?: boolean }
     }
-    fluxo?: import('@/types/wellness-system').FluxoCliente
+    fluxo?: import('@/types/ylada-flow-legacy').FluxoCliente
     tipo?: string
   }
   user_profiles?: { user_slug: string; country_code?: string }

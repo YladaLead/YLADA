@@ -1,4 +1,4 @@
-import type { FluxoCliente } from '@/types/wellness-system'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 
 /** Presets espelhados em `src/app/pt/wellness/templates/hype-drink/consumo-cafeina` e `.../custo-energia`. */
 export const HYPE_CALCULADORA_PRESET_FLUXO_IDS = ['consumo-cafeina', 'custo-energia'] as const

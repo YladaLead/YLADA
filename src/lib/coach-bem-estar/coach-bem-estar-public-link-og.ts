@@ -7,7 +7,7 @@ import { getFullOGImageUrl } from '@/lib/og-image-map'
 import { getOGMessages } from '@/lib/og-messages-map'
 import { getProLideresPresetOpenGraphImageUrl } from '@/lib/pro-lideres/pro-lideres-preset-og-image'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
-import type { FluxoCliente } from '@/types/wellness-system'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 import {
   getCoachBemEstarRecruitmentFluxos,
   getCoachBemEstarSalesFluxos,

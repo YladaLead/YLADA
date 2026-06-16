@@ -2,10 +2,10 @@
 
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
-import { getFluxoById } from '@/lib/wellness-system/fluxos-clientes'
-import { fluxosRecrutamento } from '@/lib/wellness-system/fluxos-recrutamento'
-import { FluxoCliente } from '@/types/wellness-system'
+import FluxoDiagnostico from '@/components/ylada-flow/FluxoDiagnostico'
+import { getFluxoById } from '@/lib/ylada-flow/fluxos-clientes'
+import { fluxosRecrutamento } from '@/lib/ylada-flow/fluxos-recrutamento'
+import { FluxoCliente } from '@/types/ylada-flow-legacy'
 import Link from 'next/link'
 
 function FluxoPublicPageContent() {

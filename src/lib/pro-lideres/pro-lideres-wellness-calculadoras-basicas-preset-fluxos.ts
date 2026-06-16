@@ -1,4 +1,4 @@
-import type { FluxoCliente } from '@/types/wellness-system'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 
 /**
  * Slugs alinhados ao Meus Links Wellness (`/agua`, `/calc-calorias`, `/calc-proteina`)

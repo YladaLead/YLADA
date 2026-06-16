@@ -10,7 +10,7 @@ import {
   getProLideresHypeCalculadoraPresetFluxos,
   HYPE_CALCULADORA_PRESET_FLUXO_IDS,
 } from '@/lib/pro-lideres/pro-lideres-hype-calculadora-preset-fluxos'
-import type { FluxoCliente } from '@/types/wellness-system'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
 
 /** FluxoCliente para a Calculadora de IMC (template `calc-imc`). */

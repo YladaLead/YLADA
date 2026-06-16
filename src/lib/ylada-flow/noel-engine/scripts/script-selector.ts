@@ -3,7 +3,7 @@
 // Seleciona o script apropriado baseado no contexto
 // =====================================================
 
-import type { WellnessScript, WellnessInteractionContext, ScriptCategoria, ScriptVersao } from '@/types/wellness-system'
+import type { WellnessScript, WellnessInteractionContext, ScriptCategoria, ScriptVersao } from '@/types/ylada-flow-legacy'
 import { supabaseAdmin } from '@/lib/supabase'
 
 /**

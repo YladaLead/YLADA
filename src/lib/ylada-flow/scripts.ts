@@ -5,7 +5,7 @@
  * Re-exporta os scripts completos da biblioteca oficial
  */
 
-import { Script, TipoScript } from '@/types/wellness-system'
+import { Script, TipoScript } from '@/types/ylada-flow-legacy'
 import { 
   scriptsGerais, 
   getAllScripts as getAllScriptsCompleto,

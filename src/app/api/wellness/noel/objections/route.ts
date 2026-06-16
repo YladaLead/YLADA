@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import type { WellnessObjeção, ObjeçãoFilter } from '@/types/wellness-system'
+import type { WellnessObjeção, ObjeçãoFilter } from '@/types/ylada-flow-legacy'
 
 /**
  * GET /api/wellness/noel/objections

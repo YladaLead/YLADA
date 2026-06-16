@@ -2,7 +2,7 @@
  * Converte linhas de `templates_nutrition` (Wellness) em `FluxoCliente`
  * para reutilizar `wellnessFluxoToYladaConfigJson` nos presets Pro Líderes.
  */
-import type { FluxoCliente } from '@/types/wellness-system'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 
 type PerguntaFluxo = FluxoCliente['perguntas'][number]
 

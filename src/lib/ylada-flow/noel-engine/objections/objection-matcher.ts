@@ -3,7 +3,7 @@
 // Detecta e identifica objeções na mensagem do usuário
 // =====================================================
 
-import type { WellnessObjeção, ObjeçãoCategoria } from '@/types/wellness-system'
+import type { WellnessObjeção, ObjeçãoCategoria } from '@/types/ylada-flow-legacy'
 import { supabaseAdmin } from '@/lib/supabase'
 
 /**

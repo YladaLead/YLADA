@@ -5,7 +5,7 @@
  * Baseado nas Lousas oficiais do Sistema Wellness
  */
 
-import { Script, TipoScript, FluxoId } from '@/types/wellness-system'
+import { Script, TipoScript, FluxoId } from '@/types/ylada-flow-legacy'
 
 // ============================================
 // SCRIPTS GERAIS (UNIVERSAIS PARA TODOS OS FLUXOS)

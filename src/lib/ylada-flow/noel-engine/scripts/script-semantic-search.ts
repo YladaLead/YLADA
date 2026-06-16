@@ -5,7 +5,7 @@
 // =====================================================
 
 import { supabaseAdmin } from '@/lib/supabase'
-import type { WellnessScript } from '@/types/wellness-system'
+import type { WellnessScript } from '@/types/ylada-flow-legacy'
 import { generateEmbedding } from '@/lib/noel-wellness/knowledge-search'
 
 /**

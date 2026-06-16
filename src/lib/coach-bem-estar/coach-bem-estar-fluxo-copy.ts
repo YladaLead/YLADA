@@ -1,7 +1,7 @@
 /**
  * Coach de bem-estar — helpers de copy pública (delegam ao módulo compartilhado).
  */
-import type { FluxoCliente } from '@/types/wellness-system'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 import {
   getRecruitmentFluxoPublicIntro,
   isCoachFacingRecruitmentObjetivo,

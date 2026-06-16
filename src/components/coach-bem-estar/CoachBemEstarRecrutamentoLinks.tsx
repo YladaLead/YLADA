@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { useWellnessProfile } from '@/hooks/useWellnessProfile'
 import { getCoachBemEstarRecruitmentFluxos } from '@/lib/coach-bem-estar/coach-bem-estar-fluxos'
 import { buildCoachBemEstarToolUrl } from '@/lib/url-utils'
-import FluxoDiagnosticoCoach from '@/components/wellness-system/FluxoDiagnosticoCoach'
-import type { FluxoCliente } from '@/types/wellness-system'
+import FluxoDiagnosticoCoach from '@/components/ylada-flow/FluxoDiagnosticoCoach'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 
 /**
  * Lista os 15 fluxos de recrutamento do Coach de bem-estar com botões de copiar link e preview.

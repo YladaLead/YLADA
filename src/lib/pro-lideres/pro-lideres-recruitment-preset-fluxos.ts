@@ -1,5 +1,5 @@
-import type { FluxoCliente } from '@/types/wellness-system'
-import { getFluxoRecrutamentoById } from '@/lib/wellness-system/fluxos-recrutamento'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
+import { getFluxoRecrutamentoById } from '@/lib/ylada-flow/fluxos-recrutamento'
 import { proLideresRecruitmentQuizFluxos } from '@/lib/pro-lideres/pro-lideres-recruitment-quiz-fluxos'
 import { PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS } from '@/lib/pro-lideres/pro-lideres-recruitment-unified-perguntas'
 import { getRecruitmentFluxoPublicIntro } from '@/lib/recruitment-fluxo-public-intro'

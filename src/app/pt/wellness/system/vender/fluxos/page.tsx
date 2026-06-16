@@ -4,8 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import { fluxosClientes } from '@/lib/wellness-system/fluxos-clientes'
-import { FluxoCliente } from '@/types/wellness-system'
+import { fluxosClientes } from '@/lib/ylada-flow/fluxos-clientes'
+import { FluxoCliente } from '@/types/ylada-flow-legacy'
 
 function FluxosClientesPageContent() {
   const [filtro, setFiltro] = useState<'todos' | 'energia' | 'acelera'>('todos')

@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { FluxoCliente, RespostaFluxo } from '@/types/wellness-system'
-import { getKitByTipo } from '@/lib/wellness-system/produtos'
+import { FluxoCliente, RespostaFluxo } from '@/types/ylada-flow-legacy'
+import { getKitByTipo } from '@/lib/ylada-flow/produtos'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
-import { obterMensagemWhatsApp, mensagemPadraoWhatsApp } from '@/lib/wellness-system/mensagens-whatsapp-por-ferramenta'
+import { obterMensagemWhatsApp, mensagemPadraoWhatsApp } from '@/lib/ylada-flow/mensagens-whatsapp-por-ferramenta'
 import DiagnosisDisclaimer, {
   type DisclaimerVariant,
 } from '@/components/ylada/DiagnosisDisclaimer'

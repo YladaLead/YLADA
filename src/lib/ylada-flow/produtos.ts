@@ -4,7 +4,7 @@
  * Referência completa de produtos, kits e preços
  */
 
-import { Produto, Kit } from '@/types/wellness-system'
+import { Produto, Kit } from '@/types/ylada-flow-legacy'
 
 export const produtos: Produto[] = [
   {

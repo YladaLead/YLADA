@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import { getApresentacaoNegocio } from '@/lib/wellness-system/apresentacao-negocio'
+import { getApresentacaoNegocio } from '@/lib/ylada-flow/apresentacao-negocio'
 import { useWellnessProfile } from '@/hooks/useWellnessProfile'
 
 function EnviarLinkApresentacaoPageContent() {

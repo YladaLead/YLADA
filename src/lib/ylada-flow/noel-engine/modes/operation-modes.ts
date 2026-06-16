@@ -3,7 +3,7 @@
 // 10 modos distintos de funcionamento do NOEL
 // =====================================================
 
-import type { NoelOperationMode } from '@/types/wellness-system'
+import type { NoelOperationMode } from '@/types/ylada-flow-legacy'
 
 /**
  * Definição dos 10 modos de operação do NOEL

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import type { FluxoCliente, PerguntaFluxoCliente } from '@/types/wellness-system'
+import type { FluxoCliente, PerguntaFluxoCliente } from '@/types/ylada-flow-legacy'
 import { getCoachBemEstarIntroObjetivo } from '@/lib/coach-bem-estar/coach-bem-estar-fluxo-copy'
 
 // ─── Sanitizer — remove referências a Herbalife / MLM / Wellness / Noel ─────

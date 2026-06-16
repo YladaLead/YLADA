@@ -3,7 +3,7 @@
 // Baseado na Lousa 1 do Prompt-Mestre
 // =====================================================
 
-import type { WellnessInteractionContext, TipoInteracao } from '@/types/wellness-system'
+import type { WellnessInteractionContext, TipoInteracao } from '@/types/ylada-flow-legacy'
 
 /**
  * Ordem de raciocínio do NOEL (9 passos)

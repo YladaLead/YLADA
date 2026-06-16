@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import { getAllScripts, getScriptsByTipo, TipoScript } from '@/lib/wellness-system/scripts'
+import { getAllScripts, getScriptsByTipo, TipoScript } from '@/lib/ylada-flow/scripts'
 
 const tiposScripts: { id: TipoScript; nome: string; emoji: string }[] = [
   { id: 'abertura', nome: 'Abertura', emoji: '👋' },

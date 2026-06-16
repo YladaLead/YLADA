@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import { followUpTemplates, FollowUpTemplate } from '@/lib/wellness-system/follow-up'
+import { followUpTemplates, FollowUpTemplate } from '@/lib/ylada-flow/follow-up'
 
 const momentosInfo: Record<FollowUpTemplate['momento'], { nome: string; emoji: string }> = {
   'pos-link': { nome: 'Pós-Link', emoji: '🔗' },

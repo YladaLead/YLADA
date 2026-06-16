@@ -8,7 +8,7 @@
  *
  * Pontuação no link: `meta.invert_risk_mcq_score` (ver `wellnessFluxoToYladaConfigJson`).
  */
-import type { FluxoCliente } from '@/types/wellness-system'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 
 export const PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS: FluxoCliente['perguntas'] = [
   {

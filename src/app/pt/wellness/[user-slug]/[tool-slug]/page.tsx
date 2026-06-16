@@ -5,9 +5,9 @@ import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { normalizeTemplateSlug } from '@/lib/template-slug-map'
 import { getQuizByTema } from '@/config/ylada-quiz-temas'
-import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
+import FluxoDiagnostico from '@/components/ylada-flow/FluxoDiagnostico'
 import DynamicTemplatePreview from '@/components/shared/DynamicTemplatePreview'
-import { FluxoCliente } from '@/types/wellness-system'
+import { FluxoCliente } from '@/types/ylada-flow-legacy'
 
 interface Tool {
   id: string

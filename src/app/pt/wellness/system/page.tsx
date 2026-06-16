@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import WellnessChatWidget from '@/components/wellness/WellnessChatWidget'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import WellnessNotificacoes from '@/components/wellness-system/WellnessNotificacoes'
+import WellnessNotificacoes from '@/components/ylada-flow/WellnessNotificacoes'
 
 function WellnessSystemPageContent() {
   const router = useRouter()

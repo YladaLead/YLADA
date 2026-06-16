@@ -2,7 +2,7 @@
  * Converte fluxos do Wellness (perguntas + diagnóstico estático) para config_json
  * do link público YLADA (/l/[slug]) — mesmo padrão de meta/form/result usado em PublicLinkView.
  */
-import type { FluxoCliente } from '@/types/wellness-system'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 import { FLOW_IDS } from '@/config/ylada-flow-catalog'
 import { isHypeCalculadoraPresetFluxoId } from '@/lib/pro-lideres/pro-lideres-hype-calculadora-preset-fluxos'
 import { buildProLideresPresetOgDescription } from '@/lib/pro-lideres/pro-lideres-preset-og-description'

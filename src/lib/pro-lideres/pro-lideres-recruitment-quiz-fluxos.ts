@@ -7,7 +7,7 @@
  *
  * Idioma: português do Brasil.
  */
-import type { FluxoCliente } from '@/types/wellness-system'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 import { PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS } from '@/lib/pro-lideres/pro-lideres-recruitment-unified-perguntas'
 
 export const PRO_LIDERES_RECRUITMENT_WELLNESS_MIRROR_QUIZ_IDS = [

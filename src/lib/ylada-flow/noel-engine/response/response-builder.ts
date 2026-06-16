@@ -3,7 +3,7 @@
 // Constrói a resposta estruturada do NOEL
 // =====================================================
 
-import type { WellnessScript, WellnessObjeção, NoelOperationMode, WellnessInteractionContext } from '@/types/wellness-system'
+import type { WellnessScript, WellnessObjeção, NoelOperationMode, WellnessInteractionContext } from '@/types/ylada-flow-legacy'
 import { noelPersona } from '../core/persona'
 import { regraFundamentalRecrutamento, validarRegraFundamental } from '../core/rules'
 import { validarPersona } from '../core/persona'

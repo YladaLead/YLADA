@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import { fluxosRecrutamento } from '@/lib/wellness-system/fluxos-recrutamento'
+import { fluxosRecrutamento } from '@/lib/ylada-flow/fluxos-recrutamento'
 
 function FluxosRecrutamentoPageContent() {
   const [busca, setBusca] = useState('')

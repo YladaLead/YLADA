@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import { getApresentacaoNegocio } from '@/lib/wellness-system/apresentacao-negocio'
+import { getApresentacaoNegocio } from '@/lib/ylada-flow/apresentacao-negocio'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { useWellnessProfile } from '@/hooks/useWellnessProfile'
 

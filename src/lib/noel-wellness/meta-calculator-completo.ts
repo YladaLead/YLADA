@@ -6,7 +6,7 @@
  */
 
 import { supabaseAdmin } from '@/lib/supabase'
-import type { WellnessConsultantProfile } from '@/types/wellness-system'
+import type { WellnessConsultantProfile } from '@/types/ylada-flow-legacy'
 
 export interface ObjetivosVendas {
   // Bebidas funcionais

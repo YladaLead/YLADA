@@ -20,7 +20,7 @@
 // REMOVIDO do FluxoCliente legado: `kitRecomendado: TipoKit` (termo Herbalife).
 // =====================================================
 
-import type { PerguntaFluxoCliente } from '@/types/wellness-system'
+import type { PerguntaFluxoCliente } from '@/types/ylada-flow-legacy'
 
 // -----------------------------------------------------
 // 1. DIMENSÕES (etiquetas — substituem os "três blocos") — Chat 2 §2.1 / Spec §4.4

@@ -5,7 +5,7 @@
  * Inclui: HOM ao vivo e HOM Gravada (Link da Apresentação)
  */
 
-import { getApresentacaoNegocio } from '@/lib/wellness-system/apresentacao-negocio'
+import { getApresentacaoNegocio } from '@/lib/ylada-flow/apresentacao-negocio'
 
 /**
  * URL da imagem da HOM (Bebidas Funcionais)

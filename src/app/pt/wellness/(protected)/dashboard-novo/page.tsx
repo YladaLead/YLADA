@@ -8,13 +8,13 @@ import { useWellnessProfile } from '@/hooks/useWellnessProfile'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import { buildWellnessToolUrl, getAppUrl } from '@/lib/url-utils'
-import { getScriptsByTipo } from '@/lib/wellness-system/scripts-completo'
-import type { TipoScript } from '@/types/wellness-system'
+import { getScriptsByTipo } from '@/lib/ylada-flow/scripts-completo'
+import type { TipoScript } from '@/types/ylada-flow-legacy'
 import QRCode from '@/components/QRCode'
 import WellnessChatWidget from '@/components/wellness/WellnessChatWidget'
 import NoelOnboardingCompleto from '@/components/wellness/NoelOnboardingCompleto'
 import DynamicTemplatePreview from '@/components/shared/DynamicTemplatePreview'
-import { fluxosRecrutamento } from '@/lib/wellness-system/fluxos-recrutamento'
+import { fluxosRecrutamento } from '@/lib/ylada-flow/fluxos-recrutamento'
 
 interface Template {
   id: string

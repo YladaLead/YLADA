@@ -11,16 +11,16 @@ import type {
   NoelOperationMode,
   NoelRequest,
   NoelResponse
-} from '@/types/wellness-system'
+} from '@/types/ylada-flow-legacy'
 
 // Importar módulos do novo sistema
-import { processarMensagem, tomarDecisao } from '@/lib/wellness-system/noel-engine/core/reasoning'
-import { selecionarModo, validarModo } from '@/lib/wellness-system/noel-engine/modes/mode-selector'
-import { processarScript } from '@/lib/wellness-system/noel-engine/scripts/script-engine'
-import { tratarObjeção } from '@/lib/wellness-system/noel-engine/objections/objection-handler'
-import { construirResposta, validarResposta } from '@/lib/wellness-system/noel-engine/response/response-builder'
-import { formatarParaAPI } from '@/lib/wellness-system/noel-engine/response/response-formatter'
-import { validarRegraFundamental } from '@/lib/wellness-system/noel-engine/core/rules'
+import { processarMensagem, tomarDecisao } from '@/lib/ylada-flow/noel-engine/core/reasoning'
+import { selecionarModo, validarModo } from '@/lib/ylada-flow/noel-engine/modes/mode-selector'
+import { processarScript } from '@/lib/ylada-flow/noel-engine/scripts/script-engine'
+import { tratarObjeção } from '@/lib/ylada-flow/noel-engine/objections/objection-handler'
+import { construirResposta, validarResposta } from '@/lib/ylada-flow/noel-engine/response/response-builder'
+import { formatarParaAPI } from '@/lib/ylada-flow/noel-engine/response/response-formatter'
+import { validarRegraFundamental } from '@/lib/ylada-flow/noel-engine/core/rules'
 
 /**
  * POST /api/wellness/noel/v2

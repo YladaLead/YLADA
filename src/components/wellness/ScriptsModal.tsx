@@ -7,7 +7,7 @@ import {
   getScriptsPorTipo,
   type ScriptsFerramentaConfig,
   type ScriptFerramenta 
-} from '@/lib/wellness-system/scripts-por-ferramenta'
+} from '@/lib/ylada-flow/scripts-por-ferramenta'
 
 interface ScriptsModalProps {
   isOpen: boolean

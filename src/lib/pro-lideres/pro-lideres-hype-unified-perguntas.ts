@@ -4,7 +4,7 @@
  *
  * Cada `flow_id` mantém título, objetivo e outcomes; só o formulário é compartilhado.
  */
-import type { FluxoCliente } from '@/types/wellness-system'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 
 export const PRO_LIDERES_HYPE_UNIFIED_PERGUNTAS: FluxoCliente['perguntas'] = [
   {

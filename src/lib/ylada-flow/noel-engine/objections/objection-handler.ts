@@ -3,7 +3,7 @@
 // Trata objeções e retorna respostas apropriadas
 // =====================================================
 
-import type { WellnessObjeção, ScriptVersao } from '@/types/wellness-system'
+import type { WellnessObjeção, ScriptVersao } from '@/types/ylada-flow-legacy'
 import * as objectionMatcher from './objection-matcher'
 
 /**

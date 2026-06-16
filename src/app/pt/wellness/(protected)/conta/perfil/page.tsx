@@ -6,7 +6,7 @@ import ConditionalWellnessSidebar from '@/components/wellness/ConditionalWellnes
 import NoelOnboardingCompleto from '@/components/wellness/NoelOnboardingCompleto'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
-import { WellnessConsultantProfile } from '@/types/wellness-system'
+import { WellnessConsultantProfile } from '@/types/ylada-flow-legacy'
 import { DeleteAccountSection } from '@/components/shared/DeleteAccountSection'
 
 interface MetasConstrucao {

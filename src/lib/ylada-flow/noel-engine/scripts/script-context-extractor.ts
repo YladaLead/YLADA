@@ -3,7 +3,7 @@
 // Extrai contexto da mensagem para criar scripts personalizados
 // =====================================================
 
-import type { WellnessInteractionContext } from '@/types/wellness-system'
+import type { WellnessInteractionContext } from '@/types/ylada-flow-legacy'
 
 export interface ScriptCreationContext {
   ferramenta?: string // IMC, calculadora, quiz, link

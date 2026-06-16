@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { ToolConfig } from '@/types/wellness'
 import { useParams, usePathname } from 'next/navigation'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
-import { obterMensagemWhatsApp, mensagemPadraoWhatsApp } from '@/lib/wellness-system/mensagens-whatsapp-por-ferramenta'
+import { obterMensagemWhatsApp, mensagemPadraoWhatsApp } from '@/lib/ylada-flow/mensagens-whatsapp-por-ferramenta'
 
 interface WellnessCTAButtonProps {
   config?: ToolConfig

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
-import { fluxosRecrutamento } from '@/lib/wellness-system/fluxos-recrutamento'
-import { fluxosClientes } from '@/lib/wellness-system/fluxos-clientes'
-import { FluxoCliente } from '@/types/wellness-system'
+import { fluxosRecrutamento } from '@/lib/ylada-flow/fluxos-recrutamento'
+import { fluxosClientes } from '@/lib/ylada-flow/fluxos-clientes'
+import { FluxoCliente } from '@/types/ylada-flow-legacy'
 import { getCoachBemEstarSalesFluxos, getCoachBemEstarRecruitmentFluxos } from '@/lib/coach-bem-estar/coach-bem-estar-fluxos'
 
 // Fluxos do coach-bem-estar — incluem quiz fluxos Pro Líderes que não estão no wellness-system

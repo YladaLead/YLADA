@@ -4,7 +4,7 @@
  * Fluxos para identificar e recrutar pessoas para apresentações de negócio
  */
 
-import { FluxoCliente, PerfilRecrutamento } from '@/types/wellness-system'
+import { FluxoCliente, PerfilRecrutamento } from '@/types/ylada-flow-legacy'
 
 // Perfis de Recrutamento
 export const perfisRecrutamento = {

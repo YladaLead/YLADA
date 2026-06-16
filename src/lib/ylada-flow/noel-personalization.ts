@@ -5,7 +5,7 @@
  * baseado no perfil completo do consultor.
  */
 
-import type { WellnessConsultantProfile } from '@/types/wellness-system'
+import type { WellnessConsultantProfile } from '@/types/ylada-flow-legacy'
 
 // =====================================================
 // TIPOS

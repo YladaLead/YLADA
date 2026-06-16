@@ -5,7 +5,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import { getScriptsByTipo, TipoScript } from '@/lib/wellness-system/scripts'
+import { getScriptsByTipo, TipoScript } from '@/lib/ylada-flow/scripts'
 
 const tiposScripts: Record<TipoScript, { nome: string; emoji: string }> = {
   abertura: { nome: 'Abertura', emoji: '👋' },

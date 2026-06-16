@@ -9,8 +9,8 @@
  * Os links gerados apontam para /pt/coach-bem-estar/{userSlug}/{toolSlug}
  * em vez de /pt/wellness/ — mesmo conteúdo, branding independente.
  */
-import type { FluxoCliente } from '@/types/wellness-system'
-import { getFluxoRecrutamentoById } from '@/lib/wellness-system/fluxos-recrutamento'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
+import { getFluxoRecrutamentoById } from '@/lib/ylada-flow/fluxos-recrutamento'
 import { getProLideresSalesPresetFluxos } from '@/lib/pro-lideres/pro-lideres-sales-preset-fluxos'
 import { proLideresRecruitmentQuizFluxos } from '@/lib/pro-lideres/pro-lideres-recruitment-quiz-fluxos'
 import { PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS } from '@/lib/pro-lideres/pro-lideres-recruitment-unified-perguntas'

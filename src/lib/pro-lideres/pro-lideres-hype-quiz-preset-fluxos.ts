@@ -1,4 +1,4 @@
-import type { FluxoCliente } from '@/types/wellness-system'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 import { PRO_LIDERES_HYPE_UNIFIED_PERGUNTAS } from '@/lib/pro-lideres/pro-lideres-hype-unified-perguntas'
 
 /**

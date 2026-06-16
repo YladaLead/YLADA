@@ -3,7 +3,7 @@
 // Personaliza scripts baseado no contexto específico
 // =====================================================
 
-import type { WellnessScript, WellnessInteractionContext } from '@/types/wellness-system'
+import type { WellnessScript, WellnessInteractionContext } from '@/types/ylada-flow-legacy'
 
 /**
  * Adapta um script substituindo placeholders por valores reais

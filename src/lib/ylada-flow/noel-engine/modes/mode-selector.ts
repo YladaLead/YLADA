@@ -3,7 +3,7 @@
 // Seleciona o modo apropriado baseado no contexto
 // =====================================================
 
-import type { NoelOperationMode, TipoInteracao, WellnessInteractionContext } from '@/types/wellness-system'
+import type { NoelOperationMode, TipoInteracao, WellnessInteractionContext } from '@/types/ylada-flow-legacy'
 import { operationModes } from './operation-modes'
 
 /**

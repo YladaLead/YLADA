@@ -5,7 +5,7 @@
  */
 
 import { getAvaliacaoPerfilMetabolicoPerguntasTemplate } from '@/lib/wellness/avaliacao-perfil-metabolico-quiz-questions'
-import { FluxoCliente, TipoKit } from '@/types/wellness-system'
+import { FluxoCliente, TipoKit } from '@/types/ylada-flow-legacy'
 
 export const fluxosClientes: FluxoCliente[] = [
   {

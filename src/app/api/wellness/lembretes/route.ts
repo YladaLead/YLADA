@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { gerarLembretes, lembretesGerais, configuracaoLembretes, TipoAcao } from '@/lib/wellness-system/lembretes'
+import { gerarLembretes, lembretesGerais, configuracaoLembretes, TipoAcao } from '@/lib/ylada-flow/lembretes'
 
 // GET - Buscar lembretes baseados em ações do distribuidor
 export async function GET(request: NextRequest) {

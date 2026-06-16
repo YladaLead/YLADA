@@ -12,7 +12,7 @@ import { ensureWellnessNutritionMirrorsAsProLideresLinks } from '@/lib/pro-lider
 import { getProLideresLegacyAguaPresetFluxo } from '@/lib/pro-lideres/pro-lideres-wellness-calculadoras-basicas-preset-fluxos'
 import { buildProLideresPresetOgDescription } from '@/lib/pro-lideres/pro-lideres-preset-og-description'
 import { archiveProLideresExcludedPresetLinks } from '@/lib/pro-lideres/archive-pro-lideres-excluded-preset-links'
-import type { FluxoCliente } from '@/types/wellness-system'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 
 /** Template biblioteca YLADA: calculadora IMC (peso, altura cm, idade, sexo → IMC). */
 const CALC_IMC_YLADA_TEMPLATE_ID = 'b1000027-0027-4000-8000-000000000027' as const

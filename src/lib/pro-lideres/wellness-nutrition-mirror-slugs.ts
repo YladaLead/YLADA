@@ -2,8 +2,8 @@
  * Slugs já cobertos por presets TS (fluxos clientes/recrutamento) ou HYPE —
  * não gerar de novo a partir de `templates_nutrition`.
  */
-import { fluxosClientes } from '@/lib/wellness-system/fluxos-clientes'
-import { fluxosRecrutamento } from '@/lib/wellness-system/fluxos-recrutamento'
+import { fluxosClientes } from '@/lib/ylada-flow/fluxos-clientes'
+import { fluxosRecrutamento } from '@/lib/ylada-flow/fluxos-recrutamento'
 import { WELLNESS_CALCULADORAS_BASICAS_PRESET_SLUGS } from '@/lib/pro-lideres/pro-lideres-wellness-calculadoras-basicas-preset-fluxos'
 import { WELLNESS_HYPE_MEUS_LINKS } from '@/lib/wellness/wellness-hype-meus-links'
 

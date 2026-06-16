@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { WellnessConsultantProfile } from '@/types/wellness-system'
+import type { WellnessConsultantProfile } from '@/types/ylada-flow-legacy'
 
 interface NoelOnboardingCompletoProps {
   onComplete: (data: Partial<WellnessConsultantProfile>) => void | Promise<void>

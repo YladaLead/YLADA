@@ -3,7 +3,7 @@
 // Orquestra seleção, adaptação e personalização de scripts
 // =====================================================
 
-import type { WellnessScript, WellnessInteractionContext, ScriptVersao } from '@/types/wellness-system'
+import type { WellnessScript, WellnessInteractionContext, ScriptVersao } from '@/types/ylada-flow-legacy'
 import * as scriptSelector from './script-selector'
 import * as scriptAdaptor from './script-adaptor'
 

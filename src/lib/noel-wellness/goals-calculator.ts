@@ -5,7 +5,7 @@
  * usando a matriz completa definida no roteiro oficial.
  */
 
-import type { WellnessConsultantProfile } from '@/types/wellness-system'
+import type { WellnessConsultantProfile } from '@/types/ylada-flow-legacy'
 
 export interface MetasCalculadas {
   // Metas de vendas

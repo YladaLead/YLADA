@@ -4,8 +4,8 @@ import { proLideresDailyTasksBlockedForMember } from '@/lib/pro-lideres-daily-ta
 import type { LeaderTenantRow } from '@/types/leader-tenant'
 import type { ProLideresDailyTaskRow } from '@/types/pro-lideres-daily-tasks'
 import type { ProLideresTenantRole } from '@/types/leader-tenant'
-import type { WellnessObjeção } from '@/types/wellness-system'
-import { buscarObjeçãoPorTexto } from '@/lib/wellness-system/noel-engine/objections/objection-matcher'
+import type { WellnessObjeção } from '@/types/ylada-flow-legacy'
+import { buscarObjeçãoPorTexto } from '@/lib/ylada-flow/noel-engine/objections/objection-matcher'
 
 const MAX_TASKS_CHARS = 3500
 const MAX_OBJECTION_CHARS = 2200

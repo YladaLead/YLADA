@@ -1,5 +1,5 @@
-import type { FluxoCliente } from '@/types/wellness-system'
-import { fluxosClientes } from '@/lib/wellness-system/fluxos-clientes'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
+import { fluxosClientes } from '@/lib/ylada-flow/fluxos-clientes'
 import { getProLideresWellnessCalculadorasBasicasPresetFluxos } from '@/lib/pro-lideres/pro-lideres-wellness-calculadoras-basicas-preset-fluxos'
 import { isProLideresSalesExcludedFluxoId } from '@/lib/pro-lideres/pro-lideres-sales-excluded-fluxo-ids'
 
