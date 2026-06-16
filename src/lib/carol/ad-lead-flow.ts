@@ -166,25 +166,28 @@ export function applySchedulingLoopGuard(
   const nome = extractLeadNameFromHistory(history)
   const horario = extractSchedulingHintFromHistory(history)
 
+  // Vocativo só quando há um nome de verdade (evita "Combinado, Oi!")
+  const saudacao = (n: string | null | undefined) => {
+    const f = (n || '').split(/\s+/)[0]
+    return f && !/^(oi|ol[áa]|bom|boa|sim|n[ãa]o|opa|e[ai]|tudo|certo)$/i.test(f) ? `, ${f}` : ''
+  }
+  const linkAndre =
+    'https://wa.me/5519981868000?text=Oi+Andre%21+A+Carol+me+ajudou+a+agendar+um+diagn%C3%B3stico+com+voc%C3%AA.+Pode+me+confirmar+o+hor%C3%A1rio%3F'
+  const convite =
+    `O Andre vai te chamar aqui pra confirmar o melhor horário. 😊\n\n` +
+    `Se quiser ir na frente, pode falar direto com ele:\n` +
+    `📲 ${linkAndre}`
+
   if (asksName && asksTime && nome && horario) {
-    const first = nome.split(/\s+/)[0]
-    return (
-      `Perfeito, ${first}! 😊\n` +
-      `Anotei: ${horario}.\n` +
-      `O Andre vai entrar em contato pra confirmar com você.\n\n` +
-      `Se quiser ir na frente:\n` +
-      `📲 https://wa.me/5519981868000?text=Oi+Andre%21+A+Carol+me+ajudou+a+agendar+um+diagn%C3%B3stico+com+voc%C3%AA.+Pode+me+confirmar+o+hor%C3%A1rio%3F`
-    )
+    return `Perfeito${saudacao(nome)}! Anotei: ${horario}.\n${convite}`
   }
 
   if (asksName && nome && !asksTime) {
-    const first = nome.split(/\s+/)[0]
-    return `Perfeito, ${first}! 😊 O Andre vai te chamar pra confirmar o horário.`
+    return `Perfeito${saudacao(nome)}!\n${convite}`
   }
 
   if (asksTime && horario && nome) {
-    const first = nome.split(/\s+/)[0]
-    return `Combinado, ${first}! 😊 Fico no aguardo — o Andre confirma o horário (${horario}) com você.`
+    return `Combinado${saudacao(nome)}! Anotei: ${horario}.\n${convite}`
   }
 
   return reply
