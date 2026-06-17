@@ -427,7 +427,7 @@ async function handleAutoResponseDetected(
   await saveMessage(conversationId, 'user', `[auto-resposta ignorada] ${text}`)
   if (!jaCutucou && !jaTeveAuto) {
     const cutucada =
-      'Oi! Acho que caí no atendimento automático 😊 Quando a responsável puder ver: tem agendamento escapando da agenda de estética sem ninguém perceber, e eu queria te mostrar onde. Deixo aqui?'
+      'Oi! 😊 Quando você puder ver por aqui: muita cliente se interessa pelo seu trabalho mas não marca na hora, e acaba sumindo sem ninguém perceber. É aí que a maioria das clínicas perde sem saber. Queria te mostrar como segurar essas clientes. Posso te mostrar?'
     try {
       await sendWhatsAppMessage(from, cutucada)
       await saveMessage(conversationId, 'assistant', cutucada)
