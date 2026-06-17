@@ -409,6 +409,39 @@ export type CarolInboundPayload = {
   profileName?: string
 }
 
+/**
+ * Auto-resposta (bot da clínica) detectada: manda a "cutucada 1x" na PRIMEIRA vez
+ * (deixa uma mensagem pra quando a responsável ver) e fica em silêncio nas seguintes.
+ * Combinado em Jornada_Carol_Opcao2.md.
+ */
+async function handleAutoResponseDetected(
+  conversationId: string,
+  from: string,
+  text: string
+): Promise<{ status: 'saved_no_reply' }> {
+  const hist = await getConversationHistory(conversationId, 20)
+  const jaCutucou = hist.some((m) => m.content.includes('[SISTEMA: cutucada_bot]'))
+  const jaTeveAuto = hist.some(
+    (m) => m.role === 'user' && m.content.startsWith('[auto-resposta ignorada]')
+  )
+  await saveMessage(conversationId, 'user', `[auto-resposta ignorada] ${text}`)
+  if (!jaCutucou && !jaTeveAuto) {
+    const cutucada =
+      'Oi! Acho que caí no atendimento automático 😊 Quando a responsável puder ver: tem agendamento escapando da agenda de estética sem ninguém perceber, e eu queria te mostrar onde. Deixo aqui?'
+    try {
+      await sendWhatsAppMessage(from, cutucada)
+      await saveMessage(conversationId, 'assistant', cutucada)
+      await saveMessage(conversationId, 'assistant', '[SISTEMA: cutucada_bot]')
+      console.log(`[Carol] 🤖 Auto-resposta de ${from} — cutucada 1x enviada`)
+    } catch (e) {
+      console.error('[Carol] Falha ao enviar cutucada:', e)
+    }
+  } else {
+    console.log(`[Carol] 🤖 Auto-resposta de ${from} — silêncio (cutucada já feita)`)
+  }
+  return { status: 'saved_no_reply' }
+}
+
 export type IngestInboundResult =
   | { status: 'duplicate' }
   | { status: 'saved_no_reply' }
@@ -480,9 +513,7 @@ export async function ingestInboundMessage(
   }
 
   if (isAutoResponse(text)) {
-    console.log(`[Carol] 🤖 Auto-resposta (regras) de ${from} — ignorando silenciosamente`)
-    await saveMessage(conversation.id, 'user', `[auto-resposta ignorada] ${text}`)
-    return { status: 'saved_no_reply' }
+    return await handleAutoResponseDetected(conversation.id, from, text)
   }
 
   const history = await getConversationHistory(conversation.id, 12)
@@ -491,9 +522,7 @@ export async function ingestInboundMessage(
   if (shouldClassifyWithAi(text, history)) {
     inboundKind = await classifyInboundMessage(text, history)
     if (inboundKind === 'auto_resposta') {
-      console.log(`[Carol] 🤖 Auto-resposta (IA) de ${from} — ignorando silenciosamente`)
-      await saveMessage(conversation.id, 'user', `[auto-resposta ignorada] ${text}`)
-      return { status: 'saved_no_reply' }
+      return await handleAutoResponseDetected(conversation.id, from, text)
     }
   }
 
