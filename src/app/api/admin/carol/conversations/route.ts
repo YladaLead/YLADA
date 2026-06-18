@@ -28,14 +28,29 @@ export async function GET(request: NextRequest) {
   const insightsMap: Record<string, ReturnType<typeof analyzeConversationWithPause>> = {}
 
   if (ids.length > 0) {
-    const { data: msgs } = await supabaseAdmin
-      .from('carol_messages')
-      .select('conversation_id, role, content, created_at')
-      .in('conversation_id', ids)
-      .order('created_at', { ascending: false })
+    // Busca as mensagens em LOTES. Em volume alto (centenas de leads), um único
+    // .in() com todos os ids estoura o limite de tamanho da requisição e falha
+    // calado — o painel acabava mostrando tudo como "Sem mensagens" e zerava os
+    // contadores. Quebrar em lotes mantém cada consulta dentro do limite.
+    const CHUNK = 50
+    const msgs: { conversation_id: string; role: string; content: string; created_at: string }[] = []
+    for (let i = 0; i < ids.length; i += CHUNK) {
+      const batch = ids.slice(i, i + CHUNK)
+      const { data: batchMsgs, error: batchError } = await supabaseAdmin
+        .from('carol_messages')
+        .select('conversation_id, role, content, created_at')
+        .in('conversation_id', batch)
+        .order('created_at', { ascending: false })
+
+      if (batchError) {
+        console.error('[carol/conversations] erro ao buscar mensagens do lote', i, batchError)
+        continue
+      }
+      if (batchMsgs) msgs.push(...batchMsgs)
+    }
 
     const byConv = new Map<string, CarolMessageRow[]>()
-    for (const msg of msgs || []) {
+    for (const msg of msgs) {
       if (!lastMessages[msg.conversation_id]) {
         lastMessages[msg.conversation_id] = {
           content: msg.content,
