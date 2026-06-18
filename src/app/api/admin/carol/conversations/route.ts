@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   }
 
   const ids = (data || []).map((c) => c.id)
-  let lastMessages: Record<string, { content: string; role: string; created_at: string }> = {}
+  const lastMessages: Record<string, { content: string; role: string; created_at: string }> = {}
   const insightsMap: Record<string, ReturnType<typeof analyzeConversationWithPause>> = {}
 
   if (ids.length > 0) {

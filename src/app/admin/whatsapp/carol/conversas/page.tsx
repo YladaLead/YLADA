@@ -33,7 +33,7 @@ type ConversationStats = {
   paused_awaiting_andre: number
 }
 
-type ReplyFilter = 'all' | 'responded' | 'awaiting' | 'follow_up' | 'paused_awaiting_andre'
+type ReplyFilter = 'all' | 'attention' | 'responded' | 'awaiting' | 'follow_up' | 'paused_awaiting_andre'
 
 type Message = {
   id: string
@@ -99,6 +99,54 @@ function formatDate(iso: string) {
     month: '2-digit',
     timeZone: 'America/Sao_Paulo',
   })
+}
+
+// ─── Alertas (notificação do navegador + som) ───────────────────────────────
+// Andre não tem acesso ao celular, então os avisos da Carol (que iam pro
+// WhatsApp dele) precisam aparecer DENTRO do painel: som + notificação desktop.
+
+const ALERTS_FLAG_KEY = 'carol_alerts_on'
+
+/** Conversa que pede ação do Andre: Carol pausada esperando ele, ou lead falou por último. */
+function needsAttention(c: Conversation): boolean {
+  if (c.paused_awaiting_andre) return true
+  if (c.has_user_reply && c.last_message?.role === 'user') return true
+  return false
+}
+
+function playBeep(ctx: AudioContext | null) {
+  if (!ctx) return
+  try {
+    const now = ctx.currentTime
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(880, now)
+    osc.frequency.setValueAtTime(1175, now + 0.12)
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.exponentialRampToValueAtTime(0.25, now + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.38)
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.start(now)
+    osc.stop(now + 0.4)
+  } catch {
+    /* sem áudio, segue a vida */
+  }
+}
+
+function fireDesktopNotification(title: string, body: string) {
+  if (typeof window === 'undefined' || !('Notification' in window)) return
+  if (Notification.permission !== 'granted') return
+  try {
+    const n = new Notification(title, { body, tag: 'carol-alert' })
+    n.onclick = () => {
+      window.focus()
+      n.close()
+    }
+  } catch {
+    /* ignora falha de notificação */
+  }
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
@@ -297,6 +345,8 @@ function ConversationList({
   onPhoneQueryChange,
   onSelect,
   onRefresh,
+  alertsOn,
+  onEnableAlerts,
 }: {
   conversations: Conversation[]
   stats: ConversationStats | null
@@ -305,13 +355,18 @@ function ConversationList({
   onPhoneQueryChange: (value: string) => void
   onSelect: (c: Conversation) => void
   onRefresh: () => void
+  alertsOn: boolean
+  onEnableAlerts: () => void
 }) {
   const [showModal, setShowModal] = useState(false)
   const [filter, setFilter] = useState<ReplyFilter>('all')
   const phoneInputRef = useRef<HTMLInputElement>(null)
 
+  const attentionCount = conversations.filter(needsAttention).length
+
   const filtered = conversations.filter((c) => {
     if (!matchesPhoneSearch(c.phone, phoneQuery)) return false
+    if (filter === 'attention') return needsAttention(c)
     if (filter === 'responded') return c.has_user_reply
     if (filter === 'awaiting') return c.awaiting_reply && !c.has_user_reply
     if (filter === 'follow_up') return c.follow_up_sent
@@ -348,6 +403,32 @@ function ConversationList({
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {alertsOn ? (
+              <button
+                onClick={() => setFilter('attention')}
+                title="Conversas que precisam de você"
+                className={`relative flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium ${
+                  attentionCount > 0
+                    ? 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                }`}
+              >
+                🔔
+                {attentionCount > 0 && (
+                  <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-orange-600 px-1 text-xs font-bold text-white">
+                    {attentionCount}
+                  </span>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={onEnableAlerts}
+                title="Ligar som + notificação do navegador quando um lead precisar de você"
+                className="flex items-center gap-1.5 rounded-lg border border-orange-300 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-800 hover:bg-orange-100"
+              >
+                🔔 Ativar alertas
+              </button>
+            )}
             <button
               onClick={() => setShowModal(true)}
               className="flex items-center gap-1.5 rounded-lg bg-[#075e54] px-3 py-2 text-sm font-medium text-white hover:bg-[#064f48]"
@@ -367,6 +448,7 @@ function ConversationList({
           {(
             [
               ['all', 'Todos'],
+              ['attention', 'Precisa de você'],
               ['paused_awaiting_andre', 'Aguardando você'],
               ['responded', 'Respondeu'],
               ['awaiting', 'Sem resposta'],
@@ -379,15 +461,16 @@ function ConversationList({
               onClick={() => setFilter(key)}
               className={`rounded-full px-3 py-1 text-xs font-semibold ${
                 filter === key
-                  ? key === 'paused_awaiting_andre'
+                  ? key === 'paused_awaiting_andre' || key === 'attention'
                     ? 'bg-orange-600 text-white'
                     : 'bg-[#075e54] text-white'
-                  : key === 'paused_awaiting_andre'
+                  : key === 'paused_awaiting_andre' || key === 'attention'
                     ? 'bg-orange-50 text-orange-800 hover:bg-orange-100'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               {label}
+              {key === 'attention' ? ` (${attentionCount})` : ''}
               {key === 'awaiting' && stats ? ` (${stats.awaiting_reply})` : ''}
               {key === 'paused_awaiting_andre' && stats
                 ? ` (${stats.paused_awaiting_andre})`
@@ -442,20 +525,24 @@ function ConversationList({
             <p className="font-medium">
               {phoneQuery
                 ? 'Nenhum número encontrado'
-                : filter === 'paused_awaiting_andre'
-                  ? 'Ninguém aguardando sua resposta'
-                  : conversations.length === 0
-                    ? 'Nenhuma conversa ainda'
-                    : 'Nenhuma neste filtro'}
+                : filter === 'attention'
+                  ? 'Nada precisa de você agora'
+                  : filter === 'paused_awaiting_andre'
+                    ? 'Ninguém aguardando sua resposta'
+                    : conversations.length === 0
+                      ? 'Nenhuma conversa ainda'
+                      : 'Nenhuma neste filtro'}
             </p>
             <p className="text-sm mt-1">
               {phoneQuery
                 ? 'Tente os últimos dígitos ou o número com DDI 55'
-                : filter === 'paused_awaiting_andre'
-                  ? 'Carol pausada e a última mensagem é da lead — responda pelo painel com a Carol pausada'
-                  : conversations.length === 0
-                    ? 'Quando alguém falar com a Carol aparece aqui'
-                    : 'Tente outro filtro acima'}
+                : filter === 'attention'
+                  ? 'Quando um lead responder ou estiver te esperando, aparece aqui (com som e notificação)'
+                  : filter === 'paused_awaiting_andre'
+                    ? 'Carol pausada e a última mensagem é da lead — responda pelo painel com a Carol pausada'
+                    : conversations.length === 0
+                      ? 'Quando alguém falar com a Carol aparece aqui'
+                      : 'Tente outro filtro acima'}
             </p>
             <button
               onClick={() => setShowModal(true)}
@@ -927,6 +1014,116 @@ function CarolConversasContent() {
   const [phoneQuery, setPhoneQuery] = useState(initialPhoneQuery)
   const autoOpenedFromUrl = useRef(false)
 
+  // ── Alertas: som + notificação do navegador (Andre não tem celular) ─────────
+  const [alertsOn, setAlertsOn] = useState(false)
+  const audioCtxRef = useRef<AudioContext | null>(null)
+  const seenReplyIdsRef = useRef<Set<string>>(new Set())
+  const seenAwaitingIdsRef = useRef<Set<string>>(new Set())
+  const alertsInitializedRef = useRef(false)
+
+  const enableAlerts = useCallback(async () => {
+    try {
+      if ('Notification' in window && Notification.permission !== 'granted') {
+        await Notification.requestPermission()
+      }
+    } catch {
+      /* ignora */
+    }
+    try {
+      if (!audioCtxRef.current) {
+        const Ctx =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+        if (Ctx) audioCtxRef.current = new Ctx()
+      }
+      await audioCtxRef.current?.resume()
+      playBeep(audioCtxRef.current)
+    } catch {
+      /* ignora */
+    }
+    setAlertsOn(true)
+    try {
+      localStorage.setItem(ALERTS_FLAG_KEY, '1')
+    } catch {
+      /* ignora */
+    }
+  }, [])
+
+  // Reativa alertas se já estavam ligados numa sessão anterior
+  useEffect(() => {
+    try {
+      if (
+        localStorage.getItem(ALERTS_FLAG_KEY) === '1' &&
+        'Notification' in window &&
+        Notification.permission === 'granted'
+      ) {
+        const Ctx =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+        if (Ctx && !audioCtxRef.current) audioCtxRef.current = new Ctx()
+        setAlertsOn(true)
+      }
+    } catch {
+      /* ignora */
+    }
+  }, [])
+
+  // Detecta novas respostas / novos "te esperando" a cada atualização da lista
+  useEffect(() => {
+    if (conversations.length === 0) return
+
+    const currentReply = new Set<string>()
+    const currentAwaiting = new Set<string>()
+    for (const c of conversations) {
+      if (c.has_user_reply) currentReply.add(c.id)
+      if (c.paused_awaiting_andre) currentAwaiting.add(c.id)
+    }
+
+    // Primeira carga: semeia o "já visto" sem alertar (evita disparar pro backlog)
+    if (!alertsInitializedRef.current) {
+      seenReplyIdsRef.current = currentReply
+      seenAwaitingIdsRef.current = currentAwaiting
+      alertsInitializedRef.current = true
+      return
+    }
+
+    if (alertsOn) {
+      const novasRespostas = conversations.filter(
+        (c) => c.has_user_reply && !seenReplyIdsRef.current.has(c.id)
+      )
+      const novasAguardando = conversations.filter(
+        (c) => c.paused_awaiting_andre && !seenAwaitingIdsRef.current.has(c.id)
+      )
+
+      if (novasRespostas.length + novasAguardando.length > 0) {
+        playBeep(audioCtxRef.current)
+        if (novasAguardando.length > 0) {
+          const c = novasAguardando[0]
+          const nome = c.nome ?? formatPhone(c.phone)
+          fireDesktopNotification(
+            novasAguardando.length === 1
+              ? `${nome} está te esperando`
+              : `${novasAguardando.length} leads te esperando`,
+            'Carol pausada — responda pelo painel.'
+          )
+        } else {
+          const c = novasRespostas[0]
+          const nome = c.nome ?? formatPhone(c.phone)
+          const preview = c.last_message?.content?.slice(0, 80) ?? 'Abra o painel para ver.'
+          fireDesktopNotification(
+            novasRespostas.length === 1
+              ? `${nome} respondeu`
+              : `${novasRespostas.length} novas respostas`,
+            preview
+          )
+        }
+      }
+    }
+
+    seenReplyIdsRef.current = currentReply
+    seenAwaitingIdsRef.current = currentAwaiting
+  }, [conversations, alertsOn])
+
   const loadConversations = useCallback(async () => {
     setLoading(true)
     try {
@@ -978,6 +1175,8 @@ function CarolConversasContent() {
       onPhoneQueryChange={setPhoneQuery}
       onSelect={setSelected}
       onRefresh={loadConversations}
+      alertsOn={alertsOn}
+      onEnableAlerts={() => void enableAlerts()}
     />
   )
 }

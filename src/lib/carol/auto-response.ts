@@ -146,6 +146,21 @@ export function isAutoResponse(text: string): boolean {
     'whatsapp business',
     'mensagem fora do horário',
     'mensagem fora do horario',
+    // Recepção/bot "humanizado" — script de atendimento que trata quem chega como cliente
+    'agradece seu contato',
+    'agradece o seu contato',
+    'agradece o contato',
+    'como podemos te ajudar',
+    'como podemos ajudar',
+    'como posso te ajudar',
+    'para saber se podemos te ajudar',
+    'para saber se podemos ajudar',
+    'o que você gostaria de melhorar',
+    'o que voce gostaria de melhorar',
+    'qual procedimento',
+    'procedimento de interesse',
+    'procedimento desejado',
+    'como nos conheceu',
   ]
 
   const stripped = t.replace(/[\s​-‍﻿]/g, '')
