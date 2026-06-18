@@ -43,23 +43,57 @@ export async function syncLeadProfileName(
   }
 }
 
+function onlyDigits(s: string): string {
+  return s.replace(/\D/g, '')
+}
+
+/**
+ * Variantes de um número brasileiro COM e SEM o 9º dígito de celular.
+ * O disparo outbound salva o número com o 9 (ex.: 5549991561807), mas o Meta
+ * às vezes entrega o inbound sem o 9 (ex.: 554991561807). Sem casar as duas
+ * formas, o mesmo lead virava DUAS conversas: a do disparo (com o
+ * [TEMPLATE OUTBOUND:] e o nome do negócio) e a da resposta humana (órfã). Aí a
+ * Carol perdia o contexto de outbound e respondia como se fosse inbound.
+ */
+export function phoneVariants(phone: string): string[] {
+  const d = onlyDigits(phone)
+  const variants = new Set<string>()
+  if (d) variants.add(d)
+
+  if (d.startsWith('55') && d.length >= 12) {
+    const ddd = d.slice(2, 4)
+    const local = d.slice(4)
+    if (local.length === 9 && local.startsWith('9')) {
+      variants.add(`55${ddd}${local.slice(1)}`) // versão SEM o 9
+    } else if (local.length === 8) {
+      variants.add(`55${ddd}9${local}`) // versão COM o 9
+    }
+  }
+  return Array.from(variants)
+}
+
 export async function getOrCreateConversation(phone: string): Promise<Conversation> {
-  // Tenta buscar conversa existente
-  const { data: existing, error: fetchError } = await supabase
+  const variants = phoneVariants(phone)
+
+  // Busca por qualquer variante (com/sem 9º dígito). Se houver duplicata já
+  // criada pelo bug antigo, prioriza a conversa com mais contexto: a que tem
+  // nome (veio do disparo) e, em empate, a mais antiga (o disparo veio antes).
+  const { data: matches, error: fetchError } = await supabase
     .from('carol_conversations')
     .select('*')
-    .eq('phone', phone)
-    .single()
+    .in('phone', variants)
+    .order('created_at', { ascending: true })
 
-  if (existing && !fetchError) {
-    return existing as Conversation
+  if (!fetchError && matches && matches.length > 0) {
+    const comNome = matches.find((c) => c.nome)
+    return (comNome ?? matches[0]) as Conversation
   }
 
-  // Cria nova conversa
+  // Cria nova conversa (sempre em dígitos limpos, padrão do disparo)
   const { data: created, error: createError } = await supabase
     .from('carol_conversations')
     .insert({
-      phone,
+      phone: onlyDigits(phone),
       status: 'novo',
     })
     .select()
@@ -70,7 +104,7 @@ export async function getOrCreateConversation(phone: string): Promise<Conversati
     throw new Error('Falha ao criar conversa no Supabase')
   }
 
-  console.log(`[Carol] Nova conversa criada para ${phone}`)
+  console.log(`[Carol] Nova conversa criada para ${onlyDigits(phone)}`)
   return created as Conversation
 }
 
