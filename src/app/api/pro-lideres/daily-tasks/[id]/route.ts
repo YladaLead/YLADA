@@ -18,6 +18,19 @@ function normalizeExecutionWeekdays(raw: unknown): number[] | null {
   return PL_WEEKDAY_ORDER.filter((d) => s.has(d))
 }
 
+function normalizeCountGoal(raw: unknown): number | null {
+  if (raw === null || raw === undefined || raw === '') return null
+  const n = Math.floor(Number(raw))
+  if (!Number.isFinite(n) || n < 1) return null
+  return Math.min(100000, n)
+}
+
+function normalizeCountLabel(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null
+  const t = raw.trim().slice(0, 40)
+  return t.length > 0 ? t : null
+}
+
 export async function PATCH(request: NextRequest, ctx: RouteCtx) {
   const auth = await requireApiAuth(request)
   if (auth instanceof NextResponse) return auth
@@ -46,7 +59,7 @@ export async function PATCH(request: NextRequest, ctx: RouteCtx) {
     return NextResponse.json({ error: 'JSON inválido' }, { status: 400 })
   }
 
-  const payload: Record<string, string | number | number[] | null> = {}
+  const payload: Record<string, string | number | number[] | boolean | null> = {}
   if (typeof body.title === 'string') {
     const t = body.title.trim().slice(0, 500)
     if (t.length >= 2) payload.title = t
@@ -56,6 +69,21 @@ export async function PATCH(request: NextRequest, ctx: RouteCtx) {
   }
   if (body.points !== undefined) {
     payload.points = Math.min(100000, Math.max(0, Number(body.points) || 0))
+  }
+  if (body.count_enabled !== undefined) {
+    const enabled = body.count_enabled === true
+    payload.count_enabled = enabled
+    if (!enabled) {
+      // Desligar o contador limpa meta e rótulo para manter o estado coerente.
+      payload.count_goal = null
+      payload.count_label = null
+    }
+  }
+  if (body.count_goal !== undefined && payload.count_goal === undefined) {
+    payload.count_goal = normalizeCountGoal(body.count_goal)
+  }
+  if (body.count_label !== undefined && payload.count_label === undefined) {
+    payload.count_label = normalizeCountLabel(body.count_label)
   }
   if (body.execution_weekdays !== undefined) {
     const ew = normalizeExecutionWeekdays(body.execution_weekdays)

@@ -1,8 +1,12 @@
 'use client'
 
 import { useMemo, useRef, useEffect } from 'react'
-import type { MemberDayReport, MemberExecutionReport } from '@/lib/pro-lideres-daily-tasks-member-report'
-import type { ProLideresDailyTaskCompletionRow, ProLideresDailyTaskRow } from '@/types/pro-lideres-daily-tasks'
+import type { MemberDayReport, MemberExecutionReport, MemberTaskItem } from '@/lib/pro-lideres-daily-tasks-member-report'
+import type {
+  ProLideresDailyTaskCompletionRow,
+  ProLideresDailyTaskCountRow,
+  ProLideresDailyTaskRow,
+} from '@/types/pro-lideres-daily-tasks'
 import { buildMemberExecutionReport } from '@/lib/pro-lideres-daily-tasks-member-report'
 import { formatYmdPtBrShort } from '@/lib/pro-lideres-dates-br'
 
@@ -13,7 +17,18 @@ type Props = {
   to: string
   tasks: ProLideresDailyTaskRow[]
   completions: ProLideresDailyTaskCompletionRow[]
+  counts: ProLideresDailyTaskCountRow[]
   onClose: () => void
+}
+
+/** "8 / 10 pessoas" para tarefas com contador. */
+function countLabelFor(item: MemberTaskItem): string | null {
+  if (!item.task.count_enabled) return null
+  const qty = item.quantity ?? 0
+  const unit = item.task.count_label?.trim()
+  const goal = item.task.count_goal
+  const base = goal != null ? `${qty} / ${goal}` : `${qty}`
+  return unit ? `${base} ${unit}` : base
 }
 
 function DayCard({ day }: { day: MemberDayReport }) {
@@ -50,7 +65,10 @@ function DayCard({ day }: { day: MemberDayReport }) {
             <p className="px-1 py-2 text-xs text-gray-400">Nenhuma tarefa neste dia.</p>
           ) : (
             <ul className="space-y-1">
-              {day.done.map(({ task }) => (
+              {day.done.map((item) => {
+                const { task } = item
+                const countText = countLabelFor(item)
+                return (
                 <li
                   key={task.id}
                   className="flex items-start gap-2 rounded-lg bg-emerald-50/90 px-2 py-1.5"
@@ -63,10 +81,13 @@ function DayCard({ day }: { day: MemberDayReport }) {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm leading-snug text-gray-900">{task.title}</p>
-                    <p className="text-[11px] font-medium text-emerald-800">{task.points} pts</p>
+                    <p className="text-[11px] font-medium text-emerald-800">
+                      {task.points} pts{countText ? ` · ${countText}` : ''}
+                    </p>
                   </div>
                 </li>
-              ))}
+                )
+              })}
             </ul>
           )}
         </section>
@@ -80,7 +101,10 @@ function DayCard({ day }: { day: MemberDayReport }) {
           ) : (
             <>
               <ul className="space-y-1">
-                {day.pending.map(({ task }) => (
+                {day.pending.map((item) => {
+                  const { task } = item
+                  const countText = countLabelFor(item)
+                  return (
                   <li
                     key={task.id}
                     className="flex items-start gap-2 rounded-lg border border-dashed border-amber-200/90 bg-amber-50/50 px-2 py-1.5"
@@ -93,10 +117,13 @@ function DayCard({ day }: { day: MemberDayReport }) {
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm leading-snug text-gray-700">{task.title}</p>
-                      <p className="text-[11px] text-amber-800/80">{task.points} pts</p>
+                      <p className="text-[11px] text-amber-800/80">
+                        {task.points} pts{countText ? ` · ${countText}` : ''}
+                      </p>
                     </div>
                   </li>
-                ))}
+                  )
+                })}
               </ul>
               {/* Dica quando não fez nada no dia */}
               {day.doneCount === 0 && day.applicableCount > 0 && (
@@ -201,13 +228,14 @@ export function ProLideresMemberExecutionDetail({
   to,
   tasks,
   completions,
+  counts,
   onClose,
 }: Props) {
   const panelRef = useRef<HTMLDivElement>(null)
 
   const report = useMemo(
-    () => buildMemberExecutionReport(userId, tasks, completions, from, to),
-    [userId, tasks, completions, from, to]
+    () => buildMemberExecutionReport(userId, tasks, completions, from, to, counts),
+    [userId, tasks, completions, from, to, counts]
   )
 
   const periodLabel =

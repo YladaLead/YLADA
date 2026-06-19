@@ -9,9 +9,27 @@ export type ProLideresDailyTaskRow = {
   points: number
   execution_weekdays: number[]
   sort_order: number
+  /** Quando true, o membro registra uma quantidade nesta tarefa (ex.: nº de pessoas). */
+  count_enabled: boolean
+  /** Meta de quantidade (ex.: 10). Ao bater/passar, a conclusão é gerada automaticamente. */
+  count_goal: number | null
+  /** Rótulo da unidade exibido ao lado do número (ex.: "pessoas"). Opcional. */
+  count_label: string | null
   created_by_user_id: string
   created_at: string
   updated_at: string
+}
+
+/** Quantidade registrada por um membro numa tarefa com contador, num dia civil. */
+export type ProLideresDailyTaskCountRow = {
+  id: string
+  leader_tenant_id: string
+  task_id: string
+  member_user_id: string
+  counted_on: string
+  quantity: number
+  updated_at: string
+  created_at: string
 }
 
 export type ProLideresDailyTaskCompletionRow = {

@@ -6,7 +6,21 @@ import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-acc
 import { fetchProLideresMembersEnriched } from '@/lib/pro-lideres-members-enriched'
 import { proLideresDailyTasksBlockedForMember } from '@/lib/pro-lideres-daily-tasks-access'
 import { pointsForUserInRange } from '@/lib/pro-lideres-daily-tasks-points'
-import { PL_WEEKDAY_ORDER, type ProLideresDailyTaskCompletionRow, type ProLideresDailyTaskRow } from '@/types/pro-lideres-daily-tasks'
+import { PL_WEEKDAY_ORDER, type ProLideresDailyTaskCompletionRow, type ProLideresDailyTaskCountRow, type ProLideresDailyTaskRow } from '@/types/pro-lideres-daily-tasks'
+
+/** Normaliza os campos de contador vindos do corpo (POST/PATCH). */
+function normalizeCountGoal(raw: unknown): number | null {
+  if (raw === null || raw === undefined || raw === '') return null
+  const n = Math.floor(Number(raw))
+  if (!Number.isFinite(n) || n < 1) return null
+  return Math.min(100000, n)
+}
+
+function normalizeCountLabel(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null
+  const t = raw.trim().slice(0, 40)
+  return t.length > 0 ? t : null
+}
 
 function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10)
@@ -103,6 +117,23 @@ export async function GET(request: NextRequest) {
 
   const complAll = (complRows ?? []) as ProLideresDailyTaskCompletionRow[]
 
+  const { data: countRows, error: countErr } = await supabaseAdmin
+    .from('pro_lideres_daily_task_counts')
+    .select('*')
+    .eq('leader_tenant_id', tenantId)
+    .gte('counted_on', from)
+    .lte('counted_on', to)
+
+  if (countErr) {
+    console.error('[daily-tasks GET counts]', countErr)
+    return NextResponse.json({ error: 'Erro ao carregar quantidades.' }, { status: 500 })
+  }
+
+  let counts = (countRows ?? []) as ProLideresDailyTaskCountRow[]
+  if (!isOwner) {
+    counts = counts.filter((c) => c.member_user_id === user.id)
+  }
+
   const members = isOwner ? await fetchProLideresMembersEnriched(tenantId) : []
 
   const pointsByUserId: Record<string, number> = {}
@@ -120,6 +151,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     tasks,
     completions,
+    counts,
     pointsByUserId,
     myPointsInRange,
     members,
@@ -156,6 +188,9 @@ export async function POST(request: NextRequest) {
     points?: number
     sort_order?: number
     execution_weekdays?: unknown
+    count_enabled?: unknown
+    count_goal?: unknown
+    count_label?: unknown
   }
   try {
     body = await request.json()
@@ -179,6 +214,10 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  const count_enabled = body.count_enabled === true
+  const count_goal = count_enabled ? normalizeCountGoal(body.count_goal) : null
+  const count_label = count_enabled ? normalizeCountLabel(body.count_label) : null
+
   const { data: inserted, error } = await supabaseAdmin
     .from('pro_lideres_daily_tasks')
     .insert({
@@ -188,6 +227,9 @@ export async function POST(request: NextRequest) {
       points,
       execution_weekdays,
       sort_order,
+      count_enabled,
+      count_goal,
+      count_label,
       created_by_user_id: user.id,
     })
     .select()

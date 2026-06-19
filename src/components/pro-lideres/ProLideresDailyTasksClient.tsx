@@ -8,6 +8,7 @@ import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel
 import {
   PL_WEEKDAY_ORDER,
   type ProLideresDailyTaskCompletionRow,
+  type ProLideresDailyTaskCountRow,
   type ProLideresDailyTaskRow,
 } from '@/types/pro-lideres-daily-tasks'
 import type { ProLideresMemberListItem } from '@/lib/pro-lideres-members-enriched'
@@ -16,6 +17,7 @@ import { proLideresTodayYmdBr, proLideresYesterdayYmdBr } from '@/lib/pro-lidere
 type ApiGet = {
   tasks: ProLideresDailyTaskRow[]
   completions: ProLideresDailyTaskCompletionRow[]
+  counts: ProLideresDailyTaskCountRow[]
   pointsByUserId: Record<string, number>
   myPointsInRange: number
   members: ProLideresMemberListItem[]
@@ -71,6 +73,9 @@ type TaskRowEdit = {
   points: string
   title: string
   description: string
+  countEnabled: boolean
+  countGoal: string
+  countLabel: string
 }
 
 function taskIdSetsEqual(a: Set<string>, b: Set<string>): boolean {
@@ -360,6 +365,113 @@ function generateShareImage(
   return dataUrl
 }
 
+/** Linha de tarefa COM contador: o membro digita quantos fez; bate a meta → ponto. */
+function CounterTaskRow({
+  task,
+  quantity,
+  saving,
+  onSave,
+}: {
+  task: ProLideresDailyTaskRow
+  quantity: number
+  saving: boolean
+  onSave: (qty: number) => void
+}) {
+  const [draft, setDraft] = useState<string>(String(quantity))
+
+  // Mantém o input em sincronia quando a quantidade salva muda por fora.
+  useEffect(() => {
+    setDraft(String(quantity))
+  }, [quantity])
+
+  const goal = task.count_goal
+  const unit = task.count_label?.trim() || ''
+  const met = goal != null && quantity >= goal
+
+  function commit(next: number) {
+    const q = Math.max(0, Math.min(100000, Math.floor(next) || 0))
+    setDraft(String(q))
+    if (q !== quantity) onSave(q)
+  }
+
+  return (
+    <li
+      className={`relative flex min-h-[64px] select-none flex-col gap-3 overflow-hidden rounded-xl border p-4 shadow-sm ${
+        met ? 'border-emerald-200 bg-emerald-50/70' : 'border-gray-200 bg-white'
+      }`}
+    >
+      <div className={`absolute inset-y-0 left-0 w-1 ${met ? 'bg-emerald-400' : 'bg-blue-300'}`} />
+
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className={`text-[15px] font-medium leading-snug ${met ? 'text-emerald-900' : 'text-gray-900'}`}>
+            {task.title}
+          </p>
+          {task.description && (
+            <p className="mt-1.5 text-sm leading-relaxed text-blue-600">{task.description}</p>
+          )}
+        </div>
+        <span className={`shrink-0 self-start rounded-full px-2.5 py-1 text-xs font-bold ${ptsBadgeClass(task.points, met)}`}>
+          +{task.points} pts
+        </span>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center overflow-hidden rounded-xl border border-gray-300 bg-white">
+          <button
+            type="button"
+            aria-label="Diminuir"
+            onClick={() => commit(quantity - 1)}
+            className="flex h-11 w-11 items-center justify-center text-xl font-bold text-gray-600 hover:bg-gray-50 active:scale-95"
+          >
+            −
+          </button>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={100000}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={() => commit(Number(draft))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                ;(e.target as HTMLInputElement).blur()
+              }
+            }}
+            className="h-11 w-16 border-x border-gray-200 text-center text-lg font-bold tabular-nums text-gray-900 focus:outline-none"
+          />
+          <button
+            type="button"
+            aria-label="Aumentar"
+            onClick={() => commit(quantity + 1)}
+            className="flex h-11 w-11 items-center justify-center text-xl font-bold text-blue-700 hover:bg-blue-50 active:scale-95"
+          >
+            +
+          </button>
+        </div>
+
+        <div className="min-w-0 flex-1">
+          {goal != null ? (
+            <span className={`text-sm font-bold ${met ? 'text-emerald-700' : 'text-gray-700'}`}>
+              {quantity} / {goal}
+              {unit ? ` ${unit}` : ''}
+              {met && <span className="ml-1.5 font-semibold">✓ meta batida</span>}
+            </span>
+          ) : (
+            <span className="text-sm font-bold text-gray-700">
+              {quantity}
+              {unit ? ` ${unit}` : ''}
+            </span>
+          )}
+          {saving && <span className="ml-2 text-xs font-medium text-blue-600">salvando…</span>}
+        </div>
+      </div>
+    </li>
+  )
+}
+
 export function ProLideresDailyTasksClient() {
   const router = useRouter()
   const { isLeaderWorkspace: isLeader, dailyTasksVisibleToTeam, painelBasePath } = useProLideresPainel()
@@ -386,6 +498,9 @@ export function ProLideresDailyTasksClient() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [points, setPoints] = useState('1')
+  const [newCountEnabled, setNewCountEnabled] = useState(false)
+  const [newCountGoal, setNewCountGoal] = useState('10')
+  const [newCountLabel, setNewCountLabel] = useState('')
   const [saving, setSaving] = useState(false)
   const [taskRows, setTaskRows] = useState<TaskRowEdit[]>([])
   const [savingEdits, setSavingEdits] = useState(false)
@@ -398,6 +513,9 @@ export function ProLideresDailyTasksClient() {
   const [todaySaved, setTodaySaved] = useState<Set<string>>(() => new Set())
   const [todaySubmitted, setTodaySubmitted] = useState(false)
   const [todaySaveOk, setTodaySaveOk] = useState(true)
+  // Contadores de hoje (tarefas com count_enabled): taskId -> quantidade registrada.
+  const [todayCounts, setTodayCounts] = useState<Record<string, number>>({})
+  const [countSaving, setCountSaving] = useState<Record<string, boolean>>({})
 
   const now = new Date()
   const todayStr = localIsoDate(now)
@@ -440,13 +558,29 @@ export function ProLideresDailyTasksClient() {
       )
       const json = await res.json().catch(() => ({}))
       if (!res.ok) return
-      const completions = (json as ApiGet).completions ?? []
+      const payload = json as ApiGet
+      const counterTaskIds = new Set(
+        (payload.tasks ?? []).filter((t) => t.count_enabled).map((t) => t.id)
+      )
+      const completions = payload.completions ?? []
+      // O checklist (draft/saved) só guarda tarefas SEM contador; as com contador
+      // são refletidas por todayCounts e a conclusão delas vem da meta.
       const done = new Set(
-        completions.filter((c) => c.member_user_id === myUserId).map((c) => c.task_id)
+        completions
+          .filter((c) => c.member_user_id === myUserId && !counterTaskIds.has(c.task_id))
+          .map((c) => c.task_id)
       )
       setTodayDraft(done)
       setTodaySaved(new Set(done))
-      setTodaySubmitted(done.size > 0 || readTodaySubmitted(myUserId, todayStr))
+
+      const counts: Record<string, number> = {}
+      for (const c of payload.counts ?? []) {
+        if (c.member_user_id === myUserId) counts[c.task_id] = c.quantity
+      }
+      setTodayCounts(counts)
+
+      const anyCount = Object.values(counts).some((q) => q > 0)
+      setTodaySubmitted(done.size > 0 || anyCount || readTodaySubmitted(myUserId, todayStr))
       setTodaySaveOk(true)
     } catch {
       /* mantém rascunho local */
@@ -459,7 +593,12 @@ export function ProLideresDailyTasksClient() {
 
   const tasksSnapshot = useMemo(() => {
     const list = data?.tasks ?? []
-    return list.map((t) => `${t.id}:${t.points}:${t.title}:${t.description ?? ''}`).join('|')
+    return list
+      .map(
+        (t) =>
+          `${t.id}:${t.points}:${t.title}:${t.description ?? ''}:${t.count_enabled ? 1 : 0}:${t.count_goal ?? ''}:${t.count_label ?? ''}`
+      )
+      .join('|')
   }, [data?.tasks])
 
   useEffect(() => {
@@ -470,6 +609,9 @@ export function ProLideresDailyTasksClient() {
         points: String(t.points),
         title: t.title,
         description: t.description ?? '',
+        countEnabled: t.count_enabled,
+        countGoal: t.count_goal != null ? String(t.count_goal) : '',
+        countLabel: t.count_label ?? '',
       }))
     )
   }, [isLeader, tasksSnapshot, data?.tasks])
@@ -540,6 +682,37 @@ export function ProLideresDailyTasksClient() {
     }
   }
 
+  async function saveCount(taskId: string, quantity: number) {
+    if (!myUserId) return
+    const qty = Math.max(0, Math.min(100000, Math.floor(quantity) || 0))
+    const prev = todayCounts[taskId] ?? 0
+    setTodayCounts((m) => ({ ...m, [taskId]: qty })) // otimista
+    setCountSaving((m) => ({ ...m, [taskId]: true }))
+    setError(null)
+    try {
+      const res = await fetch(`/api/pro-lideres/daily-tasks/${encodeURIComponent(taskId)}/count`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: todayStr, quantity: qty }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((json as { error?: string }).error || 'Erro ao salvar a quantidade.')
+        setTodayCounts((m) => ({ ...m, [taskId]: prev })) // reverte
+        return
+      }
+      setTodaySubmitted(true)
+      writeTodaySubmitted(myUserId, todayStr)
+      void load() // atualiza os pontos do período
+    } catch {
+      setError('Erro de rede.')
+      setTodayCounts((m) => ({ ...m, [taskId]: prev }))
+    } finally {
+      setCountSaving((m) => ({ ...m, [taskId]: false }))
+    }
+  }
+
   function toggleTodayTask(taskId: string) {
     if (savingToday) return
     const next = new Set(todayDraft)
@@ -561,7 +734,7 @@ export function ProLideresDailyTasksClient() {
     setShareError(null)
     setGeneratingShare(true)
     try {
-      const dataUrl = generateShareImage(applicableToday, todaySaved, todayStr)
+      const dataUrl = generateShareImage(applicableToday, savedDoneIds, todayStr)
       const blob = dataUrlToBlob(dataUrl)
       const file = new File([blob], 'tarefas-do-dia.png', { type: 'image/png' })
 
@@ -621,6 +794,9 @@ export function ProLideresDailyTasksClient() {
           description: description.trim() || undefined,
           points: Number(points) || 1,
           execution_weekdays: [...PL_WEEKDAY_ORDER],
+          count_enabled: newCountEnabled,
+          count_goal: newCountEnabled ? Number(newCountGoal) || null : null,
+          count_label: newCountEnabled ? newCountLabel.trim() || null : null,
         }),
       })
       const json = await res.json().catch(() => ({}))
@@ -631,6 +807,9 @@ export function ProLideresDailyTasksClient() {
       setTitle('')
       setDescription('')
       setPoints('1')
+      setNewCountEnabled(false)
+      setNewCountGoal('10')
+      setNewCountLabel('')
       await load()
     } finally {
       setSaving(false)
@@ -655,8 +834,16 @@ export function ProLideresDailyTasksClient() {
         const tit = row.title.trim()
         const desc = row.description.trim()
         const descNorm = desc || null
+        const cEnabled = row.countEnabled
+        const cGoal = cEnabled ? (Math.floor(Number(row.countGoal)) >= 1 ? Math.min(100000, Math.floor(Number(row.countGoal))) : null) : null
+        const cLabel = cEnabled ? (row.countLabel.trim().slice(0, 40) || null) : null
         const same =
-          orig.points === pts && orig.title === tit && (orig.description ?? '') === (descNorm ?? '')
+          orig.points === pts &&
+          orig.title === tit &&
+          (orig.description ?? '') === (descNorm ?? '') &&
+          orig.count_enabled === cEnabled &&
+          (orig.count_goal ?? null) === cGoal &&
+          (orig.count_label ?? null) === cLabel
         if (same) continue
         const res = await fetch(`/api/pro-lideres/daily-tasks/${encodeURIComponent(row.id)}`, {
           method: 'PATCH',
@@ -667,6 +854,9 @@ export function ProLideresDailyTasksClient() {
             description: descNorm,
             points: pts,
             execution_weekdays: [...PL_WEEKDAY_ORDER],
+            count_enabled: cEnabled,
+            count_goal: cGoal,
+            count_label: cLabel,
           }),
         })
         const j = await res.json().catch(() => ({}))
@@ -706,18 +896,38 @@ export function ProLideresDailyTasksClient() {
   const applicableToday =
     data?.tasks.filter((t) => (t.execution_weekdays ?? []).includes(todayDow)) ?? []
 
+  // Tarefa com contador conta como feita quando bate a meta (count_goal).
+  const counterMet = useCallback(
+    (t: ProLideresDailyTaskRow): boolean =>
+      t.count_enabled && t.count_goal != null && (todayCounts[t.id] ?? 0) >= t.count_goal,
+    [todayCounts]
+  )
+
+  // "Feito" combinando o check (tarefa normal) com a meta batida (tarefa com contador).
+  const isDoneDraft = useCallback(
+    (t: ProLideresDailyTaskRow): boolean => (t.count_enabled ? counterMet(t) : todayDraft.has(t.id)),
+    [counterMet, todayDraft]
+  )
+  const isDoneSaved = useCallback(
+    (t: ProLideresDailyTaskRow): boolean => (t.count_enabled ? counterMet(t) : todaySaved.has(t.id)),
+    [counterMet, todaySaved]
+  )
+
+  // Apenas tarefas SEM contador participam do botão "Salvar execução".
+  const applicableNonCounter = applicableToday.filter((t) => !t.count_enabled)
+
   const todayHasUnsavedChanges = useMemo(
     () => !taskIdSetsEqual(todayDraft, todaySaved),
     [todayDraft, todaySaved]
   )
 
   const canSaveToday =
-    applicableToday.length > 0 && !savingToday && (!todaySubmitted || todayHasUnsavedChanges)
+    applicableNonCounter.length > 0 && !savingToday && (!todaySubmitted || todayHasUnsavedChanges)
 
-  // Progresso ao vivo: pontos e contagem das tarefas marcadas no draft
-  const todayDraftCount = applicableToday.filter((t) => todayDraft.has(t.id)).length
+  // Progresso ao vivo: conta tarefas feitas (check + metas batidas) e seus pontos.
+  const todayDraftCount = applicableToday.filter((t) => isDoneDraft(t)).length
   const todayDraftPoints = applicableToday
-    .filter((t) => todayDraft.has(t.id))
+    .filter((t) => isDoneDraft(t))
     .reduce((s, t) => s + t.points, 0)
   const todayMaxPoints = applicableToday.reduce((s, t) => s + t.points, 0)
   const todayProgressPct =
@@ -765,7 +975,8 @@ export function ProLideresDailyTasksClient() {
     setTaskRows((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } : r)))
   }
 
-  const celebrationPoints = applicableToday.filter(t => todaySaved.has(t.id)).reduce((s, t) => s + t.points, 0)
+  const savedDoneIds = new Set<string>(applicableToday.filter((t) => isDoneSaved(t)).map((t) => t.id))
+  const celebrationPoints = applicableToday.filter((t) => savedDoneIds.has(t.id)).reduce((s, t) => s + t.points, 0)
   const celebrationMax = applicableToday.reduce((s, t) => s + t.points, 0)
   const celebrationPct = celebrationMax > 0 ? Math.round((celebrationPoints / celebrationMax) * 100) : 0
   const celebrationEmoji = celebrationPct >= 100 ? '🏆' : celebrationPct >= 81 ? '🎯' : celebrationPct >= 61 ? '💥' : celebrationPct >= 41 ? '🔥' : celebrationPct >= 21 ? '⚡' : celebrationPct > 0 ? '🚀' : '🌱'
@@ -793,9 +1004,11 @@ export function ProLideresDailyTasksClient() {
             </div>
             {/* Lista de tarefas — feitas e não feitas */}
             <div className="divide-y divide-gray-100 bg-gray-50">
-              {applicableToday.map(t => (
-                <div key={t.id} className={`flex items-center gap-3 px-4 py-2.5 ${todaySaved.has(t.id) ? 'bg-emerald-50/50' : ''}`}>
-                  {todaySaved.has(t.id) ? (
+              {applicableToday.map(t => {
+                const done = savedDoneIds.has(t.id)
+                return (
+                <div key={t.id} className={`flex items-center gap-3 px-4 py-2.5 ${done ? 'bg-emerald-50/50' : ''}`}>
+                  {done ? (
                     <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500">
                       <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
@@ -804,10 +1017,18 @@ export function ProLideresDailyTasksClient() {
                   ) : (
                     <div className="h-5 w-5 shrink-0 rounded-full border-2 border-gray-200 bg-white" />
                   )}
-                  <span className={`flex-1 text-sm font-medium ${todaySaved.has(t.id) ? 'text-gray-700 line-through decoration-emerald-400' : 'text-gray-400'}`}>{t.title}</span>
-                  <span className={`text-xs font-bold ${todaySaved.has(t.id) ? 'text-emerald-600' : 'text-gray-300'}`}>+{t.points}</span>
+                  <span className={`flex-1 text-sm font-medium ${done ? 'text-gray-700 line-through decoration-emerald-400' : 'text-gray-400'}`}>
+                    {t.title}
+                    {t.count_enabled && (
+                      <span className="ml-1 font-bold text-emerald-700">
+                        — {todayCounts[t.id] ?? 0}{t.count_goal != null ? `/${t.count_goal}` : ''}
+                      </span>
+                    )}
+                  </span>
+                  <span className={`text-xs font-bold ${done ? 'text-emerald-600' : 'text-gray-300'}`}>+{t.points}</span>
                 </div>
-              ))}
+                )
+              })}
             </div>
             {/* Botões */}
             <div className="space-y-2 p-4">
@@ -965,6 +1186,17 @@ export function ProLideresDailyTasksClient() {
               </li>
             ) : (
               applicableToday.map((t) => {
+                if (t.count_enabled) {
+                  return (
+                    <CounterTaskRow
+                      key={t.id}
+                      task={t}
+                      quantity={todayCounts[t.id] ?? 0}
+                      saving={!!countSaving[t.id]}
+                      onSave={(qty) => void saveCount(t.id, qty)}
+                    />
+                  )
+                }
                 const checked = todayDraft.has(t.id)
                 return (
                   <li
@@ -1027,7 +1259,7 @@ export function ProLideresDailyTasksClient() {
                   <span className="text-red-600">Não foi possível salvar. Tente novamente.</span>
                 ) : todayHasUnsavedChanges ? (
                   <span className="text-amber-600">⚠️ Alterações não salvas</span>
-                ) : todaySaved.size > 0 ? (
+                ) : savedDoneIds.size > 0 ? (
                   <span className="text-emerald-600">✅ Salvo com sucesso</span>
                 ) : (
                   <span className="text-emerald-600">✅ Salvo — 0 pontos hoje</span>
@@ -1035,27 +1267,29 @@ export function ProLideresDailyTasksClient() {
               </p>
             )}
 
-            <button
-              type="button"
-              disabled={!canSaveToday}
-              onClick={() => void saveTodayDraft()}
-              className={`w-full min-h-[52px] rounded-xl px-4 py-3 text-sm font-bold text-white shadow-md transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${
-                canSaveToday
-                  ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
-                  : 'bg-gray-400'
-              }`}
-            >
-              {savingToday
-                ? 'Salvando…'
-                : todayProgressPct === 100
-                  ? '🏆 Salvar — dia lendário!'
-                  : todayDraftCount === 0 && !todaySubmitted
-                    ? 'Salvar — 0 pontos hoje'
-                    : 'Salvar execução de hoje'}
-            </button>
+            {applicableNonCounter.length > 0 && (
+              <button
+                type="button"
+                disabled={!canSaveToday}
+                onClick={() => void saveTodayDraft()}
+                className={`w-full min-h-[52px] rounded-xl px-4 py-3 text-sm font-bold text-white shadow-md transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${
+                  canSaveToday
+                    ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
+                    : 'bg-gray-400'
+                }`}
+              >
+                {savingToday
+                  ? 'Salvando…'
+                  : todayProgressPct === 100
+                    ? '🏆 Salvar — dia lendário!'
+                    : todayDraftCount === 0 && !todaySubmitted
+                      ? 'Salvar — 0 pontos hoje'
+                      : 'Salvar execução de hoje'}
+              </button>
+            )}
 
             {/* Botão compartilhar — gera imagem PNG e usa Web Share API / download */}
-            {todaySaved.size > 0 && todaySaveOk && (
+            {savedDoneIds.size > 0 && todaySaveOk && (
               <button
                 type="button"
                 disabled={generatingShare || applicableToday.length === 0}
@@ -1245,6 +1479,52 @@ export function ProLideresDailyTasksClient() {
                             placeholder="Ex.: frase ou roteiro de apoio"
                           />
                         </label>
+                        <div className="rounded-lg border border-gray-200 bg-gray-50/70 p-2.5">
+                          <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold text-gray-700">
+                            <input
+                              type="checkbox"
+                              checked={row.countEnabled}
+                              onChange={(e) => updateTaskRow(row.id, { countEnabled: e.target.checked })}
+                              className="h-4 w-4 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            Pedir quantidade (ex.: &quot;falei com X pessoas&quot;)
+                          </label>
+                          {row.countEnabled && (
+                            <>
+                              <div className="mt-2 grid grid-cols-2 gap-2">
+                                <label className="block">
+                                  <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                                    Meta
+                                  </span>
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    max={100000}
+                                    value={row.countGoal}
+                                    onChange={(e) => updateTaskRow(row.id, { countGoal: e.target.value })}
+                                    placeholder="10"
+                                    className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-sm font-semibold text-gray-900"
+                                  />
+                                </label>
+                                <label className="block">
+                                  <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                                    Unidade (opcional)
+                                  </span>
+                                  <input
+                                    value={row.countLabel}
+                                    onChange={(e) => updateTaskRow(row.id, { countLabel: e.target.value })}
+                                    placeholder="pessoas"
+                                    className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-sm text-gray-900"
+                                  />
+                                </label>
+                              </div>
+                              <p className="mt-1.5 text-[10px] leading-snug text-gray-500">
+                                Ao bater a meta, o ponto é dado automático. Abaixo da meta, o número fica
+                                registrado para você ver no painel.
+                              </p>
+                            </>
+                          )}
+                        </div>
                       </div>
                       <div className="flex shrink-0 justify-end sm:pt-6">
                         <button
@@ -1311,6 +1591,52 @@ export function ProLideresDailyTasksClient() {
                         placeholder="Aparece em azul no cartão do membro"
                       />
                     </label>
+                    <div className="sm:col-span-2 rounded-lg border border-gray-200 bg-gray-50/70 p-2.5">
+                      <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={newCountEnabled}
+                          onChange={(e) => setNewCountEnabled(e.target.checked)}
+                          className="h-4 w-4 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        Pedir quantidade (ex.: &quot;falei com X pessoas&quot;)
+                      </label>
+                      {newCountEnabled && (
+                        <>
+                          <div className="mt-2 grid grid-cols-2 gap-2">
+                            <label className="block">
+                              <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                                Meta
+                              </span>
+                              <input
+                                type="number"
+                                min={1}
+                                max={100000}
+                                value={newCountGoal}
+                                onChange={(e) => setNewCountGoal(e.target.value)}
+                                placeholder="10"
+                                className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-sm font-semibold text-gray-900"
+                              />
+                            </label>
+                            <label className="block">
+                              <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                                Unidade (opcional)
+                              </span>
+                              <input
+                                value={newCountLabel}
+                                onChange={(e) => setNewCountLabel(e.target.value)}
+                                placeholder="pessoas"
+                                className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-sm text-gray-900"
+                              />
+                            </label>
+                          </div>
+                          <p className="mt-1.5 text-[10px] leading-snug text-gray-500">
+                            Ao bater a meta, o ponto é dado automático. Abaixo da meta, o número fica
+                            registrado para você ver no painel.
+                          </p>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <button
                     type="submit"

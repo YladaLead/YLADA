@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   type ProLideresDailyTaskCompletionRow,
+  type ProLideresDailyTaskCountRow,
   type ProLideresDailyTaskRow,
 } from '@/types/pro-lideres-daily-tasks'
 import type { ProLideresMemberListItem } from '@/lib/pro-lideres-members-enriched'
@@ -22,6 +23,7 @@ type MemberSortMode = 'points_desc' | 'points_asc' | 'name_asc' | 'name_desc' | 
 type ApiGet = {
   tasks: ProLideresDailyTaskRow[]
   completions: ProLideresDailyTaskCompletionRow[]
+  counts: ProLideresDailyTaskCountRow[]
   pointsByUserId: Record<string, number>
   myPointsInRange: number
   members: ProLideresMemberListItem[]
@@ -34,6 +36,8 @@ type MemberRow = {
   display: string
   points: number
   completionCount: number
+  /** Soma das quantidades registradas em tarefas com contador, no período. */
+  countTotal: number
 }
 
 function localIsoDate(d: Date): string {
@@ -86,6 +90,7 @@ function memberDisplayName(m: ProLideresMemberListItem): string {
 
 function buildMemberRows(data: ApiGet): MemberRow[] {
   const completions = data.completions ?? []
+  const counts = data.counts ?? []
   return data.members.map((m) => {
     const userId = m.userId
     return {
@@ -93,6 +98,9 @@ function buildMemberRows(data: ApiGet): MemberRow[] {
       display: memberDisplayName(m),
       points: data.pointsByUserId[userId] ?? 0,
       completionCount: completions.filter((c) => c.member_user_id === userId).length,
+      countTotal: counts
+        .filter((c) => c.member_user_id === userId)
+        .reduce((s, c) => s + (c.quantity ?? 0), 0),
     }
   })
 }
@@ -416,6 +424,14 @@ export function ProLideresDailyTasksExecucaoClient() {
                                   <span className="w-7 shrink-0" aria-hidden />
                                 )}
                                 <span className="min-w-0 flex-1 truncate font-medium text-gray-900">{row.display}</span>
+                                {row.countTotal > 0 && (
+                                  <span
+                                    className="shrink-0 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700"
+                                    title="Quantidade registrada no período (ex.: pessoas com quem falou)"
+                                  >
+                                    💬 {row.countTotal}
+                                  </span>
+                                )}
                                 <span className="shrink-0 text-xs text-gray-500">
                                   {row.completionCount === 0
                                     ? 'sem tarefas'
@@ -449,6 +465,7 @@ export function ProLideresDailyTasksExecucaoClient() {
                     to={data.to}
                     tasks={data.tasks}
                     completions={data.completions ?? []}
+                    counts={data.counts ?? []}
                     onClose={() => setFocusUserId(null)}
                   />
                 ) : (
