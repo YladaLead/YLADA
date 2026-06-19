@@ -5,6 +5,7 @@ import Link from 'next/link'
 import YladaAreaShell from './YladaAreaShell'
 import { getYladaAreaPathPrefix, getYladaLeadsPath } from '@/config/ylada-areas'
 import { YLADA_PRO_UPGRADE_PITCH } from '@/config/freemium-limits'
+import { useIsIOSNativeApp } from '@/lib/native-app'
 
 type DashboardData = {
   respostas_hoje: number
@@ -40,6 +41,8 @@ export default function PainelPageContent({
   const prefix = getYladaAreaPathPrefix(areaCodigo)
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
+  // App iOS (guideline 3.1.1 / modelo B2B): nenhuma superfície de venda/upgrade.
+  const isIOSApp = useIsIOSNativeApp()
 
   useEffect(() => {
     let cancelled = false
@@ -82,8 +85,9 @@ export default function PainelPageContent({
           </div>
         ) : (
           <>
-            {/* Freemium: aviso progressivo para usuários Free */}
-            {data?.freemium && !data.freemium.is_pro && (
+            {/* Freemium: aviso progressivo para usuários Free.
+                Escondido no app iOS — lá não pode haver pitch/upgrade de plano. */}
+            {data?.freemium && !data.freemium.is_pro && !isIOSApp && (
               <section className="rounded-xl border border-sky-200 bg-sky-50/80 p-5">
                 <p className="text-sm font-medium text-gray-900 mb-1">
                   {data.freemium.whatsapp_clicks_mes ?? 0}/{data.freemium.limite_whatsapp_clicks ?? 10} contatos no WhatsApp este mês
