@@ -3,6 +3,7 @@
  * @see blueprint-plataforma/Chat4_Motor_Catalogo_Permissoes.md §3.3
  */
 import { PERFIL_FLUXO_RESERVED_FIRST_SEGMENTS } from '@/lib/ylada-flow/perfil-fluxo-path'
+import { isYladaFlowNativePilotGloballyEnabled } from '@/lib/ylada-flow/ylada-flow-native-pilot'
 
 const WELLNESS_APP_SEGMENTS = new Set([
   'dashboard',
@@ -74,6 +75,15 @@ export function resolveLegacyPublicUrlRedirect(pathname: string): string | null 
   const linkLegacy = normalized.match(/^\/link\/([^/]+)$/i)
   if (linkLegacy?.[1]) {
     return `/l/${linkLegacy[1].toLowerCase()}`
+  }
+
+  // ⚠️ Redirect /pt/{area}/[user]/[fluxo] → /[perfil]/[fluxo] (rota curta) fica ACOPLADO
+  // ao mesmo flag do render nativo. A rota curta só resolve links salvos em `ylada_links`;
+  // fluxos built-in (recrutamento, calculadoras) ainda não têm linha lá e dariam 404.
+  // Enquanto o flag estiver OFF, mantemos as URLs longas (comportamento conhecido e funcional).
+  // O `/link/ → /l/` acima permanece sempre ativo (alvo /l/ resolve normalmente).
+  if (!isYladaFlowNativePilotGloballyEnabled()) {
+    return null
   }
 
   for (const area of AREA_PREFIXES) {
