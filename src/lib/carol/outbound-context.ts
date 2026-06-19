@@ -62,6 +62,18 @@ export function countRealUserMessages(
     .length
 }
 
+/** Recusa clara na primeira resposta — não adianta empurrar botões de dor. */
+export function isRejectionReply(text: string): boolean {
+  const t = text.toLowerCase().replace(/\s+/g, ' ').trim()
+  return /(n[ãa]o\s+quero|n[ãa]o\s+tenho\s+interesse|sem\s+interesse|n[ãa]o,?\s+obrigad[oa]|n[ãa]o\s+obrigad[oa]|dispenso|n[ãa]o\s+preciso|n[ãa]o\s+desejo|me\s+exclui|descadastr|para\s+de\s+(mandar|enviar)|pare\s+de\s+(mandar|enviar))/.test(t)
+}
+
+/** Pergunta de identidade ("quem é você / qual unidade / de onde") — responder, não mandar botões. */
+export function isIdentityQuestion(text: string): boolean {
+  const t = text.toLowerCase().replace(/\s+/g, ' ').trim()
+  return /(quem\s+(é|e|est[áa]|fala|t[áa])\s+(você|voce|falando|a[íi])|quem\s+é\s+você|qual\s+unidade|de\s+qual\s+unidade|qual\s+a\s+empresa|que\s+empresa|qual\s+empresa|de\s+onde\s+(você|voce|é|fala|vocês)|voc[êe]s?\s+s[ãa]o\s+de|é\s+de\s+qual)/.test(t)
+}
+
 /** Primeira mensagem humana após template outbound — momento ideal para botões de dor. */
 export function shouldSendOutboundPainButtons(
   text: string,
@@ -72,6 +84,8 @@ export function shouldSendOutboundPainButtons(
   if (carolHasConversationalReply(history)) return false
   if (text.match(/\[botão:/i)) return false
   if (detectPainFromText(text)) return false
+  if (isRejectionReply(text)) return false    // recusou → Carol responde/sai, sem botões
+  if (isIdentityQuestion(text)) return false  // "quem é você?" → Carol diz quem é, sem botões
   return countRealUserMessages(history) === 1
 }
 
