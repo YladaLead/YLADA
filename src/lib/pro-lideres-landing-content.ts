@@ -1,6 +1,6 @@
 /** Copy da landing /pro-lideres — linguagem do líder de campo, dores reais, sem citação de marca. */
 
-export const PRO_LIDERES_LANDING_HEADLINE = 'Gostaria de ver a produção da sua equipe começar a crescer de 10 a 20% já nos primeiros 30 dias, de forma real e sólida?'
+export const PRO_LIDERES_LANDING_HEADLINE = 'Imagine a sua equipe falando com 10X mais pessoas, de forma mais eficiente e eficaz. O que aconteceria com o seu negócio nos próximos 30 dias?'
 
 export const PRO_LIDERES_LANDING_LEAD = ''
 

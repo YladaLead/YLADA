@@ -16,6 +16,19 @@ import {
   PRO_LIDERES_LANDING_SECONDARY_CTA,
 } from '@/lib/pro-lideres-landing-content'
 
+function renderHeadline(text: string) {
+  const token = '10X'
+  const idx = text.indexOf(token)
+  if (idx === -1) return text
+  return (
+    <>
+      {text.slice(0, idx)}
+      <span className="pl-landing__title-highlight">{token}</span>
+      {text.slice(idx + token.length)}
+    </>
+  )
+}
+
 function WhatsappIcon() {
   return (
     <svg className="pl-landing__wa-icon" viewBox="0 0 24 24" aria-hidden fill="currentColor">
@@ -47,7 +60,7 @@ export function ProLideresHomeBody() {
       <div className="pl-landing__wrap">
         <header className="pl-landing__hero">
           <p className="pl-landing__eyebrow">Ylada Pro Líderes</p>
-          <h1 className="pl-landing__title">{PRO_LIDERES_LANDING_HEADLINE}</h1>
+          <h1 className="pl-landing__title">{renderHeadline(PRO_LIDERES_LANDING_HEADLINE)}</h1>
           {PRO_LIDERES_LANDING_LEAD && (
             <p className="pl-landing__lead">{PRO_LIDERES_LANDING_LEAD}</p>
           )}

@@ -98,6 +98,13 @@
   letter-spacing: -0.02em;
 }
 
+.pl-landing__title-highlight {
+  color: var(--pl-navy-accent);
+  font-weight: 900;
+  font-size: 1.15em;
+  white-space: nowrap;
+}
+
 .pl-landing__lead {
   margin: 0;
   font-size: 1rem;
