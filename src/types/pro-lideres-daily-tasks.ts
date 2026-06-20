@@ -11,7 +11,7 @@ export type ProLideresDailyTaskRow = {
   sort_order: number
   /** Quando true, o membro registra uma quantidade nesta tarefa (ex.: nº de pessoas). */
   count_enabled: boolean
-  /** Meta de quantidade (ex.: 10). Ao bater/passar, a conclusão é gerada automaticamente. */
+  /** Meta de quantidade (ex.: 10), exibida ao membro como referência. */
   count_goal: number | null
   /** Rótulo da unidade exibido ao lado do número (ex.: "pessoas"). Opcional. */
   count_label: string | null

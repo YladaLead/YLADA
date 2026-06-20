@@ -56,7 +56,7 @@ export async function PUT(request: NextRequest) {
 
   const { data: taskRows, error: taskErr } = await supabaseAdmin
     .from('pro_lideres_daily_tasks')
-    .select('id, execution_weekdays, count_enabled')
+    .select('id, execution_weekdays')
     .eq('leader_tenant_id', tenantId)
 
   if (taskErr) {
@@ -64,33 +64,30 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Erro ao carregar tarefas.' }, { status: 500 })
   }
 
-  const tasks = (taskRows ?? []) as Pick<
-    ProLideresDailyTaskRow,
-    'id' | 'execution_weekdays' | 'count_enabled'
-  >[]
+  const tasks = (taskRows ?? []) as Pick<ProLideresDailyTaskRow, 'id' | 'execution_weekdays'>[]
   const taskById = new Map(tasks.map((t) => [t.id, t]))
   const dow = weekdayFromYmd(dateStr)
 
-  // Tarefas com contador são geridas pelo endpoint /count (a conclusão vem da meta).
-  // Este checklist mexe apenas nas tarefas SEM contador.
-  const nonCounterTaskIds = tasks.filter((t) => !t.count_enabled).map((t) => t.id)
+  const applicableTaskIds = tasks
+    .filter((t) => (t.execution_weekdays ?? []).includes(dow))
+    .map((t) => t.id)
 
   const validIds: string[] = []
   for (const id of ids) {
     const t = taskById.get(id)
-    if (!t || t.count_enabled) continue
+    if (!t) continue
     const days = t.execution_weekdays ?? []
     if (days.includes(dow)) validIds.push(id)
   }
 
-  if (nonCounterTaskIds.length > 0) {
+  if (applicableTaskIds.length > 0) {
     const { error: delErr } = await supabaseAdmin
       .from('pro_lideres_daily_task_completions')
       .delete()
       .eq('leader_tenant_id', tenantId)
       .eq('member_user_id', user.id)
       .eq('completed_on', dateStr)
-      .in('task_id', nonCounterTaskIds)
+      .in('task_id', applicableTaskIds)
 
     if (delErr) {
       console.error('[daily-tasks today PUT delete]', delErr)

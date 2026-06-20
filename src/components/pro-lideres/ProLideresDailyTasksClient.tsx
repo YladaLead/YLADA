@@ -365,72 +365,90 @@ function generateShareImage(
   return dataUrl
 }
 
-/** Linha de tarefa COM contador: o membro digita quantos fez; bate a meta → ponto. */
+/** Linha de tarefa com contador: checkbox fez/não fez + campo para digitar a quantidade. */
 function CounterTaskRow({
   task,
+  checked,
   quantity,
   saving,
-  onSave,
+  savingToday,
+  onToggle,
+  onSaveQuantity,
 }: {
   task: ProLideresDailyTaskRow
+  checked: boolean
   quantity: number
   saving: boolean
-  onSave: (qty: number) => void
+  savingToday: boolean
+  onToggle: () => void
+  onSaveQuantity: (qty: number) => void
 }) {
   const [draft, setDraft] = useState<string>(String(quantity))
 
-  // Mantém o input em sincronia quando a quantidade salva muda por fora.
   useEffect(() => {
     setDraft(String(quantity))
   }, [quantity])
 
   const goal = task.count_goal
   const unit = task.count_label?.trim() || ''
-  const met = goal != null && quantity >= goal
 
   function commit(next: number) {
     const q = Math.max(0, Math.min(100000, Math.floor(next) || 0))
     setDraft(String(q))
-    if (q !== quantity) onSave(q)
+    if (q !== quantity) onSaveQuantity(q)
   }
 
   return (
     <li
-      className={`relative flex min-h-[64px] select-none flex-col gap-3 overflow-hidden rounded-xl border p-4 shadow-sm ${
-        met ? 'border-emerald-200 bg-emerald-50/70' : 'border-gray-200 bg-white'
+      onClick={() => !savingToday && onToggle()}
+      className={`relative flex cursor-pointer select-none items-start gap-2 overflow-hidden rounded-xl border p-3 transition-all active:scale-[0.985] sm:gap-3 sm:p-4 ${
+        checked
+          ? 'border-emerald-200 bg-emerald-50/70 shadow-sm'
+          : 'border-gray-200 bg-white shadow-sm hover:border-blue-200 hover:shadow-md'
       }`}
     >
-      <div className={`absolute inset-y-0 left-0 w-1 ${met ? 'bg-emerald-400' : 'bg-blue-300'}`} />
+      <div className={`absolute inset-y-0 left-0 w-1 transition-all ${checked ? 'bg-emerald-400' : 'bg-transparent'}`} />
 
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className={`text-[15px] font-medium leading-snug ${met ? 'text-emerald-900' : 'text-gray-900'}`}>
-            {task.title}
-          </p>
-          {task.description && (
-            <p className="mt-1.5 text-sm leading-relaxed text-blue-600">{task.description}</p>
-          )}
-        </div>
-        <span className={`shrink-0 self-start rounded-full px-2.5 py-1 text-xs font-bold ${ptsBadgeClass(task.points, met)}`}>
-          +{task.points} pts
-        </span>
+      <div
+        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all sm:h-6 sm:w-6 ${
+          checked ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300 bg-white'
+        }`}
+      >
+        {checked && (
+          <svg className="h-3 w-3 text-white sm:h-3.5 sm:w-3.5" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
+          </svg>
+        )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex items-center overflow-hidden rounded-xl border border-gray-300 bg-white">
-          <button
-            type="button"
-            aria-label="Diminuir"
-            onClick={() => commit(quantity - 1)}
-            className="flex h-11 w-11 items-center justify-center text-xl font-bold text-gray-600 hover:bg-gray-50 active:scale-95"
-          >
-            −
-          </button>
+      <div className="min-w-0 flex-1 pr-1">
+        <p
+          className={`text-sm font-medium leading-snug transition-colors sm:text-[15px] ${
+            checked ? 'text-gray-400 line-through decoration-emerald-400' : 'text-gray-900'
+          }`}
+        >
+          {task.title}
+        </p>
+        {task.description && !checked && (
+          <p className="mt-1 text-xs leading-snug text-blue-600 sm:mt-1.5 sm:text-sm sm:leading-relaxed">{task.description}</p>
+        )}
+      </div>
+
+      <div className="flex shrink-0 flex-col items-end gap-1">
+        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold transition-colors sm:px-2.5 sm:py-1 sm:text-xs ${ptsBadgeClass(task.points, checked)}`}>
+          +{task.points} pts
+        </span>
+
+        <div
+          className="flex items-center gap-0.5"
+          onClick={(e) => e.stopPropagation()}
+        >
           <input
             type="number"
             inputMode="numeric"
             min={0}
             max={100000}
+            aria-label={unit ? `Quantidade em ${unit}` : 'Quantidade feita'}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onBlur={() => commit(Number(draft))}
@@ -440,32 +458,14 @@ function CounterTaskRow({
                 ;(e.target as HTMLInputElement).blur()
               }
             }}
-            className="h-11 w-16 border-x border-gray-200 text-center text-lg font-bold tabular-nums text-gray-900 focus:outline-none"
+            className="h-7 w-9 rounded-md border border-gray-300 bg-white px-0.5 text-center text-xs font-bold tabular-nums text-gray-900 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 sm:h-8 sm:w-10 sm:rounded-lg sm:text-sm"
           />
-          <button
-            type="button"
-            aria-label="Aumentar"
-            onClick={() => commit(quantity + 1)}
-            className="flex h-11 w-11 items-center justify-center text-xl font-bold text-blue-700 hover:bg-blue-50 active:scale-95"
-          >
-            +
-          </button>
-        </div>
-
-        <div className="min-w-0 flex-1">
-          {goal != null ? (
-            <span className={`text-sm font-bold ${met ? 'text-emerald-700' : 'text-gray-700'}`}>
-              {quantity} / {goal}
-              {unit ? ` ${unit}` : ''}
-              {met && <span className="ml-1.5 font-semibold">✓ meta batida</span>}
-            </span>
-          ) : (
-            <span className="text-sm font-bold text-gray-700">
-              {quantity}
-              {unit ? ` ${unit}` : ''}
+          {goal != null && (
+            <span className="text-[10px] font-semibold tabular-nums text-gray-500 sm:text-xs">
+              /{goal}
             </span>
           )}
-          {saving && <span className="ml-2 text-xs font-medium text-blue-600">salvando…</span>}
+          {saving && <span className="text-[10px] font-medium text-blue-600">…</span>}
         </div>
       </div>
     </li>
@@ -559,16 +559,9 @@ export function ProLideresDailyTasksClient() {
       const json = await res.json().catch(() => ({}))
       if (!res.ok) return
       const payload = json as ApiGet
-      const counterTaskIds = new Set(
-        (payload.tasks ?? []).filter((t) => t.count_enabled).map((t) => t.id)
-      )
       const completions = payload.completions ?? []
-      // O checklist (draft/saved) só guarda tarefas SEM contador; as com contador
-      // são refletidas por todayCounts e a conclusão delas vem da meta.
       const done = new Set(
-        completions
-          .filter((c) => c.member_user_id === myUserId && !counterTaskIds.has(c.task_id))
-          .map((c) => c.task_id)
+        completions.filter((c) => c.member_user_id === myUserId).map((c) => c.task_id)
       )
       setTodayDraft(done)
       setTodaySaved(new Set(done))
@@ -827,7 +820,8 @@ export function ProLideresDailyTasksClient() {
     setSavingEdits(true)
     setError(null)
     try {
-      for (const row of taskRows) {
+      for (let i = 0; i < taskRows.length; i++) {
+        const row = taskRows[i]
         const orig = data.tasks.find((t) => t.id === row.id)
         if (!orig) continue
         const pts = Math.min(100000, Math.max(0, Math.floor(Number(row.points) || 0)))
@@ -837,13 +831,15 @@ export function ProLideresDailyTasksClient() {
         const cEnabled = row.countEnabled
         const cGoal = cEnabled ? (Math.floor(Number(row.countGoal)) >= 1 ? Math.min(100000, Math.floor(Number(row.countGoal))) : null) : null
         const cLabel = cEnabled ? (row.countLabel.trim().slice(0, 40) || null) : null
+        const sortOrder = i
         const same =
           orig.points === pts &&
           orig.title === tit &&
           (orig.description ?? '') === (descNorm ?? '') &&
           orig.count_enabled === cEnabled &&
           (orig.count_goal ?? null) === cGoal &&
-          (orig.count_label ?? null) === cLabel
+          (orig.count_label ?? null) === cLabel &&
+          orig.sort_order === sortOrder
         if (same) continue
         const res = await fetch(`/api/pro-lideres/daily-tasks/${encodeURIComponent(row.id)}`, {
           method: 'PATCH',
@@ -857,6 +853,7 @@ export function ProLideresDailyTasksClient() {
             count_enabled: cEnabled,
             count_goal: cGoal,
             count_label: cLabel,
+            sort_order: sortOrder,
           }),
         })
         const j = await res.json().catch(() => ({}))
@@ -896,25 +893,14 @@ export function ProLideresDailyTasksClient() {
   const applicableToday =
     data?.tasks.filter((t) => (t.execution_weekdays ?? []).includes(todayDow)) ?? []
 
-  // Tarefa com contador conta como feita quando bate a meta (count_goal).
-  const counterMet = useCallback(
-    (t: ProLideresDailyTaskRow): boolean =>
-      t.count_enabled && t.count_goal != null && (todayCounts[t.id] ?? 0) >= t.count_goal,
-    [todayCounts]
-  )
-
-  // "Feito" combinando o check (tarefa normal) com a meta batida (tarefa com contador).
   const isDoneDraft = useCallback(
-    (t: ProLideresDailyTaskRow): boolean => (t.count_enabled ? counterMet(t) : todayDraft.has(t.id)),
-    [counterMet, todayDraft]
+    (t: ProLideresDailyTaskRow): boolean => todayDraft.has(t.id),
+    [todayDraft]
   )
   const isDoneSaved = useCallback(
-    (t: ProLideresDailyTaskRow): boolean => (t.count_enabled ? counterMet(t) : todaySaved.has(t.id)),
-    [counterMet, todaySaved]
+    (t: ProLideresDailyTaskRow): boolean => todaySaved.has(t.id),
+    [todaySaved]
   )
-
-  // Apenas tarefas SEM contador participam do botão "Salvar execução".
-  const applicableNonCounter = applicableToday.filter((t) => !t.count_enabled)
 
   const todayHasUnsavedChanges = useMemo(
     () => !taskIdSetsEqual(todayDraft, todaySaved),
@@ -922,7 +908,7 @@ export function ProLideresDailyTasksClient() {
   )
 
   const canSaveToday =
-    applicableNonCounter.length > 0 && !savingToday && (!todaySubmitted || todayHasUnsavedChanges)
+    applicableToday.length > 0 && !savingToday && (!todaySubmitted || todayHasUnsavedChanges)
 
   // Progresso ao vivo: conta tarefas feitas (check + metas batidas) e seus pontos.
   const todayDraftCount = applicableToday.filter((t) => isDoneDraft(t)).length
@@ -973,6 +959,19 @@ export function ProLideresDailyTasksClient() {
 
   function updateTaskRow(id: string, patch: Partial<TaskRowEdit>) {
     setTaskRows((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } : r)))
+  }
+
+  function moveTaskRow(id: string, dir: -1 | 1) {
+    setTaskRows((rows) => {
+      const idx = rows.findIndex((r) => r.id === id)
+      if (idx < 0) return rows
+      const j = idx + dir
+      if (j < 0 || j >= rows.length) return rows
+      const copy = [...rows]
+      const [it] = copy.splice(idx, 1)
+      copy.splice(j, 0, it)
+      return copy
+    })
   }
 
   const savedDoneIds = new Set<string>(applicableToday.filter((t) => isDoneSaved(t)).map((t) => t.id))
@@ -1179,7 +1178,7 @@ export function ProLideresDailyTasksClient() {
           </div>
 
           {/* Lista de tarefas */}
-          <ul className="space-y-2 bg-gray-50/80 p-3 sm:p-4">
+          <ul className="space-y-1.5 bg-gray-50/80 p-2.5 sm:space-y-2 sm:p-4">
             {applicableToday.length === 0 ? (
               <li className="rounded-xl border border-dashed border-gray-200 px-4 py-10 text-center text-sm text-gray-400">
                 Sem tarefas para hoje.
@@ -1191,9 +1190,12 @@ export function ProLideresDailyTasksClient() {
                     <CounterTaskRow
                       key={t.id}
                       task={t}
+                      checked={todayDraft.has(t.id)}
                       quantity={todayCounts[t.id] ?? 0}
                       saving={!!countSaving[t.id]}
-                      onSave={(qty) => void saveCount(t.id, qty)}
+                      savingToday={savingToday}
+                      onToggle={() => toggleTodayTask(t.id)}
+                      onSaveQuantity={(qty) => void saveCount(t.id, qty)}
                     />
                   )
                 }
@@ -1202,7 +1204,7 @@ export function ProLideresDailyTasksClient() {
                   <li
                     key={t.id}
                     onClick={() => !savingToday && void toggleTodayTask(t.id)}
-                    className={`relative flex min-h-[64px] cursor-pointer select-none items-start gap-3 overflow-hidden rounded-xl border p-4 transition-all active:scale-[0.985] ${
+                    className={`relative flex cursor-pointer select-none items-start gap-2 overflow-hidden rounded-xl border p-3 transition-all active:scale-[0.985] sm:gap-3 sm:p-4 ${
                       checked
                         ? 'border-emerald-200 bg-emerald-50/70 shadow-sm'
                         : 'border-gray-200 bg-white shadow-sm hover:border-blue-200 hover:shadow-md'
@@ -1214,13 +1216,13 @@ export function ProLideresDailyTasksClient() {
                     }`} />
 
                     {/* Checkbox */}
-                    <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
+                    <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all sm:h-6 sm:w-6 ${
                       checked
                         ? 'border-emerald-500 bg-emerald-500'
                         : 'border-gray-300 bg-white'
                     }`}>
                       {checked && (
-                        <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
+                        <svg className="h-3 w-3 text-white sm:h-3.5 sm:w-3.5" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
                         </svg>
                       )}
@@ -1228,18 +1230,18 @@ export function ProLideresDailyTasksClient() {
 
                     {/* Texto */}
                     <div className="min-w-0 flex-1">
-                      <p className={`text-[15px] font-medium leading-snug transition-colors ${
+                      <p className={`text-sm font-medium leading-snug transition-colors sm:text-[15px] ${
                         checked ? 'text-gray-400 line-through decoration-emerald-400' : 'text-gray-900'
                       }`}>
                         {t.title}
                       </p>
                       {t.description && !checked && (
-                        <p className="mt-1.5 text-sm leading-relaxed text-blue-600">{t.description}</p>
+                        <p className="mt-1 text-xs leading-snug text-blue-600 sm:mt-1.5 sm:text-sm sm:leading-relaxed">{t.description}</p>
                       )}
                     </div>
 
                     {/* Badge de pontos — cor reflete o valor */}
-                    <span className={`shrink-0 self-start rounded-full px-2.5 py-1 text-xs font-bold transition-colors ${ptsBadgeClass(t.points, checked)}`}>
+                    <span className={`shrink-0 self-start rounded-full px-2 py-0.5 text-[10px] font-bold transition-colors sm:px-2.5 sm:py-1 sm:text-xs ${ptsBadgeClass(t.points, checked)}`}>
                       +{t.points} pts
                     </span>
                   </li>
@@ -1267,7 +1269,7 @@ export function ProLideresDailyTasksClient() {
               </p>
             )}
 
-            {applicableNonCounter.length > 0 && (
+            {applicableToday.length > 0 && (
               <button
                 type="button"
                 disabled={!canSaveToday}
@@ -1431,8 +1433,8 @@ export function ProLideresDailyTasksClient() {
               <div className="border-b border-gray-100 px-4 py-4 sm:px-5">
                 <p className="text-sm font-semibold text-gray-900">Criar tarefas diárias</p>
                 <p className="mt-1 text-xs text-gray-500">
-                  Cada linha é uma tarefa no cartão do membro. Edite à vontade e salve as alterações; use + para
-                  adicionar e ✕ para remover.
+                  Cada linha é uma tarefa no cartão do membro. Edite à vontade e salve as alterações; use ↑ ↓ para
+                  mudar a ordem, + para adicionar e ✕ para remover.
                 </p>
               </div>
 
@@ -1442,7 +1444,7 @@ export function ProLideresDailyTasksClient() {
                     Ainda não há tarefas. Adicione a primeira linha abaixo.
                   </li>
                 ) : (
-                  taskRows.map((row) => (
+                  taskRows.map((row, idx) => (
                     <li key={row.id} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start sm:px-5">
                       <label className="block w-20 shrink-0">
                         <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-gray-500">
@@ -1519,14 +1521,34 @@ export function ProLideresDailyTasksClient() {
                                 </label>
                               </div>
                               <p className="mt-1.5 text-[10px] leading-snug text-gray-500">
-                                Ao bater a meta, o ponto é dado automático. Abaixo da meta, o número fica
-                                registrado para você ver no painel.
+                                O membro marca se fez ou não e digita quantas fez. O número fica registrado
+                                para você ver no painel de execução.
                               </p>
                             </>
                           )}
                         </div>
                       </div>
-                      <div className="flex shrink-0 justify-end sm:pt-6">
+                      <div className="flex shrink-0 items-center justify-end gap-1.5 sm:pt-6">
+                        <div className="flex flex-col gap-1">
+                          <button
+                            type="button"
+                            title="Mover para cima"
+                            disabled={idx === 0}
+                            onClick={() => moveTaskRow(row.id, -1)}
+                            className="flex h-7 w-9 items-center justify-center rounded-md border border-gray-300 text-sm font-bold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            title="Mover para baixo"
+                            disabled={idx === taskRows.length - 1}
+                            onClick={() => moveTaskRow(row.id, 1)}
+                            className="flex h-7 w-9 items-center justify-center rounded-md border border-gray-300 text-sm font-bold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"
+                          >
+                            ↓
+                          </button>
+                        </div>
                         <button
                           type="button"
                           title="Remover tarefa"
@@ -1631,8 +1653,8 @@ export function ProLideresDailyTasksClient() {
                             </label>
                           </div>
                           <p className="mt-1.5 text-[10px] leading-snug text-gray-500">
-                            Ao bater a meta, o ponto é dado automático. Abaixo da meta, o número fica
-                            registrado para você ver no painel.
+                            O membro marca se fez ou não e digita quantas fez. O número fica registrado
+                            para você ver no painel de execução.
                           </p>
                         </>
                       )}

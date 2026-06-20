@@ -18,9 +18,8 @@ function parseYmd(s: string): string | null {
  * PUT: registrar a quantidade do membro numa tarefa com contador, num dia civil.
  * Body: { date: "YYYY-MM-DD", quantity: number }
  *
- * Regra: grava sempre a quantidade. Se a tarefa tem meta (count_goal) e
- * quantity >= meta → gera a conclusão (ponto). Abaixo da meta → remove a conclusão
- * (o número fica gravado, mas sem ponto).
+ * Grava a quantidade para o líder consultar. A conclusão (ponto) vem do checklist
+ * do dia (PUT /daily-tasks/today), quando o membro marca fez/não fez.
  */
 export async function PUT(request: NextRequest, ctx: RouteCtx) {
   const auth = await requireApiAuth(request)
@@ -103,40 +102,5 @@ export async function PUT(request: NextRequest, ctx: RouteCtx) {
     return NextResponse.json({ error: 'Erro ao guardar a quantidade.' }, { status: 500 })
   }
 
-  // 2) Sincroniza a conclusão (ponto) com a meta.
-  const goal = task.count_goal
-  const metGoal = goal != null && quantity >= goal
-
-  if (metGoal) {
-    // Garante a conclusão; ignora conflito (já concluída).
-    const { error: insErr } = await supabaseAdmin
-      .from('pro_lideres_daily_task_completions')
-      .upsert(
-        {
-          leader_tenant_id: tenantId,
-          task_id: taskId,
-          member_user_id: user.id,
-          completed_on: dateStr,
-        },
-        { onConflict: 'task_id,member_user_id,completed_on', ignoreDuplicates: true }
-      )
-    if (insErr) {
-      console.error('[daily-tasks count PUT completion insert]', insErr)
-      return NextResponse.json({ error: 'Erro ao registar a conclusão.' }, { status: 500 })
-    }
-  } else {
-    const { error: delErr } = await supabaseAdmin
-      .from('pro_lideres_daily_task_completions')
-      .delete()
-      .eq('leader_tenant_id', tenantId)
-      .eq('task_id', taskId)
-      .eq('member_user_id', user.id)
-      .eq('completed_on', dateStr)
-    if (delErr) {
-      console.error('[daily-tasks count PUT completion delete]', delErr)
-      return NextResponse.json({ error: 'Erro ao atualizar a conclusão.' }, { status: 500 })
-    }
-  }
-
-  return NextResponse.json({ ok: true, quantity, done: metGoal })
+  return NextResponse.json({ ok: true, quantity })
 }
