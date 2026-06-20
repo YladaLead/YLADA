@@ -107,6 +107,12 @@ export interface PapelDaPergunta {
     inverter?: boolean
     /** mapa opção→peso para múltipla escolha; escala usa o valor direto×peso. */
     pesosPorOpcao?: Record<string, number>
+    /**
+     * Qual sinal do método da Aula 2 esta pergunta alimenta (Chat5 Fase2 §4/§5).
+     * A prontidão PRONTA (20%) exige os três sinais positivos; faltou um → AINDA NÃO (80%).
+     * É o que separa a leitura de DOR (RISK/arquétipo) da leitura de PRONTIDÃO.
+     */
+    sinal?: 'problema' | 'urgencia' | 'abertura'
   }
 }
 
@@ -177,6 +183,14 @@ export interface GanchoIndicacao {
 export interface Handoff {
   /** template do contrato; vocabulário vem do nicho. */
   templateId: 'handoff-padrao'
+  /**
+   * Captação/armazenamento da lead (Chat5 Fase2 §7/§10.3). Padrão Pró-Líderes: false.
+   * MARCADOR de intenção do fluxo — a FONTE DA VERDADE dos flags (captaProprios /
+   * permiteLiderados / flag do liderado) é a config do owner/tenant, não o fluxo.
+   * O "time" da lead (pronta × ainda-não) chega NOS DOIS modos: desligado → no prefill;
+   * ligado → carimbo no painel do liderado e do líder.
+   */
+  captacaoDados?: boolean
   inclui: {
     resumoRespostas: true //  sempre
     classificacao2080: true // sempre
