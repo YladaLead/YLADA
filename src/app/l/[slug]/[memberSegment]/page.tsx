@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import PublicLinkView from '@/components/ylada/PublicLinkView'
+import NativeAppBackButton from '@/components/ylada/NativeAppBackButton'
 import { fetchPublicLinkPayload } from '@/app/l/[slug]/public-link-utils'
 
 export const dynamic = 'force-dynamic'
@@ -29,5 +30,10 @@ export default async function PublicLinkMemberSegmentPage({ params, searchParams
   const payload = await fetchPublicLinkPayload(slug, { memberShareSegment: memberSegment })
   const shareToken = plMFromQuery ?? payload.proLideresAttributionToken ?? null
 
-  return <PublicLinkView payload={payload} shareAttributionToken={shareToken} />
+  return (
+    <>
+      <NativeAppBackButton />
+      <PublicLinkView payload={payload} shareAttributionToken={shareToken} />
+    </>
+  )
 }

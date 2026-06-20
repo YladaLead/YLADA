@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import PublicLinkView from '@/components/ylada/PublicLinkView'
+import NativeAppBackButton from '@/components/ylada/NativeAppBackButton'
 import { fetchPublicLinkPayload } from '@/app/l/[slug]/public-link-utils'
 
 function pickPlM(sp: Record<string, string | string[] | undefined>): string | null {
@@ -35,7 +36,12 @@ export default async function PerfilFluxoPublicPage({ params, searchParams }: Pa
   const payload = await fetchPublicLinkPayload(linkSlug, plM ? { memberShareSegment: plM } : undefined)
   const shareTok = payload.proLideresAttributionToken ?? plM
 
-  return <PublicLinkView payload={payload} shareAttributionToken={shareTok} />
+  return (
+    <>
+      <NativeAppBackButton />
+      <PublicLinkView payload={payload} shareAttributionToken={shareTok} />
+    </>
+  )
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
