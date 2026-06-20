@@ -3,6 +3,7 @@ import { getClassifierModel, historyHasOutbound } from './carol-reply-profile'
 import { messageHasButtonReply } from './ad-lead-flow'
 import { isCarolInteractiveReply } from './parse-interactive'
 import { isAutoResponse } from './auto-response'
+import { isRealUserMessage } from './conversation-insights'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -37,6 +38,19 @@ function carolAlreadySpoke(
   return history.some((m) => m.role === 'assistant')
 }
 
+/**
+ * Já existe uma pessoa REAL conversando nesta conversa? (mensagem humana anterior,
+ * fora auto-resposta/sistema). Se sim, as próximas respostas dela NUNCA devem ser
+ * tratadas como robô — o classificador só serve pra filtrar o bot da clínica no
+ * começo. Sem isso, um "Nada" curto no meio da conversa era lido como auto-resposta
+ * e a Carol calava bem na hora que a dona se abria.
+ */
+export function hasEstablishedHumanExchange(
+  history: { role: string; content: string }[]
+): boolean {
+  return history.some((m) => m.role === 'user' && isRealUserMessage(m.content))
+}
+
 /** Resposta humana curta pós-outbound — regras bastam (economiza classificador). */
 function isSimpleOutboundHumanReply(
   text: string,
@@ -58,6 +72,8 @@ export function shouldClassifyWithAi(
 ): boolean {
   if (messageHasButtonReply(text)) return false
   if (isCarolInteractiveReply(text)) return false
+  // Conversa humana já em curso: não reclassificar como robô (evita calar no meio).
+  if (hasEstablishedHumanExchange(history)) return false
   if (isSimpleOutboundHumanReply(text, history)) return false
   // Outbound ou mensagem longa/link — sempre classificar
   if (historyHasOutbound(history) || looksAmbiguousForRules(text)) return true

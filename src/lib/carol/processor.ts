@@ -20,6 +20,7 @@ import {
 import { compactHistoryForPrompt } from './prompt-history'
 import {
   classifyInboundMessage,
+  hasEstablishedHumanExchange,
   inboundKindContextNote,
   shouldClassifyWithAi,
   type InboundKind,
@@ -519,11 +520,15 @@ export async function ingestInboundMessage(
     }
   }
 
-  if (isAutoResponse(text)) {
+  const history = await getConversationHistory(conversation.id, 12)
+  const conversaHumanaEmCurso = hasEstablishedHumanExchange(history)
+
+  // Auto-resposta de bot da clínica: só silencia no COMEÇO. Se uma pessoa real já
+  // está conversando, nunca tratar a resposta dela como robô (mesmo curta tipo "Nada").
+  if (!conversaHumanaEmCurso && isAutoResponse(text)) {
     return await handleAutoResponseDetected(conversation.id, from, text)
   }
 
-  const history = await getConversationHistory(conversation.id, 12)
   let inboundKind: InboundKind | undefined
 
   if (shouldClassifyWithAi(text, history)) {

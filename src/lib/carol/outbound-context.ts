@@ -65,7 +65,7 @@ export function countRealUserMessages(
 /** Recusa clara na primeira resposta — não adianta empurrar botões de dor. */
 export function isRejectionReply(text: string): boolean {
   const t = text.toLowerCase().replace(/\s+/g, ' ').trim()
-  return /(n[ãa]o\s+quero|n[ãa]o\s+tenho\s+interesse|sem\s+interesse|n[ãa]o,?\s+obrigad[oa]|n[ãa]o\s+obrigad[oa]|dispenso|n[ãa]o\s+preciso|n[ãa]o\s+desejo|me\s+exclui|descadastr|para\s+de\s+(mandar|enviar)|pare\s+de\s+(mandar|enviar))/.test(t)
+  return /(n[ãa]o\s+quero|n[ãa]o\s+tenho\s+interesse|sem\s+interesse|n[ãa]o,?\s+(muito\s+)?obrigad[oa]|dispenso|n[ãa]o\s+preciso|n[ãa]o\s+desejo|me\s+exclui|descadastr|para\s+de\s+(mandar|enviar)|pare\s+de\s+(mandar|enviar))/.test(t)
 }
 
 /** Pergunta de identidade ("quem é você / qual unidade / de onde") — responder, não mandar botões. */
