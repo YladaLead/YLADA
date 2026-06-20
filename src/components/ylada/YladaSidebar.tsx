@@ -12,7 +12,6 @@ import {
 } from '@/config/ylada-areas'
 import { buildYladaReferralWhatsappHref } from '@/lib/ylada-referral-whatsapp'
 import { useAuth } from '@/hooks/useAuth'
-import { useIsIOSNativeApp } from '@/lib/native-app'
 
 const YLADA_LOGO = '/images/logo/ylada/novo/ylada-horizontal-claro.png'
 
@@ -35,8 +34,6 @@ export default function YladaSidebar({
   const prefix = getYladaAreaPathPrefix(areaCodigo)
   const { signOut, userProfile } = useAuth()
   const isAdmin = userProfile?.is_admin === true
-  // App iOS (modelo B2B): esconder o item "Assinatura" do menu — sem superfície de plano no app.
-  const isIOSApp = useIsIOSNativeApp()
   const [contaOpen, setContaOpen] = useState(false)
   const [locationHash, setLocationHash] = useState('')
   const contaRouteKeyRef = useRef<string | null>(null)
@@ -229,7 +226,7 @@ export default function YladaSidebar({
               </span>
             </button>
             {contaOpen && (
-              <div className="mt-1 space-y-0.5">{contaGroup.items.filter((item) => !(isIOSApp && item.key === 'assinatura')).map((item) => renderItemLink(item))}</div>
+              <div className="mt-1 space-y-0.5">{contaGroup.items.map((item) => renderItemLink(item))}</div>
             )}
           </div>
         )}
