@@ -9,7 +9,7 @@ import { useWellnessProfile } from '@/hooks/useWellnessProfile'
 import {
   getCoachBemEstarSalesFluxos,
 } from '@/lib/coach-bem-estar/coach-bem-estar-fluxos'
-import { getCoachBemEstarCalculadorasEspelhoProLideres } from '@/config/coach-bem-estar-pro-lideres-calculadoras-catalog'
+import { getCoachBemEstarCalculadorasEspelhoProLideres, isHypeCalculadoraFluxoProLideres } from '@/config/coach-bem-estar-pro-lideres-calculadoras-catalog'
 import { getCoachBemEstarOpenGraphImageUrl } from '@/lib/coach-bem-estar/coach-bem-estar-public-link-og'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 
@@ -319,7 +319,12 @@ export function CoachBemEstarQuadroParceriaContent() {
   const catalog = useMemo<ItemQuadro[]>(() => {
     if (!userSlug) return []
 
-    const calculadoras = getCoachBemEstarCalculadorasEspelhoProLideres()
+    // Coach de bem-estar NÃO oferece calculadoras HYPE/Herbalife (consumo-cafeina, custo-energia):
+    // são de origem Herbalife e não têm renderer na rota pública do Coach (davam "Ferramenta não encontrada").
+    // O catálogo é compartilhado com a área Wellness, por isso o filtro é coach-específico (Wellness mantém as hype).
+    const calculadoras = getCoachBemEstarCalculadorasEspelhoProLideres().filter(
+      (c) => !isHypeCalculadoraFluxoProLideres(c.id),
+    )
     const calcIds = new Set(calculadoras.map((c) => c.id))
     const itens: ItemQuadro[] = []
 
