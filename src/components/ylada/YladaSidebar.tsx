@@ -12,6 +12,7 @@ import {
 } from '@/config/ylada-areas'
 import { buildYladaReferralWhatsappHref } from '@/lib/ylada-referral-whatsapp'
 import { useAuth } from '@/hooks/useAuth'
+import { useIsAndroidTWA } from '@/lib/native-app'
 
 const YLADA_LOGO = '/images/logo/ylada/novo/ylada-horizontal-claro.png'
 
@@ -34,6 +35,8 @@ export default function YladaSidebar({
   const prefix = getYladaAreaPathPrefix(areaCodigo)
   const { signOut, userProfile } = useAuth()
   const isAdmin = userProfile?.is_admin === true
+  // Android (TWA): app B2B só-login — esconde o item "Assinatura" do menu.
+  const isTWA = useIsAndroidTWA()
   const [contaOpen, setContaOpen] = useState(false)
   const [locationHash, setLocationHash] = useState('')
   const contaRouteKeyRef = useRef<string | null>(null)
@@ -226,7 +229,7 @@ export default function YladaSidebar({
               </span>
             </button>
             {contaOpen && (
-              <div className="mt-1 space-y-0.5">{contaGroup.items.map((item) => renderItemLink(item))}</div>
+              <div className="mt-1 space-y-0.5">{contaGroup.items.filter((item) => !(isTWA && item.key === 'assinatura')).map((item) => renderItemLink(item))}</div>
             )}
           </div>
         )}

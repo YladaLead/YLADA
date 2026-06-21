@@ -2,18 +2,22 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { isIOSNativeApp } from '@/lib/native-app'
+import { isIOSNativeApp, isAndroidTWA } from '@/lib/native-app'
 import { isPurchasePageRoute } from '@/lib/purchase-routes'
 import NativeAppPaywall from '@/components/ylada/NativeAppPaywall'
+import NativeAppNotice from '@/components/ylada/NativeAppNotice'
+import AndroidWebCheckoutNotice from '@/components/ylada/AndroidWebCheckoutNotice'
+import { ANDROID_WEB_CHECKOUT_ENABLED } from '@/config/android-checkout'
 
 /**
- * Guard global (montado no layout raiz). Dentro do app iOS, qualquer rota de
- * compra/assinatura é substituída pelo PAYWALL NATIVO (In-App Purchase via
- * RevenueCat/StoreKit) — não pelas páginas de checkout web. Isso atende a
- * guideline 3.1.1 da Apple (a venda de conteúdo digital usado no app precisa
- * ser via IAP) e ao mesmo tempo permite o app vender o plano. Modelo IAP-tampão
- * (decisão 20/06 noite): o IAP existe e é o único caminho de compra DENTRO do
- * app, o que torna legal acessar no app o plano contratado por fora (3.1.3b).
+ * Guard global (montado no layout raiz). Em qualquer rota de compra/assinatura:
+ *
+ * - **iOS (Capacitor):** mostra o PAYWALL NATIVO (In-App Purchase) — modelo
+ *   IAP-tampão: o IAP existe e é o único caminho de compra dentro do app, o que
+ *   torna legal acessar o plano contratado por fora (Apple 3.1.3b).
+ * - **Android (TWA):** mostra uma TELA NEUTRA, sem venda. Modelo B2B só-login
+ *   (Slack/Notion): o app não vende nada dentro, então a regra do Google Play
+ *   Billing não se aplica. A venda acontece fora (consultoria/web).
  *
  * Usa `window.Capacitor` (confiável e SEM falso-positivo para web / Instagram /
  * Facebook), então só age dentro do app real. Na web e no Android, nada muda:
@@ -22,13 +26,26 @@ import NativeAppPaywall from '@/components/ylada/NativeAppPaywall'
 export default function NativeAppPurchaseGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [isIOSApp, setIsIOSApp] = useState(false)
+  const [isTWA, setIsTWA] = useState(false)
 
   useEffect(() => {
     setIsIOSApp(isIOSNativeApp())
+    setIsTWA(isAndroidTWA())
   }, [])
 
-  if (isIOSApp && isPurchasePageRoute(pathname || '')) {
+  const onPurchaseRoute = isPurchasePageRoute(pathname || '')
+
+  if (isIOSApp && onPurchaseRoute) {
     return <NativeAppPaywall homeHref="/pt" />
+  }
+  if (isTWA && onPurchaseRoute) {
+    // Padrão (A): tela neutra, sem venda. Flag ON (B): botão "Assinar no site"
+    // que abre o checkout web num navegador externo (ver android-checkout.ts).
+    return ANDROID_WEB_CHECKOUT_ENABLED ? (
+      <AndroidWebCheckoutNotice homeHref="/pt" />
+    ) : (
+      <NativeAppNotice homeHref="/pt" />
+    )
   }
 
   return <>{children}</>

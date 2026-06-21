@@ -8,6 +8,7 @@ import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { translateError } from '@/lib/error-messages'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import YladaCancelRetentionModal from '@/components/ylada/YladaCancelRetentionModal'
+import { useIsAndroidTWA } from '@/lib/native-app'
 
 interface YladaConfiguracaoContentProps {
   areaCodigo: string
@@ -18,6 +19,8 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
   const { user, signOut } = useAuth()
   const authenticatedFetch = useAuthenticatedFetch()
   const prefix = getYladaAreaPathPrefix(areaCodigo)
+  // Android (TWA): app B2B só-login, sem venda dentro — esconde a seção de assinatura.
+  const isTWA = useIsAndroidTWA()
 
   const [perfil, setPerfil] = useState({
     nome: '',
@@ -545,7 +548,10 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
       )}
 
       {/* Assinatura — status do plano + gerenciar. No app iOS, "Assinar/Ativar plano"
-          leva a /pt/precos, que o guard converte no paywall IAP (modelo IAP-tampão). */}
+          leva a /pt/precos, que o guard converte no paywall IAP (IAP-tampão).
+          No Android (TWA) a seção inteira é escondida (app B2B só-login, sem venda). */}
+      {!isTWA && (
+        <>
       <section id="assinatura" className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
         <h2 className="text-lg font-semibold text-gray-900 mb-1">Assinatura</h2>
         <p className="text-sm text-gray-600 mb-6">
@@ -677,6 +683,8 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
           subscription={{ id: subscription.id }}
           pathPrefix={prefix}
         />
+      )}
+        </>
       )}
 
       {/* Conta */}

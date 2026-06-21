@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
-import { isIOSNativeApp } from '@/lib/native-app'
+import { isNativeApp } from '@/lib/native-app'
 
 /**
  * Portão de consentimento de IA (Apple 5.1.1 / 5.1.2 + LGPD).
@@ -14,9 +14,9 @@ import { isIOSNativeApp } from '@/lib/native-app'
  * nessas ferramentas é enviado a um provedor de IA de terceiros só para gerar a
  * resposta — a Apple exige que isso seja divulgado e consentido.
  *
- * Escopo atual: APENAS o app iOS nativo (Capacitor) — é o que a App Review
- * precisa ver. Para ligar também no Android (TWA) ou na web (LGPD), basta
- * remover/ampliar a checagem `isIOSNativeApp()` abaixo.
+ * Escopo: apps nativos (iOS Capacitor + Android TWA) — fecha a exigência da
+ * App Review (Apple 5.1.1) e atende LGPD/Google. Na web segue sem o portão
+ * (pode ampliar trocando `isNativeApp()` por sempre-true se quiser na web).
  *
  * "Concordo" grava o consentimento (tabela user_consents via /api/consent) e
  * não pergunta de novo. "Agora não" fecha e o app segue funcionando (a IA fica
@@ -36,8 +36,8 @@ export default function AiConsentGate() {
 
   useEffect(() => {
     if (loading || !user || checked) return
-    // Só dentro do app iOS nativo por enquanto (ver doc do componente).
-    if (typeof window === 'undefined' || !isIOSNativeApp()) {
+    // Só dentro de app nativo (iOS Capacitor ou Android TWA) — ver doc do componente.
+    if (typeof window === 'undefined' || !isNativeApp()) {
       setChecked(true)
       return
     }

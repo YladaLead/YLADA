@@ -5,6 +5,7 @@ import Link from 'next/link'
 import YladaAreaShell from './YladaAreaShell'
 import { getYladaAreaPathPrefix, getYladaLeadsPath } from '@/config/ylada-areas'
 import { YLADA_PRO_UPGRADE_PITCH } from '@/config/freemium-limits'
+import { useIsAndroidTWA } from '@/lib/native-app'
 
 type DashboardData = {
   respostas_hoje: number
@@ -40,6 +41,8 @@ export default function PainelPageContent({
   const prefix = getYladaAreaPathPrefix(areaCodigo)
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
+  // Android (TWA): app B2B só-login, sem venda dentro — esconde o pitch de upgrade.
+  const isTWA = useIsAndroidTWA()
 
   useEffect(() => {
     let cancelled = false
@@ -83,8 +86,9 @@ export default function PainelPageContent({
         ) : (
           <>
             {/* Freemium: aviso progressivo para usuários Free. No app iOS o CTA
-                de upgrade leva ao paywall IAP (modelo IAP-tampão). */}
-            {data?.freemium && !data.freemium.is_pro && (
+                de upgrade leva ao paywall IAP (IAP-tampão); no Android (TWA) é
+                escondido — app B2B só-login, sem venda dentro. */}
+            {data?.freemium && !data.freemium.is_pro && !isTWA && (
               <section className="rounded-xl border border-sky-200 bg-sky-50/80 p-5">
                 <p className="text-sm font-medium text-gray-900 mb-1">
                   {data.freemium.whatsapp_clicks_mes ?? 0}/{data.freemium.limite_whatsapp_clicks ?? 10} contatos no WhatsApp este mês
