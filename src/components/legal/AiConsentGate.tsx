@@ -108,16 +108,14 @@ export default function AiConsentGate() {
       aria-live="polite"
       aria-label="Aviso de uso de inteligência artificial"
     >
-      <div className="mx-auto max-w-md rounded-xl border border-gray-200 bg-white p-3.5 shadow-lg">
-        <p className="text-xs leading-relaxed text-gray-600">
-          O YLADA usa inteligência artificial: o que você escreve é enviado a um provedor de IA para gerar
-          as respostas.{' '}
+      <div className="mx-auto max-w-md rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
+        <p className="text-[11px] leading-snug text-gray-500">
+          Usamos IA para gerar respostas; seus textos vão a um provedor de IA.{' '}
           <Link href="/pt/politica-de-privacidade" className="font-medium text-sky-700 underline">
-            Política de Privacidade
+            Privacidade
           </Link>
-          .
         </p>
-        <div className="mt-2.5 flex items-center justify-end gap-1">
+        <div className="mt-2 flex items-center justify-end gap-1">
           <button
             type="button"
             onClick={agoraNao}
