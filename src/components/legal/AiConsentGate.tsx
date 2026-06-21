@@ -102,49 +102,37 @@ export default function AiConsentGate() {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/50 p-4 sm:items-center"
+      className="fixed inset-x-0 bottom-0 z-[9999] px-3"
+      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
       role="dialog"
-      aria-modal="true"
-      aria-labelledby="ai-consent-title"
+      aria-live="polite"
+      aria-label="Aviso de uso de inteligência artificial"
     >
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-        <h2 id="ai-consent-title" className="text-lg font-bold text-gray-900">
-          Este app usa inteligência artificial
-        </h2>
-        <div className="mt-3 space-y-3 text-sm leading-relaxed text-gray-700">
-          <p>
-            O YLADA usa inteligência artificial pra te ajudar a criar diagnósticos, escrever conteúdo e
-            usar o assistente Noel.
-          </p>
-          <p>
-            O que você escreve nessas ferramentas é enviado a um provedor de inteligência artificial só
-            pra gerar a resposta. Evite incluir dados sensíveis de terceiros sem autorização. Detalhes na
-            nossa{' '}
-            <Link
-              href="/pt/politica-de-privacidade"
-              className="font-medium text-sky-700 underline"
-            >
-              Política de Privacidade
-            </Link>
-            .
-          </p>
-        </div>
-        <div className="mt-6 flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={concordar}
-            disabled={submitting}
-            className="w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-sky-700 disabled:opacity-60"
-          >
-            {submitting ? 'Salvando…' : 'Concordo e continuar'}
-          </button>
+      <div className="mx-auto max-w-md rounded-xl border border-gray-200 bg-white p-3.5 shadow-lg">
+        <p className="text-xs leading-relaxed text-gray-600">
+          O YLADA usa inteligência artificial: o que você escreve é enviado a um provedor de IA para gerar
+          as respostas.{' '}
+          <Link href="/pt/politica-de-privacidade" className="font-medium text-sky-700 underline">
+            Política de Privacidade
+          </Link>
+          .
+        </p>
+        <div className="mt-2.5 flex items-center justify-end gap-1">
           <button
             type="button"
             onClick={agoraNao}
             disabled={submitting}
-            className="w-full rounded-xl px-4 py-3 text-sm font-medium text-gray-500 transition-colors hover:text-gray-700 disabled:opacity-60"
+            className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:text-gray-700 disabled:opacity-60"
           >
             Agora não
+          </button>
+          <button
+            type="button"
+            onClick={concordar}
+            disabled={submitting}
+            className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-sky-700 disabled:opacity-60"
+          >
+            {submitting ? 'Salvando…' : 'Concordo'}
           </button>
         </div>
       </div>
