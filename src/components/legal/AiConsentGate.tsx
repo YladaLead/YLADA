@@ -102,35 +102,39 @@ export default function AiConsentGate() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-[9999] px-3"
-      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
+      className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/50 p-4 sm:items-center"
       role="dialog"
-      aria-live="polite"
-      aria-label="Aviso de uso de inteligência artificial"
+      aria-modal="true"
+      aria-labelledby="ai-consent-title"
     >
-      <div className="mx-auto max-w-md rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
-        <p className="text-[11px] leading-snug text-gray-500">
-          Usamos IA para gerar respostas; seus textos vão a um provedor de IA.{' '}
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+        <h2 id="ai-consent-title" className="text-lg font-bold text-gray-900">
+          Inteligência artificial
+        </h2>
+        <p className="mt-3 text-sm leading-relaxed text-gray-700">
+          Para gerar as respostas, o YLADA envia o texto que você escreve à{' '}
+          <span className="font-semibold">OpenAI</span> (provedor de IA). Veja a{' '}
           <Link href="/pt/politica-de-privacidade" className="font-medium text-sky-700 underline">
-            Privacidade
+            Política de Privacidade
           </Link>
+          .
         </p>
-        <div className="mt-2 flex items-center justify-end gap-1">
-          <button
-            type="button"
-            onClick={agoraNao}
-            disabled={submitting}
-            className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:text-gray-700 disabled:opacity-60"
-          >
-            Agora não
-          </button>
+        <div className="mt-6 flex flex-col gap-2">
           <button
             type="button"
             onClick={concordar}
             disabled={submitting}
-            className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-sky-700 disabled:opacity-60"
+            className="w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-sky-700 disabled:opacity-60"
           >
             {submitting ? 'Salvando…' : 'Concordo'}
+          </button>
+          <button
+            type="button"
+            onClick={agoraNao}
+            disabled={submitting}
+            className="w-full rounded-xl px-4 py-3 text-sm font-medium text-gray-500 transition-colors hover:text-gray-700 disabled:opacity-60"
+          >
+            Agora não
           </button>
         </div>
       </div>

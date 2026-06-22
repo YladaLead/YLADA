@@ -160,7 +160,7 @@ export default function PoliticaPrivacidadePage() {
               <ul className="list-disc pl-6 space-y-2">
                 <li><strong>Supabase:</strong> Hospedagem de banco de dados e autenticação</li>
                 <li><strong>Vercel:</strong> Hospedagem da aplicação</li>
-                <li><strong>OpenAI:</strong> Processamento de linguagem natural pelo agente Carol</li>
+                <li><strong>OpenAI:</strong> Processamento de inteligência artificial — gera as respostas do assistente Noel e das ferramentas de criação de conteúdo, além do agente Carol (ver item 6.4)</li>
                 <li><strong>Meta (WhatsApp Business API):</strong> Canal de atendimento via WhatsApp</li>
                 <li><strong>HubSpot:</strong> Gestão de relacionamento com clientes (CRM)</li>
                 <li><strong>MailerLite:</strong> Envio de comunicações por e-mail</li>
@@ -177,8 +177,42 @@ export default function PoliticaPrivacidadePage() {
                 6.3. Transferência Internacional
               </h3>
               <p>
-                Alguns de nossos provedores podem estar localizados fora do Brasil. Garantimos que 
+                Alguns de nossos provedores podem estar localizados fora do Brasil. Garantimos que
                 todos os provedores estão em conformidade com padrões internacionais de proteção de dados.
+              </p>
+
+              <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">
+                6.4. Inteligência Artificial (OpenAI)
+              </h3>
+              <p className="mb-3">
+                Algumas funções do YLADA usam inteligência artificial — o assistente Noel e as
+                ferramentas de criação de conteúdo (textos, diagnósticos e mensagens).
+              </p>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>
+                  <strong>Quais dados são enviados:</strong> o texto que você digita nessas ferramentas
+                  (suas perguntas, instruções e o conteúdo que pede para gerar). Nenhum outro dado
+                  pessoal é enviado para essa finalidade.
+                </li>
+                <li>
+                  <strong>Para quem:</strong> o texto é enviado à <strong>OpenAI</strong>, provedor de
+                  inteligência artificial, que o processa e devolve a resposta.
+                </li>
+                <li>
+                  <strong>Como coletamos:</strong> apenas quando você usa uma função de IA e após você
+                  concordar com este uso no aviso exibido no aplicativo.
+                </li>
+                <li>
+                  <strong>Finalidade:</strong> gerar a resposta solicitada. Não usamos esse conteúdo para
+                  publicidade.
+                </li>
+                <li>
+                  <strong>Proteção equivalente:</strong> a OpenAI trata os dados conforme as próprias
+                  políticas de privacidade e segurança, com nível de proteção equivalente ao desta política.
+                </li>
+              </ul>
+              <p className="mt-3 text-sm text-gray-600">
+                Recomendamos não incluir dados sensíveis de terceiros sem autorização ao usar as funções de IA.
               </p>
             </section>
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import {
   configureRevenueCat,
@@ -108,9 +109,10 @@ export default function NativeAppPaywall({ homeHref = '/pt' }: { homeHref?: stri
           <div className="space-y-3">
             {packages.map((pkg) => {
               const product = pkg?.product || {}
-              const title: string = pkg?.identifier === '$rc_annual' || /annual|anual|year/i.test(product?.identifier || '')
-                ? 'Plano anual'
-                : 'Plano mensal'
+              const isAnnual =
+                pkg?.identifier === '$rc_annual' || /annual|anual|year/i.test(product?.identifier || '')
+              const title: string = isAnnual ? 'YLADA Professional (Anual)' : 'YLADA Professional (Mensal)'
+              const period: string = isAnnual ? 'Assinatura de 1 ano' : 'Assinatura de 1 mês'
               const price: string = product?.priceString || ''
               const id = pkg?.identifier || product?.identifier || title
               const isBusy = busyId === id
@@ -124,9 +126,7 @@ export default function NativeAppPaywall({ homeHref = '/pt' }: { homeHref?: stri
                 >
                   <span>
                     <span className="block font-semibold text-gray-900">{title}</span>
-                    {product?.description ? (
-                      <span className="block text-xs text-gray-500">{product.description}</span>
-                    ) : null}
+                    <span className="block text-xs text-gray-500">{period}</span>
                   </span>
                   <span className="font-bold text-sky-700 whitespace-nowrap">
                     {isBusy ? '…' : price}
@@ -161,9 +161,24 @@ export default function NativeAppPaywall({ homeHref = '/pt' }: { homeHref?: stri
         </div>
 
         <p className="mt-6 text-[11px] leading-relaxed text-gray-400 text-center">
-          A assinatura renova automaticamente até ser cancelada. Você pode gerenciar ou cancelar
-          a qualquer momento nos Ajustes da App Store.
+          A assinatura renova automaticamente até ser cancelada. O pagamento é cobrado na sua conta
+          da App Store; a renovação ocorre no fim de cada período, salvo cancelamento com pelo menos
+          24h de antecedência. Gerencie ou cancele nos Ajustes da App Store.
         </p>
+        <div className="mt-3 flex items-center justify-center gap-3 text-[11px] text-sky-700">
+          <Link href="/pt/politica-de-privacidade" className="underline hover:text-sky-900">
+            Política de Privacidade
+          </Link>
+          <span className="text-gray-300">·</span>
+          <a
+            href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-sky-900"
+          >
+            Termos de Uso
+          </a>
+        </div>
       </div>
     </div>
   )
