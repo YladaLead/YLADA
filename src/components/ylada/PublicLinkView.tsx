@@ -32,6 +32,11 @@ import {
   computeYladaFlowCalculatorResult,
   type YladaFlowCalculatorDevolutivaConfig,
 } from '@/lib/ylada-flow/ylada-flow-calculator-runtime'
+import {
+  buildCalculatorInputsRecapLine,
+  buildCalculatorInputsRecapParts,
+  buildCalculatorWhatsAppPrefillHuman,
+} from '@/lib/ylada-flow/calculator-public-copy'
 import { getRecruitmentFluxoPublicIntro } from '@/lib/recruitment-fluxo-public-intro'
 
 const publicLinkShareButtonClassName =
@@ -3160,40 +3165,6 @@ function getCalculatorImcFullAnalysisParagraphs(
   return [p1, p2]
 }
 
-function buildCalculatorWhatsAppPrefill(
-  title: string,
-  fields: CalculatorField[],
-  values: Record<string, number | undefined>,
-  resultNum: number,
-  resultLabel: string,
-  locale: Language,
-  resultSuffix?: string
-): string {
-  const loc = locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : 'pt-BR'
-  // Sem casas decimais desnecessárias: 13 em vez de 13,00; 2,5 em vez de 2,50
-  const n = resultNum.toLocaleString(loc, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
-  const unit = resultSuffix?.trim() ? ` ${resultSuffix.trim()}` : ''
-  const head =
-    locale === 'en'
-      ? `Hi! I used your calculator "${title}".`
-      : locale === 'es'
-        ? `¡Hola! Usé tu calculadora "${title}".`
-        : `Oi! Usei sua calculadora "${title}".`
-  const lines = [head, `${resultLabel.trim()} ${n}${unit}`.trim()]
-  for (const f of fields) {
-    const v = values[f.id]
-    if (v === undefined || v === null || Number.isNaN(v)) continue
-    const tipo = (f.type as string)?.toLowerCase()
-    if (tipo === 'select' && Array.isArray(f.options)) {
-      const opt = f.options.find((o) => Number(o.value) === Number(v))
-      lines.push(`${f.label}: ${opt?.label ?? String(v)}`)
-    } else {
-      lines.push(`${f.label}: ${v}`)
-    }
-  }
-  return lines.join('\n')
-}
-
 /** Meta em copos de 250 ml: mostra litros no destaque e a contagem entre parênteses. */
 function formatCopos250HydrationDisplay(
   resultNum: number,
@@ -3362,6 +3333,18 @@ function CalculatorBlock({
     isImcCalculator && imcProfile && !usesMoldDevolutiva
       ? buildImcRecapLine(imcProfile, locale)
       : null
+  const inputRecapParts = buildCalculatorInputsRecapParts(
+    devolutivaYladaFlow?.formulaId,
+    fieldsParaCalculadora,
+    values,
+    locale
+  )
+  const calculatorRecapLine =
+    inputRecapParts.length > 0
+      ? buildCalculatorInputsRecapLine(resultIntro, inputRecapParts, locale)
+      : !usesMoldDevolutiva && imcRecapLine
+        ? `${t.calculatorImcRecapLead} ${imcRecapLine}`
+        : resultIntro.trim() || null
   const pessoaLabel =
     locale === 'en' ? 'professional' : locale === 'es' ? 'profesional' : 'profissional'
 
@@ -3423,7 +3406,18 @@ function CalculatorBlock({
   const numLocale = locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : 'pt-BR'
   const whatsappPrefillResult =
     showResult && whatsappUrl
-      ? buildCalculatorWhatsAppPrefill(title, fieldsParaCalculadora, values, resultNum, resultLabel, locale, resultSuffix)
+      ? buildCalculatorWhatsAppPrefillHuman({
+          title,
+          formulaId: devolutivaYladaFlow?.formulaId,
+          fields: fieldsParaCalculadora,
+          values,
+          resultNum,
+          resultSuffix,
+          locale,
+          decimalPlaces: resultDecimalPlaces,
+          nativeResult: nativeFormulaResult,
+          prefillWhatsApp: devolutivaYladaFlow?.prefillWhatsApp,
+        })
       : ''
 
   return (
@@ -3515,14 +3509,8 @@ function CalculatorBlock({
               </span>
             </div>
             <p className="mb-2 text-xs text-gray-500">{title}</p>
-            {resultIntro.trim() ? (
-              <p className="mb-4 text-sm text-gray-500">{resultIntro}</p>
-            ) : null}
-            {imcRecapLine ? (
-              <p className="-mt-3 mb-4 text-xs leading-relaxed text-gray-600">
-                <span className="font-semibold text-gray-700">{t.calculatorImcRecapLead}</span>{' '}
-                {imcRecapLine}
-              </p>
+            {calculatorRecapLine ? (
+              <p className="mb-4 text-sm leading-relaxed text-gray-500">{calculatorRecapLine}</p>
             ) : null}
 
             <div className="relative mb-5 overflow-hidden rounded-2xl border border-sky-100/80 bg-gradient-to-br from-sky-50 to-white shadow-sm">

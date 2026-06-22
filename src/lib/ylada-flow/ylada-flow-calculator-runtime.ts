@@ -16,6 +16,8 @@ export type YladaFlowCalculatorDevolutivaConfig = {
     curioso: { espelho: string; causa: string; primeiroPasso: string }
   }
   porFaixa?: FaixaDevolutiva[]
+  /** Template humano do prefill WhatsApp (handoff.prefillWhatsApp do molde). */
+  prefillWhatsApp?: string
 }
 
 type CalculatorFieldLike = { id: string; type?: string }
@@ -205,9 +207,14 @@ export function applyDevolutivaTokens(template: string, resultado: FormulaResult
   const kcal = typeof meta.kcal === 'number' ? meta.kcal : resultado.valor
   const imc = typeof meta.imc === 'number' ? meta.imc : resultado.valor
   const classificacao = typeof meta.classificacao === 'string' ? meta.classificacao : ''
+  const litros = (ml / 1000).toLocaleString('pt-BR', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })
 
   return template
     .replace(/\{resultado_ml\}/g, String(ml))
+    .replace(/\{resultado_litros\}/g, litros)
     .replace(/\{resultado_copos\}/g, String(copos))
     .replace(/\{gramas\}/g, String(gramas))
     .replace(/\{kcal\}/g, String(kcal))
@@ -276,5 +283,6 @@ export function buildYladaFlowCalculatorDevolutivaConfig(
       },
     },
     porFaixa: flow.devolutiva.porFaixa,
+    prefillWhatsApp: flow.handoff?.prefillWhatsApp,
   }
 }
