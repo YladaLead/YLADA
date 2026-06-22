@@ -195,6 +195,7 @@ export async function rewriteProLideresVendasCalculadoraPresetToLibraryTemplate(
   type: 'diagnostico' | 'calculator'
 ): Promise<{ config: Record<string, unknown>; type: 'diagnostico' | 'calculator' }> {
   const meta = (config.meta as Record<string, unknown>) ?? {}
+  if (meta.use_ylada_flow_native === true) return { config, type: 'calculator' }
   if (meta.pro_lideres_preset !== true) return { config, type }
 
   const kind = typeof meta.pro_lideres_kind === 'string' ? meta.pro_lideres_kind.trim().toLowerCase() : ''

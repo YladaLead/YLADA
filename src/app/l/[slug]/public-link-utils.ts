@@ -86,15 +86,18 @@ export async function fetchPublicLinkPayload(
 
   const configRaw = (link.config_json as Record<string, unknown>) ?? {}
   let config = await resolvePublicLinkConfigJson(supabaseAdmin, configRaw)
-  config = await maybeApplyYladaFlowNativeConfig(supabaseAdmin, config, link)
+  config = await maybeApplyYladaFlowNativeConfig(supabaseAdmin, config, {
+    user_id: link.user_id,
+    template_id: link.template_id as string | null,
+  })
   const meta = config.meta as Record<string, unknown> | undefined
 
   const hasNativeCalculatorSurface =
     meta?.use_ylada_flow_native === true &&
-    typeof config.formula === 'string' &&
-    config.formula.trim().length > 0 &&
     Array.isArray(config.fields) &&
-    config.fields.length > 0
+    config.fields.length > 0 &&
+    (Boolean(config.devolutivaYladaFlow) ||
+      (typeof config.formula === 'string' && config.formula.trim().length > 0))
   /**
    * Links criados pelo Noel / generate (Etapa 6) trazem `meta.flow_id` + `meta.architecture`.
    * Se `meta` vier incompleta na BD mas o JSON tiver `page` + `form.fields` (formato unificado),
@@ -137,11 +140,10 @@ export async function fetchPublicLinkPayload(
     notFound()
   }
 
-  const vendasCalcRewrite = await rewriteProLideresVendasCalculadoraPresetToLibraryTemplate(
-    supabaseAdmin,
-    config,
-    type
-  )
+  const vendasCalcRewrite =
+    meta?.use_ylada_flow_native === true
+      ? { config, type }
+      : await rewriteProLideresVendasCalculadoraPresetToLibraryTemplate(supabaseAdmin, config, type)
   config = vendasCalcRewrite.config
   type = vendasCalcRewrite.type
 

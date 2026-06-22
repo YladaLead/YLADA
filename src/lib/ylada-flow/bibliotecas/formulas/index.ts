@@ -6,6 +6,8 @@ export type FormulaResult = {
   unidade: string
   sufixo?: string
   copos?: number
+  /** Tokens de devolutiva ({gramas}, {imc}, {kcal}, {objetivo}, …). */
+  meta?: Record<string, string | number>
 }
 
 export const HIDRATACAO_ATIVIDADE_ML = [0, 250, 500, 750, 1000] as const
@@ -38,6 +40,7 @@ export function hidratacao35mlKgV1(
     unidade: 'ml',
     sufixo: 'copos de 250 ml',
     copos,
+    meta: { ml: valor, copos },
   }
 }
 
@@ -46,7 +49,42 @@ export type YladaFlowFormulaFn = (
   faixaSegura?: { min: number; max: number }
 ) => FormulaResult
 
+import {
+  caloriasMifflinV1,
+  imcOmsV1,
+  proteinaGkgV1,
+} from './calculadoras'
+
 export const YLADA_FLOW_FORMULAS: Record<string, YladaFlowFormulaFn> = {
+  'imc-oms-v1': (inputs, faixaSegura) =>
+    imcOmsV1(
+      {
+        peso_kg: inputs.peso_kg,
+        altura_cm: inputs.altura_cm,
+        sexo_idx: inputs.sexo_idx,
+      },
+      faixaSegura
+    ),
+  'proteina-gkg-v1': (inputs, faixaSegura) =>
+    proteinaGkgV1(
+      {
+        peso_kg: inputs.peso_kg,
+        objetivo_idx: inputs.objetivo_idx,
+      },
+      faixaSegura
+    ),
+  'calorias-mifflin-v1': (inputs, faixaSegura) =>
+    caloriasMifflinV1(
+      {
+        idade: inputs.idade,
+        sexo_idx: inputs.sexo_idx,
+        peso_kg: inputs.peso_kg,
+        altura_cm: inputs.altura_cm,
+        atividade_idx: inputs.atividade_idx,
+        objetivo_idx: inputs.objetivo_idx,
+      },
+      faixaSegura
+    ),
   'hidratacao-35ml-kg-v1': (inputs, faixaSegura) => {
     if (inputs.atividade_idx !== undefined && inputs.clima_idx !== undefined) {
       return hidratacao35mlKgV1(

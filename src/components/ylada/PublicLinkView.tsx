@@ -29,6 +29,7 @@ import { dedupeQuizExpandedBody, splitQuizDescriptionForPublicResult } from '@/l
 import { shouldAdvanceConfigDrivenStepToResult } from '@/lib/ylada/public-link-quiz-flow'
 import {
   buildYladaFlowCalculatorResultCopy,
+  computeYladaFlowCalculatorResult,
   type YladaFlowCalculatorDevolutivaConfig,
 } from '@/lib/ylada-flow/ylada-flow-calculator-runtime'
 import { getRecruitmentFluxoPublicIntro } from '@/lib/recruitment-fluxo-public-intro'
@@ -3286,9 +3287,27 @@ function CalculatorBlock({
     return v !== undefined && v !== null && !Number.isNaN(v)
   })
 
-  const resultNum = evaluateCalculatorFormula(formula, fieldsParaCalculadora, values)
-  const isImcCalculator = title.toLowerCase().includes('imc')
-  const metabolicMacroCalculator = isMetabolicMacroCalculatorTitle(title)
+  const devolutivaYladaFlow = config.devolutivaYladaFlow as
+    | YladaFlowCalculatorDevolutivaConfig
+    | undefined
+  const usesMoldDevolutiva = Boolean(devolutivaYladaFlow)
+  const nativeFormulaResult =
+    devolutivaYladaFlow && showResult
+      ? computeYladaFlowCalculatorResult(devolutivaYladaFlow, values, fieldsParaCalculadora)
+      : null
+  const resultNum = (() => {
+    if (nativeFormulaResult) {
+      if (devolutivaYladaFlow?.formulaId === 'hidratacao-35ml-kg-v1') {
+        return nativeFormulaResult.copos ?? Math.round(nativeFormulaResult.valor / 250)
+      }
+      return nativeFormulaResult.valor
+    }
+    return evaluateCalculatorFormula(formula, fieldsParaCalculadora, values)
+  })()
+  const resultDecimalPlaces = devolutivaYladaFlow?.casasDecimais ?? 2
+  const isImcCalculator =
+    devolutivaYladaFlow?.formulaId === 'imc-oms-v1' ||
+    (!usesMoldDevolutiva && title.toLowerCase().includes('imc'))
   const ctaLabel =
     isImcCalculator && String(whatsappUrl || '').trim()
       ? t.calculatorImcPrimaryCta
@@ -3300,15 +3319,26 @@ function CalculatorBlock({
             : 'Quero falar com um profissional'
         : ctaText
   const imcProfile = isImcCalculator ? extractImcProfile(fieldsParaCalculadora, values) : null
-  const devolutivaYladaFlow = config.devolutivaYladaFlow as
-    | YladaFlowCalculatorDevolutivaConfig
-    | undefined
   const nativeCalculatorCopy =
-    devolutivaYladaFlow && showResult
-      ? buildYladaFlowCalculatorResultCopy(devolutivaYladaFlow, values)
+    usesMoldDevolutiva && showResult
+      ? buildYladaFlowCalculatorResultCopy(devolutivaYladaFlow!, values, 'pronto', fieldsParaCalculadora)
       : null
-  const resultCopy =
-    nativeCalculatorCopy ?? getCalculatorResultCopy(title, resultNum, locale, { imcProfile })
+  const moldFallbackCopy =
+    usesMoldDevolutiva && showResult && !nativeCalculatorCopy && devolutivaYladaFlow
+      ? (() => {
+          const fb = devolutivaYladaFlow.porPerfil.pronto
+          return {
+            insight: [fb.espelho, fb.causa].filter(Boolean).join('\n\n'),
+            tip: devolutivaYladaFlow.salvaguarda,
+            expanded: fb.primeiroPasso.trim() ? [fb.primeiroPasso] : [],
+          }
+        })()
+      : null
+  const resultCopy = usesMoldDevolutiva
+    ? nativeCalculatorCopy ?? moldFallbackCopy
+    : getCalculatorResultCopy(title, resultNum, locale, { imcProfile })
+  const metabolicMacroCalculator =
+    !usesMoldDevolutiva && isMetabolicMacroCalculatorTitle(title)
   const calculatorExpandedSource = resultCopy?.expanded?.length ? resultCopy.expanded : null
   const calculatorExpandedJoined = calculatorExpandedSource?.length
     ? calculatorExpandedSource.join('\n\n').trim()
@@ -3324,8 +3354,14 @@ function CalculatorBlock({
         })()
       : ''
   const calculatorHasExpandableAnalysis = Boolean(calculatorExpandedSource && calculatorExpandedSource.length > 0)
-  const imcEngagementHeadline = isImcCalculator ? getImcEngagementHeadline(resultNum, locale, imcProfile) : ''
-  const imcRecapLine = isImcCalculator && imcProfile ? buildImcRecapLine(imcProfile, locale) : null
+  const imcEngagementHeadline =
+    isImcCalculator && !usesMoldDevolutiva
+      ? getImcEngagementHeadline(resultNum, locale, imcProfile)
+      : ''
+  const imcRecapLine =
+    isImcCalculator && imcProfile && !usesMoldDevolutiva
+      ? buildImcRecapLine(imcProfile, locale)
+      : null
   const pessoaLabel =
     locale === 'en' ? 'professional' : locale === 'es' ? 'profesional' : 'profissional'
 
@@ -3497,7 +3533,10 @@ function CalculatorBlock({
                   {formatCopos250HydrationDisplay(resultNum, resultPrefix, resultSuffix, locale) ?? (
                     <>
                       {resultPrefix}
-                      {resultNum.toLocaleString(numLocale, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                      {resultNum.toLocaleString(numLocale, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: resultDecimalPlaces,
+                      })}
                       {resultSuffix}
                     </>
                   )}

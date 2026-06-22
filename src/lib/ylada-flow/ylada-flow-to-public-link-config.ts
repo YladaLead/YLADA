@@ -80,13 +80,15 @@ function summaryBulletsFromDevolutiva(flow: YladaFlow): string[] {
   return [...new Set(bullets)].slice(0, 8)
 }
 
-function selectMlValuesForPergunta(perguntaId: string): readonly number[] | null {
-  if (perguntaId === 'p2') return HIDRATACAO_ATIVIDADE_ML
-  if (perguntaId === 'p3') return HIDRATACAO_CLIMA_ML
+function selectValuesForPergunta(perguntaId: string, formulaId: string): readonly number[] | null {
+  if (formulaId === 'hidratacao-35ml-kg-v1') {
+    if (perguntaId === 'p2' || perguntaId === 'atividade') return HIDRATACAO_ATIVIDADE_ML
+    if (perguntaId === 'p3' || perguntaId === 'clima') return HIDRATACAO_CLIMA_ML
+  }
   return null
 }
 
-function perguntaYladaToCalculatorField(p: YladaFlow['perguntas'][number]) {
+function perguntaYladaToCalculatorField(p: YladaFlow['perguntas'][number], formulaId: string) {
   if (p.tipo === 'numero') {
     return {
       id: p.id,
@@ -98,18 +100,33 @@ function perguntaYladaToCalculatorField(p: YladaFlow['perguntas'][number]) {
     }
   }
   if (p.tipo === 'multipla_escolha' && p.opcoes?.length) {
-    const mlValues = selectMlValuesForPergunta(p.id)
+    const mappedValues = selectValuesForPergunta(p.id, formulaId)
     return {
       id: p.id,
       label: p.texto,
       type: 'select' as const,
       options: p.opcoes.map((label, idx) => ({
-        value: mlValues ? (mlValues[idx] ?? idx) : idx,
+        value: mappedValues ? (mappedValues[idx] ?? idx) : idx,
         label,
       })),
     }
   }
   return perguntaYladaToFormField(p)
+}
+
+function calculatorResultLabel(formulaId: string): string {
+  switch (formulaId) {
+    case 'hidratacao-35ml-kg-v1':
+      return 'Sua necessidade diária de água:'
+    case 'proteina-gkg-v1':
+      return 'Sua meta de proteína:'
+    case 'imc-oms-v1':
+      return 'Seu IMC:'
+    case 'calorias-mifflin-v1':
+      return 'Sua meta calórica:'
+    default:
+      return 'Resultado:'
+  }
 }
 
 function buildCalculatorFormulaExpression(flow: YladaFlow): string {
@@ -118,7 +135,7 @@ function buildCalculatorFormulaExpression(flow: YladaFlow): string {
   if (calc.formulaId === 'hidratacao-35ml-kg-v1') {
     return buildHidratacaoCalculatorFormulaExpression(calc.faixaSegura)
   }
-  return ''
+  return '__ylada_native_runtime__'
 }
 
 function yladaFlowToNativeCalculatorConfig(
@@ -129,7 +146,7 @@ function yladaFlowToNativeCalculatorConfig(
   ogDescription: string
 ): Record<string, unknown> {
   const calc = flow.calculadora!
-  const fields = flow.perguntas.map(perguntaYladaToCalculatorField)
+  const fields = flow.perguntas.map((p) => perguntaYladaToCalculatorField(p, calc.formulaId))
   const devolutivaYladaFlow = buildYladaFlowCalculatorDevolutivaConfig(flow)
   const suffixRaw = (calc.sufixoSaida ?? '').trim()
   const resultSuffix = suffixRaw ? (suffixRaw.startsWith(' ') ? suffixRaw : ` ${suffixRaw}`) : ''
@@ -139,7 +156,7 @@ function yladaFlowToNativeCalculatorConfig(
     ctaText,
     fields,
     formula: buildCalculatorFormulaExpression(flow),
-    resultLabel: 'Sua necessidade diária de água:',
+    resultLabel: calculatorResultLabel(calc.formulaId),
     resultPrefix: '',
     resultSuffix,
     resultIntro: 'Com base no que você informou:',

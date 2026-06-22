@@ -1,10 +1,27 @@
 # CLAUDE.md — Contexto do Projeto Ylada
 ## Leia este arquivo no início de TODA sessão de código
 
-**Última atualização:** 27/05/2026
+**Última atualização:** 22/06/2026
 
 > Para contexto completo de estratégia e marketing, leia:
 > `/Users/air/Desktop/Ylada-Workspace/CLAUDE.md`
+
+---
+
+## CALCULADORAS YLADAFLOW (biblioteca serviço — Chat5)
+
+**Decisão (22/06):** IMC personaliza a **leitura** por sexo + idade — **não o número** (fórmula OMS igual). Régua refinada: só perguntar o que muda o **número** ou a **leitura** de forma real.
+
+**Copy da devolutiva:** lookup determinístico em `devolutiva.porFaixa` do molde (Spec §7 — economia de token + controle). **Não** gerar por IA no resultado. Merge: `bloco` → `porSexo` → `porIdade` (mais específico por último).
+
+**Onde vive:**
+- Moldes: `src/lib/ylada-flow/bibliotecas/calculadoras/{imc,calorias,proteina,hidratacao}.ts`
+- Contrato: `src/types/ylada-flow.ts`
+- Runtime: `src/lib/ylada-flow/ylada-flow-calculator-runtime.ts`
+- Fórmulas: `src/lib/ylada-flow/bibliotecas/formulas/`
+- Blueprint: `blueprint-plataforma/Chat5_Calculadoras_Revisao_Formulas.md`, `Chat5_Calculadoras_Engine_Briefing_Cursor.md`
+
+**Pendência aberta:** nó copy molde × gerada por IA em outros fluxos (quiz/diagnóstico) — calculadoras com molde já são lookup puro.
 
 ---
 

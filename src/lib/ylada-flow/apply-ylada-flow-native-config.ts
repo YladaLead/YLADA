@@ -1,37 +1,106 @@
 /**
- * Aplica config nativa YladaFlow no payload do link público (piloto).
+ * Aplica config nativa YladaFlow no payload do link público (calculadoras com molde).
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
+import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 import { getProLideresWellnessCalculadorasBasicasPresetFluxos } from '@/lib/pro-lideres/pro-lideres-wellness-calculadoras-basicas-preset-fluxos'
-import { resolveNativePilotYladaFlow } from '@/lib/ylada-flow/resolve-native-pilot-ylada-flow'
+import {
+  hasCalculadoraMoldForFluxoId,
+  resolveNativePilotYladaFlow,
+} from '@/lib/ylada-flow/resolve-native-pilot-ylada-flow'
 import { yladaFlowToPublicLinkConfig } from '@/lib/ylada-flow/ylada-flow-to-public-link-config'
-import { isYladaFlowNativePilotForMeta } from '@/lib/ylada-flow/ylada-flow-native-pilot'
+import {
+  YLADA_TEMPLATE_CALC_AGUA_ID,
+  YLADA_TEMPLATE_CALC_CALORIAS_ID,
+  YLADA_TEMPLATE_CALC_IMC_ID,
+  YLADA_TEMPLATE_CALC_PROTEINA_ID,
+} from '@/lib/ylada-canonical-flow-config'
+import {
+  isYladaFlowNativePilotGloballyEnabled,
+  YLADA_FLOW_NATIVE_PILOT_FLUXO_ID,
+} from '@/lib/ylada-flow/ylada-flow-native-pilot'
 
-function findPilotFluxoCliente(fluxoId: string) {
-  return getProLideresWellnessCalculadorasBasicasPresetFluxos().find((f) => f.id === fluxoId) ?? null
+const YLADA_CALC_TEMPLATE_TO_FLUXO_ID: Record<string, string> = {
+  [YLADA_TEMPLATE_CALC_AGUA_ID]: 'agua',
+  [YLADA_TEMPLATE_CALC_IMC_ID]: 'calc-imc',
+  [YLADA_TEMPLATE_CALC_CALORIAS_ID]: 'calc-calorias',
+  [YLADA_TEMPLATE_CALC_PROTEINA_ID]: 'calc-proteina',
+}
+
+function minimalLegacyFluxoStub(fluxoId: string): FluxoCliente {
+  return {
+    id: fluxoId,
+    nome: fluxoId,
+    objetivo: '',
+    perguntas: [],
+    diagnostico: {
+      titulo: '',
+      descricao: '',
+      sintomas: [],
+      beneficios: [],
+      mensagemPositiva: '',
+    },
+    kitRecomendado: 'energia',
+    cta: 'Quero falar no WhatsApp',
+    tags: [],
+  }
+}
+
+function resolveCalculadoraFluxoId(
+  meta: Record<string, unknown>,
+  templateId?: string | null
+): string {
+  const fromMeta =
+    typeof meta.pro_lideres_fluxo_id === 'string'
+      ? meta.pro_lideres_fluxo_id.trim()
+      : typeof meta.flow_id === 'string'
+        ? meta.flow_id.trim()
+        : typeof meta.handle === 'string'
+          ? meta.handle.trim()
+          : ''
+  if (fromMeta) return fromMeta
+  if (templateId && YLADA_CALC_TEMPLATE_TO_FLUXO_ID[templateId]) {
+    return YLADA_CALC_TEMPLATE_TO_FLUXO_ID[templateId]
+  }
+  return ''
+}
+
+function findLegacyFluxoForMold(fluxoId: string): FluxoCliente | null {
+  const fromPreset = getProLideresWellnessCalculadorasBasicasPresetFluxos().find((f) => f.id === fluxoId)
+  if (fromPreset) return fromPreset
+  if (hasCalculadoraMoldForFluxoId(fluxoId)) return minimalLegacyFluxoStub(fluxoId)
+  return null
+}
+
+function shouldApplyCalculadoraMold(meta: Record<string, unknown>, fluxoId: string): boolean {
+  if (!fluxoId || !hasCalculadoraMoldForFluxoId(fluxoId)) return false
+  if (meta.pro_lideres_kind === 'recruitment') return false
+  if (meta.use_ylada_flow_native === true) return true
+  if (
+    isYladaFlowNativePilotGloballyEnabled() &&
+    fluxoId === YLADA_FLOW_NATIVE_PILOT_FLUXO_ID
+  ) {
+    return true
+  }
+  if (meta.pro_lideres_preset === true) return true
+  // Link de calculadora da biblioteca (Coach / template YLADA) — molde é fonte da verdade (Spec §7).
+  return true
 }
 
 /**
- * Se o piloto estiver ativo para este link, reconstrói `config_json` a partir do YladaFlow.
+ * Reconstrói `config_json` a partir do molde YladaFlow quando aplicável.
  * Preserva `meta` da instância (atribuição Pro Líderes, segmento, etc.) por cima do nativo.
  */
 export async function maybeApplyYladaFlowNativeConfig(
   _admin: SupabaseClient,
   config: Record<string, unknown>,
-  link: { user_id?: string | null }
+  link: { user_id?: string | null; template_id?: string | null }
 ): Promise<Record<string, unknown>> {
   const meta = (config.meta as Record<string, unknown> | undefined) ?? {}
-  if (!isYladaFlowNativePilotForMeta(meta)) return config
+  const fluxoId = resolveCalculadoraFluxoId(meta, link.template_id)
+  if (!shouldApplyCalculadoraMold(meta, fluxoId)) return config
 
-  const fluxoId =
-    typeof meta.pro_lideres_fluxo_id === 'string'
-      ? meta.pro_lideres_fluxo_id.trim()
-      : typeof meta.flow_id === 'string'
-        ? meta.flow_id.trim()
-        : ''
-  if (!fluxoId) return config
-
-  const legacyFluxo = findPilotFluxoCliente(fluxoId)
+  const legacyFluxo = findLegacyFluxoForMold(fluxoId)
   if (!legacyFluxo) return config
 
   const ownerId = (link.user_id as string | null) ?? ''
@@ -57,6 +126,7 @@ export async function maybeApplyYladaFlowNativeConfig(
       ...meta,
       use_ylada_flow_native: true,
       ylada_flow_handoff: yladaFlow.handoff,
+      pro_lideres_fluxo_id: fluxoId,
     },
   }
 }
