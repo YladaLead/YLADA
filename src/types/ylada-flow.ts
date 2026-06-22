@@ -151,13 +151,39 @@ export interface BlocoDevolutiva {
   i18nKey?: string
 }
 
+/** Variação opcional do bloco por sexo — Decisão B do IMC (Chat5 Calculadoras).
+ *  O sexo NÃO muda o número; sobrepõe só os campos de TEXTO informados. */
+export interface BlocoPorSexo {
+  M?: Partial<BlocoDevolutiva>
+  F?: Partial<BlocoDevolutiva>
+}
+
+/** Leitura de CALCULADORA por faixa de resultado (Spec §12.2 / Chat5 Calculadoras).
+ *  Calculadora lê pela FAIXA do valor calculado, não por prontidão. */
+export interface FaixaDevolutiva {
+  /** id da faixa (ex.: 'normal' | 'sobrepeso' | 'perder' | 'ganhar'). */
+  id: string
+  /** rótulo curto exibível (ex.: 'Peso normal'). */
+  rotulo?: string
+  /** faixa por range sobre o valor calculado [min, max). Use min/max OU `quando`. */
+  min?: number
+  max?: number
+  /** casa quando um campo nomeado do resultado bater (ex.: classificacao OMS, objetivo escolhido). */
+  quando?: string
+  bloco: BlocoDevolutiva
+  /** Decisão B: variação por sexo (sobrepõe campos do bloco). IMC usa; demais ignoram. */
+  porSexo?: BlocoPorSexo
+}
+
 export interface Devolutiva {
-  /** uma versão por perfil de prontidão; no mínimo 'pronto' e 'curioso'. */
+  /** QUIZ: uma versão por perfil de prontidão; no mínimo 'pronto' e 'curioso'. */
   porPerfil: {
     pronto: BlocoDevolutiva //  20% → autoridade
     curioso: BlocoDevolutiva // 80% → servir/educar
     [perfil: string]: BlocoDevolutiva
   }
+  /** CALCULADORA: leitura por faixa de resultado (IMC, calorias, proteína). Aditivo. */
+  porFaixa?: FaixaDevolutiva[]
   /** id da devolutiva empacotada na biblioteca, quando for lookup puro (Spec §7.3). */
   empacotadaId?: string
 }
