@@ -158,6 +158,17 @@ export interface BlocoPorSexo {
   F?: Partial<BlocoDevolutiva>
 }
 
+/** Variação opcional do bloco por faixa etária — Decisão B estendida (IMC).
+ *  A idade NÃO muda o número; sobrepõe só campos de TEXTO quando a idade casa a faixa.
+ *  Régua refinada: vale perguntar o que muda o NÚMERO ou a LEITURA de forma real. */
+export interface FaixaEtariaDevolutiva {
+  /** aplica quando idade >= de (inclusivo). */
+  de?: number
+  /** e idade < ate (exclusivo), se informado. */
+  ate?: number
+  bloco: Partial<BlocoDevolutiva>
+}
+
 /** Leitura de CALCULADORA por faixa de resultado (Spec §12.2 / Chat5 Calculadoras).
  *  Calculadora lê pela FAIXA do valor calculado, não por prontidão. */
 export interface FaixaDevolutiva {
@@ -173,6 +184,9 @@ export interface FaixaDevolutiva {
   bloco: BlocoDevolutiva
   /** Decisão B: variação por sexo (sobrepõe campos do bloco). IMC usa; demais ignoram. */
   porSexo?: BlocoPorSexo
+  /** Decisão B estendida: variação por faixa etária (sobrepõe campos). IMC usa.
+   *  Merge: bloco → porSexo → porIdade (mais específico por último). */
+  porIdade?: FaixaEtariaDevolutiva[]
 }
 
 export interface Devolutiva {

@@ -44,7 +44,8 @@ export const FLUXO_CALCULADORA_IMC: YladaFlow = {
 
   origemEsperada: { canal: 'whatsapp', funil: 'marketing', temperatura: 'morno' },
 
-  // Inputs: peso e altura entram na conta; sexo só na leitura (Decisão B).
+  // Inputs: peso e altura entram na CONTA; sexo e idade só na LEITURA (Decisão B + extensão).
+  // Régua refinada: vale perguntar o que muda o número OU a leitura de forma real.
   perguntas: [
     {
       id: 'peso',
@@ -67,6 +68,17 @@ export const FLUXO_CALCULADORA_IMC: YladaFlow = {
       papel: { alimentaLeitura: ['contexto'] },
     },
     {
+      id: 'idade',
+      texto: 'Sua idade',
+      tipo: 'numero',
+      placeholder: 'Ex: 40',
+      min: 18,
+      max: 120,
+      step: 1,
+      // Não entra na conta; personaliza a leitura (faixa saudável sobe no idoso + sarcopenia).
+      papel: { alimentaLeitura: ['perfil'] },
+    },
+    {
       id: 'sexo',
       texto: 'Você é:',
       tipo: 'multipla_escolha',
@@ -82,6 +94,7 @@ export const FLUXO_CALCULADORA_IMC: YladaFlow = {
     inputs: [
       { id: 'peso', unidade: 'kg', min: 30, max: 300 },
       { id: 'altura', unidade: 'cm', min: 100, max: 250 },
+      { id: 'idade', unidade: 'anos', min: 18, max: 120 }, // só leitura
       { id: 'sexo', unidade: '' }, // só leitura
     ],
     unidadeSaida: 'kg/m²',
@@ -138,6 +151,9 @@ export const FLUXO_CALCULADORA_IMC: YladaFlow = {
           F: { causa: 'Sua rotina está te servindo bem aqui. Mas o IMC não separa músculo de gordura, e mulher costuma ter mais gordura corporal no mesmo IMC, então o número sozinho engana um pouco.' },
           M: { causa: 'Sua rotina está te servindo bem aqui. Mas o IMC não separa músculo de gordura, e homem costuma ter mais massa muscular, que pode puxar o número pra cima sem ser gordura.' },
         },
+        porIdade: [
+          { de: 60, bloco: { causa: 'Está numa faixa boa. Depois dos 60, vale ficar de olho na massa muscular, que cai com a idade: dá pra ter peso "normal" e ainda assim ter perdido músculo. Força e proteína ajudam a manter.' } },
+        ],
       },
       {
         id: 'sobrepeso',
@@ -154,6 +170,15 @@ export const FLUXO_CALCULADORA_IMC: YladaFlow = {
           F: { espelho: 'Seu IMC deu {imc}, na faixa de sobrepeso. Lembrando que o IMC não distingue músculo de gordura, e em mulher a distribuição de gordura é diferente, então ele é só um ponto de partida.' },
           M: { espelho: 'Seu IMC deu {imc}, na faixa de sobrepeso. Lembrando que o IMC não distingue músculo de gordura, e quem tem mais massa muscular pode cair aqui sem excesso de gordura.' },
         },
+        porIdade: [
+          {
+            de: 60,
+            bloco: {
+              espelho: 'Seu IMC deu {imc}, que a tabela chama de sobrepeso. Mas depois dos 60 a faixa saudável sobe um pouco: um IMC perto de 25 a 27 costuma ser tranquilo nessa idade, então não precisa soar alarme.',
+              causa: 'O que pesa mais aqui não é o número em si, é manter músculo, força e disposição. O IMC sozinho não enxerga isso.',
+            },
+          },
+        ],
       },
       {
         id: 'obesidade',
@@ -165,6 +190,9 @@ export const FLUXO_CALCULADORA_IMC: YladaFlow = {
           primeiroPasso: 'O passo mais valioso é falar com um profissional de saúde pra montar um plano seguro, no seu ritmo, sem promessa milagrosa.',
           ctaWhatsApp: 'Quero conversar sobre um caminho seguro',
         },
+        porIdade: [
+          { de: 60, bloco: { causa: 'É uma condição de saúde com várias causas, não um defeito seu. Depois dos 60, o cuidado é perder gordura sem perder músculo: por isso acompanhamento profissional faz tanta diferença aqui.' } },
+        ],
       },
     ],
   },
