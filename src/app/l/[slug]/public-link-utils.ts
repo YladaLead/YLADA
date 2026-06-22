@@ -88,6 +88,13 @@ export async function fetchPublicLinkPayload(
   let config = await resolvePublicLinkConfigJson(supabaseAdmin, configRaw)
   config = await maybeApplyYladaFlowNativeConfig(supabaseAdmin, config, link)
   const meta = config.meta as Record<string, unknown> | undefined
+
+  const hasNativeCalculatorSurface =
+    meta?.use_ylada_flow_native === true &&
+    typeof config.formula === 'string' &&
+    config.formula.trim().length > 0 &&
+    Array.isArray(config.fields) &&
+    config.fields.length > 0
   /**
    * Links criados pelo Noel / generate (Etapa 6) trazem `meta.flow_id` + `meta.architecture`.
    * Se `meta` vier incompleta na BD mas o JSON tiver `page` + `form.fields` (formato unificado),
@@ -108,7 +115,9 @@ export async function fetchPublicLinkPayload(
    * `isFlowLike` ficaria true e o link era tratado como diagnóstico — quebrando cálculo e resultado.
    */
   let type: 'diagnostico' | 'calculator' = 'diagnostico'
-  if (link.template_id) {
+  if (hasNativeCalculatorSurface) {
+    type = 'calculator'
+  } else if (link.template_id) {
     const { data: templateRow } = await supabaseAdmin
       .from('ylada_link_templates')
       .select('type')

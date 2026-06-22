@@ -27,6 +27,10 @@ import { createClient } from '@/lib/supabase-client'
 import { parseProLideresMemberPathSegment } from '@/lib/ylada-public-link-path'
 import { dedupeQuizExpandedBody, splitQuizDescriptionForPublicResult } from '@/lib/split-quiz-result-description'
 import { shouldAdvanceConfigDrivenStepToResult } from '@/lib/ylada/public-link-quiz-flow'
+import {
+  buildYladaFlowCalculatorResultCopy,
+  type YladaFlowCalculatorDevolutivaConfig,
+} from '@/lib/ylada-flow/ylada-flow-calculator-runtime'
 import { getRecruitmentFluxoPublicIntro } from '@/lib/recruitment-fluxo-public-intro'
 
 const publicLinkShareButtonClassName =
@@ -3296,7 +3300,15 @@ function CalculatorBlock({
             : 'Quero falar com um profissional'
         : ctaText
   const imcProfile = isImcCalculator ? extractImcProfile(fieldsParaCalculadora, values) : null
-  const resultCopy = getCalculatorResultCopy(title, resultNum, locale, { imcProfile })
+  const devolutivaYladaFlow = config.devolutivaYladaFlow as
+    | YladaFlowCalculatorDevolutivaConfig
+    | undefined
+  const nativeCalculatorCopy =
+    devolutivaYladaFlow && showResult
+      ? buildYladaFlowCalculatorResultCopy(devolutivaYladaFlow, values)
+      : null
+  const resultCopy =
+    nativeCalculatorCopy ?? getCalculatorResultCopy(title, resultNum, locale, { imcProfile })
   const calculatorExpandedSource = resultCopy?.expanded?.length ? resultCopy.expanded : null
   const calculatorExpandedJoined = calculatorExpandedSource?.length
     ? calculatorExpandedSource.join('\n\n').trim()

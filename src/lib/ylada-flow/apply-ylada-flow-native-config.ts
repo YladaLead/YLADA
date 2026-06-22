@@ -3,7 +3,7 @@
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getProLideresWellnessCalculadorasBasicasPresetFluxos } from '@/lib/pro-lideres/pro-lideres-wellness-calculadoras-basicas-preset-fluxos'
-import { fluxoClienteToYladaFlow } from '@/lib/ylada-flow/fluxo-cliente-to-ylada-flow'
+import { resolveNativePilotYladaFlow } from '@/lib/ylada-flow/resolve-native-pilot-ylada-flow'
 import { yladaFlowToPublicLinkConfig } from '@/lib/ylada-flow/ylada-flow-to-public-link-config'
 import { isYladaFlowNativePilotForMeta } from '@/lib/ylada-flow/ylada-flow-native-pilot'
 
@@ -40,7 +40,7 @@ export async function maybeApplyYladaFlowNativeConfig(
   const kind: 'sales' | 'recruitment' =
     meta.pro_lideres_kind === 'recruitment' ? 'recruitment' : 'sales'
 
-  const yladaFlow = fluxoClienteToYladaFlow(legacyFluxo, {
+  const yladaFlow = resolveNativePilotYladaFlow(legacyFluxo, {
     ownerId,
     tenantId: ownerId,
     kind,

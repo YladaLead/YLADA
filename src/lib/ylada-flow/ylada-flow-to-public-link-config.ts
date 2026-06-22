@@ -4,6 +4,12 @@
  */
 import type { YladaFlow } from '@/types/ylada-flow'
 import type { FluxoCliente } from '@/types/ylada-flow-legacy'
+import {
+  buildHidratacaoCalculatorFormulaExpression,
+  HIDRATACAO_ATIVIDADE_ML,
+  HIDRATACAO_CLIMA_ML,
+} from '@/lib/ylada-flow/bibliotecas/formulas'
+import { buildYladaFlowCalculatorDevolutivaConfig } from '@/lib/ylada-flow/ylada-flow-calculator-runtime'
 import { buildProLideresPresetOgDescription } from '@/lib/pro-lideres/pro-lideres-preset-og-description'
 import { getRecruitmentFluxoPublicIntro } from '@/lib/recruitment-fluxo-public-intro'
 import { PRO_LIDERES_PUBLIC_VISITOR_CONTEXTO_VENDAS } from '@/lib/pro-lideres/wellness-fluxo-to-ylada-config'
@@ -74,6 +80,107 @@ function summaryBulletsFromDevolutiva(flow: YladaFlow): string[] {
   return [...new Set(bullets)].slice(0, 8)
 }
 
+function selectMlValuesForPergunta(perguntaId: string): readonly number[] | null {
+  if (perguntaId === 'p2') return HIDRATACAO_ATIVIDADE_ML
+  if (perguntaId === 'p3') return HIDRATACAO_CLIMA_ML
+  return null
+}
+
+function perguntaYladaToCalculatorField(p: YladaFlow['perguntas'][number]) {
+  if (p.tipo === 'numero') {
+    return {
+      id: p.id,
+      label: p.texto,
+      type: 'number' as const,
+      min: p.min,
+      max: p.max,
+      step: p.step,
+    }
+  }
+  if (p.tipo === 'multipla_escolha' && p.opcoes?.length) {
+    const mlValues = selectMlValuesForPergunta(p.id)
+    return {
+      id: p.id,
+      label: p.texto,
+      type: 'select' as const,
+      options: p.opcoes.map((label, idx) => ({
+        value: mlValues ? (mlValues[idx] ?? idx) : idx,
+        label,
+      })),
+    }
+  }
+  return perguntaYladaToFormField(p)
+}
+
+function buildCalculatorFormulaExpression(flow: YladaFlow): string {
+  const calc = flow.calculadora
+  if (!calc) return ''
+  if (calc.formulaId === 'hidratacao-35ml-kg-v1') {
+    return buildHidratacaoCalculatorFormulaExpression(calc.faixaSegura)
+  }
+  return ''
+}
+
+function yladaFlowToNativeCalculatorConfig(
+  flow: YladaFlow,
+  kind: 'sales' | 'recruitment',
+  ctaText: string,
+  pageObjetivo: string,
+  ogDescription: string
+): Record<string, unknown> {
+  const calc = flow.calculadora!
+  const fields = flow.perguntas.map(perguntaYladaToCalculatorField)
+  const devolutivaYladaFlow = buildYladaFlowCalculatorDevolutivaConfig(flow)
+  const suffixRaw = (calc.sufixoSaida ?? '').trim()
+  const resultSuffix = suffixRaw ? (suffixRaw.startsWith(' ') ? suffixRaw : ` ${suffixRaw}`) : ''
+
+  return {
+    title: flow.nome,
+    ctaText,
+    fields,
+    formula: buildCalculatorFormulaExpression(flow),
+    resultLabel: 'Sua necessidade diária de água:',
+    resultPrefix: '',
+    resultSuffix,
+    resultIntro: 'Com base no que você informou:',
+    introTitle: flow.abertura.gancho,
+    introSubtitle: flow.abertura.baixaFriccao,
+    introMicro: flow.abertura.autoridadeSutil ?? '',
+    ctaDefault: ctaText,
+    devolutivaYladaFlow,
+    page: {
+      title: flow.nome,
+      subtitle: pageObjetivo,
+      when_to_use: pageObjetivo,
+      og_description: ogDescription,
+      introTitle: flow.abertura.gancho,
+      introSubtitle: flow.abertura.baixaFriccao,
+      introMicro: flow.abertura.autoridadeSutil ?? '',
+    },
+    meta: {
+      theme_raw: flow.nome,
+      theme_display: flow.nome,
+      objective: kind === 'recruitment' ? 'propagar' : 'educar',
+      area_profissional: 'wellness',
+      pro_lideres_preset: true,
+      pro_lideres_fluxo_id: flow.id,
+      pro_lideres_kind: kind,
+      flow_id: flow.id,
+      handle: flow.handle ?? flow.id,
+      use_ylada_flow_native: true,
+      ylada_flow_handoff: flow.handoff,
+      ylada_flow_calculator: {
+        formulaId: calc.formulaId,
+        casasDecimais: calc.casasDecimais,
+        unidadeSaida: calc.unidadeSaida,
+      },
+    },
+    result: {
+      cta: { text: ctaText },
+    },
+  }
+}
+
 export function yladaFlowToPublicLinkConfig(
   flow: YladaFlow,
   kind: 'sales' | 'recruitment',
@@ -95,6 +202,10 @@ export function yladaFlowToPublicLinkConfig(
     kind,
     nome: flow.nome,
   })
+
+  if (flow.dimensoes.tipo === 'calculadora' && flow.calculadora) {
+    return yladaFlowToNativeCalculatorConfig(flow, kind, ctaText, pageObjetivo, ogDescription)
+  }
 
   const fields = flow.perguntas.map(perguntaYladaToFormField)
   const summary_bullets = legacyFluxo
