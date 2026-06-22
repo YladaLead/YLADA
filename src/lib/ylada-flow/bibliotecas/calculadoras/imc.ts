@@ -205,6 +205,9 @@ export const FLUXO_CALCULADORA_IMC: YladaFlow = {
     templateId: 'handoff-padrao',
     captacaoDados: false,
     inclui: { resumoRespostas: true, classificacao2080: true, scriptSugerido: true },
+    // Dados costurados (peso/altura/idade) + resultado + pedido de ajuda.
+    prefillWhatsApp:
+      'Oi! Fiz a calculadora de IMC ({peso} kg, {altura} cm, {idade} anos) e deu {imc} ({classificacao}). Queria entender o que isso significa pro meu caso e dar um primeiro passo com orientação. Pode me ajudar?',
   },
 
   origemBiblioteca: 'biblioteca-calculadoras-servico-v1',

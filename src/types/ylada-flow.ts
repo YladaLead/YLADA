@@ -231,6 +231,13 @@ export interface Handoff {
    * ligado → carimbo no painel do liderado e do líder.
    */
   captacaoDados?: boolean
+  /**
+   * Template do prefill do WhatsApp (calculadora) — humano, com dados costurados na frase
+   * (não dump de campos). O motor substitui tokens de INPUT (por id da pergunta, ex.: {peso},
+   * {objetivo}) e de RESULTADO (ex.: {imc}, {classificacao}, {gramas}, {kcal}, {resultado_litros},
+   * {resultado_copos}). Fonte única: vive no molde, não hardcoded no PublicLinkView.
+   */
+  prefillWhatsApp?: string
   inclui: {
     resumoRespostas: true //  sempre
     classificacao2080: true // sempre

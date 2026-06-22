@@ -167,6 +167,9 @@ export const FLUXO_CALCULADORA_HIDRATACAO: YladaFlow = {
     templateId: 'handoff-padrao',
     captacaoDados: false, // padrão Pró-Líderes: não captura/armazena (config do owner/tenant manda)
     inclui: { resumoRespostas: true, classificacao2080: true, scriptSugerido: true },
+    // Dado costurado (peso = {p1}, pois as perguntas da água usam p1/p2/p3) + resultado + pedido de ajuda.
+    prefillWhatsApp:
+      'Oi! Fiz a calculadora de água ({p1} kg) e a minha meta deu {resultado_litros} por dia ({resultado_copos} copos). Tô achando difícil manter isso na correria. Me ajuda a montar uma rotina que caiba no meu dia?',
   },
 
   // --- Catálogo/curadoria ---

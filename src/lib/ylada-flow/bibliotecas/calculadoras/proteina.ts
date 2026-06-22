@@ -131,6 +131,9 @@ export const FLUXO_CALCULADORA_PROTEINA: YladaFlow = {
     templateId: 'handoff-padrao',
     captacaoDados: false,
     inclui: { resumoRespostas: true, classificacao2080: true, scriptSugerido: true },
+    // Dados costurados na frase (peso + objetivo) + resultado + pedido de ajuda.
+    prefillWhatsApp:
+      'Oi! Fiz a calculadora de proteína ({peso} kg, objetivo: {objetivo}) e deu {gramas} g de proteína por dia. Queria ajuda pra encaixar isso na rotina sem complicar. Pode me ajudar?',
   },
 
   origemBiblioteca: 'biblioteca-calculadoras-servico-v1',

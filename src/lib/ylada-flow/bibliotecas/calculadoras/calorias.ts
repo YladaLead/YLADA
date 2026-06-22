@@ -148,6 +148,9 @@ export const FLUXO_CALCULADORA_CALORIAS: YladaFlow = {
     templateId: 'handoff-padrao',
     captacaoDados: false,
     inclui: { resumoRespostas: true, classificacao2080: true, scriptSugerido: true },
+    // Dados costurados (peso + objetivo) + resultado + pedido de ajuda.
+    prefillWhatsApp:
+      'Oi! Fiz a calculadora de calorias ({peso} kg, objetivo: {objetivo}) e deu {kcal} kcal por dia. Queria ajuda pra usar esse número no meu dia a dia. Pode me ajudar?',
   },
 
   origemBiblioteca: 'biblioteca-calculadoras-servico-v1',
