@@ -1,11 +1,13 @@
 /**
- * Aplica config nativa YladaFlow no payload do link público (calculadoras com molde).
+ * Aplica config nativa YladaFlow no payload do link público (calculadoras + quizzes com molde).
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { FluxoCliente } from '@/types/ylada-flow-legacy'
+import { fluxosClientes } from '@/lib/ylada-flow/fluxos-clientes'
 import { getProLideresWellnessCalculadorasBasicasPresetFluxos } from '@/lib/pro-lideres/pro-lideres-wellness-calculadoras-basicas-preset-fluxos'
 import {
   hasCalculadoraMoldForFluxoId,
+  hasQuizMoldForFluxoId,
   resolveNativePilotYladaFlow,
 } from '@/lib/ylada-flow/resolve-native-pilot-ylada-flow'
 import { yladaFlowToPublicLinkConfig } from '@/lib/ylada-flow/ylada-flow-to-public-link-config'
@@ -46,7 +48,7 @@ function minimalLegacyFluxoStub(fluxoId: string): FluxoCliente {
   }
 }
 
-function resolveCalculadoraFluxoId(
+function resolveNativeMoldFluxoId(
   meta: Record<string, unknown>,
   templateId?: string | null
 ): string {
@@ -68,13 +70,25 @@ function resolveCalculadoraFluxoId(
 function findLegacyFluxoForMold(fluxoId: string): FluxoCliente | null {
   const fromPreset = getProLideresWellnessCalculadorasBasicasPresetFluxos().find((f) => f.id === fluxoId)
   if (fromPreset) return fromPreset
-  if (hasCalculadoraMoldForFluxoId(fluxoId)) return minimalLegacyFluxoStub(fluxoId)
+  const fromClientes = fluxosClientes.find((f) => f.id === fluxoId)
+  if (fromClientes) return fromClientes
+  if (hasCalculadoraMoldForFluxoId(fluxoId) || hasQuizMoldForFluxoId(fluxoId)) {
+    return minimalLegacyFluxoStub(fluxoId)
+  }
   return null
 }
 
-function shouldApplyCalculadoraMold(meta: Record<string, unknown>, fluxoId: string): boolean {
-  if (!fluxoId || !hasCalculadoraMoldForFluxoId(fluxoId)) return false
+function shouldApplyNativeMold(meta: Record<string, unknown>, fluxoId: string): boolean {
+  const hasCalc = hasCalculadoraMoldForFluxoId(fluxoId)
+  const hasQuiz = hasQuizMoldForFluxoId(fluxoId)
+  if (!fluxoId || (!hasCalc && !hasQuiz)) return false
   if (meta.pro_lideres_kind === 'recruitment') return false
+
+  /** Quiz molds (ex.: bloco Corpo): só atrás de flag explícita — nunca auto-ligar em preset. */
+  if (hasQuiz && !hasCalc) {
+    return meta.use_ylada_flow_native === true
+  }
+
   if (meta.use_ylada_flow_native === true) return true
   if (
     isYladaFlowNativePilotGloballyEnabled() &&
@@ -83,7 +97,6 @@ function shouldApplyCalculadoraMold(meta: Record<string, unknown>, fluxoId: stri
     return true
   }
   if (meta.pro_lideres_preset === true) return true
-  // Link de calculadora da biblioteca (Coach / template YLADA) — molde é fonte da verdade (Spec §7).
   return true
 }
 
@@ -97,8 +110,8 @@ export async function maybeApplyYladaFlowNativeConfig(
   link: { user_id?: string | null; template_id?: string | null }
 ): Promise<Record<string, unknown>> {
   const meta = (config.meta as Record<string, unknown> | undefined) ?? {}
-  const fluxoId = resolveCalculadoraFluxoId(meta, link.template_id)
-  if (!shouldApplyCalculadoraMold(meta, fluxoId)) return config
+  const fluxoId = resolveNativeMoldFluxoId(meta, link.template_id)
+  if (!shouldApplyNativeMold(meta, fluxoId)) return config
 
   const legacyFluxo = findLegacyFluxoForMold(fluxoId)
   if (!legacyFluxo) return config

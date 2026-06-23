@@ -117,6 +117,26 @@ type CalcGenericScoreOpts = {
   formFields?: FormFieldForNormalize[]
   /** Faixas fixas (ex.: perfil metabólico 8/12 em 15 pts) em vez de terços do máximo. */
   riskScoreBands?: { medioMin: number; altoMin: number }
+  /** Restringe o score RISK a ids específicos (ex.: p1–p3 = DOR; p4/p5 = prontidão). */
+  riskMcqQuestionIds?: string[]
+}
+
+function questionIndexFromId(id: string): number | null {
+  const m = /^[qp](\d+)$/i.exec(id.trim())
+  return m ? parseInt(m[1], 10) : null
+}
+
+function sortedRiskQuestionIndices(
+  answers: Record<string, unknown>,
+  riskMcqQuestionIds?: string[]
+): number[] {
+  if (riskMcqQuestionIds?.length) {
+    const indices = riskMcqQuestionIds
+      .map((id) => questionIndexFromId(id))
+      .filter((n): n is number => n !== null)
+    return [...new Set(indices)].sort((a, b) => a - b)
+  }
+  return sortedQuizQuestionIndices(answers)
 }
 
 /** Score genérico: soma das contribuições por pergunta (qN ou pN). Faixas: terços do máximo possível. */
@@ -124,7 +144,7 @@ function calcGenericScoreAndLevel(
   answers: Record<string, unknown>,
   opts?: CalcGenericScoreOpts
 ): { score: number; level: RiskLevel } | null {
-  const indices = sortedQuizQuestionIndices(answers)
+  const indices = sortedRiskQuestionIndices(answers, opts?.riskMcqQuestionIds)
   let sum = 0
   let maxPossible = 0
   let count = 0
@@ -184,6 +204,7 @@ export function normalizeVisitorAnswers(
     formFields?: FormFieldForNormalize[]
     invertRiskMcqScore?: boolean
     riskScoreBands?: { medioMin: number; altoMin: number }
+    riskMcqQuestionIds?: string[]
   }
 ): Record<string, unknown> {
   const formFields = options?.formFields
@@ -214,6 +235,7 @@ export function normalizeVisitorAnswers(
           invertMcqScore: options?.invertRiskMcqScore === true,
           formFields,
           riskScoreBands: options?.riskScoreBands,
+          riskMcqQuestionIds: options?.riskMcqQuestionIds,
         })
         if (generic) {
           out.generic_score = generic.score

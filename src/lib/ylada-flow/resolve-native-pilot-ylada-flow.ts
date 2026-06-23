@@ -1,5 +1,5 @@
 /**
- * Resolve YladaFlow completo para calculadoras nativas (molde da biblioteca).
+ * Resolve YladaFlow completo para piloto nativo (calculadoras + quizzes com molde na biblioteca).
  */
 import type { FluxoCliente } from '@/types/ylada-flow-legacy'
 import type { YladaFlow } from '@/types/ylada-flow'
@@ -7,6 +7,7 @@ import { FLUXO_CALCULADORA_CALORIAS } from '@/lib/ylada-flow/bibliotecas/calcula
 import { FLUXO_CALCULADORA_HIDRATACAO } from '@/lib/ylada-flow/bibliotecas/calculadoras/hidratacao'
 import { FLUXO_CALCULADORA_IMC } from '@/lib/ylada-flow/bibliotecas/calculadoras/imc'
 import { FLUXO_CALCULADORA_PROTEINA } from '@/lib/ylada-flow/bibliotecas/calculadoras/proteina'
+import { FLUXOS_VENDAS_CORPO_POR_ID } from '@/lib/ylada-flow/bibliotecas/vendas/blocos/corpo-metabolismo'
 import {
   fluxoClienteToYladaFlow,
   type FluxoClienteToYladaFlowOptions,
@@ -20,10 +21,17 @@ const CALCULADORA_MOLD_BY_FLUXO_ID: Record<string, YladaFlow> = {
   'calc-imc': FLUXO_CALCULADORA_IMC,
 }
 
+const QUIZ_MOLD_BY_FLUXO_ID: Record<string, YladaFlow> = { ...FLUXOS_VENDAS_CORPO_POR_ID }
+
 export const YLADA_FLOW_CALCULADORA_MOLD_FLUXO_IDS = Object.keys(CALCULADORA_MOLD_BY_FLUXO_ID)
+export const YLADA_FLOW_QUIZ_MOLD_FLUXO_IDS = Object.keys(QUIZ_MOLD_BY_FLUXO_ID)
 
 export function hasCalculadoraMoldForFluxoId(fluxoId: string): boolean {
   return fluxoId in CALCULADORA_MOLD_BY_FLUXO_ID
+}
+
+export function hasQuizMoldForFluxoId(fluxoId: string): boolean {
+  return fluxoId in QUIZ_MOLD_BY_FLUXO_ID
 }
 
 function mergeMoldWithLegacy(
@@ -61,8 +69,11 @@ export function resolveNativePilotYladaFlow(
   legacyFluxo: FluxoCliente,
   opts: FluxoClienteToYladaFlowOptions
 ): YladaFlow {
-  const mold = CALCULADORA_MOLD_BY_FLUXO_ID[legacyFluxo.id]
-  if (mold) return mergeMoldWithLegacy(mold, legacyFluxo, opts)
+  const calcMold = CALCULADORA_MOLD_BY_FLUXO_ID[legacyFluxo.id]
+  if (calcMold) return mergeMoldWithLegacy(calcMold, legacyFluxo, opts)
+
+  const quizMold = QUIZ_MOLD_BY_FLUXO_ID[legacyFluxo.id]
+  if (quizMold) return mergeMoldWithLegacy(quizMold, legacyFluxo, opts)
 
   return fluxoClienteToYladaFlow(legacyFluxo, opts)
 }

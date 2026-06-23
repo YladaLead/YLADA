@@ -488,6 +488,12 @@ export async function POST(
     const linkTitleForCache = (config.title as string) || ''
     const scoringSalt = [
       metaRaw.invert_risk_mcq_score === true ? 'invert_mcq' : '',
+      Array.isArray(metaRaw.risk_mcq_question_ids)
+        ? `risk_ids_${(metaRaw.risk_mcq_question_ids as unknown[])
+            .filter((x): x is string => typeof x === 'string')
+            .sort()
+            .join(',')}`
+        : '',
       isMetabolicProfileQuiz
         ? `metabolic_bands_${AVALIACAO_PERFIL_METABOLICO_RISK_BANDS.medioMin}_${AVALIACAO_PERFIL_METABOLICO_RISK_BANDS.altoMin}`
         : '',
@@ -594,6 +600,9 @@ export async function POST(
 
     // Bloco 2: normalizar q1,q2... para chaves esperadas pelo motor
     const invertRiskMcqScore = metaRaw.invert_risk_mcq_score === true
+    const riskMcqQuestionIds = Array.isArray(metaRaw.risk_mcq_question_ids)
+      ? metaRaw.risk_mcq_question_ids.filter((x): x is string => typeof x === 'string')
+      : undefined
     const normalizedAnswers = normalizeVisitorAnswers(
       visitor_answers,
       architecture as DiagnosisArchitecture,
@@ -601,6 +610,7 @@ export async function POST(
         themeRaw: themeRaw ?? '',
         formFields,
         invertRiskMcqScore,
+        ...(riskMcqQuestionIds?.length ? { riskMcqQuestionIds } : {}),
         ...(isMetabolicProfileQuiz ? { riskScoreBands: AVALIACAO_PERFIL_METABOLICO_RISK_BANDS } : {}),
       }
     )
@@ -822,7 +832,8 @@ export async function POST(
         formFields,
         diagnosis.main_blocker
       )
-      if (bulletLines.length > 0) {
+      const skipLeadContextAppend = metaRaw.use_ylada_flow_native === true
+      if (bulletLines.length > 0 && !skipLeadContextAppend) {
         whatsappPrefill = appendLeadContextToWhatsAppPrefill(whatsappPrefill, bulletLines)
       }
       whatsappPrefill = clampWhatsAppPrefill(whatsappPrefill, MAX_WHATSAPP_PREFILL_CHARS)

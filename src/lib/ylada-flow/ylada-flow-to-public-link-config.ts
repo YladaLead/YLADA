@@ -129,6 +129,20 @@ function calculatorResultLabel(formulaId: string): string {
   }
 }
 
+/** Meta de score RISK para quiz nativo: só perguntas de DOR (papel.separa2080.sinal === 'problema'). */
+function buildQuizRiskScoringMeta(flow: YladaFlow): Record<string, unknown> {
+  const dorQuestions = flow.perguntas.filter((p) => p.papel?.separa2080?.sinal === 'problema')
+  if (dorQuestions.length === 0) return {}
+
+  const meta: Record<string, unknown> = {
+    risk_mcq_question_ids: dorQuestions.map((p) => p.id),
+  }
+  if (dorQuestions.some((p) => p.papel?.separa2080?.inverter === true)) {
+    meta.invert_risk_mcq_score = true
+  }
+  return meta
+}
+
 function buildCalculatorFormulaExpression(flow: YladaFlow): string {
   const calc = flow.calculadora
   if (!calc) return ''
@@ -268,6 +282,7 @@ export function yladaFlowToPublicLinkConfig(
       handle: flow.handle ?? flow.id,
       use_ylada_flow_native: true,
       ylada_flow_handoff: flow.handoff,
+      ...buildQuizRiskScoringMeta(flow),
       ...(isAguaCalculadora ? {} : { diagnosis_vertical: 'pro_lideres' }),
     },
     form: {
