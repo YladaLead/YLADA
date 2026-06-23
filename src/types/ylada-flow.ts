@@ -27,10 +27,12 @@ import type { PerguntaFluxoCliente } from '@/types/ylada-flow-legacy'
 // -----------------------------------------------------
 
 /** Onde a conversa acontece — muda o OBJETO da leitura (Spec §5). */
-export type Frente = 'campo' | 'digital' | 'rede'
+export type Frente = 'campo' | 'digital' | 'rede' | 'espelho'
 //  campo   = um a um    → lê a pessoa
 //  digital = um a muitos → lê o mercado
 //  rede    = muitos      → lê a ativação da rede
+//  espelho = Sujeito A   → o profissional lê a SI MESMO (onboarding/convicção; Chat 7).
+//            Aditivo: nenhum fluxo de lead usa; é a frente do autodiagnóstico do dono.
 
 /** Nicho é só configuração (vocabulário + biblioteca). Aberto por design. */
 export type Nicho = string
@@ -53,6 +55,8 @@ export type Finalidade =
   | 'diagnostico-servico' // servir/educar (calc. de água, IMC) — saúde: sempre orientativo
   | 'vendas' //             produto/serviço
   | 'recrutamento' //       convite ao negócio/renda — o mais sensível (nunca constranger)
+  | 'autodiagnostico-conviccao' // Sujeito A: o profissional mede a PRÓPRIA convicção (Espelho/onboarding; Chat 7).
+//                              Aditivo. NÃO é fluxo de lead: sem handoff p/ terceiro, sem 20/80; lê em 3 níveis.
 
 /** Governança aplicável (deriva de região × nicho × finalidade). */
 export type Governanca = 'bem-estar' | 'CFM' | 'ANVISA' | 'OAB' | 'CVM' | 'nenhuma'
