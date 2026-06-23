@@ -363,6 +363,21 @@ function isProEsteticaPublicLinkVertical(meta: Record<string, unknown>): boolean
   const v = typeof meta.diagnosis_vertical === 'string' ? meta.diagnosis_vertical.trim().toLowerCase() : ''
   return v === 'corporal' || v === 'capilar'
 }
+
+/**
+ * Boxes genéricos `goodNews` + `resultDisclaimer` na análise completa (quiz RISK).
+ * Pro Líderes vendas/recrutamento: suprimir salvaguarda clínica (Régua §6).
+ * Calculadoras de saúde no preset (água/IMC sem `diagnosis_vertical: pro_lideres`) mantêm os boxes.
+ */
+function shouldShowGenericClinicalSafeguardBoxes(meta: Record<string, unknown>): boolean {
+  if (meta.pro_lideres_preset !== true) return true
+  const kind = typeof meta.pro_lideres_kind === 'string' ? meta.pro_lideres_kind.trim() : ''
+  if (kind === 'recruitment') return false
+  const vertical =
+    typeof meta.diagnosis_vertical === 'string' ? meta.diagnosis_vertical.trim().toLowerCase() : ''
+  if (vertical === 'pro_lideres') return false
+  return true
+}
 /** Exibe textos de template sem travessão longa ou "--" (leitura mais limpa em mobile). */
 function softenTemplateEmDashes(text: string): string {
   if (!text) return text
@@ -1013,6 +1028,7 @@ function ConfigDrivenLinkView({
   const t = commercePublicCopy ? { ...PUBLIC_LINK_UI[locale], ...commercePublicCopy } : PUBLIC_LINK_UI[locale]
   const isProLideresPreset = meta.pro_lideres_preset === true
   const isProLideresRecruitmentLink = isProLideresPreset && meta.pro_lideres_kind === 'recruitment'
+  const showGenericClinicalSafeguardBoxes = shouldShowGenericClinicalSafeguardBoxes(meta)
   const isProEsteticaVerticalLink = isProEsteticaPublicLinkVertical(meta)
   const fieldsRaw = (formConfig.fields as FormField[]) || []
   const submitLabel = (formConfig.submit_label as string) || t.seeResult
@@ -1678,11 +1694,13 @@ function ConfigDrivenLinkView({
                   </div>
                 ) : null}
 
+                {showGenericClinicalSafeguardBoxes ? (
                 <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
                   <p className="text-gray-700 text-sm leading-relaxed">
                     {isProEsteticaVerticalLink ? t.esteticaExpandedEncouragement : t.goodNews}
                   </p>
                 </div>
+                ) : null}
 
                 {diagnosis.dica_rapida && (
                   <div className="mb-4 p-4 rounded-xl bg-sky-50/60 border border-sky-100">
@@ -1717,6 +1735,7 @@ function ConfigDrivenLinkView({
                   )}
                 </div>
 
+                {showGenericClinicalSafeguardBoxes ? (
                 <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
                     {isProLideresRecruitmentLink
@@ -1733,6 +1752,7 @@ function ConfigDrivenLinkView({
                         : t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
                   </p>
                 </div>
+                ) : null}
               </>
             )}
 
@@ -1835,6 +1855,7 @@ function ConfigDrivenLinkView({
               </ul>
             )}
           </div>
+          {showGenericClinicalSafeguardBoxes ? (
           <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
               {isProLideresRecruitmentLink
@@ -1851,6 +1872,7 @@ function ConfigDrivenLinkView({
                   : t.resultDisclaimer.replace('{pessoa}', pessoaLabelStatic)}
             </p>
           </div>
+          ) : null}
           {whatsappUrl ? (
             <div className="space-y-3">
               <p className="text-center text-sm text-gray-600">
@@ -2247,6 +2269,7 @@ function DiagnosticoQuiz({
   const cfgMeta = (config as { meta?: Record<string, unknown> }).meta ?? {}
   const isProLideresRecruitmentQuiz =
     cfgMeta.pro_lideres_preset === true && cfgMeta.pro_lideres_kind === 'recruitment'
+  const showGenericClinicalSafeguardBoxes = shouldShowGenericClinicalSafeguardBoxes(cfgMeta)
   const isProEsteticaVerticalQuiz = isProEsteticaPublicLinkVertical(cfgMeta)
   const cfg = config as DiagnosticoConfig
   const questions = Array.isArray(cfg.questions) ? cfg.questions : []
@@ -2494,11 +2517,14 @@ function DiagnosticoQuiz({
                     <p className="text-sm leading-relaxed text-gray-800 whitespace-pre-line">{quizExpandedBody}</p>
                   </div>
                 ) : null}
+                {showGenericClinicalSafeguardBoxes ? (
                 <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
                   <p className="text-gray-700 text-sm leading-relaxed">
                     {isProEsteticaVerticalQuiz ? t.esteticaExpandedEncouragement : t.goodNews}
                   </p>
                 </div>
+                ) : null}
+                {showGenericClinicalSafeguardBoxes ? (
                 <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
                     {isProLideresRecruitmentQuiz
@@ -2515,6 +2541,7 @@ function DiagnosticoQuiz({
                         : t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
                   </p>
                 </div>
+                ) : null}
               </>
             )}
           </>
