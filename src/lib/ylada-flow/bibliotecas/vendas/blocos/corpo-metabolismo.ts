@@ -168,7 +168,7 @@ const VARIACOES: VendasVariacao[] = [
     handle: 'barriga-pesada',
     nome: 'Barriga Pesada',
     objetivo: OBJETIVO_PADRAO,
-    gancho: 'Sua barriga vive pesada e estufada ao longo do dia? Em 5 perguntas, veja o que pode estar travando o seu corpo.',
+    gancho: 'Não é só o que você come. Em 5 perguntas, descubra o que deixa a sua barriga pesada o dia inteiro, e por onde começar a mudar. 2 min · sem cadastro.',
     tags: ['vendas', 'pro-lideres', 'corpo', 'barriga', 'inchaco'],
   },
   {
@@ -176,7 +176,7 @@ const VARIACOES: VendasVariacao[] = [
     handle: 'retencao-inchaco',
     nome: 'Retenção e Inchaço',
     objetivo: OBJETIVO_PADRAO,
-    gancho: 'Sente o corpo retendo líquido e inchado com facilidade? Em 5 perguntas, veja o que pode estar deixando você travada.',
+    gancho: 'O anel que aperta à tarde, a perna pesada no fim do dia. Em 5 perguntas, descubra por que o seu corpo retém tanto, e o que dá pra fazer. 2 min · sem cadastro.',
     tags: ['vendas', 'pro-lideres', 'corpo', 'retencao', 'inchaco'],
   },
   {
@@ -184,7 +184,7 @@ const VARIACOES: VendasVariacao[] = [
     handle: 'desconforto-pos-refeicao',
     nome: 'Desconforto Depois de Comer',
     objetivo: OBJETIVO_PADRAO,
-    gancho: 'Fica estufada e lenta toda vez que come? Em 5 perguntas, veja o que pode estar pesando no seu dia.',
+    gancho: 'Comeu e já bateu o peso e o sono? Não precisa ser assim depois de toda refeição. Em 5 perguntas, descubra o que pode estar por trás. 2 min · sem cadastro.',
     tags: ['vendas', 'pro-lideres', 'corpo', 'digestao', 'refeicao'],
   },
   {
@@ -192,7 +192,7 @@ const VARIACOES: VendasVariacao[] = [
     handle: 'inchaco-manha',
     nome: 'Inchaço ao Acordar',
     objetivo: OBJETIVO_PADRAO,
-    gancho: 'Acorda já se sentindo inchada e pesada? Em 5 perguntas, veja o que pode estar travando suas manhãs.',
+    gancho: 'Você acorda mais inchada do que foi dormir. Em 5 perguntas, descubra o que faz a sua manhã começar pesada, e o primeiro passo pra virar isso. 2 min · sem cadastro.',
     tags: ['vendas', 'pro-lideres', 'corpo', 'inchaco', 'manha'],
   },
   {
@@ -200,7 +200,7 @@ const VARIACOES: VendasVariacao[] = [
     handle: 'sedentarismo',
     nome: 'Corpo Parado, Sem Disposição',
     objetivo: OBJETIVO_PADRAO,
-    gancho: 'Rotina parada e o corpo sempre pesado, sem disposição? Em 5 perguntas, veja por onde dar o primeiro passo.',
+    gancho: 'Cansada sem ter feito quase nada? Corpo parado cansa mais que corpo em movimento. Em 5 perguntas, descubra o primeiro passo simples pra destravar. 2 min · sem cadastro.',
     tags: ['vendas', 'pro-lideres', 'corpo', 'sedentarismo', 'disposicao'],
   },
 ]

@@ -51,6 +51,7 @@ async function runGateTests() {
 async function main() {
   assert(hasQuizMoldForFluxoId('barriga-pesada'), 'registry barriga-pesada')
   assert(hasQuizMoldForFluxoId('retencao-inchaço'), 'registry cedilha retencao-inchaço')
+  assert(hasQuizMoldForFluxoId('energia-foco'), 'registry energia-foco via FLUXOS_VENDAS_POR_ID')
   assert(!hasQuizMoldForFluxoId('calc-proteina'), 'calculadora fora do quiz registry')
 
   const legacy = fluxosClientes.find((f) => f.id === 'barriga-pesada')

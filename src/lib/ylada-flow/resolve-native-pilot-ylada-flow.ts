@@ -7,7 +7,7 @@ import { FLUXO_CALCULADORA_CALORIAS } from '@/lib/ylada-flow/bibliotecas/calcula
 import { FLUXO_CALCULADORA_HIDRATACAO } from '@/lib/ylada-flow/bibliotecas/calculadoras/hidratacao'
 import { FLUXO_CALCULADORA_IMC } from '@/lib/ylada-flow/bibliotecas/calculadoras/imc'
 import { FLUXO_CALCULADORA_PROTEINA } from '@/lib/ylada-flow/bibliotecas/calculadoras/proteina'
-import { FLUXOS_VENDAS_CORPO_POR_ID } from '@/lib/ylada-flow/bibliotecas/vendas/blocos/corpo-metabolismo'
+import { FLUXOS_VENDAS_POR_ID } from '@/lib/ylada-flow/bibliotecas/vendas'
 import {
   fluxoClienteToYladaFlow,
   type FluxoClienteToYladaFlowOptions,
@@ -21,7 +21,7 @@ const CALCULADORA_MOLD_BY_FLUXO_ID: Record<string, YladaFlow> = {
   'calc-imc': FLUXO_CALCULADORA_IMC,
 }
 
-const QUIZ_MOLD_BY_FLUXO_ID: Record<string, YladaFlow> = { ...FLUXOS_VENDAS_CORPO_POR_ID }
+const QUIZ_MOLD_BY_FLUXO_ID: Record<string, YladaFlow> = { ...FLUXOS_VENDAS_POR_ID }
 
 export const YLADA_FLOW_CALCULADORA_MOLD_FLUXO_IDS = Object.keys(CALCULADORA_MOLD_BY_FLUXO_ID)
 export const YLADA_FLOW_QUIZ_MOLD_FLUXO_IDS = Object.keys(QUIZ_MOLD_BY_FLUXO_ID)

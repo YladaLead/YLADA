@@ -11,19 +11,19 @@
 --       · metabolismo-lento (arquivado, migration 437).
 --
 -- SUBSTITUI a copy morna anterior destes flow_ids (migrations 388/389/390) pela versão afiada
--- pela Régua (Regua_Qualidade_Diagnosticos.md): espelho → causa → consequência → 1º passo → CTA;
--- popular, frase curta, "você". Governança VENDAS health-adjacent (régua §6):
---   SEM promessa de saúde, SEM "desincha/emagrece/elimina toxina", SEM diagnóstico, SEM termo
---   de produto/Herbalife, SEM salvaguarda clínica (esfriaria). CTA = falar com quem enviou o link.
--- Prefill genérico (serve a qualquer entrada temática do bloco).
+-- pela Régua + gatilhos mentais ÉTICOS (aprovado 22/06): identificação (espelho), curiosidade,
+-- aversão à perda HONESTA (o corpo "só acumula"), compromisso/agora ("um passo só, hoje").
+--   → SEM escassez falsa, SEM promessa ("desincha/emagrece/elimina toxina"), SEM diagnóstico,
+--     SEM termo de produto/Herbalife, SEM salvaguarda clínica (esfriaria). Linguagem de bem-estar.
+-- CTA = falar com quem enviou o link. Prefill genérico (serve a qualquer entrada temática).
 --
 -- Eixo desta tabela = DOR (RISK): archetype_code leve/moderado/urgente = TOM.
 -- Prontidão (pronta × ainda-não) NÃO mora aqui — é o handoff/porPerfil do contrato (runtime).
 -- Mesmo schema da 445 (RISK_DIAGNOSIS, diagnosis_vertical NULL).
 --
--- NOTA: rodar este 447 já melhora a devolutiva mesmo no render LEGADO (lookup é por flow_id ×
--- archetype). O questionário unificado novo só aparece quando o render nativo do YladaFlow
--- for ligado para o bloco (atrás da flag YLADA_FLOW_NATIVE_PILOT / meta.use_ylada_flow_native).
+-- NOTA: rodar este 447 já melhora a devolutiva mesmo no render LEGADO (lookup por flow_id ×
+-- archetype). O questionário unificado novo e as aberturas só aparecem quando o render nativo
+-- do YladaFlow for ligado para o bloco (atrás da flag YLADA_FLOW_NATIVE_PILOT / meta.use_ylada_flow_native).
 
 DELETE FROM public.ylada_flow_diagnosis_outcomes
 WHERE architecture = 'RISK_DIAGNOSIS'
@@ -52,43 +52,43 @@ CROSS JOIN (
     (
       'leve',
       jsonb_build_object(
-        'profile_title', 'Você anda com o corpo meio pesado, mas ainda dá pra ajustar',
-        'profile_summary', 'Pelas respostas, o peso e o inchaço aparecem de vez em quando, não o tempo todo. É justo nesse começo que dá pra cuidar com calma, antes de virar rotina.',
-        'frase_identificacao', 'Se você se identifica: dá pra tocar o dia, mas você sente que poderia se sentir bem mais leve.',
-        'main_blocker', 'O que pesa ainda não é nada grave. São pequenos hábitos do dia a dia que vão deixando o corpo travado.',
-        'consequence', 'Deixar correr não custa caro hoje. Mas o que é de vez em quando tende a virar todo dia se ninguém mexe.',
-        'growth_potential', 'Dá pra começar pequeno, sem dieta radical, sem virar a rotina de cabeça pra baixo. Um passo só.',
-        'dica_rapida', 'Repare na água que você bebe e em quanto tempo fica parada: dois ajustes simples que já mudam a sensação de leveza.',
-        'cta_text', 'Quero me sentir mais leve',
-        'whatsapp_prefill', 'Oi! Respondi o que você me mandou. Meu corpo anda meio pesado de vez em quando e queria entender como me sentir mais leve, sem nada radical. Por onde eu começo?'
+        'profile_title', 'Seu corpo ainda dá só sinais leves, e dá tempo de virar',
+        'profile_summary', 'Pelas respostas, o peso e o inchaço aparecem de vez em quando, não o tempo todo. É bem nesse começo que dá pra cuidar com calma, antes de virar rotina.',
+        'frase_identificacao', 'Se isso é você: dá pra tocar o dia, mas no fundo você sente que poderia se sentir bem mais leve.',
+        'main_blocker', 'O que pesa ainda não é nada grave. São pequenos hábitos do dia a dia que já começam a deixar o corpo travado.',
+        'consequence', 'Ignorar não custa caro hoje. Mas o que é "de vez em quando" vira "todo dia" quando ninguém mexe, e aí é mais difícil de virar.',
+        'growth_potential', 'Dá pra resolver começando pequeno, sem dieta radical e sem virar a rotina de cabeça pra baixo. Um passo só, hoje.',
+        'dica_rapida', 'Repara na água que você bebe e em quanto tempo fica parada: dois ajustes simples que já mudam a sensação de leveza.',
+        'cta_text', 'Quero virar isso enquanto é simples',
+        'whatsapp_prefill', 'Oi! Respondi o que você me mandou. Meu corpo dá uns sinais de peso de vez em quando e queria virar isso enquanto ainda é simples. Por onde eu começo?'
       )
     ),
     (
       'moderado',
       jsonb_build_object(
-        'profile_title', 'O peso e o inchaço já incomodam quase todo dia',
-        'profile_summary', 'Você se vira, mas o corpo vive pesado, estufado, e isso vai puxando a sua disposição pra baixo. Não é só impressão, é um padrão que se repete.',
-        'frase_identificacao', 'Se você se identifica: não falta esforço. Falta um jeito que funcione no seu dia sem virar mais um peso.',
-        'main_blocker', 'O problema não é você. São hábitos do dia a dia somados, e o corpo paga a conta em forma de peso e cansaço.',
-        'consequence', 'Enquanto for assim, o ano que vem tende a ser igual a esse, com a mesma sensação de estar sempre devendo a você mesma.',
-        'growth_potential', 'Dá pra começar pequeno, sem largar o que você já faz. Um passo só, no seu tempo.',
-        'dica_rapida', 'Antes de falar, pensa numa coisa: em que horário do dia o peso mais te incomoda. Já ajuda a conversa a ir direto ao ponto.',
-        'cta_text', 'Quero dar o primeiro passo',
-        'whatsapp_prefill', 'Oi! Respondi o que você me mandou. Meu corpo vive pesado e isso atrapalha minha disposição. Quero entender como dar o primeiro passo pra me sentir mais leve.'
+        'profile_title', 'Seu corpo já te avisa todo dia, e você foi se acostumando',
+        'profile_summary', 'Você toca o dia, mas o corpo vive pesado e estufado, roubando a sua disposição sem você perceber. Não é frescura nem impressão: é um padrão que se repete.',
+        'frase_identificacao', 'Se isso é você: o problema nunca foi falta de esforço. É não ter um jeito que caiba no seu dia sem virar mais um peso.',
+        'main_blocker', 'A causa nunca foi você. São pequenas coisas do dia a dia que vão se somando, e quem paga a conta é o seu corpo, em peso e cansaço.',
+        'consequence', 'Do jeito que está, daqui a um ano você reclama exatamente do mesmo. O corpo não melhora sozinho; ele só acumula.',
+        'growth_potential', 'Dá pra virar isso começando pequeno, sem dieta radical e sem largar nada do que você já faz. Um passo só, hoje.',
+        'dica_rapida', 'Antes de chamar, repara: em que horário o peso mais aperta? Esse detalhe sozinho já encurta a conversa.',
+        'cta_text', 'Quero dar o meu primeiro passo',
+        'whatsapp_prefill', 'Oi! Respondi o que você me mandou. Meu corpo vive pesado e isso atrapalha minha disposição todo dia. Quero dar o primeiro passo pra me sentir mais leve.'
       )
     ),
     (
       'urgente',
       jsonb_build_object(
-        'profile_title', 'O corpo pesado e travado já está atrapalhando o seu dia inteiro',
-        'profile_summary', 'Pelas respostas, o peso, o inchaço e o cansaço aparecem o tempo todo. Não é frescura. É o corpo pedindo um cuidado que ficou pra depois tempo demais.',
-        'frase_identificacao', 'Se você se identifica: você não quer conversa enrolada, quer um caminho simples que caiba na sua vida.',
-        'main_blocker', 'Não é falta de vontade. É que o corpo travado puxa tudo junto: a energia, o humor, a vontade de fazer as coisas.',
-        'consequence', 'Cada dia assim é um dia em que você rende menos do que podia. E sozinha, no mesmo caminho, ele tende a se repetir.',
-        'growth_potential', 'O primeiro passo é uma conversa curta com quem te enviou isso, pra montar algo simples do seu jeito, sem promessa mágica.',
-        'dica_rapida', 'Leva suas duas maiores queixas pra conversa. Em cinco minutos já dá pra ver um caminho que faça sentido pra você.',
-        'cta_text', 'Quero falar agora com quem me enviou',
-        'whatsapp_prefill', 'Oi! Respondi o que você me mandou e o peso no corpo tá atrapalhando meu dia todo. Quero falar pra entender um próximo passo simples que caiba na minha vida.'
+        'profile_title', 'O peso no corpo já manda no seu dia, e você sente o tempo todo',
+        'profile_summary', 'Pelas respostas, o peso, o inchaço e o cansaço aparecem o tempo todo. Não é frescura. É o corpo cobrando um cuidado que ficou pra depois tempo demais.',
+        'frase_identificacao', 'Se isso é você: você não quer conversa enrolada. Quer um caminho simples que caiba na sua vida, e quer começar logo.',
+        'main_blocker', 'Não é falta de vontade. É que o corpo travado puxa tudo junto: a energia, o humor, a vontade de fazer qualquer coisa.',
+        'consequence', 'Cada dia assim é um dia em que você rende menos do que podia. E sozinha, no mesmo caminho, amanhã é igual a hoje.',
+        'growth_potential', 'O primeiro passo é uma conversa curta com quem te enviou isso, pra montar algo simples do seu jeito, sem promessa mágica. Dá pra começar hoje.',
+        'dica_rapida', 'Leva as suas duas maiores queixas pra conversa. Em cinco minutos já dá pra enxergar um caminho que faça sentido pra você.',
+        'cta_text', 'Quero começar agora',
+        'whatsapp_prefill', 'Oi! Respondi o que você me mandou e o peso no corpo tá atrapalhando meu dia todo. Quero começar logo, com um passo simples que caiba na minha vida.'
       )
     )
 ) AS a(archetype_code, content_json);
