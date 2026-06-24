@@ -63,6 +63,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308)
   }
 
+  // Diagnóstico público por dor (página estática em /public/diagnostico.html).
+  // URL limpa ylada.com/diagnostico, sem prefixo de idioma, servida por rewrite.
+  if (normalized === '/diagnostico') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/diagnostico.html'
+    return NextResponse.rewrite(url)
+  }
+
   // Raiz → detecta idioma do browser (307 = temporário, não cachear no browser — destino varia por usuário).
   if (pathname === '/' || pathname === '') {
     const url = request.nextUrl.clone()

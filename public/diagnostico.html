@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Diagnóstico da sua clínica · Ylada</title>
+<style>
+  :root{
+    --navy:#15303a; --teal:#1f6f6b; --teal-soft:#e7f1f0; --gold:#c8a24a;
+    --ink:#1c2b30; --muted:#6b7d82; --line:#e3eaea; --bg:#f6f8f8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;padding:18px}
+  .card{max-width:560px;margin:0 auto;background:#fff;border-radius:18px;
+    box-shadow:0 6px 30px rgba(21,48,58,.08);overflow:hidden}
+  .top{background:var(--navy);color:#fff;padding:26px 24px 22px}
+  .brand{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  .top h1{font-size:22px;margin-top:8px;font-weight:700}
+  .top p{color:#c9d8da;font-size:14px;margin-top:8px}
+  .body{padding:22px 24px 8px}
+  .q{padding:16px 0;border-bottom:1px solid var(--line)}
+  .q:last-of-type{border-bottom:none}
+  .q .label{font-weight:650;font-size:15.5px;margin-bottom:12px;color:var(--navy)}
+  .q .n{color:var(--teal);font-weight:700;margin-right:6px}
+  .opt{display:flex;align-items:center;gap:11px;padding:13px;border:1.5px solid var(--line);
+    border-radius:12px;margin-bottom:9px;cursor:pointer;transition:.15s;font-size:14.5px}
+  .opt:hover{border-color:var(--teal)}
+  .opt input{accent-color:var(--teal);width:18px;height:18px;flex:none}
+  .opt.sel{border-color:var(--teal);background:var(--teal-soft)}
+  .opt.big{font-size:15.5px;font-weight:600;color:var(--navy);padding:15px 14px}
+  .opt.big .sub{display:block;font-weight:400;font-size:13px;color:var(--muted);margin-top:2px}
+  input[type=text],textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;
+    padding:12px 13px;font-size:15px;font-family:inherit;color:var(--ink);resize:vertical}
+  input[type=text]:focus,textarea:focus{outline:none;border-color:var(--teal)}
+  .foot{padding:6px 24px 26px}
+  .note{font-size:13px;color:var(--muted);margin:14px 0 16px;text-align:center}
+  .btn{display:block;width:100%;border:none;border-radius:14px;padding:16px;font-size:16px;
+    font-weight:700;cursor:pointer;text-align:center;text-decoration:none;color:#fff}
+  .btn-teal{background:var(--teal)}
+  .btn-wa{background:#25d366;margin-top:10px}
+  .btn:active{opacity:.92}
+  .ylada{text-align:center;font-size:12px;color:var(--muted);margin-top:18px}
+  .ylada b{color:var(--teal)}
+  #result{display:none;padding:26px 24px 8px}
+  #result .tag{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:700}
+  #result h2{font-size:21px;color:var(--navy);margin:8px 0 14px;font-weight:700}
+  #result p{font-size:15.5px;margin-bottom:13px;color:var(--ink)}
+  #result .hi{background:var(--teal-soft);border-left:4px solid var(--teal);border-radius:10px;
+    padding:13px 15px;color:var(--navy);font-weight:600}
+  .err{color:#b4413a;font-size:13px;text-align:center;margin-bottom:10px;display:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <div class="brand">Ylada · Diagnóstico</div>
+      <h1>O que está travando sua clínica</h1>
+      <p>Responda rápido sobre o que mais te incomoda hoje. No fim, você sai com um ponto que quase nenhuma clínica enxerga.</p>
+    </div>
+
+    <div id="form">
+      <div class="body">
+        <div class="q">
+          <div class="label">Pra eu te conhecer e te mandar o resultado</div>
+          <input type="text" id="nome" placeholder="Seu nome" style="margin-bottom:9px" />
+          <input type="text" id="telefone" inputmode="tel" placeholder="Seu WhatsApp (com DDD)" style="margin-bottom:9px" />
+          <input type="text" id="instagram" placeholder="@ do seu Instagram" />
+        </div>
+
+        <div class="q" data-q="Dor principal" data-key="dor">
+          <div class="label"><span class="n">1.</span>Qual dessas três mais parece com a sua realidade hoje?</div>
+          <label class="opt big"><input type="radio" name="dor" value="agenda"><span>Agenda que oscila<span class="sub">Semanas cheias, semanas com buracos</span></span></label>
+          <label class="opt big"><input type="radio" name="dor" value="sozinha"><span>Faço quase tudo sozinha<span class="sub">A clínica depende de mim pra tudo</span></span></label>
+          <label class="opt big"><input type="radio" name="dor" value="lucro"><span>O lucro não cresce<span class="sub">Trabalho bastante, mas não sobra como deveria</span></span></label>
+        </div>
+
+        <div class="q" data-q="Há quanto tempo" data-key="tempo">
+          <div class="label"><span class="n">2.</span>Há quanto tempo isso te incomoda?</div>
+          <label class="opt"><input type="radio" name="tempo" value="0"><span>Há poucas semanas</span></label>
+          <label class="opt"><input type="radio" name="tempo" value="1"><span>Há alguns meses</span></label>
+          <label class="opt"><input type="radio" name="tempo" value="2"><span>Há mais de um ano</span></label>
+        </div>
+
+        <div class="q" data-q="Interessada que não fecha" data-key="perde">
+          <div class="label"><span class="n">3.</span>Quando uma pessoa se interessa mas não marca na hora, o que costuma acontecer?</div>
+          <label class="opt"><input type="radio" name="perde" value="0"><span>A gente acompanha até ela decidir</span></label>
+          <label class="opt"><input type="radio" name="perde" value="1"><span>Mandamos uma promoção</span></label>
+          <label class="opt"><input type="radio" name="perde" value="2"><span>Esperamos ela voltar sozinha</span></label>
+          <label class="opt"><input type="radio" name="perde" value="3"><span>Acaba se perdendo sem a gente ver</span></label>
+        </div>
+
+        <div class="q" data-q="Quem decide" data-key="quem">
+          <div class="label"><span class="n">4.</span>Você cuida da gestão da clínica, e quem decide os rumos junto com você?</div>
+          <textarea id="quem" rows="2" placeholder="Ex.: sou eu mesma; ou eu e mais uma sócia; ou eu cuido da agenda e a dona é a..."></textarea>
+        </div>
+      </div>
+
+      <div class="foot">
+        <div class="err" id="err">Responda as perguntas de 1 a 3 pra ver seu diagnóstico 🙂</div>
+        <button class="btn btn-teal" id="ver">Ver meu diagnóstico ›</button>
+        <div class="ylada">Diagnóstico feito com <b>Ylada</b> · Servir antes de vender</div>
+      </div>
+    </div>
+
+    <div id="result">
+      <div class="tag">Seu diagnóstico</div>
+      <h2 id="r-title"></h2>
+      <div id="r-body"></div>
+      <p class="hi" id="r-hi"></p>
+      <div class="note">O caminho prático, no seu caso, é o que o Andre te mostra numa conversa de 30 min. Sem custo, sem enrolação.</div>
+      <a href="#" class="btn btn-wa" id="falar">Enviar e falar com o Andre ›</a>
+      <div class="ylada">Diagnóstico feito com <b>Ylada</b> · Servir antes de vender</div>
+    </div>
+  </div>
+
+<script>
+  var ANDRE = '5519981868000';
+
+  document.querySelectorAll('.q').forEach(function(q){
+    q.querySelectorAll('.opt').forEach(function(opt){
+      opt.addEventListener('click', function(){
+        q.querySelectorAll('.opt').forEach(function(o){o.classList.remove('sel')});
+        opt.classList.add('sel');
+      });
+    });
+  });
+
+  function val(name){
+    var s=document.querySelector('input[name="'+name+'"]:checked');
+    return s?s.value:'';
+  }
+  function txt(name){
+    var s=document.querySelector('input[name="'+name+'"]:checked');
+    return s?s.closest('.opt').innerText.trim().replace(/\s+/g,' '):'(não respondeu)';
+  }
+
+  // Devolutiva por DOR — bate na dor, abre curiosidade, não entrega o "como"
+  var DOR = {
+    agenda:{
+      titulo:'Sua agenda oscila por um motivo que engana',
+      paras:[
+        'Você marcou a agenda que oscila, e essa é a dor que mais ilude. Parece que falta cliente, mas quase sempre o que falta é segurar quem já se interessou e não fechou na hora.',
+        'De cada 10 pessoas que olham pra sua clínica, só 2 ou 3 já chegam decididas. As outras querem também, só não é a hora delas, e é justamente nelas que a agenda escapa, sem ninguém ver.'
+      ],
+      hi:'Quando você cria um jeito de manter essas pessoas por perto até chegar a hora delas, a semana fraca some, sem você atender mais ninguém.'
+    },
+    sozinha:{
+      titulo:'A clínica cresce só até onde você dá conta',
+      paras:[
+        'Você marcou o "faço quase tudo sozinha", e aqui o ponto é duro, mas liberta: hoje a clínica cresce até onde você aguenta, e nem um pouco além.',
+        'Não é falta de esforço, é o contrário: é esforço demais concentrado em você. E o primeiro buraco costuma ser o cliente que se interessa e escapa enquanto você está ocupada com outra coisa.'
+      ],
+      hi:'O caminho não é correr mais, é tirar de cima de você o que não precisa ser seu, começando pelo que faz cliente escapar. Aí a clínica cresce sem te custar mais horas.'
+    },
+    lucro:{
+      titulo:'Agenda cheia não é a mesma coisa que lucro',
+      paras:[
+        'Você marcou o lucro que não cresce, e essa é a mais traiçoeira, porque a agenda pode até estar cheia e mesmo assim não sobrar no fim do mês.',
+        'Encher você já consegue. O que trava é outra coisa: cliente que vem uma vez e não volta, desconto que corrói, ou horário ocupado por quem rende pouco.'
+      ],
+      hi:'Quando cada cliente passa a render mais e a voltar, o mesmo movimento que você já tem vira muito mais dinheiro, sem você atender mais ninguém.'
+    }
+  };
+
+  document.getElementById('ver').addEventListener('click', function(){
+    var dor=val('dor'), tempo=val('tempo'), perde=val('perde');
+    if(!dor||tempo===''||perde===''){
+      document.getElementById('err').style.display='block';
+      return;
+    }
+    var nome=(document.getElementById('nome').value||'').trim();
+    var d=DOR[dor];
+
+    document.getElementById('r-title').innerText=(nome?nome+', ':'')+d.titulo.charAt(0).toLowerCase()+d.titulo.slice(1);
+    var body=document.getElementById('r-body');
+    body.innerHTML='';
+    d.paras.forEach(function(t){var el=document.createElement('p');el.innerText=t;body.appendChild(el);});
+    // reforço se ela mesma disse que perde quem não fecha
+    if(perde==='3'||perde==='2'){
+      var extra=document.createElement('p');
+      extra.innerText='E você mesma confirmou: quando alguém se interessa e não marca na hora, acaba se perdendo. Esse é o vazamento que quase ninguém olha.';
+      body.appendChild(extra);
+    }
+    document.getElementById('r-hi').innerText=d.hi;
+
+    var tel=(document.getElementById('telefone').value||'').trim();
+    var insta=(document.getElementById('instagram').value||'').trim();
+
+    var linhas=['*Diagnóstico — clínica*'];
+    if(nome) linhas.push('Nome: '+nome);
+    if(tel) linhas.push('WhatsApp: '+tel);
+    if(insta) linhas.push('Instagram: '+insta);
+    linhas.push('Dor principal: '+txt('dor'));
+    linhas.push('Há quanto tempo: '+txt('tempo'));
+    linhas.push('Interessada que não fecha: '+txt('perde'));
+    var quem=(document.getElementById('quem').value||'').trim();
+    if(quem) linhas.push('Quem decide: '+quem);
+    linhas.push('— Quero falar com o Andre sobre isso.');
+    var texto=encodeURIComponent(linhas.join('\n'));
+    document.getElementById('falar').setAttribute('href','https://wa.me/'+ANDRE+'?text='+texto);
+
+    document.getElementById('form').style.display='none';
+    document.getElementById('result').style.display='block';
+    window.scrollTo(0,0);
+  });
+</script>
+</body>
+</html>
