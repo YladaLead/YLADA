@@ -99,7 +99,7 @@
       <div class="foot">
         <div class="err" id="err">Responda as perguntas de 1 a 3 pra ver seu diagnóstico 🙂</div>
         <button class="btn btn-teal" id="ver">Ver meu diagnóstico ›</button>
-        <div class="ylada">Diagnóstico feito com <b>Ylada</b> · Servir antes de vender</div>
+        <div class="ylada">Diagnóstico feito com <b>Ylada</b></div>
       </div>
     </div>
 
@@ -110,7 +110,7 @@
       <p class="hi" id="r-hi"></p>
       <div class="note">O caminho prático, no seu caso, é o que o Andre te mostra numa conversa de 30 min. Sem custo, sem enrolação.</div>
       <a href="#" class="btn btn-wa" id="falar">Enviar e falar com o Andre ›</a>
-      <div class="ylada">Diagnóstico feito com <b>Ylada</b> · Servir antes de vender</div>
+      <div class="ylada">Diagnóstico feito com <b>Ylada</b></div>
     </div>
   </div>
 
@@ -138,28 +138,28 @@
   // Devolutiva por DOR — bate na dor, abre curiosidade, não entrega o "como"
   var DOR = {
     agenda:{
-      titulo:'Sua agenda oscila por um motivo que engana',
+      titulo:'Tem um motivo específico por trás da sua agenda oscilar',
       paras:[
-        'Você marcou a agenda que oscila, e essa é a dor que mais ilude. Parece que falta cliente, mas quase sempre o que falta é segurar quem já se interessou e não fechou na hora.',
-        'De cada 10 pessoas que olham pra sua clínica, só 2 ou 3 já chegam decididas. As outras querem também, só não é a hora delas, e é justamente nelas que a agenda escapa, sem ninguém ver.'
+        'Você marcou a agenda que oscila. Pelas suas respostas, dá pra ver que não é simplesmente falta de cliente: é um ponto específico que quase nenhuma clínica enxerga sozinha.',
+        'O Andre já viu esse mesmo padrão em dezenas de clínicas. Em 30 minutos ele aponta exatamente onde está, no seu caso, e o que mexer primeiro.'
       ],
-      hi:'Quando você cria um jeito de manter essas pessoas por perto até chegar a hora delas, a semana fraca some, sem você atender mais ninguém.'
+      hi:'Não é sorte, não é trabalhar mais. É método. E é isso que o Andre te mostra.'
     },
     sozinha:{
-      titulo:'A clínica cresce só até onde você dá conta',
+      titulo:'Hoje você virou o limite do crescimento, e dá pra mudar',
       paras:[
-        'Você marcou o "faço quase tudo sozinha", e aqui o ponto é duro, mas liberta: hoje a clínica cresce até onde você aguenta, e nem um pouco além.',
-        'Não é falta de esforço, é o contrário: é esforço demais concentrado em você. E o primeiro buraco costuma ser o cliente que se interessa e escapa enquanto você está ocupada com outra coisa.'
+        'Você marcou o "faço quase tudo sozinha". Por trás disso quase sempre há um ponto específico que está te prendendo, e raramente é o que parece.',
+        'O Andre já destravou isso em dezenas de clínicas. Em 30 minutos ele te mostra exatamente onde está, no seu caso.'
       ],
-      hi:'O caminho não é correr mais, é tirar de cima de você o que não precisa ser seu, começando pelo que faz cliente escapar. Aí a clínica cresce sem te custar mais horas.'
+      hi:'Não é correr mais. É método. E é isso que o Andre te mostra.'
     },
     lucro:{
-      titulo:'Agenda cheia não é a mesma coisa que lucro',
+      titulo:'Agenda cheia e lucro baixo: isso tem explicação',
       paras:[
-        'Você marcou o lucro que não cresce, e essa é a mais traiçoeira, porque a agenda pode até estar cheia e mesmo assim não sobrar no fim do mês.',
-        'Encher você já consegue. O que trava é outra coisa: cliente que vem uma vez e não volta, desconto que corrói, ou horário ocupado por quem rende pouco.'
+        'Você marcou o lucro que não cresce. Pelas suas respostas, não é falta de movimento: é um ponto específico que drena o resultado sem aparecer.',
+        'O Andre já viu isso em dezenas de clínicas. Em 30 minutos ele aponta exatamente onde está, no seu caso, e o que mudar primeiro.'
       ],
-      hi:'Quando cada cliente passa a render mais e a voltar, o mesmo movimento que você já tem vira muito mais dinheiro, sem você atender mais ninguém.'
+      hi:'Não é atender mais. É método. E é isso que o Andre te mostra.'
     }
   };
 
@@ -176,12 +176,6 @@
     var body=document.getElementById('r-body');
     body.innerHTML='';
     d.paras.forEach(function(t){var el=document.createElement('p');el.innerText=t;body.appendChild(el);});
-    // reforço se ela mesma disse que perde quem não fecha
-    if(perde==='3'||perde==='2'){
-      var extra=document.createElement('p');
-      extra.innerText='E você mesma confirmou: quando alguém se interessa e não marca na hora, acaba se perdendo. Esse é o vazamento que quase ninguém olha.';
-      body.appendChild(extra);
-    }
     document.getElementById('r-hi').innerText=d.hi;
 
     var tel=(document.getElementById('telefone').value||'').trim();
@@ -199,6 +193,12 @@
     linhas.push('— Quero falar com o Andre sobre isso.');
     var texto=encodeURIComponent(linhas.join('\n'));
     document.getElementById('falar').setAttribute('href','https://wa.me/'+ANDRE+'?text='+texto);
+
+    // captura: avisa o Andre no mesmo instante em que ela preenche (não depende do clique final)
+    try{
+      fetch('/api/diagnostico',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({nome:nome,telefone:tel,instagram:insta,dor:txt('dor'),tempo:txt('tempo'),perde:txt('perde'),quem:quem})}).catch(function(){});
+    }catch(e){}
 
     document.getElementById('form').style.display='none';
     document.getElementById('result').style.display='block';
