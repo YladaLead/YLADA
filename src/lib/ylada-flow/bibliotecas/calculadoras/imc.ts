@@ -145,7 +145,7 @@ export const FLUXO_CALCULADORA_IMC: YladaFlow = {
           espelho: 'Seu IMC deu {imc}, dentro da faixa de peso saudável. Bom sinal.',
           causa: 'Isso mostra que sua rotina está te servindo bem nesse ponto. O IMC, porém, não enxerga músculo nem gordura separados.',
           primeiroPasso: 'Mantenha o que funciona. Se quiser afinar energia ou composição corporal, dá pra evoluir com orientação.',
-          ctaWhatsApp: 'Quero otimizar minha energia e composição',
+          ctaWhatsApp: 'Quero melhorar minha energia e meu corpo',
         },
         porSexo: {
           F: { causa: 'Sua rotina está te servindo bem aqui. Mas o IMC não separa músculo de gordura, e mulher costuma ter mais gordura corporal no mesmo IMC, então o número sozinho engana um pouco.' },

@@ -164,7 +164,10 @@ function avaliarPerguntas(f: YladaFlow): NotaParte {
 // CTA "com pergunta na boca" (§4.7): o espírito é dar à pessoa a pergunta pra fazer —
 // não exige literalmente o "?". Aceita "?" OU verbo de pedir/perguntar (pergunta como…,
 // diz:, chama e fala, pede pra…). Calibragem da "régua viva" (§9) após rodar nos reais.
-const RX_CTA_PERGUNTA = /\?|\bpergunt|\bdiz\s*:|\bfala\s+(com|que)|\bchama\b|\bpe[çc]a\b|\bpede\b/i
+// Aceita: "?" · verbo de pedir/perguntar (pergunta…, diz:, fala com, chama, peça) ·
+// E a frase PRONTA em 1ª pessoa que o lead manda ("Quero entender meu resultado",
+// "Me ajuda a…", "Preciso de…") — esse é o formato canônico do handoff (a frase na boca).
+const RX_CTA_PERGUNTA = /\?|\bpergunt|\bdiz\s*:|\bfala\s+(com|que)|\bchama\b|\bpe[çc]a\b|\bpede\b|\bquero\b|\bqueria\b|\bme ajuda\b|\bpreciso\b/i
 
 function avaliarBloco(nome: string, b: BlocoDevolutiva): { veredito: Veredito; motivo: string }[] {
   const faltas: string[] = []
