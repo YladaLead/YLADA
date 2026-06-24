@@ -19,6 +19,12 @@ import {
 import { classifyProLideresMemberNoelMessage } from '@/lib/pro-lideres-member-noel-router'
 import { normalizeProLideresMemberNoelResponse } from '@/lib/pro-lideres-member-noel-response'
 import {
+  isNoelRecomendadorEnabled,
+  construirCriterioMembro,
+  recomendarParaNoel,
+  buildRecomendacaoCuradaBlockMembro,
+} from '@/lib/ylada-flow/recomendador/noel-wiring'
+import {
   fetchProLideresMemberTabulatorName,
   proLideresMemberHasNoelMemberSubscription,
   proLideresNoelMemberUserInOfferScope,
@@ -191,8 +197,24 @@ export async function POST(request: NextRequest) {
     priorUserTurns,
   })
 
+  // ADVISORY do Recomendador da Biblioteca (Chat 8 — fiação do membro), atrás de flag (OFF
+  // por padrão). Lookup determinístico (zero LLM/DB) sobre a biblioteca curada (nicho
+  // 'pro-lideres'): quando casa, anexa uma REFERÊNCIA de qual TIPO de fluxo cabe — defere
+  // o link a "Meus links" e nunca fabrica URL. Inerte com a flag OFF (byte-idêntico).
+  let memberSystemPrompt = systemPrompt
+  if (isNoelRecomendadorEnabled()) {
+    try {
+      const rec = recomendarParaNoel(
+        construirCriterioMembro({ message, audience: route.audience })
+      )
+      if (rec) memberSystemPrompt += buildRecomendacaoCuradaBlockMembro(rec)
+    } catch (e) {
+      console.warn('[pro-lideres/membro/noel] recomendador (advisory)', e)
+    }
+  }
+
   const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-    { role: 'system', content: systemPrompt },
+    { role: 'system', content: memberSystemPrompt },
     ...historyNorm.slice(-14).map((h) => ({
       role: h.role as 'user' | 'assistant',
       content: h.content,
