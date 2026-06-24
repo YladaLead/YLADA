@@ -789,10 +789,13 @@ export default function LoginForm({
                 ? '/images/logo/ylada/horizontal/laranja/ylada-horizontal-laranja-14.png'
                 : yladaHorizontalLogo)
 
+  // min-h-[100svh] + flex-col + overflow-y-auto + my-auto no card: centra o login
+  // mas, quando o teclado abre (iPad/iOS) e a altura útil encolhe, o card rola em
+  // vez de "brigar" com a centralização — evita o flicker que a Apple pegou (2.1a).
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center px-4 py-8 sm:py-12 touch-manipulation">
+    <div className="min-h-[100svh] bg-gradient-to-br from-gray-50 via-white to-gray-50 flex flex-col items-center overflow-y-auto px-4 py-8 sm:py-12 touch-manipulation">
       {/* relative + z-10: formulário acima de overlays fixos empilhados de forma estranha em alguns mobile browsers */}
-      <div className="relative z-10 max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100 p-8 sm:p-10 isolate">
+      <div className="relative z-10 my-auto max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100 p-8 sm:p-10 isolate">
         {/* Logo */}
         <div className="text-center mb-8 sm:mb-10">
           <div className="flex justify-center mb-6 sm:mb-8">

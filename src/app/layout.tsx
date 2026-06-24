@@ -68,6 +68,14 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: '#3B82F6',
+  // iPad/iOS 26: sem isto o WebView usa 'resizes-visual' (padrão), e quando o
+  // teclado abre a viewport visual encolhe enquanto o layout segue inteiro — o
+  // browser fica auto-rolando o campo focado e brigando com a tela centralizada,
+  // o que no iPad apareceu como "login recarregando + teclado some" (Apple 2.1a).
+  // 'resizes-content' faz a própria viewport de layout encolher acima do teclado:
+  // a tela reflui UMA vez e estabiliza, sem o loop de scroll. Vale pro app todo
+  // (chat/Noel/forms também ficam melhores). Fallback se persistir: 'overlays-content'.
+  interactiveWidget: 'resizes-content',
 }
 
 export default function RootLayout({
