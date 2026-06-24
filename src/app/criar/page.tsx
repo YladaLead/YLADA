@@ -49,7 +49,7 @@ export default function CriarPage() {
         <p className="text-base text-gray-600 leading-relaxed mb-8">{copy.sub}</p>
         <Link
           href={signupUrl}
-          className="inline-flex w-full items-center justify-center rounded-xl bg-gray-900 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-gray-800"
+          className="inline-flex w-full items-center justify-center rounded-xl bg-sky-600 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-sky-700"
         >
           Criar minha conta
         </Link>
