@@ -6,6 +6,33 @@ import { useAuth } from '@/contexts/AuthContext'
 import { isPublicPage, getAccessRule, getAppHomePathForPerfil, getAreaFromPath } from '@/lib/access-rules'
 
 /**
+ * Quebra-loop de redirect (bug 24/06): em estado meia-autenticado, login↔onboarding
+ * podem ficar se rebatendo; como o AutoRedirect remonta a cada volta, o ref de
+ * "já redirecionei" reseta e a tela congela. Esta guarda, baseada em sessionStorage
+ * (sobrevive ao remount), recusa REPETIR o MESMO destino dentro de 4s.
+ * Seguro: o 1º redirect sempre passa; nunca bloqueia acesso (no pior caso a pessoa
+ * fica na página atual). Retorna true = pular o redirect.
+ */
+const REDIRECT_GUARD_KEY = 'ylada_autoredirect_guard'
+function shouldSkipRedirect(currentPath: string | null, target: string): boolean {
+  if (currentPath === target) return true
+  try {
+    const now = Date.now()
+    const raw = sessionStorage.getItem(REDIRECT_GUARD_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw) as { target?: string; at?: number }
+      if (parsed.target === target && typeof parsed.at === 'number' && now - parsed.at < 4000) {
+        return true
+      }
+    }
+    sessionStorage.setItem(REDIRECT_GUARD_KEY, JSON.stringify({ target, at: now }))
+  } catch {
+    // sessionStorage indisponível → não bloquear (degrada para o comportamento antigo)
+  }
+  return false
+}
+
+/**
  * Componente que gerencia redirecionamento automático baseado em autenticação
  * 
  * VERSÃO SIMPLIFICADA - APENAS UX (não segurança)
@@ -136,6 +163,10 @@ export default function AutoRedirect() {
                   redirectPath = matrizBoard
                 }
               }
+              if (shouldSkipRedirect(pathname, redirectPath)) {
+                hasRedirectedRef.current = true
+                return
+              }
               console.log('✅ AutoRedirect (YLADA): redirecionando para', redirectPath)
               hasRedirectedRef.current = true
               router.replace(redirectPath)
@@ -143,10 +174,17 @@ export default function AutoRedirect() {
               if (hasRedirectedRef.current) return
               // Em caso de erro/timeout: se tem perfil de área (nutri, coach, etc.), ir para board em vez de onboarding
               if (userProfile?.perfil && userProfile.perfil !== 'ylada') {
+                const board = userProfile.perfil === 'coach-bem-estar' ? '/pt/coach-bem-estar/home' : '/pt/home'
+                if (shouldSkipRedirect(pathname, board)) {
+                  hasRedirectedRef.current = true
+                  return
+                }
                 hasRedirectedRef.current = true
-                router.replace(
-                  userProfile.perfil === 'coach-bem-estar' ? '/pt/coach-bem-estar/home' : '/pt/home'
-                )
+                router.replace(board)
+                return
+              }
+              if (shouldSkipRedirect(pathname, '/pt/onboarding')) {
+                hasRedirectedRef.current = true
                 return
               }
               hasRedirectedRef.current = true

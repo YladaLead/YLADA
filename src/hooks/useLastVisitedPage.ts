@@ -19,7 +19,7 @@ export function useLastVisitedPage() {
     
     // 🚨 NÃO salvar páginas de login, logout, callback, checkout ou outras páginas que não devem ser salvas
     // IMPORTANTE: /checkout nunca deve ser salvo para evitar redirecionamento indesejado após login
-    const excludedPaths = ['/login', '/logout', '/auth/callback', '/acesso', '/checkout', '/404', '/not-found']
+    const excludedPaths = ['/login', '/logout', '/auth/callback', '/acesso', '/checkout', '/404', '/not-found', '/onboarding']
     if (excludedPaths.some(path => pathname.includes(path))) {
       // Se for checkout, também limpar qualquer entrada anterior no localStorage
       if (pathname.includes('/checkout')) {
@@ -85,7 +85,7 @@ export function useLastVisitedPage() {
         
         // Validar que a rota salva ainda é válida
         if (lastPage) {
-          const excludedPaths = ['/checkout', '/login', '/logout', '/auth/callback', '/404', '/not-found', '/acesso']
+          const excludedPaths = ['/checkout', '/login', '/logout', '/auth/callback', '/404', '/not-found', '/acesso', '/onboarding']
           const hasExcludedPath = excludedPaths.some(path => lastPage.includes(path))
           const isValidRoute = lastPage.startsWith('/') && 
             (
