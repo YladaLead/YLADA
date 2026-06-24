@@ -132,13 +132,19 @@ export async function maybeApplyYladaFlowNativeConfig(
   const nativeConfig = yladaFlowToPublicLinkConfig(yladaFlow, kind, legacyFluxo)
   const nativeMeta = (nativeConfig.meta as Record<string, unknown>) ?? {}
 
+  // Chat 7 §4.2 / Chat 8 pré-passo: o Espelho (Sujeito A) NÃO tem lead pra entregar.
+  // O Motor PULA o handoff quando a finalidade é autodiagnóstico de convicção — não
+  // emite `ylada_flow_handoff`, então nenhum consumidor a jusante monta prefill de lead.
+  // Fluxos de lead (vendas/recrutamento/diagnóstico-serviço) seguem idênticos.
+  const pulaHandoff = yladaFlow.dimensoes.finalidade === 'autodiagnostico-conviccao'
+
   return {
     ...nativeConfig,
     meta: {
       ...nativeMeta,
       ...meta,
       use_ylada_flow_native: true,
-      ylada_flow_handoff: yladaFlow.handoff,
+      ...(pulaHandoff ? {} : { ylada_flow_handoff: yladaFlow.handoff }),
       pro_lideres_fluxo_id: fluxoId,
     },
   }

@@ -19,6 +19,12 @@ import {
   syncNoelProfileContactIfNeeded,
 } from '@/lib/ylada-noel-profile-gate'
 import { getNoelYladaLinks, formatLinksAtivosParaNoel } from '@/lib/noel-ylada-links'
+import {
+  isNoelRecomendadorEnabled,
+  construirCriterioNoel,
+  recomendarParaNoel,
+  buildRecomendacaoCuradaBlock,
+} from '@/lib/ylada-flow/recomendador/noel-wiring'
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
 import { formatDisplayTitle } from '@/lib/ylada/strategic-intro'
 import { getStrategicProfilesForMessage, formatStrategicProfileForPrompt } from '@/lib/noel-wellness/strategic-profile-matcher'
@@ -1154,6 +1160,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // PRÉ-PASSO (Chat 8) — Recomendador da Biblioteca, ADVISORY, atrás de flag (OFF por padrão).
+    // Lookup determinístico (zero LLM/DB) ANTES da geração: quando há um fluxo curado que casa,
+    // injeta um bloco para o Noel CITAR a recomendação. A geração de hoje segue entregando o link.
+    // Inerte com a flag OFF (byte-idêntico). NÃO toca classifyNoelResponseMode ("conteúdo > link").
+    let recomendacaoCuradaBlock = ''
+    if (isNoelRecomendadorEnabled() && linkModeEnabled && shouldGenerateNewLink) {
+      try {
+        const rec = recomendarParaNoel(
+          construirCriterioNoel({
+            message,
+            segment: validSegment,
+            profileType: profileRow?.profile_type ?? undefined,
+            profession: profileRow?.profession ?? undefined,
+          })
+        )
+        if (rec) recomendacaoCuradaBlock = buildRecomendacaoCuradaBlock(rec)
+      } catch (e) {
+        console.warn('[/api/ylada/noel] recomendador da biblioteca (advisory):', e)
+      }
+    }
+
     // Biblioteca do Noel: situação → perfil → objetivo → estratégias + conversas + insights
     // Fluxo: Mensagem → SITUAÇÃO → PERFIL → OBJETIVO → biblioteca → segmento
     let detectedStrategicProfileText = ''
@@ -1354,6 +1381,7 @@ export async function POST(request: NextRequest) {
       parts.push(NOEL_REGRAS_USO_LINKS_ATIVOS)
     }
     if (linkPerformanceBlock) parts.push(linkPerformanceBlock)
+    if (recomendacaoCuradaBlock) parts.push(recomendacaoCuradaBlock)
     if (linkGeradoBlock) parts.push(linkGeradoBlock)
     if (linkGeradoBlock && lastLinkContextOut?.url) {
       const url = lastLinkContextOut.url
