@@ -151,7 +151,8 @@ export function middleware(request: NextRequest) {
     pathname === '/favicon.ico' ||
     pathname === '/conviccao' ||                // Funil leitor PT — canônico sem prefixo de idioma
     pathname === '/conviccao-gera-performance' || // Alias funil PT
-    pathname === '/conviction'                  // Funil leitor EN — canônico sem prefixo de idioma
+    pathname === '/conviction' ||               // Funil leitor EN — canônico sem prefixo de idioma
+    pathname === '/criar'                       // Loop viral — página dedicada "crie o seu" (Caminho B)
   ) {
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set('x-pathname', pathname)

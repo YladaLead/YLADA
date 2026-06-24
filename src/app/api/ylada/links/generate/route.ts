@@ -12,6 +12,8 @@ import { fetchWhatsappE164FromLeaderTenants } from '@/lib/ylada-public-link-what
 import OpenAI from 'openai'
 import { generateDiagnosisForLink } from '@/lib/ylada/generate-diagnosis-for-link'
 import { getFlowById, VALID_FLOW_IDS } from '@/config/ylada-flow-catalog'
+import { isReferralLoopEnabled } from '@/lib/referrals/referral-loop-flag'
+import { markReferralActivationIfFirst } from '@/lib/referrals/referral-capture'
 import { getQuizEmagrecimento } from '@/config/ylada-quiz-emagrecimento'
 import { getQuizByTema } from '@/config/ylada-quiz-temas'
 import { interpretStrategyContext } from '@/lib/ylada/strategic-interpreter'
@@ -617,6 +619,15 @@ export async function POST(request: NextRequest) {
     if (insertError) {
       console.error('[ylada/links/generate]', insertError)
       return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
+    }
+
+    // Loop viral: ativação (k honesto) — marca activated_at no 1º link do usuário indicado.
+    // Só atualiza linhas ainda não ativadas → naturalmente "só o primeiro". No-op c/ flag OFF.
+    if (isReferralLoopEnabled() && supabaseAdmin) {
+      void markReferralActivationIfFirst(supabaseAdmin, {
+        referredUserId: user.id,
+        originSlug: link.slug,
+      })
     }
 
     // Gerar diagnóstico via IA para links RISK_DIAGNOSIS / BLOCKER_DIAGNOSIS

@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase-client'
 import Image from 'next/image'
 import { useLastVisitedPage } from '@/hooks/useLastVisitedPage'
 import { trackYladaFunnelUserCreated } from '@/lib/ylada-funnel-client'
+import { captureReferralIfPending } from '@/lib/referrals/referral-client'
 
 const supabase = createClient()
 
@@ -330,6 +331,8 @@ export default function LoginForm({
             // Sessão criada - usuário já está logado
             console.log('✅ Cadastro bem-sucedido com sessão ativa')
             trackYladaFunnelUserCreated(perfil)
+            // Loop viral: atribui a indicação pendente (cookie ?ref). No-op c/ flag OFF.
+            void captureReferralIfPending()
 
             // Verificar e ativar autorizações pendentes para este email
             try {
@@ -745,7 +748,11 @@ export default function LoginForm({
         // useAuth vai detectar a sessão automaticamente via onAuthStateChange
         // Não precisa aguardar - a sessão já está disponível
         console.log('🚀 Iniciando redirecionamento para:', finalRedirectPath)
-        
+
+        // Loop viral: se há indicação pendente (cookie ?ref de um cadastro c/ confirmação
+        // de e-mail), atribui agora no login. No-op c/ flag OFF; idempotente no servidor.
+        void captureReferralIfPending()
+
         // Usar window.location.href em produção para garantir que funciona
         // router.replace pode não funcionar corretamente em alguns casos
         if (typeof window !== 'undefined') {

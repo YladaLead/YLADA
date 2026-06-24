@@ -1795,7 +1795,7 @@ function ConfigDrivenLinkView({
             )}
 
             <div className="mt-5 pt-4 border-t border-gray-100">
-              <PoweredByYlada variant="compact" />
+              <PoweredByYlada variant="compact" linkSlug={slug} />
             </div>
             <DiagnosisDisclaimer
               variant={
@@ -1898,7 +1898,7 @@ function ConfigDrivenLinkView({
           )}
 
           <div className="mt-5 pt-4 border-t border-gray-100">
-            <PoweredByYlada variant="compact" />
+            <PoweredByYlada variant="compact" linkSlug={slug} />
           </div>
           <DiagnosisDisclaimer
             variant={
@@ -2575,7 +2575,7 @@ function DiagnosticoQuiz({
           )}
 
           <div className="mt-5 pt-4 border-t border-gray-100">
-            <PoweredByYlada variant="compact" />
+            <PoweredByYlada variant="compact" linkSlug={slug} />
           </div>
           <DiagnosisDisclaimer
             variant={
@@ -3667,7 +3667,7 @@ function CalculatorBlock({
             </div>
 
             <div className="mt-5 border-t border-gray-100 pt-4">
-              <PoweredByYlada variant="compact" />
+              <PoweredByYlada variant="compact" linkSlug={slug} />
             </div>
             <DiagnosisDisclaimer variant="informative" locale={locale} className="mt-4" />
           </>
