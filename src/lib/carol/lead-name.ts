@@ -26,6 +26,35 @@ const BUSINESS_HINTS = [
   'procedimento',
   'biomédica',
   'biomedica',
+  'massoterap',
+  'fisioterap',
+  'esteticista',
+  'estetic',
+  'micropigment',
+  'harmoniza',
+  'sobrancelha',
+  'cílios',
+  'cilios',
+  'podolog',
+  'pilates',
+  'beleza',
+  'cosmétic',
+  'cosmetic',
+  'agendamento',
+  'espaço',
+  'espaco',
+  'ateliê',
+  'atelie',
+  'boutique',
+  'saúde',
+  'saude',
+  'bem-estar',
+  'avançada',
+  'avancada',
+  'emagrec',
+  'depil',
+  'dra.',
+  'dr.',
 ]
 
 export function firstNameFromDisplayName(name: string): string {
@@ -47,12 +76,18 @@ export function isLikelyBusinessDisplayName(name: string): boolean {
 }
 
 /** Primeiro nome utilizável para a Carol chamar a lead */
+// Títulos não são primeiro nome (evita a Carol chamar a pessoa de "Dr"/"Dra")
+const NAME_TITLES = new Set(['dr', 'dra', 'sr', 'sra', 'dre'])
+
 export function usableFirstName(name: string | null | undefined): string | null {
   if (!name?.trim()) return null
   if (isLikelyBusinessDisplayName(name)) return null
   const first = firstNameFromDisplayName(name)
-  if (first.length < 2 || first.length > 25) return null
+  // Nome real raramente passa de ~14 letras; token longo = handle/razão social grudada
+  // (ex.: "Vilmarosamassoterapeuta"), nunca um primeiro nome.
+  if (first.length < 2 || first.length > 14) return null
   if (/^\d+$/.test(first)) return null
+  if (NAME_TITLES.has(first.toLowerCase().replace(/\.$/, ''))) return null
   return first
 }
 
