@@ -6,6 +6,8 @@
 > Para contexto completo de estratégia e marketing, leia:
 > `/Users/air/Desktop/Ylada-Workspace/CLAUDE.md`
 
+> ⚙️ **REGRAS DE CÓDIGO do agente: ler `AGENTS.md` (raiz deste repo).** Funções 4–20 linhas, arquivos <500, tipos explícitos, teste pra toda função (cobertura >80%), branch por feature, commit pequeno. Vale pra toda sessão de código aqui.
+
 ---
 
 ## CALCULADORAS YLADAFLOW (biblioteca serviço — Chat5)
