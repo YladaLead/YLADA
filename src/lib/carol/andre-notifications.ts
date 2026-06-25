@@ -12,7 +12,7 @@ import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from '../resend'
  * pessoal do Andre, que fica no celular dele com push — é a "notificação no
  * celular" sem depender da janela do WhatsApp.
  */
-const ANDRE_NOTIFY_EMAILS = Array.from(
+export const ANDRE_NOTIFY_EMAILS = Array.from(
   new Set(
     [
       process.env.ADMIN_EMAIL ||
