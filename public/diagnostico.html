@@ -56,7 +56,7 @@
     <div class="top">
       <div class="brand">Ylada · Diagnóstico</div>
       <h1>O que está travando sua clínica</h1>
-      <p>Responda rápido sobre o que mais te incomoda hoje. No fim, você sai com um ponto que quase nenhuma clínica enxerga.</p>
+      <p>Conta rápido o que mais te incomoda hoje, são 2 minutos. É o primeiro passo pra destravar o que segura o crescimento da sua clínica.</p>
     </div>
 
     <div id="form">
@@ -97,19 +97,18 @@
       </div>
 
       <div class="foot">
-        <div class="err" id="err">Responda as perguntas de 1 a 3 pra ver seu diagnóstico 🙂</div>
-        <button class="btn btn-teal" id="ver">Ver meu diagnóstico ›</button>
+        <div class="err" id="err">Responda as perguntas de 1 a 3 pra enviar 🙂</div>
+        <button class="btn btn-teal" id="ver">Enviar minhas respostas ›</button>
         <div class="ylada">Diagnóstico feito com <b>Ylada</b></div>
       </div>
     </div>
 
     <div id="result">
-      <div class="tag">Seu diagnóstico</div>
+      <div class="tag">Recebido!</div>
       <h2 id="r-title"></h2>
       <div id="r-body"></div>
       <p class="hi" id="r-hi"></p>
-      <div class="note">O caminho prático, no seu caso, é o que o Andre te mostra numa conversa de 30 min. Sem custo, sem enrolação.</div>
-      <a href="#" class="btn btn-wa" id="falar">Enviar e falar com o Andre ›</a>
+      <a href="#" class="btn btn-wa" id="falar">Falar com o Andre ›</a>
       <div class="ylada">Diagnóstico feito com <b>Ylada</b></div>
     </div>
   </div>
@@ -136,32 +135,23 @@
   }
 
   // Devolutiva por DOR — bate na dor, abre curiosidade, não entrega o "como"
-  var DOR = {
-    agenda:{
-      titulo:'Tem um motivo específico por trás da sua agenda oscilar',
-      paras:[
-        'Você marcou a agenda que oscila. Pelas suas respostas, dá pra ver que não é simplesmente falta de cliente: é um ponto específico que quase nenhuma clínica enxerga sozinha.',
-        'O Andre já viu esse mesmo padrão em dezenas de clínicas. Em 30 minutos ele aponta exatamente onde está, no seu caso, e o que mexer primeiro.'
-      ],
-      hi:'Não é sorte, não é trabalhar mais. É método. E é isso que o Andre te mostra.'
-    },
-    sozinha:{
-      titulo:'Hoje você virou o limite do crescimento, e dá pra mudar',
-      paras:[
-        'Você marcou o "faço quase tudo sozinha". Por trás disso quase sempre há um ponto específico que está te prendendo, e raramente é o que parece.',
-        'O Andre já destravou isso em dezenas de clínicas. Em 30 minutos ele te mostra exatamente onde está, no seu caso.'
-      ],
-      hi:'Não é correr mais. É método. E é isso que o Andre te mostra.'
-    },
-    lucro:{
-      titulo:'Agenda cheia e lucro baixo: isso tem explicação',
-      paras:[
-        'Você marcou o lucro que não cresce. Pelas suas respostas, não é falta de movimento: é um ponto específico que drena o resultado sem aparecer.',
-        'O Andre já viu isso em dezenas de clínicas. Em 30 minutos ele aponta exatamente onde está, no seu caso, e o que mudar primeiro.'
-      ],
-      hi:'Não é atender mais. É método. E é isso que o Andre te mostra.'
-    }
+  // Não entrega diagnóstico: só promove a reunião + autoridade. Personaliza pela dor.
+  var DOR_FRASE = {
+    agenda:'a agenda que oscila',
+    sozinha:'o peso de fazer quase tudo sozinha',
+    lucro:'o lucro que não cresce'
   };
+  function montarPromo(dor, nome){
+    var frase = DOR_FRASE[dor] || 'o que mais trava sua clínica';
+    return {
+      titulo: nome ? (nome + ', você está no lugar certo') : 'Você está no lugar certo',
+      paras:[
+        'Recebi suas respostas 🌿 E já te adianto uma coisa: ' + frase + ' é exatamente o tipo de ponto que o Andre mais destrava.',
+        'São 30 anos ajudando negócios a crescer com método, e dezenas de clínicas que já passaram por essa mesma virada. Não é achismo, é caminho.'
+      ],
+      hi:'A conversa é de 30 minutos, sem custo e sem pitch. Você sai sabendo o que está travando o seu crescimento e o que mexer primeiro. É direto ao ponto, do tipo que vale por muita reunião.'
+    };
+  }
 
   document.getElementById('ver').addEventListener('click', function(){
     var dor=val('dor'), tempo=val('tempo'), perde=val('perde');
@@ -170,9 +160,9 @@
       return;
     }
     var nome=(document.getElementById('nome').value||'').trim();
-    var d=DOR[dor];
+    var d=montarPromo(dor,nome);
 
-    document.getElementById('r-title').innerText=(nome?nome+', ':'')+d.titulo.charAt(0).toLowerCase()+d.titulo.slice(1);
+    document.getElementById('r-title').innerText=d.titulo;
     var body=document.getElementById('r-body');
     body.innerHTML='';
     d.paras.forEach(function(t){var el=document.createElement('p');el.innerText=t;body.appendChild(el);});
@@ -197,7 +187,7 @@
     // captura: avisa o Andre no mesmo instante em que ela preenche (não depende do clique final)
     try{
       fetch('/api/diagnostico',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({nome:nome,telefone:tel,instagram:insta,dor:txt('dor'),tempo:txt('tempo'),perde:txt('perde'),quem:quem})}).catch(function(){});
+        body:JSON.stringify({nome:nome,telefone:tel,instagram:insta,dor:val('dor'),tempo:val('tempo'),perde:val('perde'),quem:quem})}).catch(function(){});
     }catch(e){}
 
     document.getElementById('form').style.display='none';
