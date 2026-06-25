@@ -475,8 +475,9 @@ function CounterTaskRow({
 export function ProLideresDailyTasksClient() {
   const router = useRouter()
   const { isLeaderWorkspace: isLeader, dailyTasksVisibleToTeam, painelBasePath } = useProLideresPainel()
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const myUserId = user?.id ?? ''
+  const canMarkTasks = Boolean(myUserId)
 
   const [teamVisible, setTeamVisible] = useState(dailyTasksVisibleToTeam)
   const [savingTeamVisible, setSavingTeamVisible] = useState(false)
@@ -707,7 +708,7 @@ export function ProLideresDailyTasksClient() {
   }
 
   function toggleTodayTask(taskId: string) {
-    if (savingToday) return
+    if (!myUserId || savingToday) return
     const next = new Set(todayDraft)
     if (next.has(taskId)) next.delete(taskId)
     else next.add(taskId)
@@ -1108,8 +1109,18 @@ export function ProLideresDailyTasksClient() {
         </details>
       )}
 
-      {data && myUserId && (
+      {data && (
         <div className="overflow-hidden rounded-2xl shadow-xl shadow-blue-100">
+          {authLoading && !myUserId && (
+            <p className="border-b border-blue-100 bg-blue-50 px-4 py-2 text-center text-xs text-blue-800">
+              Carregando sua sessão…
+            </p>
+          )}
+          {!authLoading && !myUserId && (
+            <p className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-xs text-amber-900">
+              Sessão não reconhecida no navegador. Atualize a página ou entre de novo para marcar tarefas.
+            </p>
+          )}
           {/* Cabeçalho com progresso — cor muda conforme progresso */}
           <div
             className="relative overflow-hidden px-4 pb-6 pt-5 sm:px-5"
@@ -1203,8 +1214,10 @@ export function ProLideresDailyTasksClient() {
                 return (
                   <li
                     key={t.id}
-                    onClick={() => !savingToday && void toggleTodayTask(t.id)}
-                    className={`relative flex cursor-pointer select-none items-start gap-2 overflow-hidden rounded-xl border p-3 transition-all active:scale-[0.985] sm:gap-3 sm:p-4 ${
+                    onClick={() => canMarkTasks && !savingToday && void toggleTodayTask(t.id)}
+                    className={`relative flex select-none items-start gap-2 overflow-hidden rounded-xl border p-3 transition-all sm:gap-3 sm:p-4 ${
+                      canMarkTasks ? 'cursor-pointer active:scale-[0.985]' : 'cursor-not-allowed opacity-70'
+                    } ${
                       checked
                         ? 'border-emerald-200 bg-emerald-50/70 shadow-sm'
                         : 'border-gray-200 bg-white shadow-sm hover:border-blue-200 hover:shadow-md'
@@ -1272,7 +1285,7 @@ export function ProLideresDailyTasksClient() {
             {applicableToday.length > 0 && (
               <button
                 type="button"
-                disabled={!canSaveToday}
+                disabled={!canMarkTasks || !canSaveToday}
                 onClick={() => void saveTodayDraft()}
                 className={`w-full min-h-[52px] rounded-xl px-4 py-3 text-sm font-bold text-white shadow-md transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${
                   canSaveToday
@@ -1412,7 +1425,7 @@ export function ProLideresDailyTasksClient() {
         </div>
       )}
 
-      {data && myUserId && (
+      {data && (
         <div className="rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-4 text-center">
           <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Total no período</p>
           <p className="mt-1 text-3xl font-semibold tabular-nums text-gray-900">{data.myPointsInRange}</p>
