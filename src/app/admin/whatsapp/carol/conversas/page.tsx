@@ -23,6 +23,10 @@ type Conversation = {
   follow_up_sent?: boolean
   awaiting_reply?: boolean
   paused_awaiting_andre?: boolean
+  readiness_score?: number
+  readiness_level?: 'quente' | 'morno' | 'frio'
+  readiness_reasons?: string[]
+  misfired_postponement?: boolean
 }
 
 type ConversationStats = {
@@ -31,9 +35,11 @@ type ConversationStats = {
   awaiting_reply: number
   follow_up_sent: number
   paused_awaiting_andre: number
+  ready_to_close?: number
+  misfired_postponement?: number
 }
 
-type ReplyFilter = 'all' | 'attention' | 'responded' | 'awaiting' | 'follow_up' | 'paused_awaiting_andre'
+type ReplyFilter = 'all' | 'attention' | 'responded' | 'awaiting' | 'follow_up' | 'paused_awaiting_andre' | 'ready_to_close'
 
 type Message = {
   id: string
@@ -364,15 +370,27 @@ function ConversationList({
 
   const attentionCount = conversations.filter(needsAttention).length
 
-  const filtered = conversations.filter((c) => {
-    if (!matchesPhoneSearch(c.phone, phoneQuery)) return false
-    if (filter === 'attention') return needsAttention(c)
-    if (filter === 'responded') return c.has_user_reply
-    if (filter === 'awaiting') return c.awaiting_reply && !c.has_user_reply
-    if (filter === 'follow_up') return c.follow_up_sent
-    if (filter === 'paused_awaiting_andre') return Boolean(c.paused_awaiting_andre)
-    return true
-  })
+  const readyToCloseCount = conversations.filter(
+    (c) => c.readiness_level === 'quente'
+  ).length
+
+  const filtered = conversations
+    .filter((c) => {
+      if (!matchesPhoneSearch(c.phone, phoneQuery)) return false
+      if (filter === 'attention') return needsAttention(c)
+      if (filter === 'responded') return c.has_user_reply
+      if (filter === 'awaiting') return c.awaiting_reply && !c.has_user_reply
+      if (filter === 'follow_up') return c.follow_up_sent
+      if (filter === 'paused_awaiting_andre') return Boolean(c.paused_awaiting_andre)
+      if (filter === 'ready_to_close') return c.readiness_level === 'quente'
+      return true
+    })
+    // Na aba "Prontos pra fechar", os mais quentes primeiro.
+    .sort((a, b) =>
+      filter === 'ready_to_close'
+        ? (b.readiness_score ?? 0) - (a.readiness_score ?? 0)
+        : 0
+    )
 
   function handlePhoneKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter' && filtered.length === 1) {
@@ -448,6 +466,7 @@ function ConversationList({
           {(
             [
               ['all', 'Todos'],
+              ['ready_to_close', '🔥 Prontos pra fechar'],
               ['attention', 'Precisa de você'],
               ['paused_awaiting_andre', 'Aguardando você'],
               ['responded', 'Respondeu'],
@@ -461,15 +480,20 @@ function ConversationList({
               onClick={() => setFilter(key)}
               className={`rounded-full px-3 py-1 text-xs font-semibold ${
                 filter === key
-                  ? key === 'paused_awaiting_andre' || key === 'attention'
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-[#075e54] text-white'
-                  : key === 'paused_awaiting_andre' || key === 'attention'
-                    ? 'bg-orange-50 text-orange-800 hover:bg-orange-100'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? key === 'ready_to_close'
+                    ? 'bg-emerald-600 text-white'
+                    : key === 'paused_awaiting_andre' || key === 'attention'
+                      ? 'bg-orange-600 text-white'
+                      : 'bg-[#075e54] text-white'
+                  : key === 'ready_to_close'
+                    ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+                    : key === 'paused_awaiting_andre' || key === 'attention'
+                      ? 'bg-orange-50 text-orange-800 hover:bg-orange-100'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               {label}
+              {key === 'ready_to_close' ? ` (${readyToCloseCount})` : ''}
               {key === 'attention' ? ` (${attentionCount})` : ''}
               {key === 'awaiting' && stats ? ` (${stats.awaiting_reply})` : ''}
               {key === 'paused_awaiting_andre' && stats
@@ -525,13 +549,15 @@ function ConversationList({
             <p className="font-medium">
               {phoneQuery
                 ? 'Nenhum número encontrado'
-                : filter === 'attention'
-                  ? 'Nada precisa de você agora'
-                  : filter === 'paused_awaiting_andre'
-                    ? 'Ninguém aguardando sua resposta'
-                    : conversations.length === 0
-                      ? 'Nenhuma conversa ainda'
-                      : 'Nenhuma neste filtro'}
+                : filter === 'ready_to_close'
+                  ? 'Ninguém quente pra fechar agora'
+                  : filter === 'attention'
+                    ? 'Nada precisa de você agora'
+                    : filter === 'paused_awaiting_andre'
+                      ? 'Ninguém aguardando sua resposta'
+                      : conversations.length === 0
+                        ? 'Nenhuma conversa ainda'
+                        : 'Nenhuma neste filtro'}
             </p>
             <p className="text-sm mt-1">
               {phoneQuery
@@ -579,6 +605,16 @@ function ConversationList({
                   <p className="text-xs text-gray-400">{formatPhone(c.phone)}</p>
                 )}
                 <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  {c.readiness_level === 'quente' && (
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
+                      🔥 Pronto pra fechar
+                    </span>
+                  )}
+                  {c.misfired_postponement && (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700">
+                      ↩️ Adiou — resgatar
+                    </span>
+                  )}
                   <ReplyBadge conversation={c} />
                   <StatusBadge status={c.status} />
                 </div>

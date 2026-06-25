@@ -6,12 +6,23 @@ import { isMetaAdLeadMessage } from './meta-ad-lead'
 import { detectPainFromText } from './pain-detection'
 import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from '../resend'
 
-/** E-mail do Andre p/ os avisos da Carol — canal confiável (WhatsApp depende da janela de 24h da Meta e costuma falhar). */
-const ANDRE_NOTIFY_EMAIL =
-  process.env.ADMIN_EMAIL ||
-  process.env.CAROL_ANDRE_NOTIFY_EMAIL ||
-  process.env.CONTACT_NOTIFICATION_EMAIL ||
-  'ylada.lead@gmail.com'
+/**
+ * E-mails do Andre p/ os avisos da Carol — canal confiável (WhatsApp depende da
+ * janela de 24h da Meta e costuma falhar). Manda pra caixa de leads E pro Gmail
+ * pessoal do Andre, que fica no celular dele com push — é a "notificação no
+ * celular" sem depender da janela do WhatsApp.
+ */
+const ANDRE_NOTIFY_EMAILS = Array.from(
+  new Set(
+    [
+      process.env.ADMIN_EMAIL ||
+        process.env.CAROL_ANDRE_NOTIFY_EMAIL ||
+        process.env.CONTACT_NOTIFICATION_EMAIL ||
+        'ylada.lead@gmail.com',
+      'faulaandre@gmail.com',
+    ].filter(Boolean)
+  )
+)
 
 export { detectPainFromText } from './pain-detection'
 
@@ -75,7 +86,7 @@ async function notifyAndreEmail(text: string): Promise<void> {
   try {
     await resend.emails.send({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
-      to: ANDRE_NOTIFY_EMAIL,
+      to: ANDRE_NOTIFY_EMAILS,
       subject: notifySubject(text),
       html,
     })

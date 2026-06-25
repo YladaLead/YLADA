@@ -5,6 +5,10 @@ import {
   analyzeConversationWithPause,
   type CarolMessageRow,
 } from '@/lib/carol/conversation-insights'
+import {
+  scoreConversationReadiness,
+  type ConversationReadiness,
+} from '@/lib/carol/readiness'
 
 export async function GET(request: NextRequest) {
   const auth = await requireApiAuth(request, ['admin'])
@@ -26,6 +30,7 @@ export async function GET(request: NextRequest) {
   const ids = (data || []).map((c) => c.id)
   const lastMessages: Record<string, { content: string; role: string; created_at: string }> = {}
   const insightsMap: Record<string, ReturnType<typeof analyzeConversationWithPause>> = {}
+  const readinessMap: Record<string, ConversationReadiness> = {}
 
   if (ids.length > 0) {
     // Busca as mensagens em LOTES. Em volume alto (centenas de leads), um único
@@ -72,11 +77,13 @@ export async function GET(request: NextRequest) {
         byConv.get(c.id) || [],
         Boolean(c.paused)
       )
+      readinessMap[c.id] = scoreConversationReadiness(byConv.get(c.id) || [])
     }
   }
 
   const result = (data || []).map((c) => {
     const ins = insightsMap[c.id]
+    const rdy = readinessMap[c.id]
     return {
       ...c,
       last_message: lastMessages[c.id] ?? null,
@@ -86,6 +93,10 @@ export async function GET(request: NextRequest) {
       awaiting_reply: ins?.awaiting_reply ?? false,
       pending_carol_reply: ins?.pending_carol_reply ?? false,
       paused_awaiting_andre: ins?.paused_awaiting_andre ?? false,
+      readiness_score: rdy?.score ?? 0,
+      readiness_level: rdy?.level ?? 'frio',
+      readiness_reasons: rdy?.reasons ?? [],
+      misfired_postponement: rdy?.misfired_postponement ?? false,
     }
   })
 
@@ -96,6 +107,8 @@ export async function GET(request: NextRequest) {
     pending_carol_reply: result.filter((c) => c.pending_carol_reply).length,
     follow_up_sent: result.filter((c) => c.follow_up_sent).length,
     paused_awaiting_andre: result.filter((c) => c.paused_awaiting_andre).length,
+    ready_to_close: result.filter((c) => c.readiness_level === 'quente').length,
+    misfired_postponement: result.filter((c) => c.misfired_postponement).length,
   }
 
   return NextResponse.json({ conversations: result, stats })
