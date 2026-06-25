@@ -320,6 +320,15 @@ function AdminDashboardContent() {
       color: 'bg-violet-500',
       reservada: true,
     },
+    {
+      id: 'loop-kfactor',
+      title: 'Loop / k-factor',
+      description: 'Motor de aquisição: k-factor + funil de indicação + quem mais indica',
+      icon: '🔁',
+      link: '/admin/loop',
+      color: 'bg-sky-600',
+      reservada: true,
+    },
   ]
 
   const acoesArquivo: QuickAction[] = [
