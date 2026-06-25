@@ -134,22 +134,26 @@
     return s?s.closest('.opt').innerText.trim().replace(/\s+/g,' '):'(não respondeu)';
   }
 
-  // Devolutiva por DOR — bate na dor, abre curiosidade, não entrega o "como"
-  // Não entrega diagnóstico: só promove a reunião + autoridade. Personaliza pela dor.
-  var DOR_FRASE = {
-    agenda:'a agenda que oscila',
-    sozinha:'o peso de fazer quase tudo sozinha',
-    lucro:'o lucro que não cresce'
+  // Não entrega diagnóstico. Só um agradecimento caloroso que move pra reunião.
+  // A última linha muda conforme a dor que ela marcou (resultado positivo e concreto).
+  var DOR_DESFECHO = {
+    agenda:'deixar a sua agenda mais cheia',
+    sozinha:'tirar um pouco desse peso das suas costas',
+    lucro:'fazer a sua clínica crescer de verdade'
   };
+  function primeiroNome(nome){
+    return (nome||'').trim().split(/\s+/)[0] || '';
+  }
   function montarPromo(dor, nome){
-    var frase = DOR_FRASE[dor] || 'o que mais trava sua clínica';
+    var pn = primeiroNome(nome);
+    var desfecho = DOR_DESFECHO[dor] || 'fazer a sua clínica crescer';
     return {
-      titulo: nome ? (nome + ', você está no lugar certo') : 'Você está no lugar certo',
+      titulo: pn ? ('Obrigado, ' + pn + ' 💚') : 'Obrigado 💚',
       paras:[
-        'Recebi suas respostas 🌿 E já te adianto uma coisa: ' + frase + ' é exatamente o tipo de ponto que o Andre mais destrava.',
-        'São 30 anos ajudando negócios a crescer com método, e dezenas de clínicas que já passaram por essa mesma virada. Não é achismo, é caminho.'
+        'Que bom que você tirou esses minutinhos pra contar o que está te incomodando. Já é um baita primeiro passo. 🌿',
+        'Tenho certeza de que você vai gostar muito da conversa com o Andre. É leve, no seu ritmo, e você sai com clareza do que fazer.'
       ],
-      hi:'A conversa é de 30 minutos, sem custo e sem pitch. Você sai sabendo o que está travando o seu crescimento e o que mexer primeiro. É direto ao ponto, do tipo que vale por muita reunião.'
+      hi:'São 30 minutos, sem custo e sem compromisso. Bora ' + desfecho + '? 💚'
     };
   }
 
