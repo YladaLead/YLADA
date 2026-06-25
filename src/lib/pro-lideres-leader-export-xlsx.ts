@@ -1,6 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 
+import {
+  memberTabMatchesExportFilter,
+  type ProLideresLeaderExportTabulatorFilter,
+} from '@/lib/pro-lideres-leader-export-tabulators'
 import type { ProLideresDailyTaskCompletionRow, ProLideresDailyTaskRow } from '@/types/pro-lideres-daily-tasks'
 
 const TZ_SP = 'America/Sao_Paulo'
@@ -107,16 +111,26 @@ function pct100(num: number, den: number): number | string {
   return Math.round((1000 * num) / den) / 10
 }
 
+function memberPassesTabulatorFilter(
+  userId: string,
+  tabByUser: Map<string, string>,
+  tabulatorFilter: ProLideresLeaderExportTabulatorFilter
+): boolean {
+  return memberTabMatchesExportFilter(tabByUser.get(userId) ?? '—', tabulatorFilter)
+}
+
 export async function buildProLideresLeaderExportXlsx(
   admin: SupabaseClient,
   args: {
     tenantId: string
     ownerUserId: string
     range: ProLideresLeaderExportRange
+    tabulatorFilter?: ProLideresLeaderExportTabulatorFilter
   }
 ): Promise<ProLideresLeaderExportResult> {
-  const { tenantId, ownerUserId, range } = args
+  const { tenantId, ownerUserId, range, tabulatorFilter = { labels: null } } = args
   const { from, to } = range
+  const filteringTabs = Boolean(tabulatorFilter.labels?.length)
 
   const { data: memRows, error: memErr } = await admin
     .from('leader_tenant_members')
@@ -140,6 +154,7 @@ export async function buildProLideresLeaderExportXlsx(
   const memberIdsOnly = new Set(
     members
       .filter((m) => m.role === 'member' && (m.team_access_state as string) === 'active')
+      .filter((m) => memberPassesTabulatorFilter(m.user_id as string, tabByUser, tabulatorFilter))
       .map((m) => m.user_id as string)
   )
 
@@ -166,6 +181,7 @@ export async function buildProLideresLeaderExportXlsx(
   ]
   for (const r of members) {
     const uid = r.user_id as string
+    if (filteringTabs && !memberPassesTabulatorFilter(uid, tabByUser, tabulatorFilter)) continue
     const p = profileById.get(uid)
     equipeRows.push([
       displayName(uid, profileById),
@@ -208,6 +224,7 @@ export async function buildProLideresLeaderExportXlsx(
     ['Tabulador', 'Membro', 'Data', 'Tarefa', 'Pontos da tarefa', 'Concluído às (UTC)'],
   ]
   for (const c of completions) {
+    if (!memberIdsOnly.has(c.member_user_id)) continue
     const title = taskById.get(c.task_id)?.title?.trim() || 'Tarefa'
     const pts = taskById.get(c.task_id)?.points ?? 0
     tarefasLinhas.push([
@@ -509,9 +526,14 @@ export async function buildProLideresLeaderExportXlsx(
     linksResumoTab.push(['—', 0, 0, 0, 0, 0, '—'])
   }
 
+  const tabFilterLabel = filteringTabs
+    ? tabulatorFilter.labels!.join('; ')
+    : 'Todos os tabuladores'
+
   const metaRows: (string | number)[][] = [
     ['Pro Líderes — exportação para diagnóstico'],
     ['Período (inclusive)', `${from} a ${to}`],
+    ['Tabuladores incluídos', tabFilterLabel],
     ['Fuso da data «hoje»', TZ_SP],
     [
       'Nota — links (aba Links_ranking)',
