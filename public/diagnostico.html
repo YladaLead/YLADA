@@ -206,6 +206,7 @@
         body:JSON.stringify({nome:nome,telefone:tel,instagram:insta,dor:val('dor'),tempo:val('tempo'),perde:val('perde'),quem:quem})}).catch(function(){});
     }catch(e){}
 
+    var top=document.querySelector('.top'); if(top){top.style.display='none';}
     document.getElementById('form').style.display='none';
     document.getElementById('result').style.display='block';
     window.scrollTo(0,0);
