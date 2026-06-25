@@ -50,10 +50,11 @@ export async function POST(request: NextRequest) {
       console.error('[send-message] Erro ao salvar mensagem:', msgError)
     }
 
-    // Atualiza updated_at da conversa
+    // Andre assumiu a conversa → pausa a Carol automaticamente (regra de handoff:
+    // "assim que eu assumo, a Carol para"). Ela só volta se o Andre despausar.
     await db
       .from('carol_conversations')
-      .update({ updated_at: new Date().toISOString() })
+      .update({ paused: true, updated_at: new Date().toISOString() })
       .eq('id', conversationId)
 
     return NextResponse.json({ success: true })

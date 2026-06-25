@@ -4,6 +4,14 @@ import { isCarolAssistantReply, isRealUserMessage } from './conversation-insight
 import { historyHasOutbound } from './carol-reply-profile'
 import { isMetaAdLeadMessage } from './meta-ad-lead'
 import { detectPainFromText } from './pain-detection'
+import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from '../resend'
+
+/** E-mail do Andre p/ os avisos da Carol — canal confiável (WhatsApp depende da janela de 24h da Meta e costuma falhar). */
+const ANDRE_NOTIFY_EMAIL =
+  process.env.ADMIN_EMAIL ||
+  process.env.CAROL_ANDRE_NOTIFY_EMAIL ||
+  process.env.CONTACT_NOTIFICATION_EMAIL ||
+  'ylada.lead@gmail.com'
 
 export { detectPainFromText } from './pain-detection'
 
@@ -46,17 +54,49 @@ async function markMilestoneNotified(
   )
 }
 
-async function notifyAndre(text: string): Promise<void> {
-  const phone = getCarolAndreNotifyPhone()
-  if (!phone) {
-    console.warn('[Carol Notify] Nenhum telefone configurado — aviso não enviado')
-    return
-  }
+/** Assunto do e-mail = 1ª linha do aviso, sem markdown/emoji. */
+function notifySubject(text: string): string {
+  const first = (text.split('\n')[0] || 'aviso')
+    .replace(/[*_`]/g, '')
+    .replace(/^[^\p{L}\p{N}]+/u, '')
+    .trim()
+  return `Carol — ${first || 'novo aviso'}`.slice(0, 120)
+}
+
+async function notifyAndreEmail(text: string): Promise<void> {
+  if (!isResendConfigured() || !resend) return
+  const html = `<div style="font-family:Arial,sans-serif;background:#f5f7f6;padding:24px;margin:0">
+    <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 6px rgba(0,0,0,.06)">
+      <div style="white-space:pre-line;color:#0f172a;font-size:15px;line-height:1.5">${text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/\*(.+?)\*/g, '<b>$1</b>')}</div>
+    </div></div>`
   try {
-    await sendWhatsAppMessage(phone, text)
-    console.log(`[Carol Notify] Aviso enviado para +${phone}`)
+    await resend.emails.send({
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: ANDRE_NOTIFY_EMAIL,
+      subject: notifySubject(text),
+      html,
+    })
   } catch (err) {
-    console.error('[Carol Notify] Falha ao enviar aviso:', err)
+    console.error('[Carol Notify] Falha ao enviar e-mail:', err)
+  }
+}
+
+async function notifyAndre(text: string): Promise<void> {
+  // E-mail = canal confiável (sempre chega).
+  await notifyAndreEmail(text)
+
+  // WhatsApp = best-effort (só entrega dentro da janela de 24h da Meta).
+  const phone = getCarolAndreNotifyPhone()
+  if (phone) {
+    try {
+      await sendWhatsAppMessage(phone, text)
+      console.log(`[Carol Notify] Aviso enviado para +${phone}`)
+    } catch (err) {
+      console.error('[Carol Notify] WhatsApp falhou (provável janela 24h):', err)
+    }
   }
 }
 
