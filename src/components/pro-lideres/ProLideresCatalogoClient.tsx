@@ -9,6 +9,8 @@ import ProLideresHOMMembroClient from '@/components/pro-lideres/ProLideresHOMMem
 import ProLideresResetSettings from '@/components/pro-lideres/ProLideresResetSettings'
 import ProLideresResetMembroClient from '@/components/pro-lideres/ProLideresResetMembroClient'
 import ProLideresResetCompletaLinksPanel from '@/components/pro-lideres/ProLideresResetCompletaLinksPanel'
+import ProLideresVideoShareSettings from '@/components/pro-lideres/ProLideresVideoShareSettings'
+import ProLideresVideoShareMembroClient from '@/components/pro-lideres/ProLideresVideoShareMembroClient'
 import type { ProLideresCatalogCategory, ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
 import { copyTextToClipboard } from '@/lib/clipboard'
@@ -266,7 +268,7 @@ export function ProLideresCatalogoClient({
   const [search, setSearch] = useState('')
   const [teamVisibilityBusyId, setTeamVisibilityBusyId] = useState<string | null>(null)
   const [highlightYladaLinkId, setHighlightYladaLinkId] = useState<string | null>(null)
-  const [linkPanel, setLinkPanel] = useState<'reset' | 'hom' | 'completa' | null>(null)
+  const [linkPanel, setLinkPanel] = useState<'reset' | 'hom' | 'completa' | 'herbalife' | 'inicio' | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -411,10 +413,10 @@ export function ProLideresCatalogoClient({
         </header>
       ) : null}
 
-      {/* Atalhos — Bebida · Negócio · Reset completo */}
+      {/* Atalhos — Bebida · HOM Reset · Reset completo · HOM Herbalife · Início rápido */}
       <div className="space-y-3">
         <p className="text-sm font-semibold text-slate-800">Links de divulgação</p>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           <button
             type="button"
             onClick={() => setLinkPanel((p) => (p === 'reset' ? null : 'reset'))}
@@ -437,7 +439,7 @@ export function ProLideresCatalogoClient({
             }`}
           >
             <span aria-hidden>📈</span>
-            Negócio
+            HOM Reset
           </button>
           <button
             type="button"
@@ -451,6 +453,30 @@ export function ProLideresCatalogoClient({
             <span aria-hidden>📋</span>
             Reset completo
           </button>
+          <button
+            type="button"
+            onClick={() => setLinkPanel((p) => (p === 'herbalife' ? null : 'herbalife'))}
+            className={`flex min-h-[52px] items-center justify-center gap-2 rounded-xl border-2 px-3 py-3 text-sm font-bold transition ${
+              linkPanel === 'herbalife'
+                ? 'border-teal-600 bg-teal-50 text-teal-900 shadow-sm'
+                : 'border-teal-200 bg-white text-teal-900 hover:bg-teal-50/80'
+            }`}
+          >
+            <span aria-hidden>🌿</span>
+            HOM Herbalife
+          </button>
+          <button
+            type="button"
+            onClick={() => setLinkPanel((p) => (p === 'inicio' ? null : 'inicio'))}
+            className={`flex min-h-[52px] items-center justify-center gap-2 rounded-xl border-2 px-3 py-3 text-sm font-bold transition ${
+              linkPanel === 'inicio'
+                ? 'border-indigo-600 bg-indigo-50 text-indigo-900 shadow-sm'
+                : 'border-indigo-200 bg-white text-indigo-900 hover:bg-indigo-50/80'
+            }`}
+          >
+            <span aria-hidden>🚀</span>
+            Início rápido
+          </button>
         </div>
 
         {linkPanel ? (
@@ -463,6 +489,20 @@ export function ProLideresCatalogoClient({
             ) : null}
             {linkPanel === 'completa' ? (
               <ProLideresResetCompletaLinksPanel isLeaderWorkspace={isLeaderWorkspace} />
+            ) : null}
+            {linkPanel === 'herbalife' ? (
+              isLeaderWorkspace ? (
+                <ProLideresVideoShareSettings kind="hom-herbalife" videoLabel="HOM Herbalife" />
+              ) : (
+                <ProLideresVideoShareMembroClient kind="hom-herbalife" pageLabel="HOM Herbalife" />
+              )
+            ) : null}
+            {linkPanel === 'inicio' ? (
+              isLeaderWorkspace ? (
+                <ProLideresVideoShareSettings kind="inicio-rapido" videoLabel="Início Rápido" />
+              ) : (
+                <ProLideresVideoShareMembroClient kind="inicio-rapido" pageLabel="Início Rápido" />
+              )
             ) : null}
           </div>
         ) : null}
