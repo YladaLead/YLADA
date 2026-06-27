@@ -24,6 +24,9 @@ export const PRO_LIDERES_RESET_VIDEO_POSTER = '/images/pro-lideres/capa-bebida.j
 /** Poster da HOM — André + «Oportunidade de renda» (capa antes do play). */
 export const PRO_LIDERES_HOM_VIDEO_POSTER = '/images/pro-lideres/capa-hom.png'
 
+/** Poster da página HM Reset (HOM legada) — capa dedicada «Conheça a Oportunidade». */
+export const PRO_LIDERES_HOM_RESET_VIDEO_POSTER = '/images/pro-lideres/capa-hom-reset.jpg'
+
 /** Benefícios padrão da landing Reset Metabólico (Litrão Reset). */
 export const PRO_LIDERES_RESET_BENEFICIOS = [
   'Corpo mais leve e menos inchaço',

@@ -492,14 +492,24 @@ export function ProLideresCatalogoClient({
             ) : null}
             {linkPanel === 'herbalife' ? (
               isLeaderWorkspace ? (
-                <ProLideresVideoShareSettings kind="hom-herbalife" videoLabel="HOM Herbalife" />
+                <ProLideresVideoShareSettings
+                  kind="hom-herbalife"
+                  videoLabel="HOM Herbalife"
+                  placeholderHeadline="Oportunidade Herbalife"
+                  placeholderSubheadline="Assista à apresentação e descubra como começar"
+                />
               ) : (
                 <ProLideresVideoShareMembroClient kind="hom-herbalife" pageLabel="HOM Herbalife" />
               )
             ) : null}
             {linkPanel === 'inicio' ? (
               isLeaderWorkspace ? (
-                <ProLideresVideoShareSettings kind="inicio-rapido" videoLabel="Início Rápido" />
+                <ProLideresVideoShareSettings
+                  kind="inicio-rapido"
+                  videoLabel="Início Rápido"
+                  placeholderHeadline="Início Rápido"
+                  placeholderSubheadline="Seu primeiro passo para começar com o pé direito"
+                />
               ) : (
                 <ProLideresVideoShareMembroClient kind="inicio-rapido" pageLabel="Início Rápido" />
               )

@@ -14,6 +14,10 @@ export type ProLideresVideoSharePublicClientProps = {
   parsedVideo: ParsedOpportunityVideo | null
   poster: string
   videoTitle: string
+  ctaPrimaryLabel: string
+  ctaPrimaryMessage: string
+  ctaSecondaryLabel: string
+  ctaSecondaryMessage: string
 }
 
 function buildWhatsappUrl(whatsappRaw: string, message: string): string | null {
@@ -72,7 +76,7 @@ function ShareVideo({
         controls
         playsInline
         preload="metadata"
-        poster={poster}
+        {...(poster ? { poster } : {})}
       >
         <source src={parsedVideo.src} type="video/mp4" />
       </video>
@@ -97,6 +101,10 @@ export default function ProLideresVideoSharePublicClient({
   memberName,
   poster,
   videoTitle,
+  ctaPrimaryLabel,
+  ctaPrimaryMessage,
+  ctaSecondaryLabel,
+  ctaSecondaryMessage,
 }: ProLideresVideoSharePublicClientProps) {
   const memberLabel = memberName?.trim() || 'seu consultor'
 
@@ -150,17 +158,17 @@ export default function ProLideresVideoSharePublicClient({
           <div className="pl-reset-oportunidade__actions pl-reset-hom-page__actions">
             <button
               type="button"
-              onClick={() => openWa('Olá! 👋\n\nAssisti ao vídeo, gostei e quero saber mais!')}
+              onClick={() => openWa(ctaPrimaryMessage)}
               className="pl-reset-oportunidade__cta pl-reset-oportunidade__cta--primary pl-reset-oportunidade__cta--gradient"
             >
-              🚀 Gostei — quero saber mais!
+              {ctaPrimaryLabel}
             </button>
             <button
               type="button"
-              onClick={() => openWa('Olá! 👋\n\nAssisti ao vídeo e gostaria de tirar uma dúvida.')}
+              onClick={() => openWa(ctaSecondaryMessage)}
               className="pl-reset-oportunidade__cta pl-reset-oportunidade__cta--secondary"
             >
-              🤔 Tenho uma dúvida
+              {ctaSecondaryLabel}
             </button>
           </div>
 

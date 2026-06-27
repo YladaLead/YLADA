@@ -13,10 +13,6 @@ import {
   PRO_LIDERES_HOM_LEADER_SLUG,
   resolveProLideresHomLinkSubject,
 } from '@/lib/pro-lideres-hom'
-import {
-  PRO_LIDERES_HOM_VIDEO_POSTER,
-  PRO_LIDERES_RESET_VIDEO_POSTER,
-} from '@/lib/pro-lideres-reset-content'
 
 // Reuso do mesmo resolvedor de "quem é o sujeito do link" e do slug fixo do líder.
 export {
@@ -34,12 +30,21 @@ export type VideoShareDescriptor = {
   /** Vídeo MP4 padrão (public/videos) quando o líder não configurou. */
   defaultVideoUrl: string
   /** Poster (capa antes do play). */
+  /** Capa antes do play. Vazio ('') = sem capa, mostra o primeiro quadro do vídeo. */
   poster: string
   defaultHeadline: string
   defaultSubheadline: string
-  /** Chaves usadas no OG / título da aba. */
-  ogKey: string
+  /** Título curto da aba / fallback. */
   pageTitle: string
+  /** Prévia de WhatsApp/redes (OG): título, descrição e imagem próprios da página. */
+  ogTitle: string
+  ogDescription: string
+  ogImage: string
+  /** Botões de ação (direcionam pro WhatsApp do membro). */
+  ctaPrimaryLabel: string
+  ctaPrimaryMessage: string
+  ctaSecondaryLabel: string
+  ctaSecondaryMessage: string
 }
 
 export const VIDEO_SHARE_REGISTRY: Record<VideoShareKind, VideoShareDescriptor> = {
@@ -47,21 +52,33 @@ export const VIDEO_SHARE_REGISTRY: Record<VideoShareKind, VideoShareDescriptor> 
     table: 'prolider_hom_herbalife_config',
     routeSegment: 'hom-herbalife',
     defaultVideoUrl: '/videos/reset-metabolico-hom-herbalife.mp4',
-    poster: PRO_LIDERES_HOM_VIDEO_POSTER,
+    poster: '/images/pro-lideres/capa-hom-herbalife.jpg',
     defaultHeadline: 'Oportunidade Herbalife',
     defaultSubheadline: 'Assista à apresentação e descubra como começar',
-    ogKey: 'hom',
     pageTitle: 'HOM Herbalife',
+    ogTitle: 'Oportunidade de Negócio Herbalife',
+    ogDescription: 'Negócio próprio com a Herbalife: conheça a multinacional e o mercado de bem-estar.',
+    ogImage: '/images/pro-lideres/capa-hom-herbalife.jpg',
+    ctaPrimaryLabel: '🚀 Gostei, quero minha licença!',
+    ctaPrimaryMessage: 'Olá! 👋\n\nAssisti à apresentação, gostei e quero tirar minha licença!',
+    ctaSecondaryLabel: '🤔 Gostaria de tirar uma dúvida',
+    ctaSecondaryMessage: 'Olá! 👋\n\nGostaria de tirar uma dúvida.',
   },
   'inicio-rapido': {
     table: 'prolider_inicio_rapido_config',
     routeSegment: 'inicio-rapido',
     defaultVideoUrl: '/videos/reset-metabolico-inicio-rapido.mp4',
-    poster: PRO_LIDERES_RESET_VIDEO_POSTER,
+    poster: '/images/pro-lideres/capa-inicio-rapido.jpg',
     defaultHeadline: 'Início Rápido',
     defaultSubheadline: 'Seu primeiro passo para começar com o pé direito',
-    ogKey: 'hom',
     pageTitle: 'Início Rápido',
+    ogTitle: 'Início Rápido Bebidas Funcionais',
+    ogDescription: 'Seu primeiro passo no Projeto Reset Metabólico.',
+    ogImage: '/images/pro-lideres/capa-inicio-rapido.jpg',
+    ctaPrimaryLabel: '🛒 Quero fazer meu pedido',
+    ctaPrimaryMessage: 'Olá! 👋\n\nAssisti ao vídeo de Início Rápido e quero fazer meu pedido.',
+    ctaSecondaryLabel: '🤔 Quero tirar dúvida',
+    ctaSecondaryMessage: 'Olá! 👋\n\nAssisti ao vídeo de Início Rápido e quero tirar uma dúvida.',
   },
 }
 

@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { getCountryByCode, inferCountryIsoFromLeadingDigits } from '@/components/CountrySelector'
 import type { ParsedOpportunityVideo } from '@/lib/pro-lideres-opportunity-video'
 import { buildVimeoEmbedSrc, buildYouTubeEmbedSrc } from '@/lib/pro-lideres-opportunity-video'
-import { PRO_LIDERES_HOM_VIDEO_POSTER } from '@/lib/pro-lideres-reset-content'
+import { PRO_LIDERES_HOM_RESET_VIDEO_POSTER } from '@/lib/pro-lideres-reset-content'
 import ProLideresResetYladaFooter from '@/components/pro-lideres/ProLideresResetYladaFooter'
 
 export type ProLideresHOMClientProps = {
@@ -68,7 +68,7 @@ function HomVideo({
         controls
         playsInline
         preload="metadata"
-        poster={PRO_LIDERES_HOM_VIDEO_POSTER}
+        poster={PRO_LIDERES_HOM_RESET_VIDEO_POSTER}
       >
         <source src={parsedVideo.src} type="video/mp4" />
       </video>
@@ -139,19 +139,19 @@ export default function ProLideresHOMClient({
           <div className="pl-reset-oportunidade__actions pl-reset-hom-page__actions">
             <button
               type="button"
-              onClick={() => openWa('Olá! 👋\n\nAssisti à apresentação, gostei e quero saber como começar!')}
+              onClick={() => openWa('Olá! 👋\n\nAssisti à apresentação, gostei e quero tirar minha licença!')}
               className="pl-reset-oportunidade__cta pl-reset-oportunidade__cta--primary pl-reset-oportunidade__cta--gradient"
             >
-              🚀 Gostei — quero começar!
+              🚀 Gostei, quero minha licença!
             </button>
             <button
               type="button"
               onClick={() =>
-                openWa('Olá! 👋\n\nAssisti à apresentação e gostaria de tirar uma dúvida antes de decidir.')
+                openWa('Olá! 👋\n\nGostaria de tirar uma dúvida.')
               }
               className="pl-reset-oportunidade__cta pl-reset-oportunidade__cta--secondary"
             >
-              🤔 Tenho uma dúvida
+              🤔 Gostaria de tirar uma dúvida
             </button>
           </div>
 

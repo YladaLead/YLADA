@@ -26,7 +26,11 @@ export async function generateMetadata({
   const canonical = `${base}/pro-lideres/v/${kind}/${encodeURIComponent(tenantSlug)}/${encodeURIComponent(memberSlug)}`
   if (!data) return { title: `${d.pageTitle} | YLADA Pro Líderes` }
 
-  const share = buildProLideresVideoShareMetadata(base, canonical, d.ogKey, d.pageTitle)
+  const share = buildProLideresVideoShareMetadata(base, canonical, {
+    title: d.ogTitle,
+    description: d.ogDescription,
+    imagePath: d.ogImage,
+  })
   return {
     ...share,
     alternates: { canonical },
@@ -59,6 +63,10 @@ export default async function ProLideresVideoSharePage({
       parsedVideo={parsedVideo}
       poster={d.poster}
       videoTitle={d.pageTitle}
+      ctaPrimaryLabel={d.ctaPrimaryLabel}
+      ctaPrimaryMessage={d.ctaPrimaryMessage}
+      ctaSecondaryLabel={d.ctaSecondaryLabel}
+      ctaSecondaryMessage={d.ctaSecondaryMessage}
     />
   )
 }

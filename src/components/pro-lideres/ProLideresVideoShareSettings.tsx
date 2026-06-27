@@ -21,9 +21,13 @@ type MemberLink = {
 export default function ProLideresVideoShareSettings({
   kind,
   videoLabel,
+  placeholderHeadline,
+  placeholderSubheadline,
 }: {
   kind: VideoShareKind
   videoLabel: string
+  placeholderHeadline?: string
+  placeholderSubheadline?: string
 }) {
   const [config, setConfig] = useState<ShareConfig>({ videoUrl: '', headline: '', subheadline: '' })
   const [members, setMembers] = useState<MemberLink[]>([])
@@ -159,6 +163,7 @@ export default function ProLideresVideoShareSettings({
               type="text"
               value={config.headline}
               onChange={(e) => setConfig((c) => ({ ...c, headline: e.target.value }))}
+              placeholder={placeholderHeadline}
               maxLength={200}
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none ring-emerald-400 transition focus:border-emerald-400 focus:ring-2"
             />
@@ -170,6 +175,7 @@ export default function ProLideresVideoShareSettings({
               type="text"
               value={config.subheadline}
               onChange={(e) => setConfig((c) => ({ ...c, subheadline: e.target.value }))}
+              placeholder={placeholderSubheadline}
               maxLength={300}
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none ring-emerald-400 transition focus:border-emerald-400 focus:ring-2"
             />
