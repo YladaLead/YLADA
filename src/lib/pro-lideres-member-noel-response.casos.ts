@@ -2,14 +2,16 @@
  * Casos do pós-processador do Noel membro (sem OpenAI).
  * Rodar: npx tsx src/lib/pro-lideres-member-noel-response.casos.ts
  */
-import { classifyProLideresMemberNoelMessage } from '@/lib/pro-lideres-member-noel-router'
+import { classifyProLideresMemberNoelMessage, isMemberNoelConversationalQuery } from '@/lib/pro-lideres-member-noel-router'
 import {
   dedupeMemberNoelSections,
   ensureNaPraticaSection,
+  formatLinkParaEnviarBody,
   formatNaPraticaSectionsInText,
   isGenericReadyMessage,
   normalizeProLideresMemberNoelResponse,
   extractProLideresMemberNoelMensagemPronta,
+  parseLinkParaEnviarSection,
   polishProLideresMemberNoelForDisplay,
   userExplicitlyWantsReadyMessage,
 } from '@/lib/pro-lideres-member-noel-response'
@@ -177,6 +179,37 @@ assert(
   'extract mensagem pronta',
   extractProLideresMemberNoelMensagemPronta(msg) === 'Entendo, [nome]. O que pesou mais?'
 )
+
+const convQ = 'Quem é você?'
+const convRoute = classifyProLideresMemberNoelMessage(convQ)
+assert('conversacional: modo', convRoute.mode === 'conversacional')
+assert('conversacional: sem link', !convRoute.includeLink)
+const convRaw = `Sou o Noel na YLADA 😊
+
+**Na prática**
+
+- Faça algo.
+
+**Próximo passo**
+
+Me conta.`
+const convOut = normalizeProLideresMemberNoelResponse(convRaw, convRoute, convQ)
+assert('conversacional: sem blocos forçados', !/\*\*(Na prática|Próximo passo|Mensagem pronta|Link para enviar)\*\*/i.test(convOut))
+assert('conversacional: query helper', isMemberNoelConversationalQuery(convQ))
+
+const dashRaw = `Faz sentido — lista grande.
+
+**Próximo passo**
+
+Me conta — um passo de cada vez.`
+const dashOut = normalizeProLideresMemberNoelResponse(dashRaw, listaRoute, listaQ)
+assert('travessão removida na saída', !/[—–]/.test(dashOut))
+
+const linkBody = 'Calculadora de água — https://ylada.com/l/demo — educativo'
+const linkParsed = parseLinkParaEnviarSection(linkBody)
+assert('link parse: url', linkParsed?.url === 'https://ylada.com/l/demo')
+assert('link format: sem travessão', !/[—–]/.test(formatLinkParaEnviarBody(linkBody)))
+assert('link format: nome:url', formatLinkParaEnviarBody(linkBody).startsWith('Calculadora de água: https://'))
 
 console.log(`\n=== ${ok} ok, ${fail} falhas ===`)
 process.exit(fail > 0 ? 1 : 0)

@@ -2,6 +2,10 @@ import type {
   ProLideresMemberNoelMode,
   ProLideresMemberNoelRoute,
 } from '@/lib/pro-lideres-member-noel-router'
+import {
+  isMemberNoelConversationalQuery,
+} from '@/lib/pro-lideres-member-noel-router'
+import { sanitizeNoelAssistantOutput } from '@/lib/noel-output-sanitize'
 
 const SECTION_LABELS = [
   'Na prática',
@@ -111,6 +115,42 @@ export function formatMemberNoelSectionSpacing(text: string): string {
 
   t = t.replace(/\n{3,}/g, '\n\n').trim()
   return t
+}
+
+function shouldHaveProximoPasso(route: ProLideresMemberNoelRoute, userMessage: string): boolean {
+  if (route.mode === 'conversacional' || isMemberNoelConversationalQuery(userMessage)) return false
+  return true
+}
+
+function shouldHaveNaPratica(route: ProLideresMemberNoelRoute, userMessage: string): boolean {
+  if (route.mode === 'conversacional' || isMemberNoelConversationalQuery(userMessage)) return false
+  return true
+}
+
+/** Extrai nome + URL do bloco Link para enviar (formato UI). */
+export function parseLinkParaEnviarSection(body: string): { label: string; url: string } | null {
+  const urlMatch = body.match(/https?:\/\/[^\s)\]>]+/i)
+  if (!urlMatch?.[0]) return null
+  const url = urlMatch[0].replace(/[.,;]+$/, '')
+  let label = body.slice(0, urlMatch.index ?? 0).trim()
+  label = label.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/[\[—–,\]]+/g, ' ').trim()
+  label = label.replace(/\s*:\s*$/, '').trim()
+  if (!label || /^link$/i.test(label)) {
+    const parts = body.split(/\s*[—–,-]\s*/).map((p) => p.trim()).filter(Boolean)
+    const namePart = parts.find((p) => !/^https?:\/\//i.test(p))
+    label = namePart?.replace(/\*\*/g, '').trim() || 'Link'
+  }
+  return { label, url }
+}
+
+/** Formata bloco Link para enviar sem travessão entre nome e URL. */
+export function formatLinkParaEnviarBody(body: string): string {
+  const parsed = parseLinkParaEnviarSection(body)
+  if (!parsed) return body
+  const suffix = body.slice(body.indexOf(parsed.url) + parsed.url.length).trim()
+  const reason = suffix.replace(/^[\s,—–-]+/, '').trim()
+  const base = `${parsed.label}: ${parsed.url}`
+  return reason ? `${base}\n\n${reason}` : base
 }
 
 function normMsg(s: string): string {
@@ -307,7 +347,23 @@ function polishMemberNoelText(text: string): string {
   const base = stripMemberNoelDebugLines(sanitizeProLideresMemberNoelBrand(text.trim()))
   const softened = softenProLideresMemberNoelMarkdown(base)
   const headings = collapseDuplicateSectionHeadings(normalizePlainSectionHeadings(softened))
-  return formatMemberNoelSectionSpacing(headings)
+  return sanitizeNoelAssistantOutput(formatMemberNoelSectionSpacing(headings))
+}
+
+function stripConversationalBlocks(text: string): string {
+  let t = text
+  for (const label of ['Mensagem pronta', 'Link para enviar', 'Próximo passo', 'Na prática', 'Legenda curta']) {
+    t = removeSectionsByLabel(t, label)
+  }
+  return sanitizeNoelAssistantOutput(polishMemberNoelText(t))
+}
+
+function formatLinkSectionsInText(text: string): string {
+  const { preamble, sections } = parseMemberNoelSections(text)
+  const formatted = sections.map((s) =>
+    s.label === 'Link para enviar' ? { ...s, body: formatLinkParaEnviarBody(s.body) } : s
+  )
+  return rebuildMemberNoelSections(preamble, formatted)
 }
 
 /** Mesmo tratamento de seções/bullets para exibir no chat (fallback se a resposta vier sem passar de novo na API). */
@@ -341,9 +397,13 @@ function fixContextualProximoPasso(text: string, userMessage: string): string {
 }
 
 export function polishProLideresMemberNoelForDisplay(text: string, userMessage = ''): string {
+  if (isMemberNoelConversationalQuery(userMessage)) {
+    return stripConversationalBlocks(text)
+  }
   let t = polishMemberNoelText(text)
   t = dedupeMemberNoelSections(t)
   t = ensureNaPraticaSection(t)
+  t = formatLinkSectionsInText(t)
   t = fixContextualProximoPasso(t, userMessage)
   return polishMemberNoelText(t)
 }
@@ -353,20 +413,23 @@ export function normalizeProLideresMemberNoelResponse(
   route: ProLideresMemberNoelRoute,
   userMessage = ''
 ): string {
+  if (route.mode === 'conversacional' || isMemberNoelConversationalQuery(userMessage)) {
+    return stripConversationalBlocks(raw)
+  }
+
   let t = polishMemberNoelText(raw)
   if (!t) return t
 
   const hasNaPratica = hasMemberNoelSection(t, 'Na prática')
-  const hasMensagem = hasMemberNoelSection(t, 'Mensagem pronta')
-  const hasLegenda = hasMemberNoelSection(t, 'Legenda curta')
-  const hasLink = hasMemberNoelSection(t, 'Link para enviar') || textHasCatalogUrl(t)
   const hasFechamento = hasMemberNoelSection(t, 'Próximo passo')
 
   const shouldHaveMensagem =
     route.includeMensagemPronta || userExplicitlyWantsReadyMessage(userMessage)
   const shouldHaveLink = route.includeLink
+  const needsNaPratica = shouldHaveNaPratica(route, userMessage)
+  const needsProximoPasso = shouldHaveProximoPasso(route, userMessage)
 
-  if (!hasNaPratica && t.length > 40) {
+  if (needsNaPratica && !hasNaPratica && t.length > 40) {
     const blocks = t.split(/\n\n+/)
     if (blocks.length >= 2 && !/^(\*\*|###)/m.test(blocks[0] ?? '')) {
       const intro = blocks.slice(0, Math.min(2, blocks.length)).join('\n\n')
@@ -389,7 +452,7 @@ export function normalizeProLideresMemberNoelResponse(
     t += `\n\n**Link para enviar**\n\n${GENERIC_LINK_HINT}`
   }
 
-  if (!hasFechamento) {
+  if (needsProximoPasso && !hasFechamento) {
     t += `\n\n**Próximo passo**\n\n${defaultProximoPasso(route.mode, userMessage)}`
   }
 
@@ -403,9 +466,19 @@ export function normalizeProLideresMemberNoelResponse(
     t = removeSectionsByLabel(t, 'Link para enviar')
   }
 
-  t = polishMemberNoelText(
-    formatNaPraticaSectionsInText(ensureNaPraticaSection(dedupeMemberNoelSections(t)))
-  )
+  if (!needsProximoPasso) {
+    t = removeSectionsByLabel(t, 'Próximo passo')
+  }
+
+  if (needsNaPratica) {
+    t = polishMemberNoelText(
+      formatNaPraticaSectionsInText(ensureNaPraticaSection(dedupeMemberNoelSections(t)))
+    )
+  } else {
+    t = removeSectionsByLabel(polishMemberNoelText(dedupeMemberNoelSections(t)), 'Na prática')
+  }
+
+  t = formatLinkSectionsInText(t)
   t = fixContextualProximoPasso(t, userMessage)
   return polishMemberNoelText(t)
 }
