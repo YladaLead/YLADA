@@ -63,6 +63,8 @@ type LinkRow = {
   public_paused_freemium?: boolean
   /** Preset Pro Líderes (rede/MM); oculto no painel Pro Estética corporal. */
   pro_lideres_preset?: boolean
+  /** Marcado pra aparecer na vitrine da página pública /[perfil] (porta 3). */
+  perfil_destaque?: boolean
 }
 
 /** Rótulos amigáveis de perfil/categoria para exibir ao usuário (sem jargão técnico). */
@@ -189,6 +191,7 @@ function LinksPageContent({
   const [editingLink, setEditingLink] = useState<LinkRow | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [editCtaWhatsapp, setEditCtaWhatsapp] = useState('')
+  const [editPerfilDestaque, setEditPerfilDestaque] = useState(false)
   const [savingEdit, setSavingEdit] = useState(false)
   const [linkQrModal, setLinkQrModal] = useState<LinkRow | null>(null)
   const [profile, setProfile] = useState<{ profile_type?: string | null; profession?: string | null; area_specific?: Record<string, unknown> | null } | null>(null)
@@ -436,6 +439,7 @@ function LinksPageContent({
     setEditingLink(link)
     setEditTitle(link.title ?? '')
     setEditCtaWhatsapp(link.cta_whatsapp ?? '')
+    setEditPerfilDestaque(link.perfil_destaque === true)
     setMessage(null)
   }
 
@@ -443,6 +447,7 @@ function LinksPageContent({
     setEditingLink(null)
     setEditTitle('')
     setEditCtaWhatsapp('')
+    setEditPerfilDestaque(false)
   }
 
   const handleSaveEdit = async () => {
@@ -457,6 +462,7 @@ function LinksPageContent({
         body: JSON.stringify({
           title: editTitle.trim() || null,
           cta_whatsapp: editCtaWhatsapp.trim() || null,
+          perfil_destaque: editPerfilDestaque,
         }),
       })
       const json = await res.json()
@@ -464,7 +470,7 @@ function LinksPageContent({
         setLinks((prev) =>
           prev.map((l) =>
             l.id === editingLink.id
-              ? { ...l, title: editTitle.trim() || l.title, cta_whatsapp: editCtaWhatsapp.trim() || null }
+              ? { ...l, title: editTitle.trim() || l.title, cta_whatsapp: editCtaWhatsapp.trim() || null, perfil_destaque: editPerfilDestaque }
               : l
           )
         )
@@ -1664,6 +1670,20 @@ function LinksPageContent({
                     placeholder="5511999999999 ou https://wa.me/..."
                   />
                   <p className="text-xs text-gray-500 mt-1">Número com DDD, sem espaços, ou link completo.</p>
+                </div>
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editPerfilDestaque}
+                      onChange={(e) => setEditPerfilDestaque(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-xs text-gray-700">
+                      <span className="font-medium">Mostrar na minha página pública</span>
+                      <span className="block text-gray-500">Aparece em destaque no seu link de perfil. Se você não marcar nenhum, a página mostra os mais recentes.</span>
+                    </span>
+                  </label>
                 </div>
               </div>
               <div className="flex justify-end gap-2 mt-5">

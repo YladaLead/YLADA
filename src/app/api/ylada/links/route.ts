@@ -35,6 +35,13 @@ function proLideresPresetFromConfigJson(configJson: unknown): boolean {
   return meta?.pro_lideres_preset === true
 }
 
+/** Marcado pelo dono pra aparecer na vitrine da página /[perfil] (porta 3). */
+function perfilDestaqueFromConfigJson(configJson: unknown): boolean {
+  if (!configJson || typeof configJson !== 'object') return false
+  const meta = (configJson as { meta?: { perfil_destaque?: unknown } }).meta
+  return meta?.perfil_destaque === true
+}
+
 function buildStatsMap(
   rows: Array<{ link_id: string; event_type: string; cnt: number | string }> | null
 ): Record<string, EventCounts> {
@@ -157,10 +164,12 @@ export async function GET(request: NextRequest) {
       const { config_json, ...rest } = row as typeof row & { config_json?: unknown }
       const theme_raw = themeRawFromConfigJson(config_json)
       const pro_lideres_preset = proLideresPresetFromConfigJson(config_json)
+      const perfil_destaque = perfilDestaqueFromConfigJson(config_json)
       return {
         ...rest,
         theme_raw,
         pro_lideres_preset,
+        perfil_destaque,
         url: baseUrl ? `${baseUrl}/l/${row.slug}` : `/l/${row.slug}`,
         template_name: row.template_id ? templatesMap[row.template_id]?.name ?? null : null,
         template_type: row.template_id ? templatesMap[row.template_id]?.type ?? null : null,

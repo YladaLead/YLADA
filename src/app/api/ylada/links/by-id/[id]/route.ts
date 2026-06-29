@@ -137,6 +137,14 @@ export async function PUT(
       ? body.status
       : undefined
     const configOverride = body.config_json && typeof body.config_json === 'object' ? body.config_json as Record<string, unknown> : undefined
+    // Curadoria da página /[perfil] (porta 3): destaque + ordem vivem em config_json.meta.
+    const perfilDestaque = typeof body.perfil_destaque === 'boolean' ? body.perfil_destaque : undefined
+    const perfilOrdem =
+      typeof body.perfil_ordem === 'number' && Number.isFinite(body.perfil_ordem)
+        ? body.perfil_ordem
+        : body.perfil_ordem === null
+          ? null
+          : undefined
 
     const updates: Record<string, unknown> = {}
     if (title !== undefined) updates.title = title
@@ -148,6 +156,12 @@ export async function PUT(
     if (ctaWhatsapp !== undefined) configJson = { ...configJson, ctaText: ctaWhatsapp }
     if (configOverride) {
       configJson = { ...configJson, ...configOverride }
+    }
+    if (perfilDestaque !== undefined || perfilOrdem !== undefined) {
+      const meta = { ...((configJson.meta as Record<string, unknown>) || {}) }
+      if (perfilDestaque !== undefined) meta.perfil_destaque = perfilDestaque
+      if (perfilOrdem !== undefined) meta.perfil_ordem = perfilOrdem
+      configJson = { ...configJson, meta }
     }
     updates.config_json = configJson
 
