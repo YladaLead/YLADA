@@ -64,7 +64,10 @@ withEnv('1', () => {
 {
   const prefix = buildNoelPersonaSystemPrefix()
   assert(prefix.includes('C → C → P'), 'framework C→C→P no prefixo')
-  assert(prefix.includes('Andre Faula encarnado'), 'identidade Andre encarnado')
+  assert(prefix.includes('mentor de IA do Ylada'), 'identidade Noel mentor Ylada')
+  assert(prefix.includes('não é o Andre pessoa'), 'identidade distinta do Andre')
+  assert(prefix.includes('Nunca fale no nome do Andre'), 'guardrail identidade Andre')
+  assert(prefix.includes('Autoridade pelo MÉTODO'), 'voz autoridade pelo método')
 }
 
 console.log('\nTodos os casos da persona única do Noel passaram.')
