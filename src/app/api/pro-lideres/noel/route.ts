@@ -8,6 +8,11 @@ import {
   buildProLideresNoelSystemPrompt,
   resolveProLideresNoelProfileId,
 } from '@/lib/pro-lideres-noel-prompt'
+import {
+  isNoelProLideresLeaderConducaoEnabled,
+  isProLideresLeaderConversationalQuery,
+  leaderConversationalSystemHint,
+} from '@/lib/pro-lideres-noel-leader-conducao'
 import { formatLinksAtivosParaNoel, getNoelYladaLinks } from '@/lib/noel-ylada-links'
 import { formatProLideresCatalogForNoel } from '@/lib/pro-lideres-noel-catalog-context'
 import { getFlowBuilderMethodologyBlock } from '@/lib/ylada-flow-builder-methodology'
@@ -181,6 +186,9 @@ export async function POST(request: NextRequest) {
   }
 
   const extraSystemParts: string[] = []
+  if (isNoelProLideresLeaderConducaoEnabled() && isProLideresLeaderConversationalQuery(message)) {
+    extraSystemParts.push(leaderConversationalSystemHint())
+  }
   if (isProLideresNoelShortApprovalAfterQuizDraft(message, historyNorm)) {
     extraSystemParts.push(APROVACAO_CURTA_SEM_SEGUNDA_CONFIRMACAO_PT)
   }
