@@ -7,6 +7,7 @@ import {
   formatLinkObjetivosBulletFallback,
   PRO_LIDERES_LINK_OBJETIVO_OUTRO_LABEL,
 } from '@/lib/pro-lideres-noel-leader-link-objetivos'
+import { proLideresNoelFluxoCoerenciaPorObjetivoBlock } from '@/lib/pro-lideres-noel-leader-fluxo-coerencia'
 
 export { PRO_LIDERES_LINK_OBJETIVO_OUTRO_LABEL } from '@/lib/pro-lideres-noel-leader-link-objetivos'
 
@@ -138,11 +139,11 @@ export function proLideresNoelFluxoPreviewBlock(): string {
 
 \`---\`
 
-**Perguntas** — cada enunciado na voz do lead; linha em branco; opções **A)**, **B)**, **C)** em linhas separadas (mín. **4**, ideal **5**)
+**Perguntas** — cada enunciado na voz do lead; linha em branco; opções **A)**, **B)**, **C)** em linhas separadas **somente** para escolha entre alternativas (não para campo de texto). Volume: **4–5** MCQs em diagnóstico/qualificação; **2–3** em **colher indicações** (reflexão) ou **nenhuma** se o gancho + compartilhar bastarem.
 
 \`---\`
 
-**Mensagem final** — 1–3 frases consultivas convidando ao WhatsApp (pedido de permissão)
+**Mensagem final** — 1–3 frases: em **colher indicações**, CTA de **compartilhar o link**; nos demais objetivos, convite consultivo ao WhatsApp (pedido de permissão).
 
 - Pode omitir o rótulo e mostrar **só a copy** depois de **Nome** / **Primeira frase**, se ficar mais natural — **nunca** volte aos nomes técnicos dos campos.
 
@@ -152,7 +153,9 @@ export function proLideresNoelFluxoPreviewBlock(): string {
 - Ex.: fluxo de **indicações** → **Nome** tipo "Quem você ama merece esse cuidado?" — não "Colher indicações".
 - O **objetivo** (trazer gente nova, reativar, etc.) guia **só você** por trás; **não** aparece na copy.
 - Ordem interna = editor YLADA; só muda **como mostra** pro líder.
-- **Proibido** após a mensagem final: bloco **Decisão rápida** A–D.`
+- **Proibido** após a mensagem final: bloco **Decisão rápida** A–D.
+
+${proLideresNoelFluxoCoerenciaPorObjetivoBlock()}`
 }
 
 const FLUXO_TECHNICAL_LABEL_RE =
@@ -238,5 +241,5 @@ TAREFAS, SCRIPTS E FERRAMENTAS
 
 /** Nota na seção ENTREGA quando V2 está ligada — prevalece sobre brief genérico. */
 export function proLideresNoelEntregaConducaoV2Note(): string {
-  return `- **Condução V2 — criação de link (PREVALECE):** não repergunte público/tema/canal. Objetivo vago → menu de **5 opções** + **Outro**; depois **PREVIEW** com **"É assim que vai aparecer…"** e rótulos **Nome / Primeira frase / Perguntas / Mensagem final** (nunca Título do fluxo / gancho / CTA WhatsApp). Copy pro **lead**, não objetivo interno. Após rascunho: **no máximo** 2 frases + **Na prática:** um convite.`
+  return `- **Condução V2 — criação de link (PREVALECE):** não repergunte público/tema/canal. Objetivo vago → menu de **5 opções** + **Outro**; depois **PREVIEW** com **"É assim que vai aparecer…"** e rótulos **Nome / Primeira frase / Perguntas / Mensagem final**. Copy pro **lead**, não objetivo interno. **Colher indicações:** uma lógica só — **viral/compartilhar** (§6.1), CTA de passar o link; **sem** formulário de nomes/telefones. **Coleta de dados default OFF** (r84); MCQ **proibido** para nome/telefone/mensagem. Após rascunho: **no máximo** 2 frases + **Na prática:** um convite.`
 }
