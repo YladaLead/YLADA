@@ -34,7 +34,7 @@ import {
   messageHasButtonReply,
   POST_BUTTON_CLICK_PROMPT,
 } from './ad-lead-flow'
-import { buildLeadNameContextNote, usableFirstName } from './lead-name'
+import { buildLeadNameContextNote, usableFirstName, isRejectedAsLeadName } from './lead-name'
 import { isCarolInteractiveReply } from './parse-interactive'
 import {
   getOrCreateConversation,
@@ -86,7 +86,7 @@ TRILHA CURTA (2 a 3 trocas até convite ao diagnóstico com o Andre, não espere
    O objetivo é ela se sentir OUVIDA, não avaliada.
 
 4) Quando ela tiver nomeado a dor com as próprias palavras, convide ao diagnóstico de forma natural:
-   "Pelo que você me contou, faz sentido o Andre olhar seu caso. São 30 minutos — sem apresentação, só clareza. Quer que eu agende?"
+   "Pelo que você me contou, faz muito sentido você falar com o Andre 💚 Ele é especialista em ajudar clínicas como a sua a organizar e crescer, e olha cada caso de pertinho — tipo um amigo que entende do assunto te dando uma luz. São 30 min, sem custo e sem compromisso. Quer que eu agende?"
 
 5) Coleta mínima após SIM: nome completo + melhor horário (turno primeiro, depois dia). Email só se ela quiser oferecer; não peça.
 
@@ -352,6 +352,7 @@ Ansiosa:
 QUANDO SOUBER O NOME DA PESSOA (primeira vez que ela informa):
 Inclua discretamente ao final da resposta:
 [NOME_DETECTADO: nome={nome informado}]
+⚠️ "Ylada", "Carol" e "Noel" NÃO são nomes de pessoa. Se a lead escrever "Oi Ylada/Carol", ela está te cumprimentando — nunca capture isso como nome dela nem a chame assim.
 
 QUANDO DETECTAR AGENDAMENTO CONFIRMADO:
 Você coletou nome completo + email + horário E enviou o link do formulário.
@@ -834,7 +835,10 @@ export async function generateCarolReply(ingest: Extract<IngestInboundResult, { 
 
     // Extrai NOME_DETECTADO se existir
     const nomeDetectadoMatch = reply.match(/\[NOME_DETECTADO:\s*nome=([^\]]+)\]/)
-    const nomeDetectado = nomeDetectadoMatch ? nomeDetectadoMatch[1].trim() : null
+    const nomeDetectadoRaw = nomeDetectadoMatch ? nomeDetectadoMatch[1].trim() : null
+    // "Oi Ylada/Carol" não é o nome da lead — é ela cumprimentando a assistente.
+    const nomeDetectado =
+      nomeDetectadoRaw && !isRejectedAsLeadName(nomeDetectadoRaw) ? nomeDetectadoRaw : null
 
     // Extrai LEAD_DATA se existir
     const leadDataMatch = reply.match(/\[LEAD_DATA:(.*?)\]/s)

@@ -22,7 +22,7 @@ export async function generateMetadata({
 
   const share = buildProLideresVideoShareMetadata(base, canonical, {
     title: 'Oportunidade Bebidas Funcionais',
-    description: 'Conheça a oportunidade: renda extra com a multinacional Herbalife.',
+    description: 'Conheça a oportunidade de renda extra.',
     imagePath: '/images/pro-lideres/capa-hom-reset-preview.png',
   })
   return {

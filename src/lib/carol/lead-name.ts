@@ -57,6 +57,29 @@ const BUSINESS_HINTS = [
   'dr.',
 ]
 
+// Nomes da própria marca/assistentes — a lead cumprimenta "Oi Ylada/Carol",
+// e isso JAMAIS é o nome dela. Também pega saudações capturadas por engano.
+const REJECTED_LEAD_NAMES = new Set([
+  'ylada',
+  'carol',
+  'noel',
+  'oi',
+  'oie',
+  'oiê',
+  'ola',
+  'olá',
+  'bom',
+  'boa',
+  'visitante',
+])
+
+/** "Ylada"/"Carol"/saudação não são nome de pessoa — nunca usar como nome da lead. */
+export function isRejectedAsLeadName(name: string | null | undefined): boolean {
+  if (!name?.trim()) return true
+  const first = name.trim().split(/\s+/)[0].toLowerCase().replace(/[.,!?]+$/, '')
+  return REJECTED_LEAD_NAMES.has(first)
+}
+
 export function firstNameFromDisplayName(name: string): string {
   const trimmed = name.trim()
   if (!trimmed) return ''
@@ -81,6 +104,7 @@ const NAME_TITLES = new Set(['dr', 'dra', 'sr', 'sra', 'dre'])
 
 export function usableFirstName(name: string | null | undefined): string | null {
   if (!name?.trim()) return null
+  if (isRejectedAsLeadName(name)) return null
   if (isLikelyBusinessDisplayName(name)) return null
   const first = firstNameFromDisplayName(name)
   // Nome real raramente passa de ~14 letras; token longo = handle/razão social grudada
