@@ -125,6 +125,16 @@ export async function saveMessage(
     console.error('[Carol] Erro ao salvar mensagem:', error)
     throw new Error('Falha ao salvar mensagem no Supabase')
   }
+
+  // Toda mensagem (inclusive resposta da lead) atualiza o updated_at da conversa,
+  // pra ela subir no painel e entrar na janela do resumo automático.
+  const { error: bumpError } = await supabase
+    .from('carol_conversations')
+    .update({ updated_at: new Date().toISOString() })
+    .eq('id', conversationId)
+  if (bumpError) {
+    console.error('[Carol] Erro ao atualizar updated_at da conversa:', bumpError)
+  }
 }
 
 export async function getConversationHistory(

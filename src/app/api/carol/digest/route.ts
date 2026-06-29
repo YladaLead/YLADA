@@ -39,11 +39,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'sem service role' }, { status: 503 })
   }
 
+  // review=1: ignora a janela (varre TODAS as conversas), devolve as listas no
+  // JSON e NÃO manda e-mail. É o "retrato completo" pra revisão manual.
+  const review = request.nextUrl.searchParams.get('review') === '1'
+
   const mins = Math.min(
     Math.max(parseInt(request.nextUrl.searchParams.get('mins') || '75', 10) || 75, 5),
     1440
   )
-  const since = new Date(Date.now() - mins * 60_000).toISOString()
+  const since = review
+    ? '1970-01-01T00:00:00.000Z'
+    : new Date(Date.now() - mins * 60_000).toISOString()
 
   // Conversas que se moveram na janela.
   const { data: convs, error } = await supabaseAdmin
@@ -91,6 +97,21 @@ export async function GET(request: NextRequest) {
   }
 
   const total = quentes.length + precisaVoce.length + resgatar.length
+
+  // Modo revisão: devolve as listas e NÃO manda e-mail.
+  if (review) {
+    const cap = (arr: string[]) => arr.slice(0, 120)
+    return NextResponse.json({
+      ok: true,
+      review: true,
+      scanned: (convs || []).length,
+      counts: { quentes: quentes.length, precisaVoce: precisaVoce.length, resgatar: resgatar.length },
+      quentes: cap(quentes),
+      precisaVoce: cap(precisaVoce),
+      resgatar: cap(resgatar),
+    })
+  }
+
   if (total === 0) {
     return NextResponse.json({ ok: true, sent: false, msg: 'nada novo na janela' })
   }
