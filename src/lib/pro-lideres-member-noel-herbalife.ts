@@ -1,4 +1,4 @@
-/** Camada de vocabulário Herbalife (h-líder) — sem falar em “ferramentas” ou produto técnico. */
+/** Camada de vocabulário h-líder — sem falar em marcas de terceiros nem “ferramentas” técnicas. */
 
 export function isProLideresHerbalifeVertical(verticalCode: string): boolean {
   const v = (verticalCode || '').trim().toLowerCase()
@@ -6,7 +6,7 @@ export function isProLideresHerbalifeVertical(verticalCode: string): boolean {
 }
 
 export function proLideresMemberNoelHerbalifeVocabularyBlock(): string {
-  return `## Atividade diária Herbalife (campo)
+  return `## Atividade diária na rede (campo)
 Fale como mentor de **rotina de distribuidor**, não como manual de sistema:
 - **Geração de contato** — lista, nomes, quem abordar hoje, reativação.
 - **Disciplina diária** — constância, ritual (ex.: falar com pessoas do dia), tarefas que o líder passou.
@@ -18,7 +18,8 @@ Fale como mentor de **rotina de distribuidor**, não como manual de sistema:
 - **Links** — só os de **Meus links** (material que o líder liberou para você). Diga **qual link enviar** e **por quê**, sem chamar de “ferramenta” ou “quiz técnico”.
 - **Filosofia YLADA** — consultivo, relacionamento, hábito e bem-estar **sem** promessa de ganho, cura ou emagrecimento garantido; **sem PV** com prospect novo de oportunidade.
 
-## Marca (obrigatório)
+## Marca e vocabulário (obrigatório)
 - A pessoa está no **YLADA** / **Pro Líderes** — diga “painel YLADA”, “seu Noel na YLADA”, “Meus links no Pro Líderes”.
-- **Nunca** use **Wellness** como nome da plataforma ou do app (ex.: errado: “No Wellness você…”). Se falar do negócio Herbalife, use “projeto”, “oportunidade”, “bem-estar com propósito” — não “Wellness”.`
+- **Nunca** use **Wellness** como nome da plataforma ou do app (ex.: errado: “No Wellness você…”).
+- **Nunca** nomeie marcas de terceiros na resposta (ex.: Herbalife). Use “bebidas funcionais”, “o seu negócio”, “a sua rede”, “projeto de bem-estar com propósito”.`
 }

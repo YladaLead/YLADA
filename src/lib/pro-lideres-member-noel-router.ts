@@ -12,6 +12,7 @@ export type ProLideresMemberNoelMode =
   | 'emocional'
   | 'bloqueio_criar_link'
   | 'scripts_painel'
+  | 'conversacional'
 
 export type ProLideresMemberNoelRoute = {
   mode: ProLideresMemberNoelMode
@@ -21,12 +22,16 @@ export type ProLideresMemberNoelRoute = {
   directive: string
 }
 
-function norm(s: string): string {
+function normRouter(s: string): string {
   return s
     .toLowerCase()
     .normalize('NFD')
     .replace(/\p{M}/gu, '')
     .trim()
+}
+
+function norm(s: string): string {
+  return normRouter(s)
 }
 
 function detectAudience(m: string): ProLideresMemberNoelRoute['audience'] {
@@ -42,6 +47,25 @@ function detectAudience(m: string): ProLideresMemberNoelRoute['audience'] {
   return 'ambiguo'
 }
 
+/** Perguntas gerais sobre o Noel — conversa, sem blocos de ação. */
+export function isMemberNoelConversationalQuery(userMessage: string): boolean {
+  const um = normRouter(userMessage)
+  if (
+    /(quem e voce|quem é você|o que voce faz|o que você faz|como funciona o noel|como voce funciona|me apresenta|se apresenta|quem eh o noel|o que e o noel|pra que serve|para que serve|voce e uma ia|você é uma ia|voce e um robo|você é um robô)/.test(
+      um
+    )
+  ) {
+    return true
+  }
+  if (
+    /(duvida|dúvida|explica|me conta sobre|nao entendi|não entendi)/.test(um) &&
+    !/(mensagem|link|lista|post|story|objecao|objeção|whatsapp|zap|convite|abordar)/.test(um)
+  ) {
+    return true
+  }
+  return false
+}
+
 export function classifyProLideresMemberNoelMessage(
   message: string,
   opts?: { hasObjectionBase?: boolean }
@@ -49,6 +73,17 @@ export function classifyProLideresMemberNoelMessage(
   const m = norm(message)
   const audience = detectAudience(m)
   const wantsText = /(mensagem|texto|o que falar|o que mandar|o que escrever|script|whatsapp|zap)/.test(m)
+
+  if (isMemberNoelConversationalQuery(message)) {
+    return {
+      mode: 'conversacional',
+      audience,
+      includeLink: false,
+      includeMensagemPronta: false,
+      directive:
+        'Resposta em conversa natural (1–3 parágrafos). **Sem** blocos Na prática, Mensagem pronta, Link para enviar ou Próximo passo.',
+    }
+  }
 
   if (/(criar|cria|gerar|gera|montar|fazer)\s*(um\s*)?(link|quiz|calculadora)/.test(m)) {
     return {
@@ -131,7 +166,7 @@ export function classifyProLideresMemberNoelMessage(
       audience: audience === 'ambiguo' ? 'oportunidade' : audience,
       includeLink: true,
       includeMensagemPronta: true,
-      directive: 'Convite ético Herbalife: princípio + sequência + **mensagem pronta** leve + link após permissão.',
+      directive: 'Convite ético na rede: princípio + sequência + **mensagem pronta** leve + link após permissão.',
     }
   }
 
@@ -304,6 +339,12 @@ Me diga o tema que te indico qual link já existe.`,
 
 **Próximo passo**
 Gere o pacote em Scripts se precisar escalar.`,
+
+    conversacional: `Sou o **Noel**, mentor de campo na **YLADA** (Pro Líderes) 😊
+
+Te ajudo com lista, disciplina, o que postar, como falar no WhatsApp e objeções, no tom da operação do seu líder. Quando pedir, monto **mensagem pronta** ou indico link de **Meus links**.
+
+O que está travando hoje?`,
   }
   return examples[mode]
 }

@@ -158,7 +158,7 @@ const PRO_LIDERES_SUGGESTIONS = [
 ]
 
 /** Noel membro — abertura curta (sem pedir para criar link). */
-export const NOEL_PRO_LIDERES_MEMBER_WELCOME = `Sou seu **Noel de campo** na **YLADA** (Pro Líderes / Herbalife): lista, disciplina, o que postar, como falar no WhatsApp e objeções — no tom da operação do seu líder 😊
+export const NOEL_PRO_LIDERES_MEMBER_WELCOME = `Sou seu **Noel de campo** na **YLADA** (Pro Líderes): lista, disciplina, o que postar, como falar no WhatsApp e objeções, no tom da operação do seu líder 😊
 
 Te oriento com conversa leve e, quando ajudar, **mensagem pronta** pra copiar. Links só de **Meus links** no painel.
 
@@ -262,7 +262,7 @@ const PRO_ESTETICA_CAPILAR_SUGGESTIONS = [
 
 const NOEL_PRO_LIDERES_WELCOME = `Sou o **Noel** no teu espaço **Pro Líderes**.
 
-Estou focado na operação de campo: **contato**, **WhatsApp**, **links YLADA** e **scripts** para tu e a tua equipe — no contexto do teu operador (ex.: Herbalife / h‑líder).
+Estou focado na operação de campo: **contato**, **WhatsApp**, **links YLADA** e **scripts** para tu e a tua equipe, no contexto da tua rede (ex.: h‑líder).
 
 Diz-me em uma frase o que precisas agora (ou usa uma sugestão abaixo).`
 
