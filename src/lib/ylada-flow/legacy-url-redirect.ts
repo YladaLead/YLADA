@@ -56,7 +56,7 @@ function perfilFluxoTarget(perfil: string, fluxo: string): string {
   return `/${perfil.toLowerCase()}/${fluxo.toLowerCase()}`
 }
 
-function isValidPerfilSegment(seg: string): boolean {
+export function isValidPerfilSegment(seg: string): boolean {
   const s = seg.toLowerCase()
   if (!s || s.includes('.')) return false
   if (PERFIL_FLUXO_RESERVED_FIRST_SEGMENTS.has(s)) return false
