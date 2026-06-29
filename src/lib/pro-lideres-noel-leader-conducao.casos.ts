@@ -6,6 +6,8 @@ import { buildProLideresNoelSystemPrompt } from '@/lib/pro-lideres-noel-prompt'
 import {
   isNoelProLideresLeaderConducaoEnabled,
   isProLideresLeaderConversationalQuery,
+  leaderConducaoPromptRequiresDosagem,
+  leaderConducaoPromptRequiresLinkObjective,
   leaderConducaoPromptRequiresConcreteExample,
   leaderTechniqueResponseHasConcreteExample,
 } from '@/lib/pro-lideres-noel-leader-conducao'
@@ -64,9 +66,13 @@ withEnv('true', () => {
   const prompt = buildProLideresNoelSystemPrompt(baseParams)
   assert('V2: sem ORDEM FIXA', !/MODELO DE SAÍDA \(ORDEM FIXA/.test(prompt))
   assert('V2: norte ação → performance', /ação → performance/.test(prompt))
-  assert('V2: fecho liderado', /fazer essa pessoa dar o passo/.test(prompt))
-  assert('V2: proíbe grid fixo', /Proibido.*grid fixo obrigatório/.test(prompt))
+  assert('V2: fecho liderado', /fazer o liderado agir|fazer essa pessoa dar o passo/.test(prompt))
+  assert('V2: proíbe grid fixo', /Proibido.*grid fixo/.test(prompt))
   assert('V2: prompt exige exemplo', leaderConducaoPromptRequiresConcreteExample(prompt))
+  assert('V2: dosagem ~3 pontos', leaderConducaoPromptRequiresDosagem(prompt))
+  assert('V2: mentor de liderança', /mentor de liderança/i.test(prompt))
+  assert('V2: sem mentor de campo na identidade V2', !/condutor de líder de campo/.test(prompt.split('MISSÃO PRO LÍDERES')[0] ?? ''))
+  assert('V2: link objetivo Board', leaderConducaoPromptRequiresLinkObjective(prompt))
   assert('V2: formato conversacional', /Condução V2/.test(prompt))
 })
 
