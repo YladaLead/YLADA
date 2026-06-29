@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isIOSNativeAppUserAgent } from '@/lib/purchase-routes'
 import { isPerfilFluxoPublicPath } from '@/lib/ylada-flow/perfil-fluxo-path'
+import { isPerfilNuPublicPath } from '@/lib/ylada-flow/perfil-nu-path'
+import { isPerfilNuEnabled } from '@/lib/ylada-flow/perfil-nu-flag'
 import { resolveLegacyPublicUrlRedirect } from '@/lib/ylada-flow/legacy-url-redirect'
 
 /** Rollbacks *v2 (landing minimal) → fluxo progressivo canónico. */
@@ -135,6 +137,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/p/') || // IMPORTANTE: Links curtos (/p/code) - não redirecionar
     pathname.startsWith('/l/') || // Links inteligentes YLADA (/l/[slug]) - público, sem /pt
     isPerfilFluxoPublicPath(pathname) || // /[perfil]/[fluxo] — camada fina pública, sem /pt
+    (isPerfilNuEnabled() && isPerfilNuPublicPath(pathname)) || // /[perfil] nu — porta 3, atrás da flag
     pathname.startsWith('/f/') || // IMPORTANTE: Formulários públicos (/f/formId) - não redirecionar
     pathname.startsWith('/templates-environment') ||
     pathname.startsWith('/template/') ||
