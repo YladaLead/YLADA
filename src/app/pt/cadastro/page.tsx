@@ -8,6 +8,9 @@ import {
   getYladaPublicAreaAnalysisWhatsAppUrl,
   getYladaPublicAreaSupportLinkLabel,
 } from '@/lib/ylada-public-area-support'
+import { isNoelDiretoEnabled } from '@/lib/porta-unica/porta-unica-flag'
+import { readDesafio } from '@/lib/porta-unica/desafio-client'
+import { noelDiretoAtivo, NOEL_DIRETO_DESTINO } from '@/lib/porta-unica/destino-pos-cadastro'
 
 /** Áreas disponíveis para cadastro (sem ylada — matriz não é área pública). */
 const AREAS_CADASTRO: { value: string; label: string }[] = [
@@ -43,10 +46,13 @@ export default function CadastroPage() {
   const [areaAtiva, setAreaAtiva] = useState<string | null>(null)
   const [inicializado, setInicializado] = useState(false)
   const [outroTexto, setOutroTexto] = useState('')
+  /** Costura Fase 2: veio da porta (tem desafio) + flag ON → Noel direto, sem área. */
+  const [noelDireto, setNoelDireto] = useState(false)
 
   useEffect(() => {
     const area = getAreaFromUrl()
     if (area) setAreaAtiva(area)
+    else setNoelDireto(noelDiretoAtivo(isNoelDiretoEnabled(), readDesafio() !== null))
     setInicializado(true)
   }, [])
 
@@ -74,6 +80,20 @@ export default function CadastroPage() {
       <LoginForm
         perfil={areaAtiva as LoginFormPerfil}
         redirectPath="/pt/onboarding"
+        initialSignUpMode={true}
+        useYladaBrandingOnSignUp
+        signUpHeroTitle={YLADA_SIGNUP_PAGE_HERO}
+      />
+    )
+  }
+
+  // Costura Fase 2 (atrás da flag): quem vem da porta cadastra sem escolher área e
+  // cai direto no Noel servindo, que lê o desafio. Área morre (ARQUITETURA COMUM).
+  if (noelDireto) {
+    return (
+      <LoginForm
+        perfil="ylada"
+        redirectPath={NOEL_DIRETO_DESTINO}
         initialSignUpMode={true}
         useYladaBrandingOnSignUp
         signUpHeroTitle={YLADA_SIGNUP_PAGE_HERO}

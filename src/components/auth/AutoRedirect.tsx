@@ -4,6 +4,9 @@ import { useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { isPublicPage, getAccessRule, getAppHomePathForPerfil, getAreaFromPath } from '@/lib/access-rules'
+import { isNoelDiretoEnabled } from '@/lib/porta-unica/porta-unica-flag'
+import { readDesafio } from '@/lib/porta-unica/desafio-client'
+import { noelDiretoAtivo, NOEL_DIRETO_DESTINO } from '@/lib/porta-unica/destino-pos-cadastro'
 
 /**
  * Quebra-loop de redirect (bug 24/06): em estado meia-autenticado, login↔onboarding
@@ -116,6 +119,11 @@ export default function AutoRedirect() {
           const checkYladaProfile = async () => {
             await new Promise(resolve => setTimeout(resolve, 500))
             if (hasRedirectedRef.current) return
+            // Costura Fase 2 (atrás da flag): quem veio da porta (tem desafio) cai no
+            // Noel direto em vez do onboarding por área. OFF = byte-idêntico.
+            const onboardingDestino = noelDiretoAtivo(isNoelDiretoEnabled(), readDesafio() !== null)
+              ? NOEL_DIRETO_DESTINO
+              : '/pt/onboarding'
             const perfil = userProfile?.perfil
             if (perfil === 'wellness' || perfil === 'coach-bem-estar') {
               try {
@@ -145,7 +153,7 @@ export default function AutoRedirect() {
             try {
               const res = await fetch('/api/ylada/profile?segment=ylada', { credentials: 'include', signal: AbortSignal.timeout(2000) })
               if (hasRedirectedRef.current) return
-              let redirectPath = '/pt/onboarding'
+              let redirectPath = onboardingDestino
               if (res.ok) {
                 const data = await res.json()
                 const p = data?.data?.profile
@@ -183,12 +191,12 @@ export default function AutoRedirect() {
                 router.replace(board)
                 return
               }
-              if (shouldSkipRedirect(pathname, '/pt/onboarding')) {
+              if (shouldSkipRedirect(pathname, onboardingDestino)) {
                 hasRedirectedRef.current = true
                 return
               }
               hasRedirectedRef.current = true
-              router.replace('/pt/onboarding')
+              router.replace(onboardingDestino)
             }
           }
           checkYladaProfile()
