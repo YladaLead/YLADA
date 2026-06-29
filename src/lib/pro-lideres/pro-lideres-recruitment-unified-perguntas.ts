@@ -28,7 +28,7 @@ export const PRO_LIDERES_RECRUITMENT_UNIFIED_PERGUNTAS: FluxoCliente['perguntas'
     tipo: 'multipla_escolha',
     opcoes: [
       'Não, apenas uma fonte',
-      'Sim, tenho freelas esporádicos',
+      'Sim, faço uns trabalhos por fora de vez em quando',
       'Sim, tenho um negócio próprio',
       'Sim, tenho investimentos gerando renda',
     ],

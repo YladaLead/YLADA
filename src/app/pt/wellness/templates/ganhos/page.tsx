@@ -51,7 +51,7 @@ export default function QuizGanhos({ config }: TemplateBaseProps) {
       tipo: 'multipla',
       opcoes: [
         'Não, apenas uma fonte',
-        'Sim, tenho freelas esporádicos',
+        'Sim, faço uns trabalhos por fora de vez em quando',
         'Sim, tenho um negócio próprio',
         'Sim, tenho investimentos gerando renda'
       ]
