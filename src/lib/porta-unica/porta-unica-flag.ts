@@ -20,3 +20,16 @@ export function isNoelDiretoEnabled(): boolean {
   const v = process.env.NEXT_PUBLIC_ONBOARDING_NOEL_DIRETO_ENABLED
   return v === 'true' || v === '1'
 }
+
+/**
+ * Flag do TOQUE "b" da Fase 2: o Noel da home lê o `ylada_desafio` e CONDUZ a partir
+ * dele (abertura que reconhece sem re-perguntar + bloco no system prompt). `NEXT_PUBLIC`
+ * porque a abertura roda no cliente (NoelChat) e o servidor (route) lê a mesma env.
+ * Independente da costura (`...ONBOARDING_NOEL_DIRETO...`) pra pilotar sozinho. OFF =
+ * welcome estático intacto, nenhum bloco injetado (byte-idêntico).
+ * @see blueprint-plataforma/Noel_Completo_Metodo_e_Conducao.md §9.3 (Fase 2 toque "b", r88)
+ */
+export function isNoelDesafioConducaoEnabled(): boolean {
+  const v = process.env.NEXT_PUBLIC_NOEL_DESAFIO_CONDUCAO_ENABLED
+  return v === 'true' || v === '1'
+}

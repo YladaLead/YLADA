@@ -19,6 +19,20 @@ export function persistDesafio(resposta: DesafioResposta): void {
   }
 }
 
+/**
+ * Consome (apaga) o desafio depois que o Noel já o usou pra abrir e enquadrar a
+ * primeira troca (toque "b"). Evita que ele fique pra sempre e re-dispare a abertura
+ * em quem volta / limpa o chat. Best-effort: nunca lança.
+ */
+export function consumirDesafio(): void {
+  try {
+    if (typeof window === 'undefined') return
+    window.localStorage.removeItem(DESAFIO_KEY)
+  } catch {
+    /* silencioso */
+  }
+}
+
 export function readDesafio(): DesafioResposta | null {
   try {
     if (typeof window === 'undefined') return null

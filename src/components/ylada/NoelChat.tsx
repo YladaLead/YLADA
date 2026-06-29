@@ -31,6 +31,10 @@ import {
   leaderLinkObjetivoAssistantDisplayText,
 } from '@/lib/pro-lideres-noel-leader-link-objetivos'
 import { sanitizeNoelAssistantOutput } from '@/lib/noel-output-sanitize'
+import { isNoelDesafioConducaoEnabled } from '@/lib/porta-unica/porta-unica-flag'
+import { readDesafio, consumirDesafio } from '@/lib/porta-unica/desafio-client'
+import { aberturaNoelDoDesafio } from '@/lib/porta-unica/abertura-noel-desafio'
+import type { DesafioResposta } from '@/lib/porta-unica/desafio'
 
 function proLideresMemberNoelStoredContent(
   area: NoelArea,
@@ -351,6 +355,36 @@ function getWelcomeMessage(area: NoelArea): Message {
   }
 }
 
+/**
+ * Toque "b" da Fase 2: a resposta do desafio capturada pela porta, SE a flag está
+ * ligada e estamos na matriz YLADA (home). Fora disso devolve null → tudo segue
+ * byte-idêntico (welcome estático). Só vale pra conversa NOVA (sem histórico salvo).
+ */
+function getDesafioParaConducao(area: NoelArea): DesafioResposta | null {
+  if (!isNoelDesafioConducaoEnabled()) return null
+  if (area !== 'ylada') return null
+  return readDesafio()
+}
+
+/** Abertura do Noel a partir do desafio (toque "b"), ou null se não se aplica. */
+function getAberturaDesafioMessage(area: NoelArea): Message | null {
+  const resposta = getDesafioParaConducao(area)
+  if (!resposta) return null
+  const content = aberturaNoelDoDesafio(resposta)
+  if (!content) return null
+  return { id: 'abertura-desafio', role: 'assistant', content, timestamp: new Date() }
+}
+
+/** Mensagens iniciais do Noel: histórico salvo > abertura do desafio > welcome estático. */
+function getInitialNoelMessages(area: NoelArea, skipWelcomeMessage: boolean): Message[] {
+  const saved = normalizeSavedMessagesForSkipWelcome(loadMessages(area), skipWelcomeMessage)
+  if (saved.length > 0) return saved
+  const abertura = getAberturaDesafioMessage(area)
+  if (abertura) return [abertura]
+  if (skipWelcomeMessage) return []
+  return [getWelcomeMessage(area)]
+}
+
 /** Sem mensagem inicial: se só existia o welcome antigo no storage, começa vazio. */
 function normalizeSavedMessagesForSkipWelcome(saved: Message[], skipWelcomeMessage: boolean): Message[] {
   if (!skipWelcomeMessage) return saved
@@ -483,12 +517,9 @@ export default function NoelChat({
   const [capilarFeedbackByMsgId, setCapilarFeedbackByMsgId] = useState<Record<string, 'up' | 'down'>>({})
   const capilarFeedbackSubmittedRef = useRef<Set<string>>(new Set())
 
-  const [messages, setMessages] = useState<Message[]>(() => {
-    const saved = normalizeSavedMessagesForSkipWelcome(loadMessages(area), skipWelcomeMessage)
-    if (saved.length > 0) return saved
-    if (skipWelcomeMessage) return []
-    return [getWelcomeMessage(area)]
-  })
+  const [messages, setMessages] = useState<Message[]>(() =>
+    getInitialNoelMessages(area, skipWelcomeMessage)
+  )
   const [lastLinkContext, setLastLinkContext] = useState<LastLinkContext | null>(() => loadLastLinkContext(area))
   const [input, setInput] = useState(initialMessage ?? '')
   const [loading, setLoading] = useState(false)
@@ -544,15 +575,15 @@ export default function NoelChat({
   useEffect(() => {
     if (initializedRef.current) return
     initializedRef.current = true
-    const saved = normalizeSavedMessagesForSkipWelcome(loadMessages(area), skipWelcomeMessage)
-    if (saved.length > 0) setMessages(saved)
-    else setMessages(skipWelcomeMessage ? [] : [getWelcomeMessage(area)])
+    setMessages(getInitialNoelMessages(area, skipWelcomeMessage))
     setLastLinkContext(loadLastLinkContext(area))
   }, [area, skipWelcomeMessage])
 
   // Mensagem contextual ao abrir (mentor ativo): busca dashboard + links e substitui o welcome
   useEffect(() => {
     if (skipYladaContextualWelcome || skipWelcomeMessage) return
+    // Toque "b": se a abertura veio do desafio (porta), não substituir pela contextual.
+    if (getAberturaDesafioMessage(area)) return
     const saved = loadMessages(area)
     if (saved.length > 0 || contextualLoadedRef.current) return
     let cancelled = false
@@ -656,6 +687,9 @@ export default function NoelChat({
         .slice(-12)
         .map((m) => ({ role: m.role, content: m.content }))
 
+      // Toque "b": o desafio da porta só enquadra a 1ª troca; consumido logo após
+      // (evita re-injetar pra sempre / re-disparar a abertura em quem volta).
+      const desafioParaEnvio = getDesafioParaConducao(area)
       const res = await authenticatedFetch(resolvedChatApi, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -668,9 +702,11 @@ export default function NoelChat({
                 area,
                 lastLinkContext: lastLinkContext ?? undefined,
                 locale,
+                desafio: desafioParaEnvio ?? undefined,
               }
         ),
       })
+      if (desafioParaEnvio) consumirDesafio()
 
       if (!res.ok) {
         const err = (await res.json().catch(() => ({}))) as {

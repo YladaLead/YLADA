@@ -59,6 +59,11 @@ import {
   loadJornadaMemoryForNoel,
   formatJornadaMemoryForPrompt,
 } from '@/lib/noel-wellness/noel-jornada-memory'
+import { isNoelDesafioConducaoEnabled } from '@/lib/porta-unica/porta-unica-flag'
+import {
+  normalizarDesafioRecebido,
+  construirBlocoDesafioParaPrompt,
+} from '@/lib/porta-unica/abertura-noel-desafio'
 import { addExchange, getRecentMessages } from '@/lib/noel-wellness/noel-conversation-memory'
 import {
   getStrategyMap,
@@ -731,6 +736,7 @@ export async function POST(request: NextRequest) {
       channel,
       supportUi,
       mode,
+      desafio,
     } = body as {
       message?: string
       conversationHistory?: { role: 'user' | 'assistant'; content: string }[]
@@ -742,6 +748,8 @@ export async function POST(request: NextRequest) {
       supportUi?: 'matrix' | 'wellness'
       /** Força um modo de resposta. 'espelho' = Etapa 1 (convicção), sem gerar link. */
       mode?: 'espelho'
+      /** Toque "b" Fase 2: desafio capturado pela porta única (cru, normalizado depois). */
+      desafio?: unknown
     }
 
     const isSupportChannel = channel === 'support'
@@ -1337,6 +1345,11 @@ export async function POST(request: NextRequest) {
       }
     } else {
       parts.push('\nO profissional ainda não preencheu o perfil empresarial. Oriente de forma útil e, se fizer sentido, sugira completar o perfil em "Perfil empresarial" para orientações mais personalizadas.')
+    }
+    // Toque "b" Fase 2 (atrás da flag): conduzir a partir do desafio declarado na porta.
+    if (isNoelDesafioConducaoEnabled()) {
+      const blocoDesafio = construirBlocoDesafioParaPrompt(normalizarDesafioRecebido(desafio))
+      if (blocoDesafio) parts.push(blocoDesafio)
     }
     if (snapshotText) {
       parts.push('\n[RESUMO ESTRATÉGICO DA TRILHA — situação atual e próximos passos]\n' + snapshotText)
