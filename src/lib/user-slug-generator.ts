@@ -4,6 +4,7 @@
  */
 
 import { supabaseAdmin } from './supabase'
+import { isHandleAvailableAcrossNamespaces } from './ylada-flow/handle-namespace'
 
 /**
  * Normaliza um nome para slug (remove acentos, espaços, etc)
@@ -57,8 +58,11 @@ async function isSlugAvailable(slug: string): Promise<boolean> {
       return false
     }
 
-    // Se não encontrou dados, slug está disponível
-    return !data
+    if (data) return false
+
+    // Namespace único de handle: rejeita se já existe em leader_tenants /
+    // leader_tenant_members também (impede colisão nova — ver handle-namespace.ts).
+    return isHandleAvailableAcrossNamespaces(supabaseAdmin, slug)
   } catch (error) {
     console.error('Erro ao verificar disponibilidade do slug:', error)
     return false

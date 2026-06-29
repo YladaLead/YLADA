@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
 import { translateError } from '@/lib/error-messages'
 import { generateAvailableUserSlug } from '@/lib/user-slug-generator'
+import { findHandleConflict } from '@/lib/ylada-flow/handle-namespace'
 
 // GET - Buscar perfil do usuário
 export async function GET(request: NextRequest) {
@@ -231,6 +232,15 @@ export async function PUT(request: NextRequest) {
       if (existingSlug && existingSlug.user_id !== user.id) {
         return NextResponse.json(
           { error: 'Este nome de URL já está em uso por outro usuário. Escolha outro.' },
+          { status: 409 }
+        )
+      }
+
+      // Namespace único de handle: rejeita colisão com rede/membro também.
+      const handleConflict = await findHandleConflict(supabaseAdmin, userSlug, user.id)
+      if (handleConflict.taken) {
+        return NextResponse.json(
+          { error: 'Este nome de URL já está em uso (por uma rede ou outro perfil). Escolha outro.' },
           { status: 409 }
         )
       }
