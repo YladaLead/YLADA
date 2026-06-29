@@ -24,8 +24,11 @@ export default function WellnessConfiguracaoPage() {
     whatsapp: '',
     countryCode: 'BR',
     bio: '',
+    headline: '',
+    avatarUrl: '',
     userSlug: ''
   })
+  const [enviandoFoto, setEnviandoFoto] = useState(false)
   const [slugDisponivel, setSlugDisponivel] = useState(true)
   const [slugValidando, setSlugValidando] = useState(false)
   const [slugNormalizado, setSlugNormalizado] = useState(false)
@@ -187,6 +190,8 @@ export default function WellnessConfiguracaoPage() {
             whatsapp: data.profile.whatsapp || data.profile.telefone || '',
             countryCode: data.profile.countryCode || 'BR',
             bio: data.profile.bio || '',
+            headline: data.profile.headline || '',
+            avatarUrl: data.profile.avatarUrl || '',
             userSlug: data.profile.userSlug || ''
           }
           
@@ -260,6 +265,28 @@ export default function WellnessConfiguracaoPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
+  // Sobe a foto pro bucket e guarda a URL no estado (salva junto no "Salvar perfil").
+  const handleUploadFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      setEnviandoFoto(true)
+      setErro(null)
+      const form = new FormData()
+      form.append('file', file)
+      const res = await authenticatedFetch('/api/ylada/perfil/avatar', { method: 'POST', body: form })
+      const json = await res.json()
+      if (!res.ok || !json?.url) throw new Error(json?.error || 'Erro ao subir a foto')
+      setPerfil((prev) => ({ ...prev, avatarUrl: json.url }))
+    } catch (err: any) {
+      setErro(err.message || 'Erro ao subir a foto. Tente novamente.')
+      setTimeout(() => setErro(null), 8000)
+    } finally {
+      setEnviandoFoto(false)
+      e.target.value = ''
+    }
+  }
+
   // Salvar perfil
   const salvarPerfil = async () => {
     // Validações antes de salvar
@@ -309,6 +336,8 @@ export default function WellnessConfiguracaoPage() {
           whatsapp: perfil.whatsapp,
           countryCode: perfil.countryCode,
           bio: perfil.bio,
+          headline: perfil.headline,
+          avatarUrl: perfil.avatarUrl,
           userSlug: perfil.userSlug
         })
       })
@@ -336,6 +365,8 @@ export default function WellnessConfiguracaoPage() {
                   whatsapp: perfil.whatsapp,
                   countryCode: perfil.countryCode,
                   bio: perfil.bio,
+                  headline: perfil.headline,
+                  avatarUrl: perfil.avatarUrl,
                   userSlug: perfil.userSlug
                 })
               })
@@ -452,7 +483,42 @@ export default function WellnessConfiguracaoPage() {
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Bio/Bio</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Foto (aparece na sua página pública)</label>
+              <div className="flex items-center gap-4">
+                {perfil.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={perfil.avatarUrl} alt="Sua foto" className="h-16 w-16 rounded-full object-cover ring-1 ring-gray-200" />
+                ) : (
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-2xl font-semibold text-gray-400 ring-1 ring-gray-200">
+                    {(perfil.nome.trim().charAt(0) || 'Y').toUpperCase()}
+                  </div>
+                )}
+                <label className="cursor-pointer rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  {enviandoFoto ? 'Enviando...' : 'Escolher foto'}
+                  <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleUploadFoto} disabled={enviandoFoto} />
+                </label>
+                {perfil.avatarUrl && (
+                  <button type="button" onClick={() => setPerfil({ ...perfil, avatarUrl: '' })} className="text-sm text-gray-500 hover:text-red-600">
+                    Remover
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">JPG, PNG ou WEBP, até 5 MB.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Manchete (uma frase: o que você resolve)</label>
+              <input
+                type="text"
+                value={perfil.headline}
+                onChange={(e) => setPerfil({...perfil, headline: e.target.value.substring(0, 120)})}
+                maxLength={120}
+                placeholder="Ex: Ajudo donas de clínica a encher a agenda sem depender de indicação"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+              />
+              <p className="text-xs text-gray-500 mt-1">{perfil.headline.length}/120 — aparece em destaque no topo da sua página pública.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
               <textarea
                 value={perfil.bio}
                 onChange={(e) => setPerfil({...perfil, bio: e.target.value})}

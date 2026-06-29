@@ -112,6 +112,18 @@ export async function GET(request: NextRequest) {
     // Buscar email do auth.users
     const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(user.id)
 
+    // Apresentação da página /[perfil] (migration 454) — tolerante: se as colunas
+    // ainda não existem, segue sem quebrar bio/slug do formulário de configuração.
+    let apresentacao: { headline?: string | null; avatar_url?: string | null } = {}
+    {
+      const { data: apresData } = await supabaseAdmin
+        .from('user_profiles')
+        .select('headline, avatar_url')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      if (apresData) apresentacao = apresData
+    }
+
     const responseData = {
       success: true,
       profile: {
@@ -121,6 +133,8 @@ export async function GET(request: NextRequest) {
         whatsapp: profile?.whatsapp || '',
         countryCode: profile?.country_code || 'BR',
         bio: profile?.bio || '',
+        headline: apresentacao?.headline || '',
+        avatarUrl: apresentacao?.avatar_url || '',
         userSlug: profile?.user_slug || '',
         profile_type: profile?.profile_type || null
       },
@@ -187,6 +201,8 @@ export async function PUT(request: NextRequest) {
       whatsapp,
       countryCode,
       bio,
+      headline,
+      avatarUrl,
       userSlug
     } = body
 
@@ -307,7 +323,7 @@ export async function PUT(request: NextRequest) {
     if (bio !== undefined) {
       profileData.bio = bio || null
     }
-    
+
     if (userSlug !== undefined) {
       profileData.user_slug = userSlug || null
     }
@@ -526,6 +542,26 @@ export async function PUT(request: NextRequest) {
         { error: 'Erro ao salvar perfil. Tente novamente.' },
         { status: 500 }
       )
+    }
+
+    // Apresentação da página /[perfil] (migration 454): manchete + foto.
+    // Update isolado e tolerante — se as colunas ainda não existem, ignora sem
+    // afetar o salvamento principal (nome/bio/slug acima).
+    if (headline !== undefined || avatarUrl !== undefined) {
+      const apresentacao: Record<string, string | null> = {}
+      if (headline !== undefined) {
+        apresentacao.headline = typeof headline === 'string' ? headline.trim() || null : null
+      }
+      if (avatarUrl !== undefined) {
+        apresentacao.avatar_url = typeof avatarUrl === 'string' ? avatarUrl.trim() || null : null
+      }
+      const { error: apresErr } = await supabaseAdmin
+        .from('user_profiles')
+        .update(apresentacao)
+        .eq('user_id', user.id)
+      if (apresErr) {
+        console.warn('⚠️ headline/avatar_url não salvos (migration 454 pendente?):', apresErr.message)
+      }
     }
 
     // Log final de confirmação
