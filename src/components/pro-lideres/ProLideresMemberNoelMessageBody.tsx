@@ -7,7 +7,9 @@ import remarkGfm from 'remark-gfm'
 import { copyTextToClipboard } from '@/lib/clipboard'
 import {
   extractProLideresMemberNoelMensagemPronta,
+  formatLinkParaEnviarBody,
   getProLideresMemberNoelMessageSections,
+  parseLinkParaEnviarSection,
 } from '@/lib/pro-lideres-member-noel-response'
 
 function sectionMarkdown(label: string, body: string): string {
@@ -54,6 +56,67 @@ export function ProLideresMemberNoelCopyReadyButton({ text }: { text: string }) 
   )
 }
 
+function ProLideresMemberNoelCopyUrlButton({ url }: { url: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const onCopy = useCallback(async () => {
+    const ok = await copyTextToClipboard(url)
+    if (ok) {
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    }
+  }, [url])
+
+  return (
+    <button
+      type="button"
+      onClick={() => void onCopy()}
+      className="touch-manipulation inline-flex min-h-[36px] shrink-0 items-center justify-center gap-1 rounded-lg border border-sky-300 bg-sky-50 px-2.5 py-1.5 text-xs font-semibold text-sky-900 hover:bg-sky-100"
+      aria-label="Copiar URL do link"
+    >
+      {copied ? '✓ Copiado' : 'Copiar URL'}
+    </button>
+  )
+}
+
+function ProLideresMemberNoelLinkBlock({ body }: { body: string }) {
+  const formatted = formatLinkParaEnviarBody(body)
+  const parsed = parseLinkParaEnviarSection(formatted)
+  const urlMatch = formatted.match(/https?:\/\/[^\s)\]>]+/i)
+  const url = parsed?.url ?? urlMatch?.[0]?.replace(/[.,;]+$/, '') ?? null
+  const label = parsed?.label ?? 'Link'
+  const reasonStart = url ? formatted.indexOf(url) + url.length : -1
+  const reason = reasonStart >= 0 ? formatted.slice(reasonStart).trim().replace(/^[\s,—–-]+/, '') : ''
+
+  if (!url) {
+    return (
+      <div className={memberProseClass}>
+        <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{formatted}</ReactMarkdown>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-semibold text-sky-900">Link para enviar</p>
+      <div className="flex flex-col gap-2 rounded-lg border border-sky-100 bg-sky-50/60 p-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="min-w-0 text-sm leading-relaxed text-gray-900">
+          <span className="font-medium">{label}:</span>{' '}
+          <a href={url} target="_blank" rel="noopener noreferrer" className="break-all text-sky-700 underline">
+            {url}
+          </a>
+        </p>
+        <ProLideresMemberNoelCopyUrlButton url={url} />
+      </div>
+      {reason ? (
+        <div className={memberProseClass}>
+          <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{reason}</ReactMarkdown>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 const memberProseClass =
   'prose prose-sm max-w-none text-gray-900 prose-p:my-2 prose-ul:my-2 prose-ul:list-disc prose-ul:pl-5 prose-li:my-1 prose-li:leading-relaxed prose-strong:text-sky-900 [&_p>strong:only-child]:mt-3 [&_p>strong:only-child]:mb-1.5 [&_p>strong:only-child]:block [&_p>strong:only-child]:font-semibold'
 
@@ -76,14 +139,19 @@ export function ProLideresMemberNoelMessageBody({ markdown }: { markdown: string
     <div className="space-y-3">
       {sections.map((sec, i) => {
         const isMensagem = sec.label.toLowerCase() === 'mensagem pronta'
+        const isLink = sec.label.toLowerCase() === 'link para enviar'
         const key = sec.label || `intro-${i}`
         return (
           <div key={key}>
-            <div className={memberProseClass}>
-              <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
-                {sectionMarkdown(sec.label, sec.body)}
-              </ReactMarkdown>
-            </div>
+            {isLink ? (
+              <ProLideresMemberNoelLinkBlock body={sec.body} />
+            ) : (
+              <div className={memberProseClass}>
+                <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                  {sectionMarkdown(sec.label, sec.body)}
+                </ReactMarkdown>
+              </div>
+            )}
             {isMensagem && copyText ? <ProLideresMemberNoelCopyReadyButton text={copyText} /> : null}
           </div>
         )
