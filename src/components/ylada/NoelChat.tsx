@@ -25,6 +25,7 @@ import {
   softenProLideresMemberNoelMarkdown,
 } from '@/lib/pro-lideres-member-noel-response'
 import { ProLideresMemberNoelMessageBody } from '@/components/pro-lideres/ProLideresMemberNoelMessageBody'
+import { sanitizeNoelAssistantOutput } from '@/lib/noel-output-sanitize'
 
 function proLideresMemberNoelStoredContent(
   area: NoelArea,
@@ -55,7 +56,7 @@ function markdownPlainText(children: ReactNode): string {
  * e aplica negrito, para o ReactMarkdown renderizar hierarquia legível.
  */
 function normalizeNoelAssistantMarkdown(raw: string): string {
-  let t = raw.replace(/\r\n/g, '\n').trim()
+  let t = sanitizeNoelAssistantOutput(raw.replace(/\r\n/g, '\n').trim())
   if (!t) return t
 
   // Quebra antes de "2. 3. ..." quando vier colado ao parágrafo anterior
@@ -1288,6 +1289,8 @@ export default function NoelChat({
                   ) : null}
                   {lastAssistantMsg?.id === msg.id &&
                     msg.id !== 'welcome' &&
+                    area !== 'pro_lideres_member' &&
+                    !resolvedChatApi?.includes('/membro/noel') &&
                     messageHasScript(msg.content) &&
                     !(proLideresPayload && isExtractedScriptOnlyUrl(msg.content)) && (
                     <button
