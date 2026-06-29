@@ -12,6 +12,7 @@ import {
   isNoelProLideresLeaderConducaoEnabled,
   isProLideresLeaderConversationalQuery,
   leaderConversationalSystemHint,
+  normalizeLeaderFluxoDraftPreview,
 } from '@/lib/pro-lideres-noel-leader-conducao'
 import { formatLinksAtivosParaNoel, getNoelYladaLinks } from '@/lib/noel-ylada-links'
 import { formatProLideresCatalogForNoel } from '@/lib/pro-lideres-noel-catalog-context'
@@ -276,6 +277,10 @@ export async function POST(request: NextRequest) {
     if (lastLinkContextForResponse?.url?.trim()) {
       text = sanitizeProLideresQuizMarkdownToCanonicalUrl(text, lastLinkContextForResponse.url)
       text = stripMarkdownProLideresProximoPassoSection(text)
+    }
+
+    if (isNoelProLideresLeaderConducaoEnabled()) {
+      text = normalizeLeaderFluxoDraftPreview(text)
     }
 
     text = sanitizeNoelAssistantOutput(text)

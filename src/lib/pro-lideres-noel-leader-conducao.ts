@@ -117,44 +117,69 @@ Ex.: o líder escreve "quero algo pra quem já comprou mas não usa direito" —
 - **Regra geral:** toda orientação sobre objetivo vem com **exemplo**; linguagem **popular**.`
 }
 
-/** Preview do rascunho de fluxo (V2) — sem rótulos técnicos; copy pro lead. */
+/** Preview do rascunho de fluxo (V2) — rótulos simples; copy pro lead. */
 export function proLideresNoelFluxoPreviewBlock(): string {
   return `- **RASCUNHO = PREVIEW (V2 — PREVALECE SOBRE «MODELO VISUAL» COM \`###\` TÉCNICOS):**
-- **Proibido** na mensagem ao líder: cabeçalhos **### Título do fluxo**, **### Texto na primeira tela (gancho)**, **### Pergunta 1**, **### CTA WhatsApp** — são rótulos de editor, não preview.
-- Apresente assim (copy **real** que o lead lê; rótulos simples ou **sem** rótulo):
+- **Proibido** na mensagem ao líder os rótulos de editor: **Título do fluxo**, **Texto na primeira tela (gancho)**, **Pergunta 1**, **CTA WhatsApp** (com ou sem \`###\`).
+- **Obrigatório** abrir o rascunho com:
 
 **É assim que vai aparecer pra quem receber:**
 
-**[Título]** — uma linha (nome curto **pro lead**)
+- Use rótulos **simples** (ou **nenhum**), nesta ordem:
 
-**[Abertura]** — 1–3 linhas (texto da primeira tela)
+**Nome** — uma linha, título que o **lead** lê (dor/benefício dele)
 
-\`---\`
-
-**[Pergunta]** — enunciado na voz do lead. Linha em branco. Opções **A)**, **B)**, **C)** cada uma na sua linha.
+**Primeira frase** — 1–3 linhas (texto da primeira tela)
 
 \`---\`
 
-(repetir até **4–5** perguntas no mínimo, mesmo padrão)
+**Perguntas** — cada enunciado na voz do lead; linha em branco; opções **A)**, **B)**, **C)** em linhas separadas (mín. **4**, ideal **5**)
 
 \`---\`
 
-**[Convite no WhatsApp]** — 1–3 frases consultivas, pedido de permissão.
+**Mensagem final** — 1–3 frases consultivas convidando ao WhatsApp (pedido de permissão)
 
-**OBJETIVO INTERNO ≠ COPY DO LEAD (CRÍTICO)**
-- O **objetivo** do link (trazer gente nova, indicações, reativar, cuidar do cliente) guia **só você** — **nunca** no título, abertura ou perguntas.
-- **Proibido** títulos que **exponham** o objetivo interno: **"Colhendo Indicações"**, **"Qualificando Leads"**, **"Reativando Clientes"**, **"Gerando Contatos"**.
-- Escreva **para quem clica**: dor, curiosidade, benefício **dela**. Ex.: fluxo de **indicações** → título sobre **ajudar alguém que ela ama**, não "colher indicações".
-- Ordem interna = editor YLADA (título → abertura → perguntas → convite); só muda **como mostra** pro líder.
-- **Proibido** após o convite: bloco **Decisão rápida** A–D.`
+- Pode omitir o rótulo e mostrar **só a copy** depois de **Nome** / **Primeira frase**, se ficar mais natural — **nunca** volte aos nomes técnicos dos campos.
+
+**COPY SEMPRE PRO LEITOR (CRÍTICO)**
+- Título, primeira frase e perguntas = o que o **lead** lê. Escreva na **dor/benefício dele** — **nunca** o objetivo interno do líder.
+- **Proibido:** **"Colhendo Indicações"**, **"Qualificando Leads"**, **"Reativando Clientes"**, **"Gerando Contatos"**.
+- Ex.: fluxo de **indicações** → **Nome** tipo "Quem você ama merece esse cuidado?" — não "Colher indicações".
+- O **objetivo** (trazer gente nova, reativar, etc.) guia **só você** por trás; **não** aparece na copy.
+- Ordem interna = editor YLADA; só muda **como mostra** pro líder.
+- **Proibido** após a mensagem final: bloco **Decisão rápida** A–D.`
+}
+
+const FLUXO_TECHNICAL_LABEL_RE =
+  /#{1,3}\s*(?:Título do fluxo|Texto na primeira tela\s*\(gancho\)|CTA WhatsApp)\b|\*\*(?:Título do fluxo|Texto na primeira tela\s*\(gancho\)|CTA WhatsApp)\*\*/i
+
+/** Rascunho ainda usa rótulos técnicos de editor (regressão). */
+export function leaderFluxoDraftHasTechnicalLabels(text: string): boolean {
+  return FLUXO_TECHNICAL_LABEL_RE.test(text)
+}
+
+/** Converte rascunho legado com \`###\` técnicos para preview com rótulos simples. */
+export function normalizeLeaderFluxoDraftPreview(text: string): string {
+  if (!text.trim() || !leaderFluxoDraftHasTechnicalLabels(text)) return text
+  let out = text
+    .replace(/#{1,3}\s*Título do fluxo\s*\n?/gi, '**Nome**\n\n')
+    .replace(/#{1,3}\s*Texto na primeira tela\s*\(gancho\)\s*\n?/gi, '**Primeira frase**\n\n')
+    .replace(/#{1,3}\s*Pergunta\s+\d+\s*\n?/gi, '')
+    .replace(/#{1,3}\s*CTA WhatsApp\s*\n?/gi, '**Mensagem final**\n\n')
+  if (!/é assim que vai aparecer/i.test(out)) {
+    out = `**É assim que vai aparecer pra quem receber:**\n\n${out.trim()}`
+  }
+  return out
 }
 
 export function leaderConducaoPromptRequiresFluxoPreview(prompt: string): boolean {
   return (
     /é assim que vai aparecer/i.test(prompt) &&
-    /objetivo interno/i.test(prompt) &&
-    /proibido.*título do fluxo|proibido.*rótulos técnicos|proibido.*na mensagem ao líder/i.test(prompt) &&
-    /colhendo indicações/i.test(prompt)
+    /\*\*Nome\*\*/.test(prompt) &&
+    /\*\*Primeira frase\*\*/.test(prompt) &&
+    /\*\*Mensagem final\*\*/.test(prompt) &&
+    /copy sempre pro leitor/i.test(prompt) &&
+    /proibido.*título do fluxo|proibido.*rótulos de editor/i.test(prompt)
   )
 }
 
@@ -208,5 +233,5 @@ TAREFAS, SCRIPTS E FERRAMENTAS
 
 /** Nota na seção ENTREGA quando V2 está ligada — prevalece sobre brief genérico. */
 export function proLideresNoelEntregaConducaoV2Note(): string {
-  return `- **Condução V2 — criação de link (PREVALECE):** não repergunte público/tema/canal. Objetivo vago → menu de **5 opções** + **Outro**; depois **PREVIEW** ("É assim que vai aparecer…"), **não** \`### Título do fluxo\`. Objetivo interno **≠** copy do lead. Após rascunho: **no máximo** 2 frases + **Na prática:** um convite.`
+  return `- **Condução V2 — criação de link (PREVALECE):** não repergunte público/tema/canal. Objetivo vago → menu de **5 opções** + **Outro**; depois **PREVIEW** com **"É assim que vai aparecer…"** e rótulos **Nome / Primeira frase / Perguntas / Mensagem final** (nunca Título do fluxo / gancho / CTA WhatsApp). Copy pro **lead**, não objetivo interno. Após rascunho: **no máximo** 2 frases + **Na prática:** um convite.`
 }

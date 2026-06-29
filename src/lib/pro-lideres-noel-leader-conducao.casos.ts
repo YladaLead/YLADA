@@ -10,8 +10,10 @@ import {
   leaderConducaoPromptRequiresLinkObjective,
   leaderConducaoPromptRequiresLinkObjetivoOutro,
   leaderConducaoPromptRequiresFluxoPreview,
+  leaderFluxoDraftHasTechnicalLabels,
   leaderConducaoPromptRequiresConcreteExample,
   leaderTechniqueResponseHasConcreteExample,
+  normalizeLeaderFluxoDraftPreview,
 } from '@/lib/pro-lideres-noel-leader-conducao'
 
 let ok = 0
@@ -96,6 +98,51 @@ const tecnicaRuim = `Cadência medível ajuda a equipe a manter foco. Alinhe exp
 
 assert('técnica boa: tem exemplo', leaderTechniqueResponseHasConcreteExample(tecnicaBoa))
 assert('técnica ruim: sem exemplo', !leaderTechniqueResponseHasConcreteExample(tecnicaRuim))
+
+const rascunhoTecnico = `Montei o fluxo para indicações:
+
+### Título do fluxo
+Colhendo Indicações Valiosas
+
+### Texto na primeira tela (gancho)
+Descubra como ajudar quem você ama.
+
+### Pergunta 1
+Quem você gostaria de indicar?
+
+A) Família
+B) Amigos
+
+### CTA WhatsApp
+Posso te mandar uma mensagem no WhatsApp?`
+
+const rascunhoPreview = `**É assim que vai aparecer pra quem receber:**
+
+**Nome**
+Quem você ama merece esse cuidado?
+
+**Primeira frase**
+Responde em 1 minuto e veja o que faz sentido pra você.
+
+---
+
+Você já pensou em indicar alguém especial?
+
+A) Sim
+B) Ainda não
+
+---
+
+**Mensagem final**
+Posso te mandar uma mensagem no WhatsApp?`
+
+assert('rascunho técnico: detecta rótulos', leaderFluxoDraftHasTechnicalLabels(rascunhoTecnico))
+assert('preview bom: sem rótulos técnicos', !leaderFluxoDraftHasTechnicalLabels(rascunhoPreview))
+const rascunhoNormalizado = normalizeLeaderFluxoDraftPreview(rascunhoTecnico)
+assert('normaliza: remove rótulos técnicos', !leaderFluxoDraftHasTechnicalLabels(rascunhoNormalizado))
+assert('normaliza: abre com preview', /é assim que vai aparecer/i.test(rascunhoNormalizado))
+assert('normaliza: usa Nome', /\*\*Nome\*\*/.test(rascunhoNormalizado))
+assert('normaliza: usa Mensagem final', /\*\*Mensagem final\*\*/.test(rascunhoNormalizado))
 
 console.log(`\n${ok} ok, ${fail} fail`)
 if (fail > 0) process.exit(1)
