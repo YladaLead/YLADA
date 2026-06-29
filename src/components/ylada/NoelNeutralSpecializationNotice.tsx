@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { NOEL_NEUTRAL_SPECIALIZATION_NOTICE } from '@/config/noel-ux-content'
 import type { NoelArea } from '@/config/noel-ux-content'
+import { isNoelDiretoEnabled } from '@/lib/porta-unica/porta-unica-flag'
 
 const STORAGE_PREFIX = 'ylada_noel_neutral_notice_v1'
 
@@ -26,6 +27,9 @@ export default function NoelNeutralSpecializationNotice({ mentorArea }: { mentor
   useEffect(() => {
     if (loading || !user?.id) return
     if (mentorArea !== 'ylada') return
+    // Fluxo novo (Fase 2): o Noel já abre conduzindo pelo desafio — o aviso
+    // "ainda não é especialista na sua área" destoa e some. OFF = aparece como hoje.
+    if (isNoelDiretoEnabled()) return
     if (!userProfile || !isNeutralPerfil(userProfile.perfil)) return
 
     try {
