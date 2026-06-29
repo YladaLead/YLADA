@@ -8,6 +8,7 @@ import {
   NOEL_DIRETO_DESTINO,
   noelDiretoAtivo,
   redirectPathPosCadastro,
+  relaxarGateMatrizParaNoelDireto,
 } from './destino-pos-cadastro'
 
 let passou = 0
@@ -35,6 +36,14 @@ caso('flag ON + desafio → cai no Noel direto', () => {
 
 caso('flag ON sem desafio → segue o legado', () => {
   assert.strictEqual(redirectPathPosCadastro(true, false), DESTINO_LEGADO_ONBOARDING)
+})
+
+caso('relaxar guarda: só area ylada + flag ON', () => {
+  assert.strictEqual(relaxarGateMatrizParaNoelDireto('ylada', true), true)
+  assert.strictEqual(relaxarGateMatrizParaNoelDireto('ylada', false), false)
+  assert.strictEqual(relaxarGateMatrizParaNoelDireto('estetica', true), false)
+  assert.strictEqual(relaxarGateMatrizParaNoelDireto('coach', true), false)
+  assert.strictEqual(relaxarGateMatrizParaNoelDireto('med', false), false)
 })
 
 console.log(`\n${passou} casos verdes.`)

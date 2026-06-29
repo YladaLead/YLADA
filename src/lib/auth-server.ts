@@ -5,6 +5,8 @@ import { hasActiveSubscription, canBypassSubscription, wellnessAreaSubscriptionO
 import { resolveProLideresRedirectForWellnessAccount } from '@/lib/pro-lideres-server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
+import { isNoelDiretoEnabled } from '@/lib/porta-unica/porta-unica-flag'
+import { relaxarGateMatrizParaNoelDireto } from '@/lib/porta-unica/destino-pos-cadastro'
 
 type Area =
   | 'wellness'
@@ -330,6 +332,11 @@ export async function validateProtectedAccess(
         (p) => actualPath.endsWith(p) || actualPath.includes(p)
       )
 
+    // Fluxo novo (Fase 2, atrás de flag): a casa do Noel (/pt/home, matriz ylada)
+    // NÃO força mais onboarding/perfil-empresarial de perfil incompleto — o Noel
+    // coleta o que falta conversando (§9.3 r49). Não afeta sessão/perfil; OFF = igual.
+    const relaxNovoFluxo = relaxarGateMatrizParaNoelDireto(area, isNoelDiretoEnabled())
+
     // Coach de bem-estar não tem acesso ao board /pt/home (matriz); evita loop login ↔ home.
     if (
       area === 'ylada' &&
@@ -380,6 +387,7 @@ export async function validateProtectedAccess(
       segmentosContatoObrigatorio.includes(area) &&
       !canBypassProfile &&
       !isAllowAnyPerfilPath &&
+      !relaxNovoFluxo &&
       supabaseAdmin
     ) {
       const onboardingPaths =
@@ -423,6 +431,7 @@ export async function validateProtectedAccess(
       !canBypassProfile &&
       !isAllowAnyPerfilPath &&
       !skipYladaNoelProfileForRoute &&
+      !relaxNovoFluxo &&
       supabaseAdmin
     ) {
       try {

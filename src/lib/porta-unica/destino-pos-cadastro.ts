@@ -25,3 +25,14 @@ export function noelDiretoAtivo(flagOn: boolean, temDesafio: boolean): boolean {
 export function redirectPathPosCadastro(flagOn: boolean, temDesafio: boolean): string {
   return noelDiretoAtivo(flagOn, temDesafio) ? NOEL_DIRETO_DESTINO : DESTINO_LEGADO_ONBOARDING
 }
+
+/**
+ * No fluxo novo, a casa do Noel (`/pt/home`, matriz `ylada`) deixa de FORÇAR a
+ * onboarding/perfil-empresarial de perfil incompleto — o Noel coleta o que falta
+ * conversando (§9.3 r49). Só vale pra `area === 'ylada'` com a flag do fluxo novo ON;
+ * NÃO afeta sessão nem perfil, NÃO afeta outras áreas, e com a flag OFF é inerte.
+ * Puro — testável em `destino-pos-cadastro.casos.ts`.
+ */
+export function relaxarGateMatrizParaNoelDireto(area: string, flagOn: boolean): boolean {
+  return area === 'ylada' && flagOn
+}
