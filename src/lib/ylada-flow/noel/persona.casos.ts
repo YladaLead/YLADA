@@ -68,6 +68,8 @@ withEnv('1', () => {
   assert(prefix.includes('construído sobre a Inteligência de Convicção'), 'resposta padrão de identidade')
   assert(prefix.includes('Só nomeie o Andre Faula em 3ª pessoa'), 'guardrail Andre só sob pergunta')
   assert(!prefix.includes('do Andre.'), 'identidade padrão sem nome do Andre')
+  assert(prefix.includes('anunciar postura'), 'identidade sem declarar sem empurrar na fala')
+  assert(!prefix.includes('move sem empurrar'), 'teste único sem empurrar na fala')
   assert(prefix.includes('Autoridade pela Inteligência de Convicção'), 'voz autoridade pela convicção')
 }
 

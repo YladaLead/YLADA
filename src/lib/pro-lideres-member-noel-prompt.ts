@@ -47,8 +47,8 @@ export function buildProLideresMemberNoelSystemPrompt(params: BuildProLideresMem
 
   const catalogBlock =
     catalogExcerpt && catalogExcerpt.trim().length > 0
-      ? `\n[MEUS LINKS — O QUE O LÍDER LIBEROU PARA VOCÊ]\n${catalogExcerpt.trim()}\n`
-      : '\n[MEUS LINKS]\nCopie no painel os links que o líder liberou. **Nunca** invente URL.\n'
+      ? `\n[MEUS LINKS — SEUS ENDEREÇOS PARA COMPARTILHAR]\nCada linha abaixo é **seu link** (URL personalizada sua). Indique qual enviar.\n${catalogExcerpt.trim()}\n`
+      : '\n[MEUS LINKS]\nEm Meus links cada ferramenta já é **seu link** com URL própria pra copiar e enviar. **Nunca** invente URL.\n'
 
   const focusBlock =
     focusNotes && focusNotes.trim().length > 0

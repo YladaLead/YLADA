@@ -13,6 +13,9 @@ import {
   extractProLideresMemberNoelMensagemPronta,
   parseAllLinksParaEnviarSection,
   parseLinkParaEnviarSection,
+  splitLinkParaEnviarSection,
+  extractLinkSectionReason,
+  MEMBER_NOEL_GENERIC_LINK_HINT,
   polishProLideresMemberNoelForDisplay,
   userExplicitlyWantsReadyMessage,
 } from '@/lib/pro-lideres-member-noel-response'
@@ -197,6 +200,17 @@ Me conta.`
 const convOut = normalizeProLideresMemberNoelResponse(convRaw, convRoute, convQ)
 assert('conversacional: sem blocos forçados', !/\*\*(Na prática|Próximo passo|Mensagem pronta|Link para enviar)\*\*/i.test(convOut))
 assert('conversacional: query helper', isMemberNoelConversationalQuery(convQ))
+assert('conversacional: quem e vc', isMemberNoelConversationalQuery('quem é vc?'))
+const vcRoute = classifyProLideresMemberNoelMessage('quem é vc?')
+assert('conversacional vc: modo', vcRoute.mode === 'conversacional')
+const vcOut = normalizeProLideresMemberNoelResponse(
+  'Sou o Noel na YLADA.\n\n**Na prática**\n\n- Ajudo no campo.\n\n**Próximo passo**\n\nMe conta.',
+  vcRoute,
+  'quem é vc?'
+)
+assert('conversacional vc: sem blocos forçados', !/\*\*(Na prática|Próximo passo|Link para enviar)\*\*/i.test(vcOut))
+
+assert('generic link hint: copy do membro', MEMBER_NOEL_GENERIC_LINK_HINT.includes('seu link'))
 
 const dashRaw = `Faz sentido — lista grande.
 
@@ -221,6 +235,37 @@ assert('multi link: dois URLs', multiLinks.length === 2)
 assert('multi link: primeiro', multiLinks[0]?.url === 'https://ylada.com/l/agua')
 assert('multi link: segundo', multiLinks[1]?.url === 'https://ylada.com/l/opp')
 assert('multi link: labels', multiLinks[0]?.label === 'Água' && multiLinks[1]?.label === 'Oportunidade')
+assert(
+  'multi link: motivo limpo',
+  extractLinkSectionReason(multiLinkBody, multiLinks) === 'Use conforme o perfil.'
+)
+
+const residualBody = `Renda Extra Imediata: https://ylada.com/l/renda
+
+Renda Extra Imediata:
+
+Envie depois da permissão, para mostrar como começar sem pressão.`
+const residualLinks = parseAllLinksParaEnviarSection(residualBody)
+const residualReason = extractLinkSectionReason(residualBody, residualLinks)
+const residualFormatted = formatLinkParaEnviarBody(residualBody)
+assert('residual: um link', residualLinks.length === 1)
+assert('residual: sem label solto no motivo', !/Renda Extra Imediata\s*:?\s*$/m.test(residualReason))
+assert('residual: sem label repetido no motivo', !residualReason.includes('Renda Extra Imediata:'))
+assert('residual: mantém explicação', residualReason.includes('para mostrar como começar'))
+assert('residual: formatado sem resíduo', !residualFormatted.includes('Renda Extra Imediata:\n\n'))
+assert(
+  'split: motivo único',
+  splitLinkParaEnviarSection(residualBody).reason === residualReason
+)
+
+const peeledBody =
+  'Renda Extra Imediata: , para mostrar como começar sem pressionar produto.'
+const peeled = splitLinkParaEnviarSection(
+  `Renda Extra Imediata: https://ylada.com/l/renda\n\n${peeledBody}`
+)
+assert('peeled: label+url extraídos', peeled.links.length === 1)
+assert('peeled: explicação na mesma linha', peeled.reason.includes('para mostrar como começar'))
+assert('peeled: sem nome solto', !peeled.reason.includes('Renda Extra Imediata:'))
 
 console.log(`\n=== ${ok} ok, ${fail} falhas ===`)
 process.exit(fail > 0 ? 1 : 0)

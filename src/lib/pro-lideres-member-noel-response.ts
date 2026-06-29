@@ -19,8 +19,10 @@ const SECTION_LABELS = [
 export const MEMBER_NOEL_GENERIC_READY_MSG =
   'Oi, [nome]! Posso te ajudar com calma — me conta o que está pesando mais pra você? 😊'
 
-const GENERIC_LINK_HINT =
-  'Veja **Meus links** no seu painel YLADA e use o que o líder liberou para este momento.'
+export const MEMBER_NOEL_GENERIC_LINK_HINT =
+  'Abra **Meus links** no painel YLADA e use **o seu link** certo para este momento (cada ferramenta já tem URL sua pra compartilhar).'
+
+const GENERIC_LINK_HINT = MEMBER_NOEL_GENERIC_LINK_HINT
 
 const PLAIN_SECTION_LABELS = [
   'Na prática',
@@ -159,27 +161,106 @@ export function parseLinkParaEnviarSection(body: string): { label: string; url: 
   return all[0] ?? null
 }
 
+function stripLinkLabelMarkup(text: string): string {
+  return text.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/^[-*•]\s+/, '').trim()
+}
+
+function lineMatchesLinkLabel(line: string, label: string): boolean {
+  const plain = stripLinkLabelMarkup(line)
+  const l = label.trim()
+  return plain === l || plain === `${l}:`
+}
+
+function classifyLinkLine(line: string, link: { label: string; url: string }): 'pair' | 'label' | 'url' | 'none' {
+  const t = line.trim()
+  if (!t) return 'none'
+  if (t.includes(link.url)) return 'pair'
+  if (t.replace(/[.,;]+$/, '') === link.url) return 'url'
+  if (lineMatchesLinkLabel(t, link.label)) return 'label'
+  return 'none'
+}
+
+/** Sobra de texto após "Label:" quando a URL já foi para a caixa. */
+function peelExplanationAfterLabel(
+  line: string,
+  links: { label: string; url: string }[]
+): string | null {
+  const plain = stripLinkLabelMarkup(line)
+  for (const link of links) {
+    const prefix = `${link.label}:`
+    if (!plain.toLowerCase().startsWith(prefix.toLowerCase())) continue
+    const rest = plain.slice(prefix.length).trim().replace(/^,\s*/, '')
+    if (!rest || /^https?:\/\//i.test(rest)) return ''
+    return rest
+  }
+  return null
+}
+
 /** Texto explicativo após os links (sem repetir nome/URL). */
 export function extractLinkSectionReason(body: string, links: { label: string; url: string }[]): string {
-  let t = body
-  for (const link of links) {
-    t = t.replace(link.url, '')
+  if (links.length === 0) return ''
+
+  const rawLines = body.split('\n')
+  const skip = new Array<boolean>(rawLines.length).fill(false)
+  const reasonParts: string[] = []
+
+  for (let i = 0; i < rawLines.length; i++) {
+    if (skip[i]) continue
+    const trimmed = (rawLines[i] ?? '').trim()
+    if (!trimmed) continue
+
+    let consumed = false
+    for (const link of links) {
+      const kind = classifyLinkLine(trimmed, link)
+      if (kind === 'pair') {
+        skip[i] = true
+        consumed = true
+        break
+      }
+      if (kind === 'label') {
+        skip[i] = true
+        if (i + 1 < rawLines.length && classifyLinkLine(rawLines[i + 1]?.trim() ?? '', link) === 'url') {
+          skip[i + 1] = true
+          i += 1
+        }
+        consumed = true
+        break
+      }
+      if (kind === 'url') {
+        skip[i] = true
+        consumed = true
+        break
+      }
+    }
+    if (consumed) continue
+
+    const peeled = peelExplanationAfterLabel(trimmed, links)
+    if (peeled !== null) {
+      if (peeled) reasonParts.push(peeled)
+      continue
+    }
+
+    if (!links.some((l) => lineMatchesLinkLabel(trimmed, l.label))) {
+      reasonParts.push(trimmed)
+    }
   }
-  return t
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line && !/^https?:\/\//i.test(line) && !/^link\s*\d*$/i.test(line))
-    .join('\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
+
+  return reasonParts.join('\n').replace(/\n{3,}/g, '\n\n').trim()
+}
+
+export function splitLinkParaEnviarSection(body: string): {
+  links: { label: string; url: string }[]
+  reason: string
+} {
+  const links = parseAllLinksParaEnviarSection(body)
+  return { links, reason: extractLinkSectionReason(body, links) }
 }
 
 /** Formata bloco Link para enviar sem travessão entre nome e URL. */
 export function formatLinkParaEnviarBody(body: string): string {
-  const links = parseAllLinksParaEnviarSection(body)
+  const { links, reason } = splitLinkParaEnviarSection(body)
   if (links.length === 0) return body
   const formatted = links.map((l) => `${l.label}: ${l.url}`).join('\n\n')
-  const reason = extractLinkSectionReason(body, links)
   const out = reason ? `${formatted}\n\n${reason}` : formatted
   return sanitizeNoelAssistantOutput(out)
 }
@@ -215,7 +296,11 @@ export function isGenericReadyMessage(body: string): boolean {
 }
 
 export function isGenericLinkHint(body: string): boolean {
-  return /veja\s+\*\*meus links\*\*/i.test(body) && !/https?:\/\//i.test(body)
+  return (
+    /meus links/i.test(body) &&
+    /(seu link|seus links|url sua)/i.test(body) &&
+    !/https?:\/\//i.test(body)
+  )
 }
 
 export function isGenericFechamento(body: string): boolean {

@@ -47,19 +47,31 @@ function detectAudience(m: string): ProLideresMemberNoelRoute['audience'] {
   return 'ambiguo'
 }
 
+/** Normaliza abreviações de chat (vc, tb…) antes de classificar intenção. */
+function expandMemberNoelQueryNorm(userMessage: string): string {
+  return normRouter(userMessage)
+    .replace(/\bvc\b/g, 'voce')
+    .replace(/\btb\b/g, 'tambem')
+    .replace(/\bpq\b/g, 'porque')
+    .replace(/\bq\b/g, 'que')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 /** Perguntas gerais sobre o Noel — conversa, sem blocos de ação. */
 export function isMemberNoelConversationalQuery(userMessage: string): boolean {
-  const um = normRouter(userMessage)
+  const um = expandMemberNoelQueryNorm(userMessage)
+
   if (
-    /(quem e voce|quem é você|o que voce faz|o que você faz|como funciona o noel|como voce funciona|me apresenta|se apresenta|quem eh o noel|o que e o noel|pra que serve|para que serve|voce e uma ia|você é uma ia|voce e um robo|você é um robô)/.test(
+    /(quem e (voce|noel)|quem eh (voce|noel)|o que (e|eh) (voce|noel)|o que voce faz|como (voce|noel) funciona|como funciona (o )?noel|me apresenta|se apresenta|quem eh o noel|o que e o noel|pra que serve|para que serve|voce e (uma ia|um robo|um bot)|noel quem e)/.test(
       um
     )
   ) {
     return true
   }
   if (
-    /(duvida|dúvida|explica|me conta sobre|nao entendi|não entendi)/.test(um) &&
-    !/(mensagem|link|lista|post|story|objecao|objeção|whatsapp|zap|convite|abordar)/.test(um)
+    /(duvida|dúvida|explica|me conta sobre|nao entendi|não entendi|nao sei o que|não sei o que)/.test(um) &&
+    !/(mensagem|link|lista|post|story|objecao|objeção|whatsapp|zap|convite|abordar|mandar|enviar)/.test(um)
   ) {
     return true
   }
@@ -92,7 +104,7 @@ export function classifyProLideresMemberNoelMessage(
       includeLink: false,
       includeMensagemPronta: false,
       directive:
-        'Explique que links vêm de **Meus links** (líder). **Sem** bloco Link para enviar — oriente a abrir o painel.',
+        'Explique que os links ficam em **Meus links** (URLs suas no painel). **Sem** bloco Link para enviar — oriente a abrir o painel.',
     }
   }
 
@@ -318,7 +330,7 @@ Se ela usar o link, mande mensagem em 24–48h com **uma** pergunta objetiva (ex
 **Próximo passo**
 Me conta o que fez — mesmo que tenha sido só 1 contato. Bola pra frente. 💪`,
 
-    bloqueio_criar_link: `Aqui no Noel da YLADA eu **não crio** link novo — seu líder já liberou tudo em **Meus links** 😊
+    bloqueio_criar_link: `Aqui no Noel da YLADA eu **não crio** link novo — em **Meus links** você já tem os endereços prontos pra compartilhar 😊
 
 **Na prática**
 - Abra **Meus links** no Pro Líderes.

@@ -208,7 +208,7 @@ export function buildRecomendacaoCuradaBlockMembro(rec: RecomendacaoFluxo): stri
     `Para este pedido, o tipo de diagnóstico pronto que melhor cabe é "${f.nome}".\n` +
     `Por quê: ${explicarRecomendacao(rec)}\n` +
     'Como usar: você PODE sugerir esse TIPO de fluxo como caminho. Mas o link de verdade ' +
-    'vem só de **Meus links** (o que o líder liberou) — aponte o membro para o link ' +
+    'vem só de **Meus links** (seus links no painel, cada um com URL sua) — aponte o membro para o link ' +
     'correspondente lá. NÃO invente URL, NÃO diga "clique aqui", NÃO cite um link que não ' +
     'esteja em Meus links. A referência é só para orientar a escolha.'
   )
