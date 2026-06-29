@@ -7,10 +7,9 @@ import remarkGfm from 'remark-gfm'
 import { copyTextToClipboard } from '@/lib/clipboard'
 import {
   extractProLideresMemberNoelMensagemPronta,
-  extractLinkSectionReason,
   formatLinkParaEnviarBody,
   getProLideresMemberNoelMessageSections,
-  parseAllLinksParaEnviarSection,
+  splitLinkParaEnviarSection,
 } from '@/lib/pro-lideres-member-noel-response'
 
 function sectionMarkdown(label: string, body: string): string {
@@ -81,11 +80,10 @@ function ProLideresMemberNoelCopyUrlButton({ url }: { url: string }) {
 }
 
 function ProLideresMemberNoelLinkBlock({ body }: { body: string }) {
-  const formatted = formatLinkParaEnviarBody(body)
-  const links = parseAllLinksParaEnviarSection(formatted.length ? formatted : body)
-  const reason = extractLinkSectionReason(body, links)
+  const { links, reason } = splitLinkParaEnviarSection(body)
 
   if (links.length === 0) {
+    const formatted = formatLinkParaEnviarBody(body)
     return (
       <div className={memberProseClass}>
         <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{formatted}</ReactMarkdown>
@@ -101,15 +99,21 @@ function ProLideresMemberNoelLinkBlock({ body }: { body: string }) {
       {links.map((link) => (
         <div
           key={link.url}
-          className="flex flex-col gap-2 rounded-lg border border-sky-100 bg-sky-50/60 p-3 sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-2 rounded-lg border border-sky-100 bg-sky-50/60 p-3"
         >
-          <p className="min-w-0 text-sm leading-relaxed text-gray-900">
-            <span className="font-medium">{link.label}:</span>{' '}
-            <a href={link.url} target="_blank" rel="noopener noreferrer" className="break-all text-sky-700 underline">
-              {link.url}
-            </a>
-          </p>
-          <ProLideresMemberNoelCopyUrlButton url={link.url} />
+          <p className="text-sm font-medium leading-snug text-gray-900">{link.label}:</p>
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={link.url}
+            className="block truncate text-sm leading-relaxed text-sky-700 underline"
+          >
+            {link.url}
+          </a>
+          <div className="pt-0.5">
+            <ProLideresMemberNoelCopyUrlButton url={link.url} />
+          </div>
         </div>
       ))}
       {reason ? (
