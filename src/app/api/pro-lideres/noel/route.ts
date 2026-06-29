@@ -11,6 +11,7 @@ import {
 import { formatLinksAtivosParaNoel, getNoelYladaLinks } from '@/lib/noel-ylada-links'
 import { formatProLideresCatalogForNoel } from '@/lib/pro-lideres-noel-catalog-context'
 import { getFlowBuilderMethodologyBlock } from '@/lib/ylada-flow-builder-methodology'
+import { sanitizeNoelAssistantOutput } from '@/lib/noel-output-sanitize'
 import { applyNoelPersonaToSystemPrompt } from '@/lib/ylada-flow/noel/persona'
 import {
   buildCanonicalQuizMarkdownForProLideresResponse,
@@ -268,6 +269,8 @@ export async function POST(request: NextRequest) {
       text = sanitizeProLideresQuizMarkdownToCanonicalUrl(text, lastLinkContextForResponse.url)
       text = stripMarkdownProLideresProximoPassoSection(text)
     }
+
+    text = sanitizeNoelAssistantOutput(text)
 
     return NextResponse.json({
       response: text,

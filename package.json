@@ -23,6 +23,7 @@
     "test-video-url": "tsx scripts/test-video-url.ts",
     "smoke:noel-membro": "tsx scripts/pro-lideres-noel-membro-smoke.ts",
     "test:noel-membro-response": "tsx src/lib/pro-lideres-member-noel-response.casos.ts",
+    "test:noel-output-sanitize": "tsx src/lib/noel-output-sanitize.casos.ts",
     "test:noel-jornada-memory": "tsx src/lib/noel-wellness/noel-jornada-memory.casos.ts",
     "smoke:noel-membro:full": "tsx scripts/pro-lideres-noel-membro-smoke.ts --full",
     "test:fase": "tsx src/lib/carol-v2/fase.casos.ts",
