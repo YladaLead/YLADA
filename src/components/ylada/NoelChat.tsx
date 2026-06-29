@@ -25,6 +25,11 @@ import {
   softenProLideresMemberNoelMarkdown,
 } from '@/lib/pro-lideres-member-noel-response'
 import { ProLideresMemberNoelMessageBody } from '@/components/pro-lideres/ProLideresMemberNoelMessageBody'
+import { ProLideresNoelLinkObjetivoChips } from '@/components/pro-lideres/ProLideresNoelLinkObjetivoChips'
+import {
+  leaderAssistantOffersLinkObjetivoChoices,
+  leaderLinkObjetivoAssistantDisplayText,
+} from '@/lib/pro-lideres-noel-leader-link-objetivos'
 import { sanitizeNoelAssistantOutput } from '@/lib/noel-output-sanitize'
 
 function proLideresMemberNoelStoredContent(
@@ -393,6 +398,11 @@ function isProLideresNoelApiPath(path: string | undefined): boolean {
       path?.includes('/pro-estetica-corporal/noel') ||
       path?.includes('/pro-estetica-capilar/noel')
   )
+}
+
+function isProLideresLeaderNoelApiPath(path: string | undefined): boolean {
+  if (!path?.includes('/pro-lideres/noel')) return false
+  return !path.includes('/membro/')
 }
 
 export default function NoelChat({
@@ -1130,6 +1140,18 @@ export default function NoelChat({
                   )
                 : normalizeNoelAssistantMarkdown(assistantMarkdownSource)
               : ''
+          const assistantMarkdownForDisplay =
+            msg.role === 'assistant' &&
+            isProLideresLeaderNoelApiPath(resolvedChatApi) &&
+            leaderAssistantOffersLinkObjetivoChoices(assistantMarkdownNormalized)
+              ? leaderLinkObjetivoAssistantDisplayText(assistantMarkdownNormalized)
+              : assistantMarkdownNormalized
+          const showLeaderLinkObjetivoChips =
+            isProLideresLeaderNoelApiPath(resolvedChatApi) &&
+            msg.role === 'assistant' &&
+            isLastAssistantMessage &&
+            !loading &&
+            leaderAssistantOffersLinkObjetivoChoices(msg.content)
 
           return (
           <div
@@ -1214,7 +1236,7 @@ export default function NoelChat({
                         },
                       }}
                     >
-                      {assistantMarkdownNormalized}
+                      {assistantMarkdownForDisplay}
                     </ReactMarkdown>
                   </div>
                   )}
@@ -1247,6 +1269,15 @@ export default function NoelChat({
                         </>
                       )}
                     </div>
+                  ) : null}
+                  {showLeaderLinkObjetivoChips ? (
+                    <ProLideresNoelLinkObjetivoChips
+                      disabled={loading}
+                      onSelectPreset={(message) => void sendMessage(message)}
+                      onFocusOutroInput={() => {
+                        queueMicrotask(() => inputRef.current?.focus())
+                      }}
+                    />
                   ) : null}
                   {proLideresPayload &&
                     !disableYladaLinkEditor &&

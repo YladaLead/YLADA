@@ -9,12 +9,14 @@ import {
   leaderConducaoPromptRequiresDosagem,
   leaderConducaoPromptRequiresLinkObjective,
   leaderConducaoPromptRequiresLinkObjetivoOutro,
+  leaderConducaoPromptRequiresLinkObjetivoChips,
   leaderConducaoPromptRequiresFluxoPreview,
   leaderFluxoDraftHasTechnicalLabels,
   leaderConducaoPromptRequiresConcreteExample,
   leaderTechniqueResponseHasConcreteExample,
   normalizeLeaderFluxoDraftPreview,
 } from '@/lib/pro-lideres-noel-leader-conducao'
+import { leaderIndicacoesPreviewTitleIsReaderFacing } from '@/lib/pro-lideres-noel-leader-link-objetivos'
 
 let ok = 0
 let fail = 0
@@ -79,6 +81,7 @@ withEnv('true', () => {
   assert('V2: sem mentor de campo na identidade V2', !/condutor de líder de campo/.test(prompt.split('MISSÃO PRO LÍDERES')[0] ?? ''))
   assert('V2: link 4 objetivos convicção', leaderConducaoPromptRequiresLinkObjective(prompt))
   assert('V2: link Outro campo livre', leaderConducaoPromptRequiresLinkObjetivoOutro(prompt))
+  assert('V2: link botões tocáveis', leaderConducaoPromptRequiresLinkObjetivoChips(prompt))
   assert('V2: fluxo preview lead', leaderConducaoPromptRequiresFluxoPreview(prompt))
   assert('V2: proíbe menu qualificar/educar/engajar', /proibido.*qualificar.*educar.*engajar/i.test(prompt))
   assert('V2: formato conversacional', /Condução V2/.test(prompt))
@@ -143,6 +146,17 @@ assert('normaliza: remove rótulos técnicos', !leaderFluxoDraftHasTechnicalLabe
 assert('normaliza: abre com preview', /é assim que vai aparecer/i.test(rascunhoNormalizado))
 assert('normaliza: usa Nome', /\*\*Nome\*\*/.test(rascunhoNormalizado))
 assert('normaliza: usa Mensagem final', /\*\*Mensagem final\*\*/.test(rascunhoNormalizado))
+
+const nomeIndicacoesMatch = rascunhoPreview.match(/\*\*Nome\*\*\s*\n([^\n]+)/)
+assert(
+  'colher indicações: preview título pro leitor',
+  nomeIndicacoesMatch ? leaderIndicacoesPreviewTitleIsReaderFacing(nomeIndicacoesMatch[1]) : false
+)
+const nomeTecnicoMatch = rascunhoTecnico.match(/### Título do fluxo\s*\n([^\n]+)/)
+assert(
+  'colher indicações: rejeita título interno',
+  nomeTecnicoMatch ? !leaderIndicacoesPreviewTitleIsReaderFacing(nomeTecnicoMatch[1]) : false
+)
 
 console.log(`\n${ok} ok, ${fail} fail`)
 if (fail > 0) process.exit(1)

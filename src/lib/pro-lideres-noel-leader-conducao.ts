@@ -3,6 +3,13 @@
  * Flag OFF = buildProLideresNoelSystemPrompt byte-idêntico na parte de liderança.
  */
 
+import {
+  formatLinkObjetivosBulletFallback,
+  PRO_LIDERES_LINK_OBJETIVO_OUTRO_LABEL,
+} from '@/lib/pro-lideres-noel-leader-link-objetivos'
+
+export { PRO_LIDERES_LINK_OBJETIVO_OUTRO_LABEL } from '@/lib/pro-lideres-noel-leader-link-objetivos'
+
 function expandLeaderNoelQueryNorm(message: string): string {
   return message
     .toLowerCase()
@@ -64,8 +71,6 @@ export function leaderConducaoPromptRequiresDosagem(prompt: string): boolean {
   return /máximo\s*~?3\s*pontos/i.test(prompt) && /uma\s+ação concreta/i.test(prompt)
 }
 
-export const PRO_LIDERES_LINK_OBJETIVO_OUTRO_LABEL = 'Outro — me conta o que você quer'
-
 export function leaderConducaoPromptRequiresLinkObjective(prompt: string): boolean {
   return (
     /o que você quer que esse link faça/i.test(prompt) &&
@@ -86,28 +91,28 @@ export function leaderConducaoPromptRequiresLinkObjetivoOutro(prompt: string): b
   )
 }
 
+export function leaderConducaoPromptRequiresLinkObjetivoChips(prompt: string): boolean {
+  return /botões tocáveis|botões tocaveis/i.test(prompt) && /proibido.*lista inteira/i.test(prompt)
+}
+
 /** Bloco dos 5 objetivos do link (4 presets + Outro) — Inteligência de Convicção. */
 export function proLideresNoelLinkObjetivosBlock(): string {
+  const bulletFallback = formatLinkObjetivosBulletFallback()
   return `OBJETIVOS DO LINK — INTELIGÊNCIA DE CONVICÇÃO (servir antes de vender)
 - Público fixo: **leads do liderado** (Board) — **não** pergunte público, persona, canal nem tema.
 - Se faltar intenção, pergunte em linguagem **popular**: **"O que você quer que esse link faça?"** — **proibido** oferecer só "qualificar / educar / engajar".
-- Mesmo padrão do **onboarding** («Maior desafio»): **opções + campo livre** — apresente as **5** abaixo (**cada preset com exemplo**); se o líder já escolheu ou descreveu, **conduza** sem repetir o menu inteiro.
+- **UI do chat:** o painel mostra **botões tocáveis** com as 5 opções (mesmo padrão do onboarding). Faça **só** a pergunta (1–2 frases) — **proibido** colar a lista inteira das 5 opções no texto; o líder **clica** no botão. Pode acrescentar: "Toque na opção abaixo."
+- **Fallback** (sem botões): cada opção em linha com **•** e **nome em negrito** + explicação curta:
+${bulletFallback}
+- Se o líder já escolheu ou descreveu, **conduza** sem repetir o menu.
 - **Por trás** (raciocínio interno — **não** exponha jargão): mapeie para o funil YLADA — **captar** / **educar-reter** / **reativar** / **indicar**.
 
-**1) Trazer gente nova (gerar contatos)** — atrair quem ainda não conhece.
-Ex.: um quiz que revela um problema que a pessoa nem tinha percebido, e ela te chama.
-
-**2) Cuidar de quem já é cliente (acompanhar / educar / melhorar o serviço)** — ajudar quem já usa a aproveitar melhor.
-Ex.: uma calculadora ou conteúdo que mostra como usar no dia a dia o que já tem.
-
-**3) Reativar quem parou ou esfriou** — reabrir conversa com quem sumiu.
-Ex.: um link com uma novidade ou dica que dá um motivo de voltar a falar.
-
-**4) Colher indicações (multiplicar)** — conteúdo que a pessoa **quer** passar pra quem ama.
-Ex.: algo que ela compartilha com a família ou amigos e traz gente nova pela indicação.
-
-**5) ${PRO_LIDERES_LINK_OBJETIVO_OUTRO_LABEL}** — campo livre (como **Outro** no desafio do onboarding).
-Ex.: o líder escreve "quero algo pra quem já comprou mas não usa direito" — você entende, mapeia e monta o fluxo.
+**Presets (referência interna — exemplos ao conduzir, não colar no chat):**
+1) Trazer gente nova — quiz que revela um problema e a pessoa te chama.
+2) Cuidar de quem já é cliente — calculadora ou conteúdo do dia a dia.
+3) Reativar quem parou — novidade ou dica que traz de volta.
+4) Colher indicações — conteúdo que a pessoa quer passar pra quem ama.
+5) ${PRO_LIDERES_LINK_OBJETIVO_OUTRO_LABEL} — **campo livre** (como **Outro** no onboarding); líder descreve, você mapeia e monta o fluxo.
 
 **Quando for Outro ou objetivo escrito pelo líder:**
 - **Leia** a intenção; **mapeie** para o estágio/funil mais próximo e **conduza** a partir daí (servir antes de vender).
