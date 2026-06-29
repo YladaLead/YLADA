@@ -7,9 +7,10 @@ import remarkGfm from 'remark-gfm'
 import { copyTextToClipboard } from '@/lib/clipboard'
 import {
   extractProLideresMemberNoelMensagemPronta,
+  extractLinkSectionReason,
   formatLinkParaEnviarBody,
   getProLideresMemberNoelMessageSections,
-  parseLinkParaEnviarSection,
+  parseAllLinksParaEnviarSection,
 } from '@/lib/pro-lideres-member-noel-response'
 
 function sectionMarkdown(label: string, body: string): string {
@@ -81,14 +82,10 @@ function ProLideresMemberNoelCopyUrlButton({ url }: { url: string }) {
 
 function ProLideresMemberNoelLinkBlock({ body }: { body: string }) {
   const formatted = formatLinkParaEnviarBody(body)
-  const parsed = parseLinkParaEnviarSection(formatted)
-  const urlMatch = formatted.match(/https?:\/\/[^\s)\]>]+/i)
-  const url = parsed?.url ?? urlMatch?.[0]?.replace(/[.,;]+$/, '') ?? null
-  const label = parsed?.label ?? 'Link'
-  const reasonStart = url ? formatted.indexOf(url) + url.length : -1
-  const reason = reasonStart >= 0 ? formatted.slice(reasonStart).trim().replace(/^[\s,—–-]+/, '') : ''
+  const links = parseAllLinksParaEnviarSection(formatted.length ? formatted : body)
+  const reason = extractLinkSectionReason(body, links)
 
-  if (!url) {
+  if (links.length === 0) {
     return (
       <div className={memberProseClass}>
         <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{formatted}</ReactMarkdown>
@@ -98,16 +95,23 @@ function ProLideresMemberNoelLinkBlock({ body }: { body: string }) {
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-semibold text-sky-900">Link para enviar</p>
-      <div className="flex flex-col gap-2 rounded-lg border border-sky-100 bg-sky-50/60 p-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="min-w-0 text-sm leading-relaxed text-gray-900">
-          <span className="font-medium">{label}:</span>{' '}
-          <a href={url} target="_blank" rel="noopener noreferrer" className="break-all text-sky-700 underline">
-            {url}
-          </a>
-        </p>
-        <ProLideresMemberNoelCopyUrlButton url={url} />
-      </div>
+      <p className="text-sm font-semibold text-sky-900">
+        {links.length > 1 ? 'Links para enviar' : 'Link para enviar'}
+      </p>
+      {links.map((link) => (
+        <div
+          key={link.url}
+          className="flex flex-col gap-2 rounded-lg border border-sky-100 bg-sky-50/60 p-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p className="min-w-0 text-sm leading-relaxed text-gray-900">
+            <span className="font-medium">{link.label}:</span>{' '}
+            <a href={link.url} target="_blank" rel="noopener noreferrer" className="break-all text-sky-700 underline">
+              {link.url}
+            </a>
+          </p>
+          <ProLideresMemberNoelCopyUrlButton url={link.url} />
+        </div>
+      ))}
       {reason ? (
         <div className={memberProseClass}>
           <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{reason}</ReactMarkdown>

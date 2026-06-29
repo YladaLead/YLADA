@@ -11,6 +11,7 @@ import {
   isGenericReadyMessage,
   normalizeProLideresMemberNoelResponse,
   extractProLideresMemberNoelMensagemPronta,
+  parseAllLinksParaEnviarSection,
   parseLinkParaEnviarSection,
   polishProLideresMemberNoelForDisplay,
   userExplicitlyWantsReadyMessage,
@@ -210,6 +211,16 @@ const linkParsed = parseLinkParaEnviarSection(linkBody)
 assert('link parse: url', linkParsed?.url === 'https://ylada.com/l/demo')
 assert('link format: sem travessão', !/[—–]/.test(formatLinkParaEnviarBody(linkBody)))
 assert('link format: nome:url', formatLinkParaEnviarBody(linkBody).startsWith('Calculadora de água: https://'))
+
+const multiLinkBody = `Água: https://ylada.com/l/agua
+Oportunidade: https://ylada.com/l/opp
+
+Use conforme o perfil.`
+const multiLinks = parseAllLinksParaEnviarSection(multiLinkBody)
+assert('multi link: dois URLs', multiLinks.length === 2)
+assert('multi link: primeiro', multiLinks[0]?.url === 'https://ylada.com/l/agua')
+assert('multi link: segundo', multiLinks[1]?.url === 'https://ylada.com/l/opp')
+assert('multi link: labels', multiLinks[0]?.label === 'Água' && multiLinks[1]?.label === 'Oportunidade')
 
 console.log(`\n=== ${ok} ok, ${fail} falhas ===`)
 process.exit(fail > 0 ? 1 : 0)

@@ -127,30 +127,61 @@ function shouldHaveNaPratica(route: ProLideresMemberNoelRoute, userMessage: stri
   return true
 }
 
-/** Extrai nome + URL do bloco Link para enviar (formato UI). */
+/** Extrai todos os pares nome + URL do bloco Link para enviar. */
+export function parseAllLinksParaEnviarSection(body: string): { label: string; url: string }[] {
+  const urlRe = /https?:\/\/[^\s)\]>]+/gi
+  const matches = [...body.matchAll(urlRe)]
+  if (matches.length === 0) return []
+
+  return matches.map((match, i) => {
+    const url = match[0].replace(/[.,;]+$/, '')
+    const idx = match.index ?? 0
+    const lineStart = body.lastIndexOf('\n', idx) + 1
+    const chunk = body.slice(lineStart, idx).trim()
+    let label = chunk
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/^[-*•]\s+/, '')
+      .replace(/[\[—–,\]]+/g, ' ')
+      .replace(/\s*:\s*$/, '')
+      .trim()
+    if (!label || /^link$/i.test(label)) {
+      const parts = chunk.split(/\s*[—–,-]\s*/).map((p) => p.trim()).filter(Boolean)
+      const namePart = parts.find((p) => !/^https?:\/\//i.test(p))
+      label = namePart?.replace(/\*\*/g, '').trim() || `Link ${i + 1}`
+    }
+    return { label, url }
+  })
+}
+
+/** Extrai o primeiro par nome + URL (compat). */
 export function parseLinkParaEnviarSection(body: string): { label: string; url: string } | null {
-  const urlMatch = body.match(/https?:\/\/[^\s)\]>]+/i)
-  if (!urlMatch?.[0]) return null
-  const url = urlMatch[0].replace(/[.,;]+$/, '')
-  let label = body.slice(0, urlMatch.index ?? 0).trim()
-  label = label.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/[\[—–,\]]+/g, ' ').trim()
-  label = label.replace(/\s*:\s*$/, '').trim()
-  if (!label || /^link$/i.test(label)) {
-    const parts = body.split(/\s*[—–,-]\s*/).map((p) => p.trim()).filter(Boolean)
-    const namePart = parts.find((p) => !/^https?:\/\//i.test(p))
-    label = namePart?.replace(/\*\*/g, '').trim() || 'Link'
+  const all = parseAllLinksParaEnviarSection(body)
+  return all[0] ?? null
+}
+
+/** Texto explicativo após os links (sem repetir nome/URL). */
+export function extractLinkSectionReason(body: string, links: { label: string; url: string }[]): string {
+  let t = body
+  for (const link of links) {
+    t = t.replace(link.url, '')
   }
-  return { label, url }
+  return t
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !/^https?:\/\//i.test(line) && !/^link\s*\d*$/i.test(line))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
 }
 
 /** Formata bloco Link para enviar sem travessão entre nome e URL. */
 export function formatLinkParaEnviarBody(body: string): string {
-  const parsed = parseLinkParaEnviarSection(body)
-  if (!parsed) return body
-  const suffix = body.slice(body.indexOf(parsed.url) + parsed.url.length).trim()
-  const reason = suffix.replace(/^[\s,—–-]+/, '').trim()
-  const base = `${parsed.label}: ${parsed.url}`
-  return reason ? `${base}\n\n${reason}` : base
+  const links = parseAllLinksParaEnviarSection(body)
+  if (links.length === 0) return body
+  const formatted = links.map((l) => `${l.label}: ${l.url}`).join('\n\n')
+  const reason = extractLinkSectionReason(body, links)
+  const out = reason ? `${formatted}\n\n${reason}` : formatted
+  return sanitizeNoelAssistantOutput(out)
 }
 
 function normMsg(s: string): string {
