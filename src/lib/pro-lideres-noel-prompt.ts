@@ -3,6 +3,7 @@ import {
   isNoelProLideresLeaderConducaoEnabled,
   proLideresNoelCondutorCampoV2,
   proLideresNoelEntregaConducaoV2Note,
+  proLideresNoelFluxoPreviewBlock,
   proLideresNoelLeaderConducaoBlock,
   proLideresNoelOrientacaoLiderLadaV2,
 } from '@/lib/pro-lideres-noel-leader-conducao'
@@ -204,6 +205,20 @@ Use sempre **data, dia da semana ou janela clara** — **proibido** no texto da 
 - **Prioridade:** resposta total **enxuta**; o bloco **"Como conduzir / falar"** fica na faixa **~85–140 palavras** (máx. ~155) — os demais blocos **bem curtos**.
 - **Script longo para WhatsApp:** só com bloco \`\`\` ou **Script:** quando for pedido explícito ou exemplo único curto; caso contrário oriente **Painel → Scripts** e mantenha o Noel em **conduta de líder**.`
 
+  const modeloVisualFluxoLegado = `- **MODELO VISUAL DE FLUXO (OBRIGATÓRIO — RASCUNHO PARA O LÍDER):** Use **exatamente** esta estrutura em markdown (facilita ler no chat e bater com o que o contato vê no link depois):
+  - **### Título do fluxo** — uma linha com o nome curto sugerido.
+  - **### Texto na primeira tela (gancho)** — 1–3 linhas (subtítulo / copy que aparece **antes** da 1ª pergunta; desperta o clique).
+  - Linha **\`---\`** (separador).
+  - **### Pergunta 1** — só o enunciado (uma ou duas linhas). **Linha em branco.** Depois **cada** opção **A)**, **B)**, **C)** (e **D)** se precisar) **cada uma na sua própria linha**. **Proibido** colocar **"Respostas:"** na **mesma linha** do enunciado nem colar **(A)(B)(C)** tudo seguido na mesma frase.
+  - Linha **\`---\`**.
+  - **### Pergunta 2** … (mesmo padrão: enunciado → linha em branco → opções em linhas separadas).
+  - Repetir até **Pergunta 4** no **mínimo**; **Pergunta 5** quando couber **percepção + intenção** antes do CTA.
+  - Linha **\`---\`**.
+  - **### CTA WhatsApp** — texto pronto entre aspas ou parágrafo curto.
+  - **Proibido** após o CTA acrescentar bloco **### Decisão rápida** com opções A–D — o painel do chat já oferece **aprovação** (**gostei**, **gera o link**) e, depois do link, os **botões** (copiar, testar, catálogo, equipe). Não duplique esse passo no texto.`
+
+  const modeloVisualFluxoBlock = useConducaoV2 ? proLideresNoelFluxoPreviewBlock() : modeloVisualFluxoLegado
+
   return `${baseNoel}
 
 ${ptBrBlock}
@@ -234,17 +249,7 @@ ${excecaoSoMensagem}
 
 ENTREGA — ALINHADA À MATRIZ YLADA (LINKS, FLUXOS, ASSUNTOS)
 - **REGRA CRÍTICA — ENTREGA PRIMEIRO (OBRIGATÓRIA):** Quando o líder pedir **criar**, **montar**, **gerar** ou **fazer** **quiz**, **fluxo**, **diagnóstico**, **link** ou **perguntas** de forma **explícita**, a **primeira** resposta deve ser **executável** e seguir o **MODELO VISUAL DE FLUXO** abaixo (é a mesma **ordem lógica** do editor na matriz YLADA: título → texto da primeira tela → perguntas em sequência → CTA). **Volume:** em **diagnóstico / qualificação**, use **no mínimo 4** e **idealmente 5** perguntas (fluxo curto demais **não** gera sinal para conversa nem espelha a profundidade habitual dos diagnósticos na matriz). **Proibido** abrir **só** com **### Perguntas para fechar o brief** em modo formulário RH quando o pedido **já** traz tema. **Segmentação:** se o líder falar **"para quem usa"** um fármaco/tema **ou** o público puder ser **misto**, a **primeira pergunta do fluxo** deve separar **já uso** / **estou pensando em usar** / **ainda não uso** (ou **duas** ramificações claras) — **não** assumir que **todo mundo** já está em tratamento. **Ajuste fino** depois — **no máximo 1–2** perguntas ao líder no fim, ou **nenhuma**.
-- **MODELO VISUAL DE FLUXO (OBRIGATÓRIO — RASCUNHO PARA O LÍDER):** Use **exatamente** esta estrutura em markdown (facilita ler no chat e bater com o que o contato vê no link depois):
-  - **### Título do fluxo** — uma linha com o nome curto sugerido.
-  - **### Texto na primeira tela (gancho)** — 1–3 linhas (subtítulo / copy que aparece **antes** da 1ª pergunta; desperta o clique).
-  - Linha **\`---\`** (separador).
-  - **### Pergunta 1** — só o enunciado (uma ou duas linhas). **Linha em branco.** Depois **cada** opção **A)**, **B)**, **C)** (e **D)** se precisar) **cada uma na sua própria linha**. **Proibido** colocar **"Respostas:"** na **mesma linha** do enunciado nem colar **(A)(B)(C)** tudo seguido na mesma frase.
-  - Linha **\`---\`**.
-  - **### Pergunta 2** … (mesmo padrão: enunciado → linha em branco → opções em linhas separadas).
-  - Repetir até **Pergunta 4** no **mínimo**; **Pergunta 5** quando couber **percepção + intenção** antes do CTA.
-  - Linha **\`---\`**.
-  - **### CTA WhatsApp** — texto pronto entre aspas ou parágrafo curto.
-  - **Proibido** após o CTA acrescentar bloco **### Decisão rápida** com opções A–D — o painel do chat já oferece **aprovação** (**gostei**, **gera o link**) e, depois do link, os **botões** (copiar, testar, catálogo, equipe). Não duplique esse passo no texto.
+${modeloVisualFluxoBlock}
 - **Quando o sistema anexar \`### Quiz e link (oficial)\`** no **mesmo** turno (link já gerado): respeite o **bloco interno** que você receber — em geral **não** repita a lista de perguntas no texto (evita divergência com o link); use **introdução curta** + remessa ao bloco oficial. **Sem** URL oficial ainda, use **sempre** o **MODELO VISUAL** completo com **4–5** perguntas.
 - **CRÍTICO — URL público \`/l/…\`:** quando o backend **já** gerou o link neste turno, **proibido** escrever no corpo **qualquer** outro URL com **\`/l/\`** (incluindo slugs **pl-…-r-…** ou **pl-…-v-…** que imitam presets da biblioteca). O **único** URL válido é o **dentro** do bloco oficial que o sistema fornecer — **não** repita o link em parágrafo solto, **não** invente domínio nem slug.
 - **REGRA DE INTENÇÃO FINAL — CTA (OBRIGATÓRIA EM TODA PROPOSTA DE QUIZ/DIAGNÓSTICO):** Mesmo que o líder **não** diga “WhatsApp” ou “consultor”, assuma o funil **qualificar → gerar percepção (momento/dificuldade) → conversa no WhatsApp → orientação com quem atende na operação**. Inclua **sempre** um **CTA** em texto **pronto** (1–3 frases, tom consultivo, **pedido de permissão**) convidando a pessoa a **chamar no WhatsApp** ou **conversar** com o consultor — **sem** prometer resultado, **sem** pressão de fechamento duro. **Não** termine o fluxo só em “revise na call” ou “defina você as perguntas”.

@@ -240,7 +240,7 @@ export default function NoelOnboardingCompleto({
             <div className="space-y-6">
               {isSinglePage && (
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm font-semibold text-gray-900">Seção 1 — Base do seu perfil</p>
+                  <p className="text-sm font-semibold text-gray-900">Seção 1: Base do seu perfil</p>
                   <p className="text-xs text-gray-600 mt-1">Responda as perguntas essenciais (1–4).</p>
                 </div>
               )}
@@ -429,7 +429,7 @@ export default function NoelOnboardingCompleto({
             <div className="space-y-6">
               {isSinglePage && (
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm font-semibold text-gray-900">Seção 2 — Tempo, metas e carteira</p>
+                  <p className="text-sm font-semibold text-gray-900">Seção 2: Tempo, metas e carteira</p>
                   <p className="text-xs text-gray-600 mt-1">Obrigatórias: 5–7. Opcionais: 8–11 (carteira, contatos, equipe, bloqueio).</p>
                 </div>
               )}
@@ -646,7 +646,7 @@ export default function NoelOnboardingCompleto({
             <div className="space-y-6">
               {isSinglePage && (
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm font-semibold text-gray-900">Seção 3 — Metas temporais e observações</p>
+                  <p className="text-sm font-semibold text-gray-900">Seção 3: Metas temporais e observações</p>
                   <p className="text-xs text-gray-600 mt-1">Opcional, mas recomendado.</p>
                 </div>
               )}

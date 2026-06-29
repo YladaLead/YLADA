@@ -8,6 +8,8 @@ import {
   isProLideresLeaderConversationalQuery,
   leaderConducaoPromptRequiresDosagem,
   leaderConducaoPromptRequiresLinkObjective,
+  leaderConducaoPromptRequiresLinkObjetivoOutro,
+  leaderConducaoPromptRequiresFluxoPreview,
   leaderConducaoPromptRequiresConcreteExample,
   leaderTechniqueResponseHasConcreteExample,
 } from '@/lib/pro-lideres-noel-leader-conducao'
@@ -60,6 +62,7 @@ withEnv('false', () => {
   assert('legado: MODELO DE SAÍDA ORDEM FIXA', /MODELO DE SAÍDA \(ORDEM FIXA/.test(prompt))
   assert('legado: cinco blocos Diagnóstico', /### Diagnóstico/.test(prompt))
   assert('legado: sem MISSÃO FAZER AGIR V2', !/MISSÃO PRO LÍDERES — FAZER AGIR/.test(prompt))
+  assert('legado: sem preview fluxo', !leaderConducaoPromptRequiresFluxoPreview(prompt))
 })
 
 withEnv('true', () => {
@@ -72,7 +75,10 @@ withEnv('true', () => {
   assert('V2: dosagem ~3 pontos', leaderConducaoPromptRequiresDosagem(prompt))
   assert('V2: mentor de liderança', /mentor de liderança/i.test(prompt))
   assert('V2: sem mentor de campo na identidade V2', !/condutor de líder de campo/.test(prompt.split('MISSÃO PRO LÍDERES')[0] ?? ''))
-  assert('V2: link objetivo Board', leaderConducaoPromptRequiresLinkObjective(prompt))
+  assert('V2: link 4 objetivos convicção', leaderConducaoPromptRequiresLinkObjective(prompt))
+  assert('V2: link Outro campo livre', leaderConducaoPromptRequiresLinkObjetivoOutro(prompt))
+  assert('V2: fluxo preview lead', leaderConducaoPromptRequiresFluxoPreview(prompt))
+  assert('V2: proíbe menu qualificar/educar/engajar', /proibido.*qualificar.*educar.*engajar/i.test(prompt))
   assert('V2: formato conversacional', /Condução V2/.test(prompt))
 })
 

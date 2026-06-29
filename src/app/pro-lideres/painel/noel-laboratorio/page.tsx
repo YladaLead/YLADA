@@ -293,7 +293,7 @@ export default function ProLideresNoelLaboratorioPage() {
   const runAgentThenNoel = useCallback(async () => {
     if (batteryId) {
       setError(
-        'Com perguntas pré-definidas selecionadas, use o cartão laranja («Próxima pergunta» ou «Rodar todas»). Para o agente IA, escolha «Livre — agente IA».'
+        'Com perguntas pré-definidas selecionadas, use o cartão laranja («Próxima pergunta» ou «Rodar todas»). Para o agente IA, escolha «Livre, agente IA».'
       )
       return
     }
@@ -401,11 +401,11 @@ export default function ProLideresNoelLaboratorioPage() {
         <p className="text-sm font-medium text-violet-600">Laboratório · Ambiente do líder</p>
         <h1 className="text-2xl font-bold text-gray-900">Testes ao Noel</h1>
         <p className="mt-2 text-sm text-gray-600">
-          <strong>Chat manual:</strong> escreva na caixa abaixo da transcrição — conversa contínua com o Noel no mesmo
+          <strong>Chat manual:</strong> escreva na caixa abaixo da transcrição. Conversa contínua com o Noel no mesmo
           histórico (responde à pergunta dele, aprofunda, testa outro ângulo).{' '}
           <strong>Modo livre:</strong> o agente de IA simula um presidente.{' '}
           <strong>Perguntas pré-definidas:</strong> escolha <strong>«Sequência completa»</strong> (só mentoria de
-          campo) ou um tema — depois é só ir clicando em <strong>«Próxima pergunta + Noel»</strong>. A{' '}
+          campo) ou um tema. Depois é só ir clicando em <strong>«Próxima pergunta + Noel»</strong>. A{' '}
           <strong>criação de quiz/link na Ylada</strong> tem bateria própria e atalho abaixo, para não misturar com
           dezenas de testes de liderança.
           O <strong>Noel real</strong> usa as mesmas regras do painel. Nada disto grava no Noel de produção fora desta
@@ -417,7 +417,7 @@ export default function ProLideresNoelLaboratorioPage() {
             <p className="mt-0.5 text-xs text-violet-900/90">
               Um clique: limpa a sessão, ativa a sequência completa de <strong>mentoria</strong> e dispara as{' '}
               <strong>{NOEL_LAB_FULL_SEQUENCE_TOTAL}</strong> perguntas (sem a bateria de quiz/link) com pausa curta
-              entre chamadas — igual a escolher «Sequência completa» no menu e «Rodar todas».
+              entre chamadas, igual a escolher «Sequência completa» no menu e «Rodar todas».
             </p>
           </div>
           <button
@@ -478,9 +478,9 @@ export default function ProLideresNoelLaboratorioPage() {
             onChange={(e) => setBatteryId(e.target.value)}
             className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-100"
           >
-            <option value="">Livre — agente IA gera a pergunta (cenário abaixo)</option>
+            <option value="">Livre: agente IA gera a pergunta (cenário abaixo)</option>
             <option value={NOEL_LAB_FULL_SEQUENCE_ID}>
-              Sequência completa — mentoria de campo ({NOEL_LAB_FULL_SEQUENCE_TOTAL})
+              Sequência completa: mentoria de campo ({NOEL_LAB_FULL_SEQUENCE_TOTAL})
             </option>
             {PRO_LIDERES_NOEL_LAB_BATTERIES.map((b) => (
               <option key={b.id} value={b.id}>
@@ -504,7 +504,7 @@ export default function ProLideresNoelLaboratorioPage() {
             </p>
           ) : activeBattery ? (
             <p className="text-xs text-gray-600">
-              <span className="font-medium text-gray-700">Observar:</span> {activeBattery.checklistHint} — pergunta{' '}
+              <span className="font-medium text-gray-700">Observar:</span> {activeBattery.checklistHint}. Pergunta{' '}
               <strong>{Math.min(batteryStep + 1, activeBattery.questions.length)}</strong> de{' '}
               <strong>{activeBattery.questions.length}</strong>
               {presetAtEnd ? <span className="ml-1 font-medium text-amber-800"> (tema concluído)</span> : null}
@@ -548,7 +548,7 @@ export default function ProLideresNoelLaboratorioPage() {
 
       {presetActive ? (
         <div className="rounded-xl border-2 border-amber-400 bg-gradient-to-b from-amber-50 to-white p-4 shadow-sm">
-          <p className="text-center text-sm font-semibold text-amber-950">Teste rápido — mesma ação, várias vezes</p>
+          <p className="text-center text-sm font-semibold text-amber-950">Teste rápido: mesma ação, várias vezes</p>
           <p className="mt-1 text-center text-xs text-amber-900/90">
             <strong>Um clique:</strong> próxima pergunta. <strong>Rodar todas:</strong> dispara o resto da sequência do
             início (com pausa curta entre chamadas). Depois analise a transcrição.
@@ -602,7 +602,7 @@ export default function ProLideresNoelLaboratorioPage() {
               disabled={!!loading || autoRunning}
               onClick={() => setBatteryStep(0)}
               className="mt-4 w-full rounded-xl border-2 border-amber-500 bg-amber-100 px-4 py-3 text-sm font-bold text-amber-950 hover:bg-amber-200 disabled:opacity-50"
-              title="Volta à primeira pergunta deste modo. A transcrição mantém-se — use Limpar sessão para teste sem histórico."
+              title="Volta à primeira pergunta deste modo. A transcrição mantém-se; use Limpar sessão para teste sem histórico."
             >
               Repetir do início (mesma sequência)
             </button>
@@ -685,7 +685,7 @@ export default function ProLideresNoelLaboratorioPage() {
                   {t.from === 'president'
                     ? 'Presidente (simulado)'
                     : t.from === 'leader'
-                      ? 'Você (líder — teste)'
+                      ? 'Você (líder, teste)'
                       : 'Noel'}
                 </p>
                 <div className="prose prose-sm mt-1 max-w-none text-gray-900 prose-p:my-1">

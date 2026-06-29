@@ -64,12 +64,97 @@ export function leaderConducaoPromptRequiresDosagem(prompt: string): boolean {
   return /máximo\s*~?3\s*pontos/i.test(prompt) && /uma\s+ação concreta/i.test(prompt)
 }
 
+export const PRO_LIDERES_LINK_OBJETIVO_OUTRO_LABEL = 'Outro — me conta o que você quer'
+
 export function leaderConducaoPromptRequiresLinkObjective(prompt: string): boolean {
   return (
-    /leads do liderado/i.test(prompt) &&
-    /qualificar/i.test(prompt) &&
-    /educar/i.test(prompt) &&
-    /engajar/i.test(prompt)
+    /o que você quer que esse link faça/i.test(prompt) &&
+    /trazer gente nova/i.test(prompt) &&
+    /cuidar de quem já é cliente/i.test(prompt) &&
+    /reativar quem parou/i.test(prompt) &&
+    /colher indicações/i.test(prompt) &&
+    /outro.*me conta o que você quer/i.test(prompt) &&
+    /inteligência de convicção/i.test(prompt)
+  )
+}
+
+export function leaderConducaoPromptRequiresLinkObjetivoOutro(prompt: string): boolean {
+  return (
+    /campo livre/i.test(prompt) &&
+    /não aceitar cego|proibido.*aceitar cego/i.test(prompt) &&
+    /mapeie.*funil|mapear.*funil/i.test(prompt)
+  )
+}
+
+/** Bloco dos 5 objetivos do link (4 presets + Outro) — Inteligência de Convicção. */
+export function proLideresNoelLinkObjetivosBlock(): string {
+  return `OBJETIVOS DO LINK — INTELIGÊNCIA DE CONVICÇÃO (servir antes de vender)
+- Público fixo: **leads do liderado** (Board) — **não** pergunte público, persona, canal nem tema.
+- Se faltar intenção, pergunte em linguagem **popular**: **"O que você quer que esse link faça?"** — **proibido** oferecer só "qualificar / educar / engajar".
+- Mesmo padrão do **onboarding** («Maior desafio»): **opções + campo livre** — apresente as **5** abaixo (**cada preset com exemplo**); se o líder já escolheu ou descreveu, **conduza** sem repetir o menu inteiro.
+- **Por trás** (raciocínio interno — **não** exponha jargão): mapeie para o funil YLADA — **captar** / **educar-reter** / **reativar** / **indicar**.
+
+**1) Trazer gente nova (gerar contatos)** — atrair quem ainda não conhece.
+Ex.: um quiz que revela um problema que a pessoa nem tinha percebido, e ela te chama.
+
+**2) Cuidar de quem já é cliente (acompanhar / educar / melhorar o serviço)** — ajudar quem já usa a aproveitar melhor.
+Ex.: uma calculadora ou conteúdo que mostra como usar no dia a dia o que já tem.
+
+**3) Reativar quem parou ou esfriou** — reabrir conversa com quem sumiu.
+Ex.: um link com uma novidade ou dica que dá um motivo de voltar a falar.
+
+**4) Colher indicações (multiplicar)** — conteúdo que a pessoa **quer** passar pra quem ama.
+Ex.: algo que ela compartilha com a família ou amigos e traz gente nova pela indicação.
+
+**5) ${PRO_LIDERES_LINK_OBJETIVO_OUTRO_LABEL}** — campo livre (como **Outro** no desafio do onboarding).
+Ex.: o líder escreve "quero algo pra quem já comprou mas não usa direito" — você entende, mapeia e monta o fluxo.
+
+**Quando for Outro ou objetivo escrito pelo líder:**
+- **Leia** a intenção; **mapeie** para o estágio/funil mais próximo e **conduza** a partir daí (servir antes de vender).
+- Se estiver **vago** ("um link legal", "algo pro time"): **uma** pergunta curta para entender — **proibido** aceitar cego nem entregar quiz genérico.
+- Quando estiver claro: **confirme em uma linha** o que entendeu e **entregue** o **preview do fluxo** (abaixo).
+
+- **Regra geral:** toda orientação sobre objetivo vem com **exemplo**; linguagem **popular**.`
+}
+
+/** Preview do rascunho de fluxo (V2) — sem rótulos técnicos; copy pro lead. */
+export function proLideresNoelFluxoPreviewBlock(): string {
+  return `- **RASCUNHO = PREVIEW (V2 — PREVALECE SOBRE «MODELO VISUAL» COM \`###\` TÉCNICOS):**
+- **Proibido** na mensagem ao líder: cabeçalhos **### Título do fluxo**, **### Texto na primeira tela (gancho)**, **### Pergunta 1**, **### CTA WhatsApp** — são rótulos de editor, não preview.
+- Apresente assim (copy **real** que o lead lê; rótulos simples ou **sem** rótulo):
+
+**É assim que vai aparecer pra quem receber:**
+
+**[Título]** — uma linha (nome curto **pro lead**)
+
+**[Abertura]** — 1–3 linhas (texto da primeira tela)
+
+\`---\`
+
+**[Pergunta]** — enunciado na voz do lead. Linha em branco. Opções **A)**, **B)**, **C)** cada uma na sua linha.
+
+\`---\`
+
+(repetir até **4–5** perguntas no mínimo, mesmo padrão)
+
+\`---\`
+
+**[Convite no WhatsApp]** — 1–3 frases consultivas, pedido de permissão.
+
+**OBJETIVO INTERNO ≠ COPY DO LEAD (CRÍTICO)**
+- O **objetivo** do link (trazer gente nova, indicações, reativar, cuidar do cliente) guia **só você** — **nunca** no título, abertura ou perguntas.
+- **Proibido** títulos que **exponham** o objetivo interno: **"Colhendo Indicações"**, **"Qualificando Leads"**, **"Reativando Clientes"**, **"Gerando Contatos"**.
+- Escreva **para quem clica**: dor, curiosidade, benefício **dela**. Ex.: fluxo de **indicações** → título sobre **ajudar alguém que ela ama**, não "colher indicações".
+- Ordem interna = editor YLADA (título → abertura → perguntas → convite); só muda **como mostra** pro líder.
+- **Proibido** após o convite: bloco **Decisão rápida** A–D.`
+}
+
+export function leaderConducaoPromptRequiresFluxoPreview(prompt: string): boolean {
+  return (
+    /é assim que vai aparecer/i.test(prompt) &&
+    /objetivo interno/i.test(prompt) &&
+    /proibido.*título do fluxo|proibido.*rótulos técnicos|proibido.*na mensagem ao líder/i.test(prompt) &&
+    /colhendo indicações/i.test(prompt)
   )
 }
 
@@ -99,7 +184,7 @@ export function proLideresNoelLeaderConducaoBlock(): string {
 RITMO E DOSAGEM (OBRIGATÓRIO)
 - **Dosar, não listar tudo:** no máximo **~3 pontos** por resposta — só os que **mais** levam o liderado a **agir**.
 - Entre **cada** ponto (bullet ou frase curta): **linha em branco** — respiro visual; **proibido** amontoar 6–7 itens seguidos.
-- **Proibido** listas com **4+** itens na orientação de liderança (salvo **perguntas** do MODELO VISUAL de quiz).
+- **Proibido** listas com **4+** itens na orientação de liderança (salvo **perguntas** no **preview do fluxo**).
 - Feche com **UMA ação concreta** (uma frase, um número, um prazo) — **não** despejar manual nem três "próximos passos".
 
 LAYOUT (CONDICIONAL — COMO O MEMBRO)
@@ -111,9 +196,8 @@ EXEMPLO OBRIGATÓRIO EM TÉCNICA
 - **Toda** técnica inclui **um exemplo concreto**: **"Na prática:"** + ação específica.
 - Ex.: cadência medível → **Na prática:** peça 3 nomes até sexta; na call cada um diz quantos fez.
 
-CRIAR LINK / QUIZ (PRO LÍDERES — PÚBLICO FIXO)
-- O público é **sempre** os **leads do liderado** (já no **Board**) — **não** pergunte **público**, **persona**, **idade**, **canal de tráfego**, **Instagram**, **"pra quem é"** nem **tema** genérico.
-- Conduza pelo **OBJETIVO** do link: **qualificar** lead / **educar** / **engajar** — se faltar, **uma** pergunta fechada (A/B/C ou "qualificar, educar ou engajar?"); se o líder já disse, **entregue** o rascunho direto.
+CRIAR LINK / QUIZ (PRO LÍDERES)
+${proLideresNoelLinkObjetivosBlock()}
 - **Proibido** abrir com **### Perguntas para fechar o brief** sobre público/tema/canal.
 
 TAREFAS, SCRIPTS E FERRAMENTAS
@@ -124,5 +208,5 @@ TAREFAS, SCRIPTS E FERRAMENTAS
 
 /** Nota na seção ENTREGA quando V2 está ligada — prevalece sobre brief genérico. */
 export function proLideresNoelEntregaConducaoV2Note(): string {
-  return `- **Condução V2 — criação de link (PREVALECE sobre brief de público/tema abaixo):** público = **leads do liderado (Board)** — **proibido** reperguntar público, tema, tráfego ou persona. Só clarifique **objetivo** se vago: **qualificar** / **educar** / **engajar**; depois **MODELO VISUAL** direto. Após o rascunho: **no máximo** 2 frases + **Na prática:** um convite — **sem** empilhar os cinco ### de campo nem lista longa de próximos passos.`
+  return `- **Condução V2 — criação de link (PREVALECE):** não repergunte público/tema/canal. Objetivo vago → menu de **5 opções** + **Outro**; depois **PREVIEW** ("É assim que vai aparecer…"), **não** \`### Título do fluxo\`. Objetivo interno **≠** copy do lead. Após rascunho: **no máximo** 2 frases + **Na prática:** um convite.`
 }

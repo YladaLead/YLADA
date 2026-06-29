@@ -231,7 +231,7 @@ export default function YladaActivationJourneyCard({ areaCodigo }: YladaActivati
         </Link>
       </div>
       <p className="mt-3 text-xs text-gray-500 leading-relaxed">
-        Na página de links você copia o endereço e manda onde quiser. Se travar, chame o Noel — peça um texto curto para enviar com o link ou para responder no WhatsApp.
+        Na página de links você copia o endereço e manda onde quiser. Se travar, chame o Noel: peça um texto curto para enviar com o link ou para responder no WhatsApp.
       </p>
     </section>
   )

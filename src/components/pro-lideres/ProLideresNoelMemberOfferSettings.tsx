@@ -123,7 +123,7 @@ export default function ProLideresNoelMemberOfferSettings() {
           <strong>Salvo.</strong>{' '}
           {enabled
             ? 'O item Noel (campo) aparece no menu lateral. Cada membro elegível ainda precisa aderir ao add-on na própria conta (pagamento à YLADA).'
-            : 'A oferta foi desligada — a equipe deixa de ver a opção no menu.'}
+            : 'A oferta foi desligada. A equipe deixa de ver a opção no menu.'}
         </p>
       ) : null}
 

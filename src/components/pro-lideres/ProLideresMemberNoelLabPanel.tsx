@@ -135,7 +135,7 @@ export default function ProLideresMemberNoelLabPanel({
     <div className="space-y-4">
       <p className="text-sm text-gray-600">
         Mesma API do chat (
-        <code className="rounded bg-gray-100 px-1 text-xs">/api/pro-lideres/membro/noel</code>) — envia as{' '}
+        <code className="rounded bg-gray-100 px-1 text-xs">/api/pro-lideres/membro/noel</code>) envia as{' '}
         {PRO_LIDERES_MEMBER_NOEL_LAB_TOTAL} perguntas oficiais, uma por vez, e mostra cada resposta abaixo.
       </p>
 
@@ -182,7 +182,7 @@ export default function ProLideresMemberNoelLabPanel({
           }}
           className="mt-2 w-full rounded-lg border border-amber-400 py-2 text-xs font-semibold text-amber-950 hover:bg-amber-100 disabled:opacity-50"
         >
-          Repetir do início (mantém transcrição — use Limpar para zerar)
+          Repetir do início (mantém transcrição; use Limpar para zerar)
         </button>
       </div>
 

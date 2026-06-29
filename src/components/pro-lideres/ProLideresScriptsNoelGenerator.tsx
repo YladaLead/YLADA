@@ -449,7 +449,7 @@ export function ProLideresScriptsNoelGenerator({
         <p className="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/90 via-white to-violet-50/40 px-4 py-3 text-sm leading-snug text-indigo-950 sm:px-5 sm:py-3.5">
           {inputMode === 'adapt' ? (
             <>
-              <strong className="text-indigo-950">Adaptar treino ao tom YLADA</strong> — cola o material como treinas
+              <strong className="text-indigo-950">Adaptar treino ao tom YLADA</strong>: cola o material como treinas
               (passos, lista, texto de campo). O Noel devolve o <strong className="text-indigo-950">mesmo conteúdo</strong>{' '}
               num <strong className="text-indigo-950">jeito YLADA</strong>: perguntas que fazem a pessoa{' '}
               <strong className="text-indigo-950">refletir</strong>, permissão, ritmo de execução quando já existir no
@@ -457,7 +457,7 @@ export function ProLideresScriptsNoelGenerator({
             </>
           ) : (
             <>
-              <strong className="text-indigo-950">Prefira «Guiado»</strong> — o Noel pergunta, você escolhe e avança. O
+              <strong className="text-indigo-950">Prefira «Guiado»</strong>: o Noel pergunta, você escolhe e avança. O
               texto já sai em tom leve (permissão antes de link; convite a ajudar, sem pressão). No fim: ajustar se
               quiser e <strong className="text-indigo-950">salvar</strong>. O tom de abertura fica sempre no perfil
               equilibrado (educação antes de vender).
@@ -1004,8 +1004,8 @@ export function ProLideresScriptsNoelGenerator({
             </button>
           </div>
           <p className="text-xs text-gray-500">
-            <strong className="font-medium text-gray-700">Salvar para a equipe</strong> — a sequência aparece no painel
-            para copiar. <strong className="font-medium text-gray-700">Só para mim</strong> — rascunho; depois você pode
+            <strong className="font-medium text-gray-700">Salvar para a equipe</strong>: a sequência aparece no painel
+            para copiar. <strong className="font-medium text-gray-700">Só para mim</strong>: rascunho; depois você pode
             marcar «Equipe vê no painel» na lista.
           </p>
         </div>

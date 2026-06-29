@@ -13,7 +13,7 @@ const ADESAO_ITENS = [
   },
   {
     title: 'Qual link enviar',
-    detail: 'Indica o link certo em Meus links — e por quê naquele momento.',
+    detail: 'Indica o link certo em Meus links e por quê naquele momento.',
   },
   {
     title: 'Objeções e convites',
@@ -39,7 +39,7 @@ export function ProLideresNoelMembroAdesaoPitch({ brlMensal }: { brlMensal: stri
             </span>
             <span>
               <strong className="font-semibold text-gray-900">{item.title}</strong>
-              <span className="text-gray-700"> — {item.detail}</span>
+              <span className="text-gray-700">: {item.detail}</span>
             </span>
           </li>
         ))}

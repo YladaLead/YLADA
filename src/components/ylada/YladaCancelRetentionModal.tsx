@@ -365,7 +365,7 @@ export default function YladaCancelRetentionModal({
               <p className="mb-2">
                 Se você <strong>cancelar a cobrança do plano pago</strong>, quando o período já pago acabar sua conta
                 passa para o <strong>gratuito</strong>: você segue na YLADA com <strong>um diagnóstico ativo</strong>,
-                limites mensais de conversas no WhatsApp e análises com o Noel — dá para manter o hábito de divulgar e
+                limites mensais de conversas no WhatsApp e análises com o Noel. Dá para manter o hábito de divulgar e
                 acompanhar respostas sem pagar assinatura.
               </p>
               <p className="mb-2">

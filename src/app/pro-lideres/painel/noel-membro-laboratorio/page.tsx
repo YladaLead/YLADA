@@ -11,7 +11,7 @@ export default function ProLideresMemberNoelLaboratorioPage() {
         <p className="text-sm font-medium text-emerald-700">Laboratório · Noel da equipe (membro)</p>
         <h1 className="text-2xl font-bold text-gray-900">Testes de campo</h1>
         <p className="mt-2 text-sm text-gray-600">
-          Você entra como <strong>líder</strong> — não precisa de assinatura Noel membro. Ative{' '}
+          Você entra como <strong>líder</strong>. Não precisa de assinatura Noel membro. Ative{' '}
           <strong>Noel equipe</strong> na configuração antes.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">

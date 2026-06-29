@@ -352,7 +352,7 @@ const NOEL_UX_BY_AREA: Record<NoelArea, NoelUxContentWithoutWelcome> = {
   pro_lideres_member: {
     suggestions: PRO_LIDERES_MEMBER_SUGGESTIONS,
     placeholder: 'Lista, objeção, convite, o que postar, qual link enviar…',
-    placeholderExample: 'Ex.: objeção de preço — como responder?',
+    placeholderExample: 'Ex.: objeção de preço, como responder?',
   },
   pro_estetica_corporal: {
     suggestions: PRO_ESTETICA_CORPORAL_SUGGESTIONS,

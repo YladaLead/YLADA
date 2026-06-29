@@ -68,7 +68,7 @@ export default function ProLideresNoelMembroClient({
     return (
       <div className="mx-auto max-w-lg space-y-3 py-4 text-sm text-gray-700">
         <h1 className="text-xl font-bold text-gray-900">Noel</h1>
-        <p className="font-medium text-gray-800">Seu Noel membro já está pago — falta só o acesso da equipe voltar.</p>
+        <p className="font-medium text-gray-800">Seu Noel membro já está pago. Falta só o acesso da equipe voltar.</p>
         <p>
           Quando o plano Pro Líderes da operação normalizar, você volta ao chat na hora. Enquanto isso, fale com o
           líder.
@@ -82,7 +82,7 @@ export default function ProLideresNoelMembroClient({
       <div className="flex min-h-0 flex-1 flex-col gap-2">
         {variant === 'leader_included' ? (
           <p className="text-xs leading-relaxed text-gray-700 rounded-lg border border-sky-100 bg-sky-50/90 px-3 py-2">
-            <strong>Incluído no seu plano:</strong> este Noel da equipe vem na mensalidade Pro Líderes — sem taxa extra
+            <strong>Incluído no seu plano:</strong> este Noel da equipe vem na mensalidade Pro Líderes, sem taxa extra
             na YLADA. Membros que quiserem o add-on contratam à parte, na própria conta.
           </p>
         ) : null}
@@ -123,14 +123,14 @@ export default function ProLideresNoelMembroClient({
       <div className="mx-auto max-w-lg space-y-5 py-4">
         {previewMembroComoLider ? (
           <p className="rounded-lg border border-amber-200 bg-amber-50/90 px-3 py-2 text-xs leading-relaxed text-amber-950">
-            <strong>Pré-visualização</strong> — abaixo é <strong>exatamente</strong> o que o membro vê. O botão
+            <strong>Pré-visualização.</strong> Abaixo é <strong>exatamente</strong> o que o membro vê. O botão
             «Aderir» só conclui com conta de membro (convite demo ou convite real).
           </p>
         ) : null}
         <h1 className="text-xl font-bold text-gray-900">Noel</h1>
         {lapsed ? (
           <p className="text-sm leading-relaxed text-gray-600">
-            Seu Noel venceu. Renove no Mercado Pago para voltar ao chat — plano à parte da assinatura da equipe (R${' '}
+            Seu Noel venceu. Renove no Mercado Pago para voltar ao chat. Plano à parte da assinatura da equipe (R${' '}
             {brlMensal}/mês).
           </p>
         ) : (

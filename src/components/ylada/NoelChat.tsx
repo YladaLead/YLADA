@@ -1061,7 +1061,7 @@ export default function NoelChat({
               </span>
             )}
             <div className="min-w-0 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-              <span className="text-sm font-bold text-sky-800">{headerTitle ?? 'Noel — Mentor estratégico'}</span>
+              <span className="text-sm font-bold text-sky-800">{headerTitle ?? 'Noel, mentor estratégico'}</span>
               {headerTagline?.trim() ? (
                 <span className="text-xs font-medium leading-snug text-sky-800/85">{headerTagline.trim()}</span>
               ) : null}
@@ -1258,7 +1258,7 @@ export default function NoelChat({
                     assistantContentIsProLideresQuizDraftNoOfficialLink(msg.content) ? (
                     <div className="mt-3 flex flex-col gap-2 border-t border-sky-100 pt-3">
                       <p className="text-xs font-medium text-sky-900/90">
-                        Quando estiver satisfeito com o rascunho, gere o link — ou peça ajustes no chat.
+                        Quando estiver satisfeito com o rascunho, gere o link, ou peça ajustes no chat.
                       </p>
                       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                         <button
@@ -1271,7 +1271,7 @@ export default function NoelChat({
                           }
                           className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-500/20 hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation transition-colors"
                         >
-                          Gostei — gerar o link
+                          Gostei, gerar o link
                         </button>
                         <button
                           type="button"
@@ -1574,7 +1574,7 @@ export default function NoelChat({
                 <p className="font-semibold text-emerald-900">Próximos passos</p>
                 <ul className="mt-1.5 list-disc space-y-1 pl-4 text-emerald-900/95">
                   <li>
-                    O link <strong>já está salvo</strong> na sua conta YLADA — não precisa guardar de novo neste chat.
+                    O link <strong>já está salvo</strong> na sua conta YLADA. Não precisa guardar de novo neste chat.
                   </li>
                   <li>
                     Use <strong>Editar perguntas</strong> (matriz Ylada) ou veja a lista em{' '}

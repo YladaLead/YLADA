@@ -11,7 +11,7 @@ function ProJoiasNoelClient() {
         className="flex min-h-[min(70vh,560px)] flex-1 flex-col"
         chatApiPath="/api/noel"
         skipYladaContextualWelcome
-        headerTitle="Noel — Pro Joias"
+        headerTitle="Noel, Pro Joias"
         hideSuggestionsHeading
         hideInputHint={false}
         sendButtonLabel="Enviar para o Noel"

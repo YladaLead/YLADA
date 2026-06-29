@@ -93,7 +93,7 @@ export default async function ProLideresPainelNoelMembroPage() {
       <h1 className="text-2xl font-bold text-gray-900">Noel na equipe</h1>
 
       <div className="rounded-xl border border-emerald-200 bg-emerald-50/90 p-3 text-sm text-emerald-950">
-        <p className="font-semibold text-emerald-900">Pré-visualização — menu como a equipe</p>
+        <p className="font-semibold text-emerald-900">Pré-visualização: menu como a equipe</p>
         <p className="mt-1 text-emerald-900/95">
           A adesão ao Noel membro (checklist + botão) é só na <strong>área do membro</strong>, com login de quem entrou
           pela equipe.
@@ -105,7 +105,7 @@ export default async function ProLideresPainelNoelMembroPage() {
           href={noelEquipeHref}
           className="inline-flex justify-center rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white hover:bg-blue-700"
         >
-          Ligar oferta — Noel equipe
+          Ligar oferta: Noel equipe
         </Link>
         <Link
           href={leaderNoelHref}
@@ -122,7 +122,7 @@ export default async function ProLideresPainelNoelMembroPage() {
       </div>
 
       <div className="rounded-lg border border-amber-200 bg-amber-50/90 p-3 text-xs text-amber-950">
-        <p className="font-semibold text-amber-900">Demo — convite fixo (membro de teste)</p>
+        <p className="font-semibold text-amber-900">Demo: convite fixo (membro de teste)</p>
         <p className="mt-1 break-all font-mono">{demoConviteHref}</p>
         <p className="mt-1">
           E-mail da conta: <span className="font-mono">{PRO_LIDERES_DEMO_MEMBER_INVITE_EMAIL}</span> · token{' '}

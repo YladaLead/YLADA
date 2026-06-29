@@ -24,7 +24,7 @@ export default function ProEsteticaCorporalNoelClient() {
         className="flex min-h-[min(70vh,560px)] flex-1 flex-col"
         chatApiPath="/api/pro-estetica-corporal/noel"
         skipYladaContextualWelcome
-        headerTitle="Noel — Estética corporal"
+        headerTitle="Noel, estética corporal"
         hideSuggestionsHeading
         hideInputHint={false}
         sendButtonLabel="Enviar para o Noel"
