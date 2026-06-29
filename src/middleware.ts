@@ -163,7 +163,8 @@ export function middleware(request: NextRequest) {
     pathname === '/conviccao' ||                // Funil leitor PT — canônico sem prefixo de idioma
     pathname === '/conviccao-gera-performance' || // Alias funil PT
     pathname === '/conviction' ||               // Funil leitor EN — canônico sem prefixo de idioma
-    pathname === '/criar'                       // Loop viral — página dedicada "crie o seu" (Caminho B)
+    pathname === '/criar' ||                    // Loop viral — página dedicada "crie o seu" (Caminho B)
+    pathname === '/descubra'                    // Porta única de entrada (telas 1-2) — gateada por flag na própria página
   ) {
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set('x-pathname', pathname)
