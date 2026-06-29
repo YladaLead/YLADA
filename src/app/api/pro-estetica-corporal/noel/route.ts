@@ -33,6 +33,7 @@ import {
   ESTETICA_NOEL_MODO_EXECUTOR_LINK_PT,
   ESTETICA_NOEL_PEDIDO_SEM_GERACAO_PT,
 } from '@/lib/pro-estetica-noel-link-system-blocks'
+import { applyNoelPersonaToSystemPrompt } from '@/lib/ylada-flow/noel/persona'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -220,7 +221,7 @@ export async function POST(request: NextRequest) {
     extraSystemParts.push(ESTETICA_NOEL_PEDIDO_SEM_GERACAO_PT)
   }
 
-  const systemPrompt =
+  const systemPrompt = applyNoelPersonaToSystemPrompt(
     buildSystemPrompt({
       operationLabel,
       focusNotes: t.focus_notes?.trim() || null,
@@ -229,7 +230,8 @@ export async function POST(request: NextRequest) {
       role: ctx.role,
       replyLanguage,
       linksAtivosContext,
-    }) + extraSystemParts.join('\n')
+    }) + extraSystemParts.join('\n'),
+  )
 
   const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     { role: 'system', content: systemPrompt },

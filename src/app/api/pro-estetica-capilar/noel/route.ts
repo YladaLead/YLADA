@@ -29,6 +29,7 @@ import {
   ESTETICA_NOEL_MODO_EXECUTOR_LINK_PT,
   ESTETICA_NOEL_PEDIDO_SEM_GERACAO_PT,
 } from '@/lib/pro-estetica-noel-link-system-blocks'
+import { applyNoelPersonaToSystemPrompt } from '@/lib/ylada-flow/noel/persona'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -157,7 +158,9 @@ export async function POST(request: NextRequest) {
     replyLanguage,
     linksAtivosContext,
   })
-  const systemPrompt = `${systemPromptBody}${buildEsteticaProQuizLinkRulesBlock('capilar')}${extraSystemParts.join('\n')}`
+  const systemPrompt = applyNoelPersonaToSystemPrompt(
+    `${systemPromptBody}${buildEsteticaProQuizLinkRulesBlock('capilar')}${extraSystemParts.join('\n')}`,
+  )
 
   const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     { role: 'system', content: systemPrompt },

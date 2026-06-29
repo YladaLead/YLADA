@@ -24,6 +24,7 @@ import {
   recomendarParaNoel,
   buildRecomendacaoCuradaBlockMembro,
 } from '@/lib/ylada-flow/recomendador/noel-wiring'
+import { applyNoelPersonaToSystemPrompt } from '@/lib/ylada-flow/noel/persona'
 import {
   fetchProLideresMemberTabulatorName,
   proLideresMemberHasNoelMemberSubscription,
@@ -214,7 +215,7 @@ export async function POST(request: NextRequest) {
   }
 
   const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-    { role: 'system', content: memberSystemPrompt },
+    { role: 'system', content: applyNoelPersonaToSystemPrompt(memberSystemPrompt) },
     ...historyNorm.slice(-14).map((h) => ({
       role: h.role as 'user' | 'assistant',
       content: h.content,

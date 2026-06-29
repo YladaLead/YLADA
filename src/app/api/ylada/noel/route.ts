@@ -54,6 +54,11 @@ import {
   upsertNoelMemory,
   detectActionFromMessage,
 } from '@/lib/noel-wellness/noel-memory'
+import {
+  isNoelJornadaMemoryEnabled,
+  loadJornadaMemoryForNoel,
+  formatJornadaMemoryForPrompt,
+} from '@/lib/noel-wellness/noel-jornada-memory'
 import { addExchange, getRecentMessages } from '@/lib/noel-wellness/noel-conversation-memory'
 import {
   getStrategyMap,
@@ -66,6 +71,7 @@ import {
   NOEL_DETECTED_PROFILE_INSTRUCTION,
   NOEL_LAYER4_PRIORITY_RULE,
 } from '@/lib/noel-wellness/prompt-layers'
+import { applyNoelPersonaToSystemPrompt } from '@/lib/ylada-flow/noel/persona'
 import OpenAI from 'openai'
 import { hasYladaProPlan } from '@/lib/subscription-helpers'
 import { getNoelUsageCount, incrementNoelUsage } from '@/lib/noel-usage-helpers'
@@ -947,6 +953,7 @@ export async function POST(request: NextRequest) {
     // Memória estratégica + Mapa Estratégico do Noel (jornada entre conversas)
     let noelMemoryText = ''
     let strategyMapText = ''
+    let jornadaMemoryText = ''
     let noelMemory: Awaited<ReturnType<typeof getNoelMemory>> = null
     if (supabaseAdmin) {
       try {
@@ -956,6 +963,17 @@ export async function POST(request: NextRequest) {
         strategyMapText = formatStrategyMapForPrompt(strategyMap)
       } catch (e) {
         console.warn('[/api/ylada/noel] memória/mapa:', e)
+      }
+    }
+
+    // Memória da jornada (§13 passo 4): eventos comportamentais + Board — atrás de flag
+    if (isNoelJornadaMemoryEnabled() && supabaseAdmin) {
+      try {
+        const boardArea = typeof area === 'string' && area.trim() ? area.trim() : validSegment
+        const jornadaSnapshot = await loadJornadaMemoryForNoel(user.id, validSegment, boardArea)
+        jornadaMemoryText = formatJornadaMemoryForPrompt(jornadaSnapshot)
+      } catch (e) {
+        console.warn('[/api/ylada/noel] jornada memory:', e)
       }
     }
 
@@ -1337,6 +1355,13 @@ export async function POST(request: NextRequest) {
           '\nUse o mapa para orientar o próximo passo. Ex.: "Você já está em Captação e Diagnóstico. Agora vamos focar em Conversa — use o diagnóstico para iniciar conversas."'
       )
     }
+    if (jornadaMemoryText) {
+      parts.push(
+        '\n[MEMÓRIA DA JORNADA — onde a pessoa está (eventos + Board)]\n' +
+          jornadaMemoryText +
+          '\nConduza a partir daqui como mentor que acompanha a evolução — não comece do zero.'
+      )
+    }
     if (detectedStrategicProfileText) {
       parts.push('\n[PERFIL ESTRATÉGICO IDENTIFICADO — SITUAÇÃO]\n' + detectedStrategicProfileText + '\n' + NOEL_DETECTED_PROFILE_INSTRUCTION)
     }
@@ -1407,7 +1432,7 @@ export async function POST(request: NextRequest) {
         '\n[PEDIDO DE LINK SEM GERAÇÃO]\nO profissional pediu link/quiz/formulário/fluxo mas o sistema não gerou o link nesta resposta. NUNCA invente um link nem diga "Clique aqui", "Copiar link" ou "link gerado" sem URL real fornecido pelo sistema. O link só existe quando o backend anexar o bloco oficial. Faça assim: (1) Explique brevemente que nesta rodada o link automático não saiu (perfil, tema ou limite técnico). (2) Ofereça o **texto completo** do quiz/formulário no chat (perguntas + opções + CTA) para ela usar já. (3) Diga que, para **link único YLADA**, ela pode repetir o pedido com tema explícito, ex.: "Quero um quiz para [tema]" ou "Cria um formulário para captar clientes de estética". (4) Se ela precisar de **URL fora da YLADA** (Google Forms), seja honesto: você não hospeda; ela cola o roteiro lá — reforce que é rápido e que ela consegue.'
       )
     }
-    const systemContent = parts.join('')
+    const systemContent = applyNoelPersonaToSystemPrompt(parts.join(''))
 
     // Memória de conversa: quando frontend não envia histórico, carregar do DB (janela 8 msgs)
     let historyToUse = conversationHistory

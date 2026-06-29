@@ -11,6 +11,7 @@ import {
 import { formatLinksAtivosParaNoel, getNoelYladaLinks } from '@/lib/noel-ylada-links'
 import { formatProLideresCatalogForNoel } from '@/lib/pro-lideres-noel-catalog-context'
 import { getFlowBuilderMethodologyBlock } from '@/lib/ylada-flow-builder-methodology'
+import { applyNoelPersonaToSystemPrompt } from '@/lib/ylada-flow/noel/persona'
 import {
   buildCanonicalQuizMarkdownForProLideresResponse,
   isProLideresNoelShortApprovalAfterQuizDraft,
@@ -194,7 +195,7 @@ export async function POST(request: NextRequest) {
     ? `\n[REFERÊNCIA — exemplo «Ganhar massa muscular» (espelhe estrutura e tom quando o pedido for compatível)]\n${FLUXO_PRESET_GANHAR_MASSA_MUSCULAR}\n`
     : ''
 
-  const systemPrompt =
+  const systemPrompt = applyNoelPersonaToSystemPrompt(
     buildProLideresNoelSystemPrompt({
       operationLabel,
       verticalCode,
@@ -204,10 +205,11 @@ export async function POST(request: NextRequest) {
       linksAtivosContext,
       painelTarefasDiariasUrl,
     }) +
-    `\n\n${catalogContext}\n` +
-    getFlowBuilderMethodologyBlock() +
-    massaPresetAppendix +
-    extraSystemParts.join('\n')
+      `\n\n${catalogContext}\n` +
+      getFlowBuilderMethodologyBlock() +
+      massaPresetAppendix +
+      extraSystemParts.join('\n'),
+  )
 
   const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     { role: 'system', content: systemPrompt },

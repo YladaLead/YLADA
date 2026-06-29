@@ -1,3 +1,8 @@
+import {
+  buildNoelPersonaSystemPrefix,
+  isNoelPersonaUnicaEnabled,
+} from '@/lib/ylada-flow/noel/persona'
+
 /**
  * Arquitetura de prompt em camadas para o Noel (ideal para GPT-4.1 Mini e modelos leves).
  * Prompts organizados = respostas mais consistentes e previsíveis.
@@ -201,5 +206,8 @@ ${userMessage.trim()}
  * O Layer 3 (comportamento) é o bloco grande montado em route.ts.
  */
 export function buildLayeredPromptPrefix(): string {
+  if (isNoelPersonaUnicaEnabled()) {
+    return buildNoelPersonaSystemPrefix()
+  }
   return LAYER_1_IDENTITY + LAYER_2_PHILOSOPHY
 }
