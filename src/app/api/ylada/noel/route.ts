@@ -70,6 +70,7 @@ import {
   deveGerarNaConducao,
   construirTextoInterpretConducao,
   corrigirFlowDaConducao,
+  perguntasDoUltimoRascunho,
 } from '@/lib/porta-unica/conducao-geracao'
 import { relaxarGateMatrizParaNoelDireto } from '@/lib/porta-unica/destino-pos-cadastro'
 import {
@@ -1169,7 +1170,13 @@ export async function POST(request: NextRequest) {
           // texto genérico). Força diagnóstico de bloqueio de verdade. Só no fluxo da porta.
           if (conducaoDeveGerar && typeof flowId === 'string') flowId = corrigirFlowDaConducao(flowId)
           const interpretacao = data?.interpretacao
-          const questions = Array.isArray(data?.questions) ? data.questions : []
+          let questions = Array.isArray(data?.questions) ? data.questions : []
+          // #2: o link tem que SER o rascunho que a pessoa aprovou. Na condução, se o Noel mostrou
+          // um rascunho (perguntas + opções), usamos ELE; senão cai nas perguntas do interpret.
+          if (conducaoDeveGerar) {
+            const doRascunho = perguntasDoUltimoRascunho(conversationHistory)
+            if (doRascunho) questions = doRascunho
+          }
           const confidence = typeof data?.confidence === 'number' ? data.confidence : 0
 
           if (flowId && interpretacao && confidence >= 0.5) {

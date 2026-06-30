@@ -164,3 +164,80 @@ export function construirTextoInterpretConducao(args: {
     notaObjetivo
   )
 }
+
+/* ============================================================================
+ * #2 — LINK = RASCUNHO APROVADO
+ * O Noel mostra um rascunho (numerado + A/B/C/D) e a pessoa aprova; mas a geração
+ * monta OUTRO diagnóstico (às vezes pior/fora do tema). Aqui a gente lê o rascunho
+ * que ele mostrou e usa ELE como as perguntas do link. Tudo puro, com FALLBACK SEGURO:
+ * se não parsear ≥3 perguntas MCQ limpas, devolve null e o route cai no fluxo de hoje.
+ * ========================================================================== */
+
+export type PerguntaQuiz = { id: string; label: string; type: 'single'; options: string[] }
+
+/** Início de pergunta: "1. ...", "  * 2. ..." etc. Captura o resto da linha. */
+const RE_INICIO_PERGUNTA = /^\s*\*?\s*\d+\.\s+(.+\S)\s*$/
+/** Linha que é uma opção: "A) ...", "* B) ...", "   - C) ...". */
+const RE_LINHA_OPCAO = /^\s*[*•-]?\s*[A-D]\)\s*\S/
+
+/** Extrai as opções A)/B)/C)/D) de um trecho (inline ou multi-linha já juntado). */
+function extrairOpcoesDoTrecho(trecho: string): string[] {
+  const limpo = trecho.replace(/[*•]/g, ' ').replace(/\s+/g, ' ').trim()
+  const out: string[] = []
+  const re = /([A-D])\)\s*(.+?)(?=\s+[A-D]\)|$)/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(limpo)) !== null) {
+    const txt = m[2].trim()
+    if (txt.length >= 1 && txt.length <= 120) out.push(txt)
+  }
+  return out
+}
+
+/**
+ * Lê um rascunho de diagnóstico (texto do Noel) e devolve as perguntas MCQ. Aceita os
+ * formatos vistos no lab: opções inline na mesma linha da pergunta OU em linhas/bullets
+ * abaixo. Linhas que não são pergunta nem opção (título, "Ficou bom assim?") são ignoradas.
+ * Devolve null se não achar ≥3 perguntas com ≥3 opções (sinal pra cair no fallback).
+ */
+export function extrairPerguntasDoRascunho(texto: string): PerguntaQuiz[] | null {
+  if (!texto || typeof texto !== 'string') return null
+  type Bruta = { resto: string; opcoesLinhas: string[] }
+  const brutas: Bruta[] = []
+  for (const linha of texto.split('\n')) {
+    const mp = RE_INICIO_PERGUNTA.exec(linha)
+    if (mp) {
+      brutas.push({ resto: mp[1], opcoesLinhas: [] })
+      continue
+    }
+    if (brutas.length > 0 && RE_LINHA_OPCAO.test(linha)) {
+      brutas[brutas.length - 1].opcoesLinhas.push(linha)
+    }
+  }
+  const perguntas: PerguntaQuiz[] = []
+  for (const b of brutas) {
+    const full = [b.resto, ...b.opcoesLinhas].join(' ')
+    const idxA = full.search(/\bA\)/)
+    const label = (idxA >= 0 ? full.slice(0, idxA) : full)
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/[\s*•\-–]+$/, '') // tira bullet/asterisco que sobra antes do "A)"
+      .trim()
+    const options = idxA >= 0 ? extrairOpcoesDoTrecho(full.slice(idxA)) : []
+    if (label.length < 6 || options.length < 3) continue
+    const quatro = options.slice(0, 4)
+    while (quatro.length < 4) quatro.push('Outro')
+    perguntas.push({ id: `q${perguntas.length + 1}`, label, type: 'single', options: quatro })
+  }
+  return perguntas.length >= 3 ? perguntas : null
+}
+
+/** Acha o rascunho mais recente que o Noel mostrou no histórico e devolve as perguntas (ou null). */
+export function perguntasDoUltimoRascunho(history?: readonly Turno[]): PerguntaQuiz[] | null {
+  const h = Array.isArray(history) ? history : []
+  for (let i = h.length - 1; i >= 0; i -= 1) {
+    if (h[i]?.role !== 'assistant') continue
+    const p = extrairPerguntasDoRascunho(h[i].content ?? '')
+    if (p) return p
+  }
+  return null
+}

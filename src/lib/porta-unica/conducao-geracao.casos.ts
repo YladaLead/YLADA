@@ -9,6 +9,8 @@ import {
   mensagemEhAprovacao,
   construirTextoInterpretConducao,
   corrigirFlowDaConducao,
+  extrairPerguntasDoRascunho,
+  perguntasDoUltimoRascunho,
 } from './conducao-geracao'
 
 let passou = 0
@@ -127,6 +129,73 @@ caso('corrigirFlowDaConducao troca checklist por diagnóstico (sem nota), manté
   assert.strictEqual(corrigirFlowDaConducao('checklist_prontidao'), 'diagnostico_bloqueio')
   assert.strictEqual(corrigirFlowDaConducao('diagnostico_risco'), 'diagnostico_risco')
   assert.strictEqual(corrigirFlowDaConducao('calculadora_projecao'), 'calculadora_projecao')
+})
+
+caso('parser lê rascunho com opções INLINE (A/B/C na mesma linha)', () => {
+  const rascunho = [
+    'Diagnóstico — Você precisa de um implante?',
+    '1. O que mais te incomoda quando se olha no espelho? A) Falta de dentes B) Dentes tortos C) Dificuldade em mastigar D) Outros',
+    '2. Você já considerou um implante antes? A) Sim, estou pensando B) Não, nunca pensei C) Já pensei, mas desisti',
+    '3. Qual sua maior preocupação? A) Custo B) Procedimento C) Tempo de recuperação D) Outros',
+    'Ficou bom assim, ou quer ajustar?',
+  ].join('\n')
+  const p = extrairPerguntasDoRascunho(rascunho)
+  assert.ok(p && p.length === 3, 'devia achar 3 perguntas')
+  assert.match(p![0].label, /se olha no espelho/i)
+  assert.ok(!/A\)/.test(p![0].label), 'label não deve conter "A)"')
+  assert.strictEqual(p![0].options.length, 4)
+  assert.ok(p![1].options.length === 4, 'pergunta de 3 opções é preenchida pra 4')
+})
+
+caso('parser lê rascunho com opções em BULLETS abaixo', () => {
+  const rascunho = [
+    '   1. O que mais te impede de prospectar?',
+    '      * A) Falta de tempo',
+    '      * B) Dificuldade em abordar',
+    '      * C) Desmotivação',
+    '      * D) Outro',
+    '   2. Como você se sente ao vender?',
+    '      * A) Confiante',
+    '      * B) Inseguro',
+    '      * C) Desmotivado',
+    '   3. Qual sua maior motivação pra voltar?',
+    '      * A) Metas financeiras',
+    '      * B) Reconhecimento',
+    '      * C) Crescimento',
+  ].join('\n')
+  const p = extrairPerguntasDoRascunho(rascunho)
+  assert.ok(p && p.length === 3, 'devia achar 3 perguntas (bullets)')
+  assert.match(p![0].label, /impede de prospectar/i)
+  assert.strictEqual(p![0].options[0], 'Falta de tempo')
+})
+
+caso('parser devolve null pra texto que NÃO é quiz (script/mensagem) → fallback', () => {
+  const script = 'Oi [Nome]! Estou feliz com seus resultados. Se conhece alguém que se beneficiaria, compartilhe!'
+  assert.strictEqual(extrairPerguntasDoRascunho(script), null)
+})
+
+caso('parser devolve null com menos de 3 perguntas MCQ', () => {
+  const rascunho = '1. Pergunta única? A) sim B) não C) talvez'
+  assert.strictEqual(extrairPerguntasDoRascunho(rascunho), null)
+})
+
+caso('perguntasDoUltimoRascunho pega o rascunho mais recente do assistente', () => {
+  const hist = [
+    { role: 'user', content: 'vamos' },
+    { role: 'assistant', content: 'Me conta: o que você faz?' },
+    { role: 'user', content: 'sou dentista' },
+    {
+      role: 'assistant',
+      content: [
+        '1. O que mais te incomoda? A) Falta de dentes B) Dor C) Mastigação D) Outros',
+        '2. Já pensou em implante? A) Sim B) Não C) Talvez',
+        '3. Maior preocupação? A) Custo B) Dor C) Tempo D) Outros',
+      ].join('\n'),
+    },
+    { role: 'user', content: 'ficou ótimo' },
+  ]
+  const p = perguntasDoUltimoRascunho(hist)
+  assert.ok(p && p.length === 3, 'devia extrair as 3 do último rascunho')
 })
 
 console.log(`\n${passou} casos verdes.`)
