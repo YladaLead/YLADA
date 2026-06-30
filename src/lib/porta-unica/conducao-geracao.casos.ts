@@ -69,7 +69,7 @@ caso('mensagemEhAprovacao reconhece os "ok/gera" e rejeita pergunta/recusa', () 
   }
 })
 
-caso('texto do interpret costura objetivo (1ª pessoa) + respostas substantivas', () => {
+caso('texto do interpret costura nicho/foco + objetivo (como nota interna)', () => {
   const desafio: DesafioResposta = { key: 'atrair', texto: null }
   const hist = [
     { role: 'assistant', content: 'o que você faz?' },
@@ -80,24 +80,46 @@ caso('texto do interpret costura objetivo (1ª pessoa) + respostas substantivas'
     { role: 'user', content: '19 98186-8000' },
   ]
   const texto = construirTextoInterpretConducao({ desafio, conversationHistory: hist })
-  assert.match(texto, /atrair mais clientes/i)
+  assert.match(texto, /atrair mais clientes/i) // objetivo presente (na nota interna)
   assert.match(texto, /cl[íi]nica de est[ée]tica/i)
   assert.match(texto, /rejuvenescimento/i)
   // o número de WhatsApp e o starter não entram no texto (ruído)
   assert.ok(!/98186/.test(texto), 'número de WhatsApp vazou pro texto do interpret')
 })
 
-caso('texto do interpret usa o texto livre no desafio "outro"', () => {
+caso('texto SEMPRE vira pro ponto de vista do CLIENTE (não do negócio do dono)', () => {
+  const texto = construirTextoInterpretConducao({
+    desafio: { key: 'vender', texto: null },
+    conversationHistory: [{ role: 'user', content: 'vendo semijoias pelo instagram' }],
+  })
+  assert.match(texto, /COMPARTILHAR/i)
+  assert.match(texto, /ponto de vista do CLIENTE/i)
+  assert.match(texto, /NUNCA sobre o meu neg[óo]cio/i)
+  assert.match(texto, /N[ÃA]O deve aparecer nas perguntas/i) // objetivo do dono fica como nota interna
+})
+
+caso('equipe vira pro ponto de vista do MEMBRO, não do líder', () => {
+  const texto = construirTextoInterpretConducao({
+    desafio: { key: 'equipe', texto: null },
+    conversationHistory: [{ role: 'user', content: 'tenho um time de revendedores' }],
+  })
+  assert.match(texto, /equipe|membro|vendedor/i)
+  assert.match(texto, /ponto de vista de QUEM RESPONDE/i)
+  assert.match(texto, /NUNCA do ponto de vista do l[íi]der/i)
+})
+
+caso('texto do interpret usa o texto livre no desafio "outro" (como objetivo interno)', () => {
   const desafio: DesafioResposta = { key: 'outro', texto: 'minha agenda vive vazia' }
   const texto = construirTextoInterpretConducao({ desafio, conversationHistory: [] })
   assert.match(texto, /minha agenda vive vazia/)
 })
 
-caso('texto do interpret sem respostas cai só no objetivo', () => {
+caso('texto sem respostas ainda traz a moldura de compartilhar + objetivo', () => {
   const desafio: DesafioResposta = { key: 'vender', texto: null }
   const texto = construirTextoInterpretConducao({ desafio, conversationHistory: [{ role: 'user', content: 'oi' }] })
-  assert.match(texto, /^Quero vender mais/i)
-  assert.ok(!/oi/.test(texto.replace(/Quero/i, '')), 'starter genérico vazou')
+  assert.match(texto, /COMPARTILHAR/i)
+  assert.match(texto, /vender mais/i) // objetivo na nota interna
+  assert.ok(!/Meu nicho/i.test(texto), 'sem respostas substantivas, não inventa "Meu nicho"')
 })
 
 console.log(`\n${passou} casos verdes.`)

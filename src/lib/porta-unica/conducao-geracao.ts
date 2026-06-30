@@ -112,9 +112,12 @@ function ehRespostaSubstantiva(conteudo: string): boolean {
 }
 
 /**
- * Texto enriquecido pro `/api/ylada/interpret`: objetivo declarado na porta + tudo que a
- * pessoa contou na condução (nicho, foco/carro-chefe, público). Deixa o interpret extrair
- * tema/área da fala REAL dela, em vez do "pode gerar" cru — diagnóstico sob medida.
+ * Texto enriquecido pro `/api/ylada/interpret`: nicho/foco da condução + a MOLDURA DE AUDIÊNCIA.
+ * Crítico: o link gerado é COMPARTILHADO, então as perguntas têm que falar do ponto de vista de
+ * QUEM RESPONDE (o cliente; ou, no desafio equipe, o membro do time), NUNCA do negócio/vendas do
+ * dono. Sem isto, "vender mais"/"colher indicações" gera um autodiagnóstico do dono (a cliente
+ * recebia "minhas vendas estão baixas?"). O objetivo do dono entra só como nota interna, fora das
+ * perguntas. Deixa o interpret montar o diagnóstico sob medida, virado pro cliente.
  */
 export function construirTextoInterpretConducao(args: {
   desafio: DesafioResposta
@@ -130,7 +133,24 @@ export function construirTextoInterpretConducao(args: {
     .map((t) => (t.content ?? '').trim())
     .filter(ehRespostaSubstantiva)
   const corpo = respostas.join('. ')
-  return corpo
-    ? `Quero ${objetivo}. Sobre o que eu faço e quem eu quero atingir: ${corpo}`
-    : `Quero ${objetivo}.`
+  const sobre = corpo ? ` Meu nicho e o que eu faço: ${corpo}.` : ''
+  const notaObjetivo = ` (Objetivo interno meu, que NÃO deve aparecer nas perguntas: ${objetivo}.)`
+
+  if (args.desafio.key === 'equipe') {
+    return (
+      'Quero um diagnóstico para COMPARTILHAR com a minha equipe (cada vendedor ou membro do time), ' +
+      'pra cada um refletir sobre as PRÓPRIAS dificuldades e voltar a agir. ' +
+      'As perguntas devem ser do ponto de vista de QUEM RESPONDE (o vendedor/membro: o que trava ELE), ' +
+      'NUNCA do ponto de vista do líder nem sobre "a minha equipe".' +
+      sobre +
+      notaObjetivo
+    )
+  }
+  return (
+    'Quero um diagnóstico para COMPARTILHAR com os meus clientes e atrair quem precisa do que eu ofereço. ' +
+    'As perguntas devem ser do ponto de vista do CLIENTE (a dor, o incômodo e o desejo DELE), ' +
+    'NUNCA sobre o meu negócio, as minhas vendas ou a minha estratégia.' +
+    sobre +
+    notaObjetivo
+  )
 }
