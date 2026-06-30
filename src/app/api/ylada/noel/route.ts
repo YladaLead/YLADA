@@ -756,6 +756,7 @@ export async function POST(request: NextRequest) {
       supportUi,
       mode,
       desafio,
+      labIsolado,
     } = body as {
       message?: string
       conversationHistory?: { role: 'user' | 'assistant'; content: string }[]
@@ -767,6 +768,10 @@ export async function POST(request: NextRequest) {
       supportUi?: 'matrix' | 'wellness'
       /** Força um modo de resposta. 'espelho' = Etapa 1 (convicção), sem gerar link. */
       mode?: 'espelho'
+      /** Modo laboratório (`/pt/noel-lab`): ignora o estado da conta (links ativos, memória,
+       *  histórico salvo) e NÃO persiste, pra cada cenário rodar do zero. Só vale com a flag de
+       *  condução ligada (inerte em produção). @see app/pt/noel-lab/page.tsx */
+      labIsolado?: boolean
       /** Toque "b" Fase 2: desafio capturado pela porta única (cru, normalizado depois). */
       desafio?: unknown
     }
@@ -790,6 +795,9 @@ export async function POST(request: NextRequest) {
       deveGerarNaConducao({ message, conversationHistory })
     if (conducaoDeveGerar) noelResponseMode = 'modo_link'
     const linkModeEnabled = noelResponseMode === 'modo_link'
+    // Modo laboratório: cada cenário roda do ZERO (ignora estado da conta + não persiste).
+    // Só com a flag de condução ligada → inerte em produção (mesmo se o body mandar labIsolado).
+    const isLabIsolado = isNoelDesafioConducaoEnabled() && labIsolado === true
 
     // Freemium: verificar limite de análises avançadas antes de chamar IA (mentor; Nina não consome cota)
     const isPro = await hasYladaProPlan(user.id)
@@ -958,7 +966,7 @@ export async function POST(request: NextRequest) {
       // Item 3 Fase 2 (Plano A): no fluxo novo (mesma flag), a guarda não EXPULSA por
       // perfil incompleto — o Noel coleta o que falta conversando, na hora da ação.
       // Com a flag OFF, `relaxColeta` é false e o 403 abaixo é byte-idêntico ao legado.
-      const relaxColeta = relaxarGateMatrizParaNoelDireto(validSegment, isNoelDiretoEnabled())
+      const relaxColeta = relaxarGateMatrizParaNoelDireto(validSegment, isNoelDiretoEnabled()) || isLabIsolado
       if (relaxColeta && !gate.ok) {
         coletaWhatsappPendente = gate.missing.includes('whatsapp')
         coletaPerfilPendente = gate.missing.includes('perfil_empresarial')
@@ -1015,7 +1023,7 @@ export async function POST(request: NextRequest) {
     let strategyMapText = ''
     let jornadaMemoryText = ''
     let noelMemory: Awaited<ReturnType<typeof getNoelMemory>> = null
-    if (supabaseAdmin) {
+    if (supabaseAdmin && !isLabIsolado) {
       try {
         noelMemory = await getNoelMemory(user.id, validSegment)
         noelMemoryText = formatNoelMemoryForPrompt(noelMemory)
@@ -1027,7 +1035,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Memória da jornada (§13 passo 4): eventos comportamentais + Board — atrás de flag
-    if (isNoelJornadaMemoryEnabled() && supabaseAdmin) {
+    if (isNoelJornadaMemoryEnabled() && supabaseAdmin && !isLabIsolado) {
       try {
         const boardArea = typeof area === 'string' && area.trim() ? area.trim() : validSegment
         const jornadaSnapshot = await loadJornadaMemoryForNoel(user.id, validSegment, boardArea)
@@ -1038,12 +1046,14 @@ export async function POST(request: NextRequest) {
     }
 
     const baseUrl = typeof request.url === 'string' ? new URL(request.url).origin : (process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app')
-    const linksAtivos = await getNoelYladaLinks(user.id, baseUrl)
-    const linksAtivosBlock = formatLinksAtivosParaNoel(linksAtivos)
+    // No lab isolado: ignora os links/estado da conta pra cada cenário começar do zero (sem vazar
+    // o diagnóstico de um cenário pro próximo via "LINKS ATIVOS").
+    const linksAtivos = isLabIsolado ? [] : await getNoelYladaLinks(user.id, baseUrl)
+    const linksAtivosBlock = isLabIsolado ? '' : formatLinksAtivosParaNoel(linksAtivos)
 
     // Links com baixa conversão: Noel pode sugerir melhorias proativamente
-    const linksLowConversion = await getLinksWithLowConversion(user.id, baseUrl)
-    const linkPerformanceBlock = formatLinkPerformanceForNoel(linksLowConversion)
+    const linksLowConversion = isLabIsolado ? [] : await getLinksWithLowConversion(user.id, baseUrl)
+    const linkPerformanceBlock = isLabIsolado ? '' : formatLinkPerformanceForNoel(linksLowConversion)
 
     // Se o profissional pediu ajuste no link anterior: interpret com contexto + generate novo link
     let linkGeradoBlock = ''
@@ -1526,7 +1536,7 @@ export async function POST(request: NextRequest) {
 
     // Memória de conversa: quando frontend não envia histórico, carregar do DB (janela 8 msgs)
     let historyToUse = conversationHistory
-    if (!historyToUse || historyToUse.length === 0) {
+    if (!isLabIsolado && (!historyToUse || historyToUse.length === 0)) {
       const dbHistory = await getRecentMessages(user.id, 8)
       historyToUse = dbHistory
     }
@@ -1912,7 +1922,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Evento comportamental para analytics/valuation: noel_analysis_used
-    if (supabaseAdmin && responseText && responseText.length > 10) {
+    if (supabaseAdmin && !isLabIsolado && responseText && responseText.length > 10) {
       supabaseAdmin
         .from('ylada_behavioral_events')
         .insert({
@@ -1925,8 +1935,8 @@ export async function POST(request: NextRequest) {
         })
     }
 
-    // Atualizar memória estratégica e mapa
-    try {
+    // Atualizar memória estratégica e mapa (pulado no lab isolado — não suja a conta de teste)
+    if (!isLabIsolado) try {
       const actionFromMessage = detectActionFromMessage(message)
       const actionFromLink = linkGeradoBlock ? 'link_gerado' : undefined
       await upsertNoelMemory(user.id, validSegment, {
@@ -1942,13 +1952,15 @@ export async function POST(request: NextRequest) {
       console.warn('[/api/ylada/noel] upsertNoelMemory/syncStrategyMap:', memErr)
     }
 
-    // Memória de conversa: persistir troca (janela deslizante 8 msgs)
-    addExchange(user.id, message.trim(), responseText).catch((e) =>
-      console.warn('[/api/ylada/noel] addExchange:', e)
-    )
+    // Memória de conversa: persistir troca (janela deslizante 8 msgs) — pulado no lab isolado
+    if (!isLabIsolado) {
+      addExchange(user.id, message.trim(), responseText).catch((e) =>
+        console.warn('[/api/ylada/noel] addExchange:', e)
+      )
+    }
 
     // Persistir diagnóstico da conversa (bloqueio + estratégia + exemplo) para histórico
-    if (noelStrategies.length > 0 || situationCodes.length > 0 || professionalProfileCodes.length > 0) {
+    if (!isLabIsolado && (noelStrategies.length > 0 || situationCodes.length > 0 || professionalProfileCodes.length > 0)) {
       saveConversationDiagnosis({
         userId: user.id,
         segment: validSegment,

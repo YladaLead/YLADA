@@ -8,7 +8,13 @@ import remarkBreaks from 'remark-breaks'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { copyTextToClipboard } from '@/lib/clipboard'
 import { isNoelDesafioConducaoEnabled } from '@/lib/porta-unica/porta-unica-flag'
-import { NOEL_LAB_CENARIOS, type LabCenario } from '@/lib/porta-unica/noel-lab-cenarios'
+import {
+  NOEL_LAB_CENARIOS,
+  PAPEL_LABEL,
+  FASE_LABEL,
+  type LabCenario,
+  type LabFase,
+} from '@/lib/porta-unica/noel-lab-cenarios'
 
 /**
  * Laboratório da condução (matriz): roda cenários roteirizados de ponta a ponta contra
@@ -45,8 +51,9 @@ export default function NoelLabPage() {
               message: fala,
               conversationHistory: historia,
               area: 'ylada',
-              desafio: c.desafio,
+              desafio: c.desafio ?? undefined,
               locale: 'pt',
+              labIsolado: true,
               lastLinkContext: link ?? undefined,
             }),
           })
@@ -139,15 +146,21 @@ export default function NoelLabPage() {
         )}
       </div>
 
-      <div className="flex flex-col gap-4">
-        {NOEL_LAB_CENARIOS.map((c) => {
+      {(['entrada', 'dia-a-dia'] as LabFase[]).map((fase) => {
+        const doFase = NOEL_LAB_CENARIOS.filter((c) => c.fase === fase)
+        if (doFase.length === 0) return null
+        return (
+        <div key={fase} className="flex flex-col gap-4">
+          <h2 className="mt-2 text-sm font-bold uppercase tracking-wide text-gray-500">{FASE_LABEL[fase]}</h2>
+        {doFase.map((c) => {
           const r = resultados[c.id]
           return (
             <div key={c.id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                    {c.papel === 'lider' ? 'Líder' : 'Liberal'} · desafio: {c.desafio.key}
+                    {PAPEL_LABEL[c.papel]}
+                    {c.desafio ? ` · desafio: ${c.desafio.key}` : ' · orientação'}
                   </p>
                   <h2 className="text-base font-semibold text-gray-900">{c.label}</h2>
                 </div>
@@ -186,11 +199,13 @@ export default function NoelLabPage() {
                     {copiado === c.id ? 'Copiado!' : 'Copiar'}
                   </button>
                 </div>
-              ) : r?.status === 'done' ? (
+              ) : r?.status === 'done' && c.esperaLink ? (
                 <p className="mt-2 text-sm text-amber-800">
                   Conversa concluída, mas nenhum link foi gerado (veja a transcrição: pode ter faltado o gatilho de
                   aprovação/WhatsApp, ou o limite Free de 1 link foi atingido).
                 </p>
+              ) : r?.status === 'done' ? (
+                <p className="mt-2 text-xs text-gray-500">Orientação concluída (sem link). Avalie a resposta na transcrição.</p>
               ) : null}
 
               {r?.transcript?.length ? (
@@ -220,7 +235,9 @@ export default function NoelLabPage() {
             </div>
           )
         })}
-      </div>
+        </div>
+        )
+      })}
     </div>
   )
 }
