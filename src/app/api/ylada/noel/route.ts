@@ -66,6 +66,10 @@ import {
   construirBlocoGeracaoToolParaPrompt,
   construirBlocoFewShotConducaoParaPrompt,
 } from '@/lib/porta-unica/abertura-noel-desafio'
+import {
+  deveGerarNaConducao,
+  construirTextoInterpretConducao,
+} from '@/lib/porta-unica/conducao-geracao'
 import { relaxarGateMatrizParaNoelDireto } from '@/lib/porta-unica/destino-pos-cadastro'
 import {
   construirBlocoColetaContatoParaPrompt,
@@ -155,22 +159,29 @@ function buildLinkBlock(
   return { descResumida, conteudoReal }
 }
 
-/** Bloco anexado à resposta final — mesma fonte que o link público e a tela de edição (`config`). */
+/** Bloco anexado à resposta final — mesma fonte que o link público e a tela de edição (`config`).
+ * `vocab` = 'diagnostico' (condução/porta) reposiciona como autoridade: heading + âncora em
+ * "diagnóstico", não "quiz" (§10.14). A UI detecta os dois headings (additivo). */
 function buildCanonicalQuizMarkdownForResponse(
   title: string,
   url: string,
   flowId: string,
-  config: Record<string, unknown> | null
+  config: Record<string, unknown> | null,
+  vocab: 'quiz' | 'diagnostico' = 'quiz'
 ): string {
   const { conteudoReal } = buildLinkBlock(title, flowId, url, config)
   const lines: string[] = []
-  lines.push('### Quiz e link (oficial — igual ao link público e à edição)')
+  lines.push(
+    vocab === 'diagnostico'
+      ? '### Diagnóstico e link (oficial — igual ao link público e à edição)'
+      : '### Quiz e link (oficial — igual ao link público e à edição)'
+  )
   lines.push('')
   if (conteudoReal.trim()) {
     lines.push(conteudoReal.trim())
     lines.push('')
   }
-  lines.push(`[Acesse seu quiz](${url})`)
+  lines.push(`[${vocab === 'diagnostico' ? 'Acessar diagnóstico' : 'Acesse seu quiz'}](${url})`)
   return lines.join('\n')
 }
 
@@ -766,8 +777,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Mensagem é obrigatória.' }, { status: 400 })
     }
     // Modo Espelho (Etapa 1): forçado pelo handoff do diagnóstico de convicção. Nunca gera link.
-    const noelResponseMode: NoelResponseMode =
+    let noelResponseMode: NoelResponseMode =
       mode === 'espelho' ? 'modo_espelho' : classifyNoelResponseMode(message, conversationHistory)
+    // Passo 4 (Fase 2): no fluxo da porta (flag + desafio em jogo), a aprovação/WhatsApp NÃO casa
+    // com isIntencaoCriarLink — sem isto a IA inventa a URL (404). Detectamos o momento de gerar e
+    // forçamos modo_link AQUI (atrás da flag + desafio; OFF/sem-desafio = byte-idêntico).
+    const desafioConducao =
+      isNoelDesafioConducaoEnabled() ? normalizarDesafioRecebido(desafio) : null
+    const conducaoDeveGerar =
+      noelResponseMode !== 'modo_espelho' &&
+      !!desafioConducao &&
+      deveGerarNaConducao({ message, conversationHistory })
+    if (conducaoDeveGerar) noelResponseMode = 'modo_link'
     const linkModeEnabled = noelResponseMode === 'modo_link'
 
     // Freemium: verificar limite de análises avançadas antes de chamar IA (mentor; Nina não consome cota)
@@ -1097,14 +1118,22 @@ export async function POST(request: NextRequest) {
     const retrieveExistingLinkIntent = isIntencaoRecuperarLinkExistente(message)
     const shouldGenerateNewLink =
       linkModeEnabled &&
-      isIntencaoCriarLink(message, conversationHistory) &&
+      (isIntencaoCriarLink(message, conversationHistory) || conducaoDeveGerar) &&
       !retrieveExistingLinkIntent
     const requestedTitle = extractRequestedTitleFromMessage(message)
+    // Passo 4: na condução, o `message` é só "pode gerar"/o WhatsApp — cego ao caso. Costuramos o
+    // desafio + as respostas de nicho/foco da conversa pra o interpret gerar o diagnóstico SOB MEDIDA.
+    const interpretTextForGeneration =
+      conducaoDeveGerar && desafioConducao
+        ? construirTextoInterpretConducao({ desafio: desafioConducao, conversationHistory })
+        : message.trim()
 
     // Se o profissional pediu link/quiz/calculadora: verificar perfil; se tiver, interpret + generate
     if (!linkGeradoBlock && shouldGenerateNewLink && !blockAutoLinkForClientFollowUp) {
+      // Na condução (porta → Noel direto) o nicho/foco vem da CONVERSA, não do perfil empresarial
+      // (o usuário da porta entra sem perfil completo). Por isso, com conducaoDeveGerar, não exigimos perfil.
       const temPerfil = profileRow && (profileRow.profile_type || profileRow.profession)
-      if (!temPerfil) {
+      if (!temPerfil && !conducaoDeveGerar) {
         linkGeradoBlock = '\n[AVISO: SEM PERFIL]\nO perfil do profissional está incompleto (falta tipo de atuação e/ou área). NÃO gere link. Explique de forma amigável: (1) que o perfil está incompleto e ele precisa preencher em "Perfil empresarial" (menu ao lado); (2) que você sempre se baseia no perfil dele para recomendar o link mais adequado — por isso é essencial que ele complete o perfil primeiro. Depois que preencher, ele pode pedir o link de novo que aí você entrega.'
       } else {
         try {
@@ -1113,7 +1142,7 @@ export async function POST(request: NextRequest) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', cookie },
             body: JSON.stringify({
-              text: message.trim(),
+              text: interpretTextForGeneration,
               segment: validSegment,
               profile_type: profileRow?.profile_type ?? undefined,
               profession: profileRow?.profession ?? undefined,
@@ -1851,21 +1880,25 @@ export async function POST(request: NextRequest) {
     }
 
     if (linkModeEnabled && canonicalAppendix && lastLinkContextOut?.url) {
+      // Vocabulário: na condução (porta), posiciona como "diagnóstico" (autoridade), não "quiz".
+      const appendixVocab: 'quiz' | 'diagnostico' = conducaoDeveGerar ? 'diagnostico' : 'quiz'
+      const blocoNome = appendixVocab === 'diagnostico' ? 'Diagnóstico e link (oficial)' : 'Quiz e link (oficial)'
       // Evita duplicação: quando já existe bloco oficial, mantenha acima apenas uma introdução curta.
       responseText = [
         'Perfeito — seu diagnóstico está pronto.',
         '',
-        'Abaixo está o bloco **Quiz e link (oficial)** com as perguntas exatas e o link certo para compartilhar.',
+        `Abaixo está o bloco **${blocoNome}** com as perguntas exatas e o link certo para compartilhar.`,
         '',
         'Se quiser, eu ajusto as perguntas e gero uma versão alternativa em seguida.',
       ].join('\n')
-      const marker = '### Quiz e link (oficial'
+      const marker = appendixVocab === 'diagnostico' ? '### Diagnóstico e link (oficial' : '### Quiz e link (oficial'
       if (!responseText.includes(marker)) {
         const footer = buildCanonicalQuizMarkdownForResponse(
           canonicalAppendix.title,
           canonicalAppendix.url,
           canonicalAppendix.flowId,
-          canonicalAppendix.config
+          canonicalAppendix.config,
+          appendixVocab
         )
         responseText = `${responseText.trim()}\n\n---\n\n${footer}`
       }

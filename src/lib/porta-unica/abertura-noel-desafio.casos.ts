@@ -97,6 +97,9 @@ caso('bloco de GERAÇÃO traz as regras do líder (copy pro leitor + coerência 
   // aprovação antes do link final (preview → aprova/ajusta → gera, como o líder)
   assert.match(g, /APROVAÇÃO ANTES DO LINK/i)
   assert.match(g, /Só gere\/entregue o LINK depois que a pessoa aprovar/i)
+  // Passo 4: anti-alucinação de URL (quem gera o link é o SISTEMA, nunca a IA)
+  assert.match(g, /QUEM GERA O LINK É O SISTEMA/i)
+  assert.match(g, /NUNCA.*(inventa|exemplifica).*URL|JAMAIS escreve/i)
 })
 
 caso('few-shot tem 3 exemplos que modelam o padrão (foco, objetivo, lógica, indicação viral, dúvida primeiro)', () => {

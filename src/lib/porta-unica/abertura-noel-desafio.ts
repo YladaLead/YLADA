@@ -67,7 +67,8 @@ export function construirBlocoGeracaoToolParaPrompt(): string {
     'COPY PRO LEITOR: título, primeira frase e perguntas são escritos PRA QUEM VAI RESPONDER (a dor / o desejo dele), NUNCA expõem o objetivo interno. Ex.: o objetivo "colher indicações" não vira o título "Colhendo Indicações"; vira algo como "Quem você ama merece esse cuidado?".\n' +
     'COERÊNCIA POR OBJETIVO — UMA lógica por tool, sem misturar: (a) trazer gente nova = diagnóstico que revela uma dor + CTA de conversa; (b) cuidar de cliente / reativar = conteúdo útil + percepção do momento + CTA leve; (c) colher indicações = VIRAL / COMPARTILHAR (gancho + CTA de passar o link adiante), NUNCA um formulário pedindo nome/telefone de terceiros.\n' +
     'COLETA DE DADOS: default OFF. NUNCA peça nome, telefone, e-mail ou mensagem como PERGUNTA de quiz (A/B/C/D) — o handoff no WhatsApp já identifica quem engajou. Coleta ativa só se a finalidade pedir, com opt-in claro e campo livre.\n' +
-    'APROVAÇÃO ANTES DO LINK FINAL: primeiro MOSTRE o rascunho (as perguntas do quiz) e PEÇA aprovação — ex.: "ficou bom assim, ou quer ajustar alguma pergunta?". Só gere/entregue o LINK depois que a pessoa aprovar. (Mesmo padrão do Construtor do líder: preview → aprova/ajusta → gera.)'
+    'APROVAÇÃO ANTES DO LINK FINAL: primeiro MOSTRE o rascunho (as perguntas do quiz) e PEÇA aprovação — ex.: "ficou bom assim, ou quer ajustar alguma pergunta?". Só gere/entregue o LINK depois que a pessoa aprovar. (Mesmo padrão do Construtor do líder: preview → aprova/ajusta → gera.)\n' +
+    'QUEM GERA O LINK É O SISTEMA — NUNCA VOCÊ: você JAMAIS escreve, inventa ou exemplifica uma URL/endereço de link (nada de "ylada.com/...", "/quiz/123", "aqui está o link" com endereço inventado). Quando a pessoa aprova e passa o WhatsApp, o SISTEMA gera o diagnóstico real e ANEXA o bloco oficial com o único link válido ao final da sua mensagem. Enquanto esse bloco oficial não aparecer, NÃO diga que o link está pronto nem mostre endereço nenhum — conduza ou peça o que falta (aprovação/WhatsApp).'
   )
 }
 
@@ -111,7 +112,8 @@ const ROTULO_POR_KEY: Readonly<Record<DesafioKey, string>> = {
   outro: 'algo que ele quer melhorar',
 }
 
-function rotuloDoDesafio(resposta: DesafioResposta): string {
+/** Rótulo do desafio em 3ª pessoa (reusado pela costura do texto de interpret na condução). */
+export function rotuloDoDesafio(resposta: DesafioResposta): string {
   if (resposta.key === 'outro' && resposta.texto) return resposta.texto
   return ROTULO_POR_KEY[resposta.key]
 }
