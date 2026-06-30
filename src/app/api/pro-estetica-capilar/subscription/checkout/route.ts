@@ -7,10 +7,8 @@ import {
   proEsteticaCapilarCheckoutAmountBrl,
   type ProEsteticaCapilarPlanType,
 } from '@/lib/pro-estetica-capilar-subscription'
-import {
-  resolveEsteticaCapilarTenantContext,
-  resolvedUserEmail,
-} from '@/lib/pro-estetica-capilar-server'
+import { resolveEsteticaCapilarTenantContext } from '@/lib/pro-estetica-capilar-server'
+import { resolvedUserEmail } from '@/lib/pro-lideres-server'
 
 /**
  * Cria Preapproval Mercado Pago (cartão recorrente) — dona do tenant capilar.
