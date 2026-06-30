@@ -3,6 +3,14 @@ import {
   extractMercadoPagoPayerFromPayment,
   type MercadoPagoPayerSnapshot,
 } from '@/lib/mercado-pago-payer'
+import {
+  applyInviteQuotaPackPaymentFromMercadoPago,
+  billingDayFromIsoDate,
+  createPendingInviteQuotaPack,
+  parsePackIdFromInviteQuotaPackMpRef,
+  PRO_LIDERES_INVITE_QUOTA_PIX_REF_PREFIX,
+  syncTeamInvitePendingQuotaFromPacks,
+} from '@/lib/pro-lideres-invite-quota-packs'
 
 export type { MercadoPagoPayerSnapshot }
 export { extractMercadoPagoPayerFromPayment }
@@ -35,6 +43,7 @@ export type ApplyInviteQuotaTopupResult =
   | { ok: false; error: string }
 
 /**
+ * @deprecated Fluxo avulso legado — novos pacotes usam assinatura recorrente (`pro_lideres_invite_quota_packs`).
  * Webhook MP: confirma pagamento aprovado e soma +50 em team_invite_pending_quota (idempotente por payment id).
  */
 export async function applyLeaderTenantInviteQuotaTopupFromMercadoPago(
@@ -157,36 +166,25 @@ export async function reverseLeaderTenantInviteQuotaTopupFromMercadoPago(
 ): Promise<boolean> {
   const { data: rec } = await admin
     .from('pro_lideres_invite_quota_mp_receipts')
-    .select('leader_tenant_id, owner_user_id, slots_added')
+    .select('leader_tenant_id, owner_user_id, pack_id')
     .eq('mercado_pago_payment_id', paymentId)
     .maybeSingle()
 
   if (!rec?.leader_tenant_id) return false
 
-  const slots = typeof rec.slots_added === 'number' && rec.slots_added > 0 ? rec.slots_added : 50
   const owner = String(rec.owner_user_id)
+  const tenantId = String(rec.leader_tenant_id)
 
-  const { data: tenant } = await admin
-    .from('leader_tenants')
-    .select('team_invite_pending_quota')
-    .eq('id', rec.leader_tenant_id)
-    .eq('owner_user_id', owner)
-    .maybeSingle()
+  if (rec.pack_id) {
+    await admin
+      .from('pro_lideres_invite_quota_packs')
+      .update({ status: 'past_due', updated_at: new Date().toISOString() })
+      .eq('id', rec.pack_id)
+  }
 
-  const cur =
-    typeof tenant?.team_invite_pending_quota === 'number' && tenant.team_invite_pending_quota >= 0
-      ? tenant.team_invite_pending_quota
-      : 0
-  const next = Math.max(0, cur - slots)
-
-  await admin
-    .from('leader_tenants')
-    .update({ team_invite_pending_quota: next, updated_at: new Date().toISOString() })
-    .eq('id', rec.leader_tenant_id)
-    .eq('owner_user_id', owner)
-
+  await syncTeamInvitePendingQuotaFromPacks(admin, tenantId, owner)
   await admin.from('pro_lideres_invite_quota_mp_receipts').delete().eq('mercado_pago_payment_id', paymentId)
-  console.log('↩️ Cota Pro Líderes revertida (estorno MP):', paymentId, 'tenant', rec.leader_tenant_id, next)
+  console.log('↩️ Pacote Pro Líderes revertido (estorno MP):', paymentId, 'tenant', tenantId)
   return true
 }
 
@@ -202,7 +200,53 @@ export async function tryHandleProLideresInviteQuotaTopupWebhook(
   },
   paymentId: string
 ): Promise<boolean> {
-  const tenantId = parseLeaderTenantIdFromInviteQuotaMpRef(fullData.external_reference ?? undefined)
+  const extRef = fullData.external_reference ?? undefined
+  const metaPackId =
+    typeof fullData.metadata?.pack_id === 'string' ? fullData.metadata.pack_id : null
+  const packId = metaPackId && UUID_RE.test(metaPackId)
+    ? metaPackId
+    : parsePackIdFromInviteQuotaPackMpRef(extRef)
+
+  if (packId) {
+    const ownerUserId =
+      typeof fullData.metadata?.user_id === 'string'
+        ? fullData.metadata.user_id
+        : fullData.metadata?.user_id != null
+          ? String(fullData.metadata.user_id)
+          : ''
+    if (!ownerUserId || !UUID_RE.test(ownerUserId)) {
+      console.error('[tryHandleProLideresInviteQuotaTopupWebhook] pack sem user_id válido', paymentId)
+      return true
+    }
+
+    const viaPix = Boolean(
+      (extRef && extRef.startsWith(PRO_LIDERES_INVITE_QUOTA_PIX_REF_PREFIX)) ||
+        fullData.metadata?.ylada_product === 'pro_lideres_invite_quota_50_pix'
+    )
+    const mpPayer = extractMercadoPagoPayerFromPayment(fullData)
+    const checkoutEmail =
+      typeof fullData.metadata?.checkout_account_email === 'string'
+        ? fullData.metadata.checkout_account_email
+        : null
+
+    const result = await applyInviteQuotaPackPaymentFromMercadoPago(admin, {
+      paymentId,
+      packId,
+      transactionAmount: Number(fullData.transaction_amount ?? 0),
+      checkoutAccountEmail: checkoutEmail,
+      mpPayer,
+      viaPix,
+    })
+
+    if (!result.ok) {
+      console.error('[tryHandleProLideresInviteQuotaTopupWebhook] pack', paymentId, result.error)
+    } else {
+      console.log('✅ Pacote recorrente +50 MP processado:', paymentId, packId)
+    }
+    return true
+  }
+
+  const tenantId = parseLeaderTenantIdFromInviteQuotaMpRef(extRef)
   if (!tenantId) return false
 
   const ownerUserId =
@@ -223,23 +267,25 @@ export async function tryHandleProLideresInviteQuotaTopupWebhook(
       ? fullData.metadata.checkout_account_email
       : null
 
-  const result = await applyLeaderTenantInviteQuotaTopupFromMercadoPago(admin, {
-    paymentId,
+  const legacyPack = await createPendingInviteQuotaPack(admin, {
     leaderTenantId: tenantId,
-    ownerUserIdFromCheckout: ownerUserId,
+    ownerUserId,
+    billingDay: billingDayFromIsoDate(new Date().toISOString()),
+  })
+
+  const result = await applyInviteQuotaPackPaymentFromMercadoPago(admin, {
+    paymentId,
+    packId: legacyPack.id,
     transactionAmount: amount,
     checkoutAccountEmail: checkoutEmail,
     mpPayer,
+    viaPix: true,
   })
 
   if (!result.ok) {
-    console.error('[tryHandleProLideresInviteQuotaTopupWebhook]', paymentId, result.error)
+    console.error('[tryHandleProLideresInviteQuotaTopupWebhook] legado', paymentId, result.error)
     return true
   }
-  if (result.alreadyProcessed) {
-    console.log('✅ Pacote +50 convites MP já processado:', paymentId)
-  } else {
-    console.log('✅ Pacote +50 convites MP aplicado:', paymentId, 'nova cota', result.newQuota)
-  }
+  console.log('✅ Pacote legado +50 convertido para recorrente:', paymentId, legacyPack.id)
   return true
 }

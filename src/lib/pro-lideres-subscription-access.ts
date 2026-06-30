@@ -8,33 +8,82 @@ import {
   isProLideresDevStubTenant,
   proLideresPainelDevBypassEnabled,
 } from '@/lib/pro-lideres-server'
+import { supabaseAdmin } from '@/lib/supabase'
 import { hasActiveSubscription, type SubscriptionArea } from '@/lib/subscription-helpers'
+import { evaluateInviteQuotaPacksAccess } from '@/lib/pro-lideres-invite-quota-packs'
 
 const PRO_LIDERES_TEAM_AREA: SubscriptionArea = 'pro_lideres_team'
+
+export type ProLideresAccessBlockReason =
+  | null
+  | 'base_subscription'
+  | 'invite_quota_pack_overdue'
+
+export type ProLideresTeamAccessStatus = {
+  allowed: boolean
+  reason: ProLideresAccessBlockReason
+  overduePackIds: string[]
+}
 
 /**
  * Líder + equipe dependem da assinatura recorrente do dono do tenant (Mercado Pago).
  * Bypass: stub de dev, contas bootstrap (env / lista interna).
+ * Qualquer pacote +50 em atraso bloqueia o painel inteiro.
  */
+export async function resolveProLideresTeamAccessStatus(
+  user: User,
+  ctx: ProLideresTenantContext,
+  supabase: SupabaseClient
+): Promise<ProLideresTeamAccessStatus> {
+  if (proLideresPainelDevBypassEnabled() && isProLideresDevStubTenant(ctx.tenant)) {
+    return { allowed: true, reason: null, overduePackIds: [] }
+  }
+  if (isProLideresBootstrapLeader(user)) {
+    return { allowed: true, reason: null, overduePackIds: [] }
+  }
+
+  const ownerId = ctx.tenant.owner_user_id
+  const baseOk = await hasActiveSubscription(ownerId, PRO_LIDERES_TEAM_AREA)
+  if (!baseOk) {
+    return { allowed: false, reason: 'base_subscription', overduePackIds: [] }
+  }
+
+  const packAccess = await evaluateInviteQuotaPacksAccess(supabase, ctx.tenant.id)
+  if (!packAccess.ok) {
+    return {
+      allowed: false,
+      reason: 'invite_quota_pack_overdue',
+      overduePackIds: packAccess.overduePacks.map((p) => p.id),
+    }
+  }
+
+  return { allowed: true, reason: null, overduePackIds: [] }
+}
+
 export async function proLideresTeamSubscriptionAllowsAccess(
   user: User,
   ctx: ProLideresTenantContext
 ): Promise<boolean> {
-  if (proLideresPainelDevBypassEnabled() && isProLideresDevStubTenant(ctx.tenant)) return true
-  if (isProLideresBootstrapLeader(user)) return true
-  const ownerId = ctx.tenant.owner_user_id
-  return hasActiveSubscription(ownerId, PRO_LIDERES_TEAM_AREA)
+  if (!supabaseAdmin) return false
+  const status = await resolveProLideresTeamAccessStatus(user, ctx, supabaseAdmin)
+  return status.allowed
 }
 
 export async function ownerHasProLideresTeamSubscription(ownerUserId: string): Promise<boolean> {
   return hasActiveSubscription(ownerUserId, PRO_LIDERES_TEAM_AREA)
 }
 
-export function proLideresSubscriptionRequiredResponse(): NextResponse {
+export function proLideresSubscriptionRequiredResponse(reason?: ProLideresAccessBlockReason): NextResponse {
+  const isPackOverdue = reason === 'invite_quota_pack_overdue'
   return NextResponse.json(
     {
-      error: 'Assinatura YLADA deste espaço inativa ou pagamento em atraso.',
-      code: 'pro_lideres_team_subscription_required',
+      error: isPackOverdue
+        ? 'Pagamento de um pacote de convites em atraso. Regularize para voltar a usar o painel.'
+        : 'Assinatura YLADA deste espaço inativa ou pagamento em atraso.',
+      code: isPackOverdue
+        ? 'pro_lideres_invite_quota_pack_overdue'
+        : 'pro_lideres_team_subscription_required',
+      blockReason: reason ?? 'base_subscription',
     },
     { status: 402 }
   )
@@ -69,7 +118,8 @@ export async function requireProLideresPaidContext(
     return { ok: true, ctx }
   }
 
-  if (await proLideresTeamSubscriptionAllowsAccess(user, ctx)) {
+  const accessStatus = await resolveProLideresTeamAccessStatus(user, ctx, supabase)
+  if (accessStatus.allowed) {
     return { ok: true, ctx }
   }
 
@@ -77,5 +127,5 @@ export async function requireProLideresPaidContext(
     return { ok: true, ctx }
   }
 
-  return { ok: false, response: proLideresSubscriptionRequiredResponse() }
+  return { ok: false, response: proLideresSubscriptionRequiredResponse(accessStatus.reason) }
 }

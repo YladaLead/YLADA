@@ -7,12 +7,21 @@ import {
   resolveProLideresViewerDisplayName,
 } from '@/lib/pro-lideres-server'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
-import { createProLideresInviteQuotaPreference } from '@/lib/mercado-pago-pro-lideres-invite-quota-preference'
+import { createProLideresInviteQuotaPackSubscription } from '@/lib/mercado-pago-pro-lideres-invite-quota-subscription'
+import {
+  createPendingInviteQuotaPack,
+  getInviteQuotaPackById,
+  linkInviteQuotaPackPreapproval,
+} from '@/lib/pro-lideres-invite-quota-packs'
+import { PRO_LIDERES_INVITE_PACK_BRL, PRO_LIDERES_INVITE_SLOTS_PER_PACK } from '@/lib/pro-lideres-invite-slots'
 
-const PACK_BRL = 750
+type CheckoutBody = {
+  packId?: string
+}
 
 /**
- * Cria Preference Mercado Pago (pagamento único R$ 750) — +50 convites pendentes após webhook aprovado.
+ * Cria assinatura recorrente Mercado Pago (cartão, R$ 750/mês) — +50 convites por pacote.
+ * Renova no dia do mês em que o líder contratou.
  */
 export async function POST(request: NextRequest) {
   const auth = await requireApiAuth(request)
@@ -25,11 +34,15 @@ export async function POST(request: NextRequest) {
 
   const ctx = await resolveProLideresTenantContext(supabaseAdmin, user)
   if (!ctx || ctx.tenant.owner_user_id !== user.id) {
-    return NextResponse.json({ error: 'Apenas o líder pode comprar cota extra.' }, { status: 403 })
+    return NextResponse.json({ error: 'Apenas o líder pode contratar pacote extra.' }, { status: 403 })
   }
 
-  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
-  if (!paid.ok) return paid.response
+  let body: CheckoutBody = {}
+  try {
+    body = (await request.json()) as CheckoutBody
+  } catch {
+    body = {}
+  }
 
   const email = resolvedUserEmail(user)
   if (!email?.includes('@')) {
@@ -52,16 +65,36 @@ export async function POST(request: NextRequest) {
   const isTest = process.env.NODE_ENV !== 'production'
 
   try {
+    const packIdFromBody = typeof body.packId === 'string' ? body.packId.trim() : ''
+    let pack = packIdFromBody ? await getInviteQuotaPackById(supabaseAdmin, packIdFromBody) : null
+
+    if (pack && pack.leader_tenant_id !== ctx.tenant.id) {
+      return NextResponse.json({ error: 'Pacote não pertence a este espaço.' }, { status: 403 })
+    }
+
+    if (pack && pack.status === 'active') {
+      return NextResponse.json({ error: 'Este pacote já está ativo.' }, { status: 400 })
+    }
+
+    if (!pack) {
+      const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+      if (!paid.ok) return paid.response
+      pack = await createPendingInviteQuotaPack(supabaseAdmin, {
+        leaderTenantId: ctx.tenant.id,
+        ownerUserId: user.id,
+      })
+    }
+
     const displayName = resolveProLideresViewerDisplayName(user, {
       nomeCompleto: ctx.tenant.display_name,
     })
 
-    const pref = await createProLideresInviteQuotaPreference(
+    const sub = await createProLideresInviteQuotaPackSubscription(
       {
         userId: user.id,
         userEmail: email,
-        userDisplayName: displayName,
         leaderTenantId: ctx.tenant.id,
+        packId: pack.id,
         successUrl,
         failureUrl,
         pendingUrl,
@@ -69,14 +102,18 @@ export async function POST(request: NextRequest) {
       isTest
     )
 
+    await linkInviteQuotaPackPreapproval(supabaseAdmin, pack.id, sub.preapprovalId)
+
     return NextResponse.json({
-      checkoutUrl: pref.initPoint,
-      preferenceId: pref.preferenceId,
-      amountBrl: PACK_BRL,
-      slotsAdded: 50,
+      checkoutUrl: sub.initPoint,
+      preapprovalId: sub.preapprovalId,
+      packId: pack.id,
+      amountBrl: PRO_LIDERES_INVITE_PACK_BRL,
+      slotsAdded: PRO_LIDERES_INVITE_SLOTS_PER_PACK,
+      recurring: true,
     })
   } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : 'Erro ao criar checkout no Mercado Pago.'
+    const msg = e instanceof Error ? e.message : 'Erro ao criar assinatura no Mercado Pago.'
     console.error('[pro-lideres/invites/quota-topup/checkout]', e)
     return NextResponse.json({ error: msg }, { status: 500 })
   }

@@ -17,6 +17,7 @@ import {
   reverseLeaderTenantInviteQuotaTopupFromMercadoPago,
   tryHandleProLideresInviteQuotaTopupWebhook,
 } from '@/lib/pro-lideres-invite-quota-mp'
+import { tryHandleProLideresInviteQuotaPackPreapprovalWebhook } from '@/lib/pro-lideres-invite-quota-packs'
 import {
   extendProEsteticaCapilarConsultAccess,
   isProEsteticaCapilarSubscriptionArea,
@@ -1358,6 +1359,11 @@ async function handleSubscriptionEvent(
   console.log('🔄 Processando assinatura recorrente (Preapproval):', subscriptionId, 'isTest:', isTest)
 
   try {
+    if (supabaseAdmin) {
+      const handledPack = await tryHandleProLideresInviteQuotaPackPreapprovalWebhook(supabaseAdmin, fullData)
+      if (handledPack) return
+    }
+
     const metadata = (fullData.metadata as Record<string, unknown> | undefined) || {}
     let userId = metadata.user_id as string | undefined
     let area = normalizeMercadoPagoWebhookArea(

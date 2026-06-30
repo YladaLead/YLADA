@@ -14,6 +14,7 @@ import {
   loadProLideresInviteSlotsStatus,
   proLideresInviteSlotsBlockedMessage,
 } from '@/lib/pro-lideres-invite-slots'
+import { loadInviteQuotaPacksForTenant } from '@/lib/pro-lideres-invite-quota-packs'
 import type { LeaderTenantInviteListItem, LeaderTenantInviteRow } from '@/types/leader-tenant'
 
 function requestOrigin(request: NextRequest): string {
@@ -152,11 +153,13 @@ export async function GET(request: NextRequest) {
   const { data: receiptRows } = await supabaseAdmin
     .from('pro_lideres_invite_quota_mp_receipts')
     .select(
-      'mercado_pago_payment_id, amount_brl, slots_added, created_at, checkout_account_email, mp_payer_email, mp_payer_name, mp_cardholder_name, mp_card_last_four'
+      'mercado_pago_payment_id, amount_brl, slots_added, created_at, checkout_account_email, mp_payer_email, mp_payer_name, mp_cardholder_name, mp_card_last_four, pack_id, is_renewal'
     )
     .eq('leader_tenant_id', tenantId)
     .order('created_at', { ascending: false })
     .limit(12)
+
+  const inviteQuotaPacks = await loadInviteQuotaPacksForTenant(supabaseAdmin, tenantId)
 
   const mpQuotaReceipts = (receiptRows ?? []).map((row) => {
     const checkout = (row.checkout_account_email as string | null)?.trim().toLowerCase() || null
@@ -185,6 +188,14 @@ export async function GET(request: NextRequest) {
       totalListed: baseRows.length,
     },
     mpQuotaReceipts,
+    inviteQuotaPacks: inviteQuotaPacks.map((pack) => ({
+      id: pack.id,
+      status: pack.status,
+      slots: pack.slots,
+      amountBrl: Number(pack.amount_brl),
+      billingDay: pack.billing_day,
+      currentPeriodEnd: pack.current_period_end,
+    })),
   })
 }
 
