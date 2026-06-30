@@ -419,7 +419,8 @@ interface NoelChatProps {
   showChatHeaderTitle?: boolean
   /** Ocultar a linha de exemplo abaixo do campo de texto. */
   hideInputHint?: boolean
-  /** Texto do botão de envio (default: «Perguntar ao Noel»). */
+  /** Texto do botão de envio (default: «Enviar» — neutro, porque a pessoa muitas vezes
+   *  está RESPONDENDO o Noel, não perguntando). */
   sendButtonLabel?: string
   /** Se true, não mostra o rótulo "Sugestões:" acima dos chips. */
   hideSuggestionsHeading?: boolean
@@ -687,8 +688,10 @@ export default function NoelChat({
         .slice(-12)
         .map((m) => ({ role: m.role, content: m.content }))
 
-      // Toque "b": o desafio da porta só enquadra a 1ª troca; consumido logo após
-      // (evita re-injetar pra sempre / re-disparar a abertura em quem volta).
+      // Toque "b": manda o desafio da porta em TODA a janela de onboarding (não só no
+      // 1º turno) — os blocos de condução/geração/few-shot precisam estar no prompt ATÉ
+      // a geração do tool. É RETIRADO quando o 1º tool é gerado (abaixo). A recepção não
+      // re-dispara porque é gateada por "sem histórico salvo".
       const desafioParaEnvio = getDesafioParaConducao(area)
       const res = await authenticatedFetch(resolvedChatApi, {
         method: 'POST',
@@ -706,7 +709,6 @@ export default function NoelChat({
               }
         ),
       })
-      if (desafioParaEnvio) consumirDesafio()
 
       if (!res.ok) {
         const err = (await res.json().catch(() => ({}))) as {
@@ -758,6 +760,10 @@ export default function NoelChat({
       if (data.lastLinkContext) {
         setLastLinkContext(data.lastLinkContext)
         saveLastLinkContext(area, data.lastLinkContext) // persistir imediatamente (evita perda se componente desmontar)
+        // Toque "b": o onboarding cumpriu o objetivo (gerou o 1º tool) → retira o desafio.
+        // (Antes era consumido no 1º turno, cedo demais: os blocos de condução/geração/few-shot
+        //  precisam persistir ATÉ a geração, que acontece vários turnos depois.)
+        if (desafioParaEnvio) consumirDesafio()
       }
       const assistantMsg: Message = {
         id: `a-${Date.now()}`,
@@ -1083,7 +1089,11 @@ export default function NoelChat({
   )
 
   const showSuggestions =
-    !hideSuggestions && messages.length === 1 && messages[0]?.role === 'assistant'
+    !hideSuggestions &&
+    messages.length === 1 &&
+    messages[0]?.role === 'assistant' &&
+    // Recepção do desafio (toque "b") conduz primeiro — chips "criar link" são prematuros aqui.
+    messages[0]?.id !== 'abertura-desafio'
 
   return (
     <div className={`flex flex-col rounded-2xl border border-sky-100 bg-white shadow-lg overflow-hidden ${className}`}>
@@ -1356,6 +1366,7 @@ export default function NoelChat({
                   ) : null}
                   {lastAssistantMsg?.id === msg.id &&
                     msg.id !== 'welcome' &&
+                    msg.id !== 'abertura-desafio' &&
                     area !== 'pro_lideres_member' &&
                     !resolvedChatApi?.includes('/membro/noel') &&
                     messageHasScript(msg.content) &&
@@ -1808,7 +1819,7 @@ export default function NoelChat({
             className="h-[48px] px-6 bg-sky-600 text-white rounded-xl hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold shrink-0 shadow-md flex items-center gap-2"
           >
             {loading ? '⏳' : '➤'}
-            <span className="hidden sm:inline">{sendButtonLabel ?? 'Perguntar ao Noel'}</span>
+            <span className="hidden sm:inline">{sendButtonLabel ?? 'Enviar'}</span>
           </button>
         </div>
       </div>

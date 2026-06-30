@@ -63,6 +63,8 @@ import { isNoelDesafioConducaoEnabled, isNoelDiretoEnabled } from '@/lib/porta-u
 import {
   normalizarDesafioRecebido,
   construirBlocoDesafioParaPrompt,
+  construirBlocoGeracaoToolParaPrompt,
+  construirBlocoFewShotConducaoParaPrompt,
 } from '@/lib/porta-unica/abertura-noel-desafio'
 import { relaxarGateMatrizParaNoelDireto } from '@/lib/porta-unica/destino-pos-cadastro'
 import {
@@ -1378,7 +1380,13 @@ export async function POST(request: NextRequest) {
     // Toque "b" Fase 2 (atrás da flag): conduzir a partir do desafio declarado na porta.
     if (isNoelDesafioConducaoEnabled()) {
       const blocoDesafio = construirBlocoDesafioParaPrompt(normalizarDesafioRecebido(desafio))
-      if (blocoDesafio) parts.push(blocoDesafio)
+      if (blocoDesafio) {
+        parts.push(blocoDesafio)
+        // Regras de geração do tool (copy pro leitor + coerência por objetivo + coleta OFF — §10.14)
+        parts.push(construirBlocoGeracaoToolParaPrompt())
+        // Few-shot: conversas-modelo que travam o comportamento (HANDOFF_Noel_Reestruturacao)
+        parts.push(construirBlocoFewShotConducaoParaPrompt())
+      }
     }
     // Item 3 Fase 2 (Plano A): pedir WhatsApp/perfil na HORA DA AÇÃO (não na entrada).
     // `coleta*Pendente` só fica true com a flag do fluxo novo ON; OFF = nenhum bloco.

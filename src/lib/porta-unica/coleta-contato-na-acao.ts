@@ -41,7 +41,8 @@ export function construirBlocoColetaContatoParaPrompt(
   if (faltaWhatsapp) {
     linhas.push(
       'O profissional ainda NÃO tem WhatsApp cadastrado. NÃO peça o número na abertura nem transforme isso em formulário. ' +
-        'Peça o WhatsApp SÓ no momento em que você vai gerar ou entregar o primeiro link, quiz ou handoff (o link precisa do WhatsApp do dono pra receber quem chegar). ' +
+        'Peça o WhatsApp SÓ no momento em que você vai gerar ou entregar o primeiro link, quiz ou handoff. ' +
+        'Deixe claro que é FUNDAMENTAL: é pra onde caem os contatos de quem se interessar; sem ele, o link funciona mas não tem como te entregar quem chegou até você. ' +
         'Peça em UMA linha natural, na voz simples: por exemplo "Antes de eu te entregar o seu link, me passa seu WhatsApp com DDD? É pra onde vão cair os contatos que chegarem." ' +
         'Se a pessoa já tiver passado o número nesta conversa, NÃO peça de novo. O nome já veio do cadastro, não re-pergunte.'
     )
@@ -96,10 +97,19 @@ function trechoTelefone(texto: string): { trecho: string; internacional: boolean
  * país) — senão o link `wa.me` não funciona. Regras:
  *  - veio com `+` (internacional): já tem o DDI, mantém (E.164, 11–15 dígitos);
  *  - 12–13 dígitos começando com 55: já tem o DDI BR, mantém;
- *  - 10–11 dígitos (DDD + número, sem país): PREPENDA o 55 (audiência é BR).
+ *  - 10–11 dígitos (DDD + número, sem país): PREPENDA o `ddiPadrao` (default BR=55).
  * '' se não houver número válido.
+ *
+ * `ddiPadrao` é o HOOK pro DDI por REGIÃO (fase internacional): o chamador passa o
+ * DDI do país do usuário (da locale/região) em vez do 55 chumbado.
+ * ⚠️ Pra internacionalização COMPLETA falta também a regra de COMPRIMENTO por país
+ * (BR = 10–11 locais; Portugal = 9; etc.) — hoje a validação de tamanho ainda é BR.
+ * @see blueprint-plataforma/Mapa_Captura_Noel_Onboarding_Progressivo.md (refino: DDI por região)
  */
-export function extrairWhatsappDaMensagem(texto: string | null | undefined): string {
+export function extrairWhatsappDaMensagem(
+  texto: string | null | undefined,
+  ddiPadrao: string = DDI_PADRAO_BR
+): string {
   if (!texto) return ''
   const achado = trechoTelefone(texto)
   if (!achado) return ''
@@ -110,8 +120,8 @@ export function extrairWhatsappDaMensagem(texto: string | null | undefined): str
   }
   // BR já com DDI explícito (55 + DDD + número): mantém.
   if (digitos.length >= 12 && digitos.length <= 13 && digitos.startsWith(DDI_PADRAO_BR)) return digitos
-  // BR sem DDI (só DDD + número): adiciona o 55 pra o link funcionar.
-  if (digitos.length >= 10 && digitos.length <= 11) return DDI_PADRAO_BR + digitos
+  // Local, sem DDI (só DDD + número): adiciona o DDI da região (default BR=55).
+  if (digitos.length >= 10 && digitos.length <= 11) return ddiPadrao + digitos
   return ''
 }
 
@@ -134,7 +144,7 @@ function ultimaFalaAssistant(history?: { role: string; content: string }[]): str
  * número (a trava do ticket: lê o histórico, não pesca número solto). '' caso
  * contrário.
  */
-export function capturarWhatsappSeNoelPediu(entrada: ColetaEntrada): string {
+export function capturarWhatsappSeNoelPediu(entrada: ColetaEntrada, ddiPadrao?: string): string {
   if (!noelPediuWhatsapp(ultimaFalaAssistant(entrada.conversationHistory))) return ''
-  return extrairWhatsappDaMensagem(entrada.message)
+  return extrairWhatsappDaMensagem(entrada.message, ddiPadrao)
 }

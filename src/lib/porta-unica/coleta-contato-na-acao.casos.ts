@@ -66,6 +66,13 @@ caso('extrairWhatsappDaMensagem devolve SEMPRE com DDI e rejeita lixo', () => {
   assert.strictEqual(extrairWhatsappDaMensagem(''), '')
 })
 
+caso('hook DDI por região: default BR (55), mas chamador pode passar outro DDI', () => {
+  // default segue BR
+  assert.strictEqual(extrairWhatsappDaMensagem('(19) 98186-8000'), '5519981868000')
+  // chamador passa o DDI da região do usuário → vira o prefixo do número local
+  assert.strictEqual(extrairWhatsappDaMensagem('(19) 98186-8000', '1'), '119981868000')
+})
+
 caso('captura SÓ quando o Noel acabou de pedir (não pesca número solto)', () => {
   const history = [
     { role: 'user', content: 'quero um link' },
