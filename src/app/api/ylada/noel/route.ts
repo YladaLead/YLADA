@@ -59,11 +59,17 @@ import {
   loadJornadaMemoryForNoel,
   formatJornadaMemoryForPrompt,
 } from '@/lib/noel-wellness/noel-jornada-memory'
-import { isNoelDesafioConducaoEnabled } from '@/lib/porta-unica/porta-unica-flag'
+import { isNoelDesafioConducaoEnabled, isNoelDiretoEnabled } from '@/lib/porta-unica/porta-unica-flag'
 import {
   normalizarDesafioRecebido,
   construirBlocoDesafioParaPrompt,
 } from '@/lib/porta-unica/abertura-noel-desafio'
+import { relaxarGateMatrizParaNoelDireto } from '@/lib/porta-unica/destino-pos-cadastro'
+import {
+  construirBlocoColetaContatoParaPrompt,
+  capturarWhatsappSeNoelPediu,
+} from '@/lib/porta-unica/coleta-contato-na-acao'
+import { gravarWhatsappNoUserProfile } from '@/lib/porta-unica/coleta-contato-store'
 import { addExchange, getRecentMessages } from '@/lib/noel-wellness/noel-conversation-memory'
 import {
   getStrategyMap,
@@ -791,6 +797,9 @@ export async function POST(request: NextRequest) {
     let profileResumo = ''
     let snapshotText = ''
     let profileRow: YladaNoelProfileRow | null = null
+    // Item 3 Fase 2 (Plano A): o que o Noel ainda precisa colher NA AÇÃO (atrás da flag).
+    let coletaWhatsappPendente = false
+    let coletaPerfilPendente = false
     const simulateKey = request.cookies.get(SIMULATE_COOKIE_NAME)?.value?.trim()
     if (simulateKey) {
       const fixture = getPerfilSimuladoByKey(simulateKey)
@@ -923,7 +932,27 @@ export async function POST(request: NextRequest) {
         profileResumo = buildProfileResumo(profileRow)
       }
 
-      if (!gate.ok) {
+      // Item 3 Fase 2 (Plano A): no fluxo novo (mesma flag), a guarda não EXPULSA por
+      // perfil incompleto — o Noel coleta o que falta conversando, na hora da ação.
+      // Com a flag OFF, `relaxColeta` é false e o 403 abaixo é byte-idêntico ao legado.
+      const relaxColeta = relaxarGateMatrizParaNoelDireto(validSegment, isNoelDiretoEnabled())
+      if (relaxColeta && !gate.ok) {
+        coletaWhatsappPendente = gate.missing.includes('whatsapp')
+        coletaPerfilPendente = gate.missing.includes('perfil_empresarial')
+        // Captura o WhatsApp SÓ se o Noel acabou de pedir (lê o histórico, não pesca
+        // número solto). Persiste em user_profiles → no próximo turno o gate já passa.
+        if (coletaWhatsappPendente && supabaseAdmin) {
+          const whatsappColhido = capturarWhatsappSeNoelPediu({ message, conversationHistory })
+          if (whatsappColhido) {
+            void gravarWhatsappNoUserProfile(supabaseAdmin, user.id, whatsappColhido).catch((e) =>
+              console.warn('[/api/ylada/noel] gravarWhatsappNoUserProfile:', e)
+            )
+            coletaWhatsappPendente = false
+          }
+        }
+      }
+
+      if (!gate.ok && !relaxColeta) {
         const msg = (message ?? '').toLowerCase().trim()
         let profileRequiredMessage: string
         if (/próximo passo|o que fazer|o que faço agora/i.test(msg)) {
@@ -1350,6 +1379,15 @@ export async function POST(request: NextRequest) {
     if (isNoelDesafioConducaoEnabled()) {
       const blocoDesafio = construirBlocoDesafioParaPrompt(normalizarDesafioRecebido(desafio))
       if (blocoDesafio) parts.push(blocoDesafio)
+    }
+    // Item 3 Fase 2 (Plano A): pedir WhatsApp/perfil na HORA DA AÇÃO (não na entrada).
+    // `coleta*Pendente` só fica true com a flag do fluxo novo ON; OFF = nenhum bloco.
+    if (coletaWhatsappPendente || coletaPerfilPendente) {
+      const blocoColeta = construirBlocoColetaContatoParaPrompt(
+        coletaWhatsappPendente,
+        coletaPerfilPendente
+      )
+      if (blocoColeta) parts.push(blocoColeta)
     }
     if (snapshotText) {
       parts.push('\n[RESUMO ESTRATÉGICO DA TRILHA — situação atual e próximos passos]\n' + snapshotText)
