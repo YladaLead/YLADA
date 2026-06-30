@@ -15,7 +15,7 @@ function flowToQuestions(
   profile: ProfileInput
 ): StrategyQuestion[] {
   const flow = getFlowById(flowId)
-  const labels = flow?.question_labels ?? ['O que mais atrapalha', 'Rotina e constância', 'Clareza do processo']
+  const labels = flow?.question_labels ?? ['Qual dessas situações mais parece com você hoje?', 'O que você já tentou para resolver isso?', 'O que mais dificulta no seu caso hoje?']
   return labels.map((label, i) => ({
     key: `q${i + 1}`,
     label,

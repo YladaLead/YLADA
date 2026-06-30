@@ -54,7 +54,7 @@ export const YLADA_FLOW_CATALOG: FlowCatalogItem[] = [
     description:
       'O visitante responde sobre sinais, histórico e impacto. O link devolve um nível de risco (baixo/médio/alto) com explicação e próximo passo. Ideal para temas com consequência ou urgência.',
     perfil_lead_atraido: 'Pessoas preocupadas com saúde, exames e prevenção.',
-    question_labels: ['Sinais ou sintomas', 'Histórico relevante', 'Impacto no dia a dia', 'Tentativas anteriores'],
+    question_labels: ['Qual dessas situações mais parece com você hoje?', 'Há quanto tempo você sente isso?', 'O que isso tem atrapalhado no seu dia a dia?', 'O que você já tentou até agora?'],
     result_preview: 'Nível de risco + explicação + evidências + próximo passo + botão WhatsApp.',
     cta_default: 'Quero analisar meu caso',
   },
@@ -67,7 +67,7 @@ export const YLADA_FLOW_CATALOG: FlowCatalogItem[] = [
     description:
       'Identifica o principal bloqueio (rotina, emocional, processo, hábitos ou expectativa) a partir das respostas. O visitante recebe um diagnóstico direto e um primeiro passo para destravar.',
     perfil_lead_atraido: 'Pessoas que sentem que "não conseguem" ou que algo as trava.',
-    question_labels: ['O que mais atrapalha', 'Rotina e constância', 'Clareza do processo', 'Expectativa em relação à meta'],
+    question_labels: ['Qual dessas situações mais parece com você hoje?', 'O que você já tentou para resolver isso?', 'O que mais dificulta no seu caso hoje?', 'O que você mais quer melhorar agora?'],
     result_preview: 'Principal bloqueio + por que acontece + primeiro passo + botão WhatsApp.',
     cta_default: 'Quero destravar isso',
   },
