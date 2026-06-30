@@ -21,7 +21,7 @@ caso('toda chave do desafio tem devolutiva não vazia', () => {
   }
 })
 
-caso('copy travada r90 (atrair/vender/equipe/outro)', () => {
+caso('copy travada r91 — enxuta (atrair/vender/equipe/outro)', () => {
   assert.match(devolutivaReativaPara('atrair'), /Atrair mais gente quase nunca é aparecer mais\./)
   assert.match(devolutivaReativaPara('vender'), /Vender mais não é empurrar mais\./)
   assert.match(devolutivaReativaPara('equipe'), /Equipe que ouve muito e age pouco/)

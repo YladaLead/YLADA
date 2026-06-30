@@ -24,10 +24,18 @@ caso('toda chave tem abertura não vazia', () => {
   }
 })
 
-caso('abertura reconhece sem re-perguntar o desafio (atrair/vender/equipe)', () => {
-  assert.match(aberturaNoelDoDesafio({ key: 'atrair', texto: null }), /quer atrair mais gente/i)
-  assert.match(aberturaNoelDoDesafio({ key: 'vender', texto: null }), /quer vender mais/i)
-  assert.match(aberturaNoelDoDesafio({ key: 'equipe', texto: null }), /equipe mais produtiva/i)
+caso('recepção se apresenta + reconhece o desafio (sem re-perguntar)', () => {
+  assert.match(aberturaNoelDoDesafio({ key: 'atrair', texto: null }), /atrair mais gente que precisa de você/i)
+  assert.match(aberturaNoelDoDesafio({ key: 'vender', texto: null }), /vender mais, sem empurrar/i)
+  assert.match(aberturaNoelDoDesafio({ key: 'equipe', texto: null }), /sua equipe agir mais/i)
+})
+
+caso('toda recepção diz quem é o Noel e fecha convidando a começar', () => {
+  for (const { key } of DESAFIO_OPCOES) {
+    const texto = aberturaNoelDoDesafio({ key, texto: 'x' })
+    assert.match(texto, /eu sou o Noel/i, `sem apresentação em ${key}`)
+    assert.match(texto, /começ/i, `sem convite a começar em ${key}`)
+  }
 })
 
 caso('outro costura o texto da pessoa', () => {

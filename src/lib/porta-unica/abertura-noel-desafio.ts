@@ -15,18 +15,21 @@
 import { isDesafioKey, type DesafioKey, type DesafioResposta } from './desafio'
 
 /**
- * Abertura do Noel na home, por chave do desafio: reconhece (sem re-perguntar) e
- * abre a leitura do dono pedindo o caso concreto. O 'outro' costura o texto da pessoa.
+ * RECEPÇÃO de 1º acesso (iniciante TOTAL), por chave do desafio. Estrutura igual nas
+ * 4 chaves: acolhe + diz quem é o Noel + 1 frase do que vai rolar + convite a começar
+ * pelo primeiro passo ("eu te guio"). NÃO joga chips secos nem re-pergunta o desafio.
+ * A leitura do dono (o "primeiro passo") vem na PRÓXIMA troca, conduzida pelo bloco
+ * `[DESAFIO DECLARADO]` do prompt. O 'outro' costura o texto da pessoa.
  */
 const ABERTURA_POR_KEY: Readonly<Record<DesafioKey, string>> = {
   atrair:
-    'Você quer atrair mais gente que precisa de você. Pra eu te ajudar com o que é o seu caso, me conta como é hoje: o que você já faz pra essas pessoas te acharem, e onde costuma travar?',
+    'Oi, eu sou o Noel. Vou te ajudar a atrair mais gente que precisa de você. A gente faz isso montando juntos uma ferramenta simples que faz a pessoa certa te procurar. Pode ser do seu jeito, no seu tempo. Bora começar pelo primeiro passo? Eu te guio.',
   vender:
-    'Você quer vender mais, produtos ou serviços. Então me conta como é hoje: quando alguém chega interessado, como costuma ser essa conversa até virar (ou não) uma venda? Quero entender o seu caso antes de sugerir qualquer coisa.',
+    'Oi, eu sou o Noel. Vou te ajudar a vender mais, sem empurrar. A gente vai montar juntos um jeito da pessoa chegar já querendo. Eu te mostro cada passo, é tranquilo. Começamos?',
   equipe:
-    'Você quer a sua equipe mais produtiva. Pra eu te ajudar de verdade, me conta um pouco dela: hoje, o que o seu time faz bem e onde você sente que empaca? Pode falar do seu jeito.',
+    'Oi, eu sou o Noel. Vou te ajudar a fazer sua equipe agir mais. A gente vai montar juntos um caminho claro pra cada um saber o que fazer. Eu te guio passo a passo. Bora começar?',
   outro:
-    'Você me contou que tem algo pra melhorar. Me conta com as suas palavras o que mais te incomoda hoje, que a gente acha a raiz e resolve junto.',
+    'Oi, eu sou o Noel. Você me contou que tem algo pra melhorar. A gente vai achar a raiz disso juntos e montar um primeiro passo simples. Eu te guio, sem pressa. Começamos?',
 }
 
 /**
@@ -45,7 +48,7 @@ export function normalizarDesafioRecebido(input: unknown): DesafioResposta | nul
 export function aberturaNoelDoDesafio(resposta: DesafioResposta | null): string {
   if (!resposta || !isDesafioKey(resposta.key)) return ''
   if (resposta.key === 'outro' && resposta.texto) {
-    return `Você me disse: “${resposta.texto}”. Boa, é por aí que a gente começa. Me conta um pouco mais de como isso aparece no seu dia a dia, pra eu entender a raiz antes de sugerir um caminho.`
+    return `Oi, eu sou o Noel. Você me disse que quer melhorar “${resposta.texto}”. A gente vai achar a raiz disso juntos e montar um primeiro passo simples. Eu te guio, sem pressa. Começamos?`
   }
   return ABERTURA_POR_KEY[resposta.key]
 }
