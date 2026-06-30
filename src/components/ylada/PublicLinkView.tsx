@@ -1519,7 +1519,7 @@ function ConfigDrivenLinkView({
           : null
       const profileTitleForUi = softenTemplateEmDashes(
         String(commerceNarrative?.profileTitle ?? formattedProfileTitle).trim()
-      )
+      ).replace(/^\p{L}/u, (c) => c.toUpperCase()) // inicial maiúscula (ex.: "perda de peso" → "Perda de peso")
       const impactDiagnosisTextForUi = softenTemplateEmDashes(
         String(commerceNarrative?.impactLine ?? impactDiagnosisText).trim()
       )

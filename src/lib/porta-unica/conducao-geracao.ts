@@ -175,8 +175,8 @@ export function construirTextoInterpretConducao(args: {
 
 export type PerguntaQuiz = { id: string; label: string; type: 'single'; options: string[] }
 
-/** Início de pergunta: "1. ...", "  * 2. ..." etc. Captura o resto da linha. */
-const RE_INICIO_PERGUNTA = /^\s*\*?\s*\d+\.\s+(.+\S)\s*$/
+/** Início de pergunta: "1. ...", "**1. ...**", "  * 2. ..." etc. */
+const RE_INICIO_PERGUNTA = /^\s*(?:\*+\s*)?\d+\.\s+(.+?)(?:\s*\*+)?\s*$/
 /** Linha que é uma opção: "A) ...", "* B) ...", "   - C) ...". */
 const RE_LINHA_OPCAO = /^\s*[*•-]?\s*[A-D]\)\s*\S/
 
@@ -187,7 +187,9 @@ function extrairOpcoesDoTrecho(trecho: string): string[] {
   const re = /([A-D])\)\s*(.+?)(?=\s+[A-D]\)|$)/g
   let m: RegExpExecArray | null
   while ((m = re.exec(limpo)) !== null) {
-    const txt = m[2].trim()
+    // Tira traço/bullet/asterisco que sobra no fim (ex.: o "- " da bullet da PRÓXIMA opção é
+    // absorvido pelo regex e vira " -" no fim desta — o que desfigurava a opção no link).
+    const txt = m[2].replace(/[\s*•\-–—]+$/u, '').replace(/\*+/g, '').trim()
     if (txt.length >= 1 && txt.length <= 120) out.push(txt)
   }
   return out
@@ -210,7 +212,8 @@ export function extrairPerguntasDoRascunho(texto: string): PerguntaQuiz[] | null
       continue
     }
     if (brutas.length > 0 && RE_LINHA_OPCAO.test(linha)) {
-      brutas[brutas.length - 1].opcoesLinhas.push(linha)
+      // Tira o bullet do começo ("* A)", "- B)") pra não ser absorvido como traço da opção anterior.
+      brutas[brutas.length - 1].opcoesLinhas.push(linha.replace(/^\s*[*•\-–—]\s*/u, ''))
     }
   }
   const perguntas: PerguntaQuiz[] = []
@@ -218,9 +221,10 @@ export function extrairPerguntasDoRascunho(texto: string): PerguntaQuiz[] | null
     const full = [b.resto, ...b.opcoesLinhas].join(' ')
     const idxA = full.search(/\bA\)/)
     const label = (idxA >= 0 ? full.slice(0, idxA) : full)
+      .replace(/\*+/g, '') // tira ** / * de markdown (vazava como "**" no título da pergunta)
       .replace(/\s+/g, ' ')
       .trim()
-      .replace(/[\s*•\-–]+$/, '') // tira bullet/asterisco que sobra antes do "A)"
+      .replace(/[\s*•\-–—]+$/u, '') // tira bullet/traço que sobra antes do "A)"
       .trim()
     const options = idxA >= 0 ? extrairOpcoesDoTrecho(full.slice(idxA)) : []
     if (label.length < 6 || options.length < 3) continue

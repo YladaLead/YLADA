@@ -179,6 +179,27 @@ caso('parser devolve null com menos de 3 perguntas MCQ', () => {
   assert.strictEqual(extrairPerguntasDoRascunho(rascunho), null)
 })
 
+caso('parser NÃO deixa traço/bullet sobrando na opção nem ** no título', () => {
+  const rascunho = [
+    '**1. O que você gostaria que fosse diferente?**',
+    '   - A) Solução rápida e pacífica',
+    '   - B) Compreensão mútua entre os envolvidos',
+    '   - C) Acompanhamento jurídico constante',
+    '2. Qual sua maior preocupação? A) Divórcio B) Guarda dos filhos C) Pensão',
+    '3. Já buscou orientação? A) Sim B) Não C) Talvez',
+  ].join('\n')
+  const p = extrairPerguntasDoRascunho(rascunho)
+  assert.ok(p && p.length === 3, 'devia achar 3 perguntas')
+  assert.ok(!p![0].label.includes('*'), 'label não pode ter asterisco')
+  for (const q of p!) {
+    for (const opt of q.options) {
+      assert.ok(!/[*]/.test(opt), `opção com asterisco: "${opt}"`)
+      assert.ok(!/[-–—]\s*$/.test(opt), `opção com traço no fim: "${opt}"`)
+    }
+  }
+  assert.strictEqual(p![0].options[0], 'Solução rápida e pacífica') // sem " -" no fim
+})
+
 caso('perguntasDoUltimoRascunho pega o rascunho mais recente do assistente', () => {
   const hist = [
     { role: 'user', content: 'vamos' },
