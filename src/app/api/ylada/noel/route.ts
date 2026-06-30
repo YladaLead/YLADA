@@ -69,6 +69,7 @@ import {
 import {
   deveGerarNaConducao,
   construirTextoInterpretConducao,
+  corrigirFlowDaConducao,
 } from '@/lib/porta-unica/conducao-geracao'
 import { relaxarGateMatrizParaNoelDireto } from '@/lib/porta-unica/destino-pos-cadastro'
 import {
@@ -1163,7 +1164,10 @@ export async function POST(request: NextRequest) {
           })
           const interpretJson = await interpretRes.json().catch(() => ({}))
           const data = interpretJson?.data
-          const flowId = data?.flow_id
+          let flowId = data?.flow_id
+          // Passo 4 / #1: na condução o link é compartilhado — nunca checklist (gera nota 100/100 +
+          // texto genérico). Força diagnóstico de bloqueio de verdade. Só no fluxo da porta.
+          if (conducaoDeveGerar && typeof flowId === 'string') flowId = corrigirFlowDaConducao(flowId)
           const interpretacao = data?.interpretacao
           const questions = Array.isArray(data?.questions) ? data.questions : []
           const confidence = typeof data?.confidence === 'number' ? data.confidence : 0

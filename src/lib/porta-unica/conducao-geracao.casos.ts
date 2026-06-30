@@ -8,6 +8,7 @@ import {
   deveGerarNaConducao,
   mensagemEhAprovacao,
   construirTextoInterpretConducao,
+  corrigirFlowDaConducao,
 } from './conducao-geracao'
 
 let passou = 0
@@ -120,6 +121,12 @@ caso('texto sem respostas ainda traz a moldura de compartilhar + objetivo', () =
   assert.match(texto, /COMPARTILHAR/i)
   assert.match(texto, /vender mais/i) // objetivo na nota interna
   assert.ok(!/Meu nicho/i.test(texto), 'sem respostas substantivas, não inventa "Meu nicho"')
+})
+
+caso('corrigirFlowDaConducao troca checklist por diagnóstico (sem nota), mantém os outros', () => {
+  assert.strictEqual(corrigirFlowDaConducao('checklist_prontidao'), 'diagnostico_bloqueio')
+  assert.strictEqual(corrigirFlowDaConducao('diagnostico_risco'), 'diagnostico_risco')
+  assert.strictEqual(corrigirFlowDaConducao('calculadora_projecao'), 'calculadora_projecao')
 })
 
 console.log(`\n${passou} casos verdes.`)

@@ -88,6 +88,16 @@ export function deveGerarNaConducao(args: {
   return false
 }
 
+/**
+ * Na condução o link é COMPARTILHADO com o cliente. O `checklist_prontidao` gera uma NOTA
+ * (ex.: "100/100") + texto-template genérico, que não faz sentido pra quem recebe (Spec §12:
+ * em share link, evitar checklist). Força um diagnóstico de bloqueio de verdade (sem score,
+ * conteúdo específico). Os outros flows passam intactos.
+ */
+export function corrigirFlowDaConducao(flowId: string): string {
+  return flowId === 'checklist_prontidao' ? 'diagnostico_bloqueio' : flowId
+}
+
 /** Objetivo declarado em 1ª pessoa, pra costurar no texto do interpret (não o rótulo 3ª pessoa). */
 const OBJETIVO_PRIMEIRA_PESSOA: Readonly<Record<DesafioResposta['key'], string>> = {
   atrair: 'atrair mais clientes que precisam do meu trabalho',
