@@ -79,6 +79,9 @@ export function construirBlocoDesafioParaPrompt(resposta: DesafioResposta | null
     '\n[DESAFIO DECLARADO PELO PROFISSIONAL — porta de entrada]\n' +
     `Logo antes de entrar, o profissional disse o que quer melhorar: "${rotulo}".\n` +
     'Conduza A PARTIR disso: reconheça (NÃO re-pergunte o desafio), aprofunde o caso concreto e a CAUSA dele (o GAP), servindo antes de oferecer. ' +
-    'Comece lendo a situação dele (diagnóstico do dono), uma pergunta por vez, linguagem simples e sem travessão. Não despeje solução nem link na abertura.'
+    'Comece lendo a situação dele (diagnóstico do dono), uma pergunta por vez, linguagem simples e sem travessão. Não despeje solução nem link na abertura.\n' +
+    'ANTES de gerar QUALQUER link, quiz ou ferramenta: entenda o NICHO da pessoa (o que ela faz / vende) e QUEM ela quer atingir com esse desafio. ' +
+    'Se ainda não souber o nicho e o público, pergunte primeiro, de forma natural. ' +
+    'A ferramenta tem que servir o OBJETIVO declarado e o público DELE (ex.: pra atrair clientes, é um diagnóstico que fala da dor de quem ele quer atrair, no nicho dele) — NUNCA um quiz genérico que diagnostica o próprio profissional.'
   )
 }

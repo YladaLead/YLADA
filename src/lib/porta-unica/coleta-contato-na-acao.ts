@@ -81,24 +81,37 @@ export function noelPediuWhatsapp(ultimaFalaDoNoel: string | null | undefined): 
   return MARCADORES_PEDIDO_WHATSAPP.some((m) => t.includes(m))
 }
 
-/** Pega o 1º trecho com cara de telefone (dígitos + separadores comuns). */
-function trechoTelefone(texto: string): string | null {
+/** DDI padrão (Brasil) quando a pessoa manda só DDD + número, sem código do país. */
+const DDI_PADRAO_BR = '55'
+
+/** Pega o 1º trecho com cara de telefone + se veio internacional (prefixo +). */
+function trechoTelefone(texto: string): { trecho: string; internacional: boolean } | null {
   const match = texto.match(/(\+?\d[\d\s().-]{8,17}\d)/)
-  return match ? match[1] : null
+  if (!match) return null
+  return { trecho: match[1], internacional: match[1].trim().startsWith('+') }
 }
 
 /**
- * Número de WhatsApp BR válido numa mensagem, em dígitos limpos, ou '' se não houver.
- * Aceita 10–11 dígitos (DDD + número) ou 12–13 com o 55 na frente. Cap em 13 pra não
- * casar com IDs longos.
+ * Número de WhatsApp numa mensagem, em dígitos limpos e SEMPRE COM DDI (código do
+ * país) — senão o link `wa.me` não funciona. Regras:
+ *  - veio com `+` (internacional): já tem o DDI, mantém (E.164, 11–15 dígitos);
+ *  - 12–13 dígitos começando com 55: já tem o DDI BR, mantém;
+ *  - 10–11 dígitos (DDD + número, sem país): PREPENDA o 55 (audiência é BR).
+ * '' se não houver número válido.
  */
 export function extrairWhatsappDaMensagem(texto: string | null | undefined): string {
   if (!texto) return ''
-  const trecho = trechoTelefone(texto)
-  if (!trecho) return ''
-  const digitos = trecho.replace(/\D/g, '')
-  if (digitos.length >= 12 && digitos.length <= 13 && digitos.startsWith('55')) return digitos
-  if (digitos.length >= 10 && digitos.length <= 11) return digitos
+  const achado = trechoTelefone(texto)
+  if (!achado) return ''
+  const digitos = achado.trecho.replace(/\D/g, '')
+  // Internacional (com +): confia no DDI que a pessoa mandou.
+  if (achado.internacional) {
+    return digitos.length >= 11 && digitos.length <= 15 ? digitos : ''
+  }
+  // BR já com DDI explícito (55 + DDD + número): mantém.
+  if (digitos.length >= 12 && digitos.length <= 13 && digitos.startsWith(DDI_PADRAO_BR)) return digitos
+  // BR sem DDI (só DDD + número): adiciona o 55 pra o link funcionar.
+  if (digitos.length >= 10 && digitos.length <= 11) return DDI_PADRAO_BR + digitos
   return ''
 }
 

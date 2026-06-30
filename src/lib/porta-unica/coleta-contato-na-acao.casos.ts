@@ -52,10 +52,15 @@ caso('noelPediuWhatsapp detecta o pedido (com e sem acento)', () => {
   assert.ok(!noelPediuWhatsapp(null))
 })
 
-caso('extrairWhatsappDaMensagem aceita formatos BR e rejeita lixo', () => {
-  assert.strictEqual(extrairWhatsappDaMensagem('(19) 98186-8000'), '19981868000')
-  assert.strictEqual(extrairWhatsappDaMensagem('meu zap é 19 8186 8000'), '1981868000')
+caso('extrairWhatsappDaMensagem devolve SEMPRE com DDI e rejeita lixo', () => {
+  // BR sem DDI → ganha o 55 (senão o wa.me quebra)
+  assert.strictEqual(extrairWhatsappDaMensagem('(19) 98186-8000'), '5519981868000')
+  assert.strictEqual(extrairWhatsappDaMensagem('meu zap é 19 8186 8000'), '551981868000')
+  // BR já com 55 → mantém
   assert.strictEqual(extrairWhatsappDaMensagem('+55 19 98186-8000'), '5519981868000')
+  assert.strictEqual(extrairWhatsappDaMensagem('55 19 98186 8000'), '5519981868000')
+  // Internacional (com +) → confia no DDI que veio
+  assert.strictEqual(extrairWhatsappDaMensagem('+1 415 555 1234'), '14155551234')
   assert.strictEqual(extrairWhatsappDaMensagem('é 1234'), '') // curto demais
   assert.strictEqual(extrairWhatsappDaMensagem('pedido 000123456789012345'), '') // longo demais
   assert.strictEqual(extrairWhatsappDaMensagem(''), '')
@@ -68,7 +73,7 @@ caso('captura SÓ quando o Noel acabou de pedir (não pesca número solto)', () 
   ]
   assert.strictEqual(
     capturarWhatsappSeNoelPediu({ message: 'é (19) 98186-8000', conversationHistory: history }),
-    '19981868000'
+    '5519981868000'
   )
 })
 

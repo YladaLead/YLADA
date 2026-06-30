@@ -60,6 +60,10 @@ caso('bloco do prompt manda conduzir e proíbe re-perguntar', () => {
     assert.match(bloco, /DESAFIO DECLARADO/)
     assert.match(bloco, /NÃO re-pergunte/)
     assert.match(bloco, /diagnóstico do dono/i)
+    // reforço: entender nicho/público antes de gerar (não gerar genérico)
+    assert.match(bloco, /ANTES de gerar/i)
+    assert.match(bloco, /nicho/i)
+    assert.match(bloco, /gen[ée]rico/i)
   }
 })
 
