@@ -1054,6 +1054,9 @@ export async function POST(request: NextRequest) {
       flowId: string
       config: Record<string, unknown> | null
     } | null = null
+    // Declarado AQUI (antes do bloco de ajuste que o usa) — antes ficava abaixo e o ajuste de link
+    // acessava em TDZ (ReferenceError em runtime). Fix de bug pré-existente, sem mudar o valor.
+    const requestedTitle = extractRequestedTitleFromMessage(message)
 
     if (linkModeEnabled && lastLinkContext?.flow_id && lastLinkContext?.interpretacao && isIntencaoAjustarLink(message)) {
       try {
@@ -1120,7 +1123,6 @@ export async function POST(request: NextRequest) {
       linkModeEnabled &&
       (isIntencaoCriarLink(message, conversationHistory) || conducaoDeveGerar) &&
       !retrieveExistingLinkIntent
-    const requestedTitle = extractRequestedTitleFromMessage(message)
     // Passo 4: na condução, o `message` é só "pode gerar"/o WhatsApp — cego ao caso. Costuramos o
     // desafio + as respostas de nicho/foco da conversa pra o interpret gerar o diagnóstico SOB MEDIDA.
     const interpretTextForGeneration =
