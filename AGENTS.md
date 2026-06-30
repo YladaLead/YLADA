@@ -52,3 +52,8 @@
 - Copy de devolutiva = lookup determinístico no molde (`porFaixa`/`porPerfil`), NÃO gerar por IA no resultado.
 - NÃO renomear `flow_id` existente (chave de lookup em banco/catálogo/OG).
 - Commits sempre pelo terminal do Cursor (`git add <paths> && git commit && git push`), nunca `git add -A` cego.
+
+## Banco / Supabase (segurança)
+- **Toda `CREATE TABLE ... public.` numa migration DEVE vir seguida de `ALTER TABLE ... ENABLE ROW LEVEL SECURITY;`** — senão a tabela fica exposta pela API pública (alerta `rls_disabled_in_public`). Se o acesso é só via service-role (`supabaseAdmin`), ligar o RLS sem policy basta (o app continua intacto); se há acesso anon/authenticated, criar a policy junto.
+- **Views em `public.` devem usar `security_invoker = on`** (respeitam o RLS de quem consulta, não o do criador). Evita o alerta `security_definer_view`.
+- Depois de mexer no schema, conferir o **Security Advisor** do Supabase antes de dar a tarefa por concluída. Histórico: migration 453 esqueceu o RLS → corrigido na 455.
