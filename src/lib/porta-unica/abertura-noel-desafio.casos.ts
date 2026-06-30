@@ -83,6 +83,14 @@ caso('bloco do prompt manda conduzir e proíbe re-perguntar', () => {
     assert.match(bloco, /AUTORIDADE/)
     assert.match(bloco, /DIAGNÓSTICO/)
     assert.match(bloco, /SEU WhatsApp/)
+    // Passo 2: convergência pra ação (parar de interrogar, ir pro rascunho)
+    assert.match(bloco, /CONVERG[ÊE]NCIA PRA AÇÃO/i)
+    assert.match(bloco, /PARE de perguntar/i)
+    // Passo 2: líder = equipar a equipe + os 2 caminhos (self-serve + ambiente exclusivo/contato)
+    assert.match(bloco, /EQUIPA cada pessoa do time/i)
+    assert.match(bloco, /DOIS caminhos/i)
+    assert.match(bloco, /AMBIENTE EXCLUSIVO/i)
+    assert.match(bloco, /FALAR COM O NOSSO TIME/i)
   }
 })
 
@@ -100,6 +108,12 @@ caso('bloco de GERAÇÃO traz as regras do líder (copy pro leitor + coerência 
   // Passo 4: anti-alucinação de URL (quem gera o link é o SISTEMA, nunca a IA)
   assert.match(g, /QUEM GERA O LINK É O SISTEMA/i)
   assert.match(g, /NUNCA.*(inventa|exemplifica).*URL|JAMAIS escreve/i)
+  // Passo 2: o grande diferencial (funil de vendas × funil de marketing) + Noel monta o material
+  assert.match(g, /FUNIL DE VENDAS/i)
+  assert.match(g, /FUNIL DE MARKETING/i)
+  assert.match(g, /movimento antes da certeza/i)
+  assert.match(g, /criativos/i)
+  assert.match(g, /cuido do material/i)
 })
 
 caso('few-shot tem 3 exemplos que modelam o padrão (foco, objetivo, lógica, indicação viral, dúvida primeiro)', () => {
@@ -117,6 +131,12 @@ caso('few-shot tem 3 exemplos que modelam o padrão (foco, objetivo, lógica, in
   assert.match(fs, /autoridade/i) // explica o valor (autoridade)
   assert.match(fs, /Ficou bom assim/i) // modela a aprovação antes do link
   assert.ok(!/\bquiz\b/i.test(fs), 'few-shot não deve usar a palavra "quiz"')
+  // Passo 2: exemplo do líder (funil de marketing + equipar + os 2 caminhos)
+  assert.match(fs, /funil de marketing/i)
+  assert.match(fs, /equipa cada vendedor/i)
+  assert.match(fs, /ambiente exclusivo/i)
+  assert.match(fs, /criativos/i)
+  assert.ok(!fs.includes('—'), 'few-shot não deve ter travessão de aparte')
 })
 
 caso('normalizarDesafioRecebido limpa o body cru', () => {
