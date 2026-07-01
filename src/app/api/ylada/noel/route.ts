@@ -99,6 +99,8 @@ import {
   NOEL_LAYER4_PRIORITY_RULE,
 } from '@/lib/noel-wellness/prompt-layers'
 import { applyNoelPersonaToSystemPrompt } from '@/lib/ylada-flow/noel/persona'
+import { loadProLideresNoelMatrixContext } from '@/lib/pro-lideres-noel-context-block'
+import { NOEL_CHAT_MODEL } from '@/lib/pro-lideres-noel-unified-flag'
 import OpenAI from 'openai'
 import { hasYladaProPlan } from '@/lib/subscription-helpers'
 import { getNoelUsageCount, incrementNoelUsage } from '@/lib/noel-usage-helpers'
@@ -767,6 +769,7 @@ export async function POST(request: NextRequest) {
       mode,
       desafio,
       labIsolado,
+      proLideresPapel,
     } = body as {
       message?: string
       conversationHistory?: { role: 'user' | 'assistant'; content: string }[]
@@ -784,6 +787,8 @@ export async function POST(request: NextRequest) {
       labIsolado?: boolean
       /** Toque "b" Fase 2: desafio capturado pela porta única (cru, normalizado depois). */
       desafio?: unknown
+      /** Unificação PL na matriz (Fase 1): `leader` | `member` — inerte com NOEL_PRO_LIDERES_UNIFIED_ENABLED OFF. */
+      proLideresPapel?: string
     }
 
     const isSupportChannel = channel === 'support'
@@ -1064,6 +1069,25 @@ export async function POST(request: NextRequest) {
     }
 
     const baseUrl = typeof request.url === 'string' ? new URL(request.url).origin : (process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app')
+
+    // Fase 1 — Pro Líderes unificado na matriz (inerte com NOEL_PRO_LIDERES_UNIFIED_ENABLED OFF).
+    let proLideresNoelContextBlock: string | null = null
+    if (supabaseAdmin && !isLabIsolado) {
+      try {
+        proLideresNoelContextBlock = await loadProLideresNoelMatrixContext({
+          supabase: supabaseAdmin,
+          user,
+          request,
+          message: message.trim(),
+          area: typeof area === 'string' ? area : undefined,
+          proLideresPapel: typeof proLideresPapel === 'string' ? proLideresPapel : undefined,
+          locale,
+        })
+      } catch (e) {
+        console.warn('[/api/ylada/noel] contexto Pro Líderes unificado:', e)
+      }
+    }
+
     // No lab isolado: ignora os links/estado da conta pra cada cenário começar do zero (sem vazar
     // o diagnóstico de um cenário pro próximo via "LINKS ATIVOS").
     const linksAtivos = isLabIsolado ? [] : await getNoelYladaLinks(user.id, baseUrl)
@@ -1380,6 +1404,9 @@ export async function POST(request: NextRequest) {
       NOEL_CLIQUE_MENTAL_E_RETORNO_DIARIO,
       NOEL_CONTATO_FRIO,
     ]
+    if (proLideresNoelContextBlock) {
+      parts.push('\n' + proLideresNoelContextBlock)
+    }
     parts.push(
       `\n[MODO DA RESPOSTA — CAMADA 0]\nModo atual detectado: ${noelResponseMode}.\n- modo_link: pode criar/ajustar link, quiz e anexar bloco oficial.\n- modo_mentor: foco em direção estratégica; NÃO gerar/anexar link.\n- modo_copy: foco em texto/script/CTA; NÃO gerar/anexar link.\n- modo_execucao: foco em ação prática e rotina; NÃO gerar/anexar link.\n- modo_espelho: Etapa 1 (convicção). Conduz o profissional a ver o próprio ciclo e dar um primeiro passo; NUNCA gera link/quiz/copy.`
     )
@@ -1609,7 +1636,7 @@ export async function POST(request: NextRequest) {
     ]
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: NOEL_CHAT_MODEL,
       messages,
       max_tokens: 1024,
       temperature: 0.7,
