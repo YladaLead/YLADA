@@ -20,10 +20,17 @@ import {
 } from '@/lib/porta-unica/desafio'
 import { persistDesafio } from '@/lib/porta-unica/desafio-client'
 import { devolutivaReativaPara } from '@/lib/porta-unica/devolutiva-reativa'
+import { PORTA1_HERO } from '@/lib/porta-unica/porta1-home-copy'
 import { buildSignupUrlWithReferral, parseReferralParams } from '@/lib/referrals/referral-url'
 import { persistReferral } from '@/lib/referrals/referral-client'
 
-export default function PortaUnica() {
+/**
+ * `porta` = /descubra (hero seco). `home` = /pt reposicionada (hero com a
+ * CATEGORIA no topo). Só a tela 1 muda; o desafio (tela 2/3) é reusado.
+ */
+type PortaUnicaVariant = 'porta' | 'home'
+
+export default function PortaUnica({ variant = 'porta' }: { variant?: PortaUnicaVariant }) {
   const router = useRouter()
   const [passo, setPasso] = useState<1 | 2 | 3>(1)
   const [ref, setRef] = useState<string | null>(null)
@@ -48,7 +55,7 @@ export default function PortaUnica() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-6">
       <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-        {passo === 1 ? <Tela1 onAvancar={() => setPasso(2)} /> : null}
+        {passo === 1 ? <Tela1 variant={variant} onAvancar={() => setPasso(2)} /> : null}
         {passo === 2 ? <Tela2 onResponder={irParaDevolutiva} /> : null}
         {passo === 3 && escolha ? <Tela3 desafioKey={escolha} onCriarConta={criarConta} /> : null}
       </div>
@@ -56,19 +63,46 @@ export default function PortaUnica() {
   )
 }
 
-function Tela1({ onAvancar }: { onAvancar: () => void }) {
+function LogoYlada() {
+  return (
+    <div className="mb-6 flex justify-center">
+      <Image
+        src="/images/logo/ylada/novo/ylada-horizontal-claro.png"
+        alt="YLADA"
+        width={280}
+        height={84}
+        priority
+        className="h-12 w-auto object-contain"
+      />
+    </div>
+  )
+}
+
+function Tela1({ variant, onAvancar }: { variant: PortaUnicaVariant; onAvancar: () => void }) {
+  if (variant === 'home') {
+    return (
+      <div className="text-center">
+        <LogoYlada />
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-sky-700">
+          {PORTA1_HERO.categoria}
+        </p>
+        <h1 className="mb-4 text-3xl font-bold leading-tight text-gray-900">{PORTA1_HERO.headline}</h1>
+        <p className="mx-auto mb-8 max-w-md text-base leading-relaxed text-gray-600">
+          {PORTA1_HERO.subheadline}
+        </p>
+        <button
+          type="button"
+          onClick={onAvancar}
+          className="inline-flex w-full items-center justify-center rounded-xl bg-sky-600 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-sky-700"
+        >
+          {PORTA1_HERO.cta}
+        </button>
+      </div>
+    )
+  }
   return (
     <div className="text-center">
-      <div className="mb-6 flex justify-center">
-        <Image
-          src="/images/logo/ylada/novo/ylada-horizontal-claro.png"
-          alt="YLADA"
-          width={280}
-          height={84}
-          priority
-          className="h-12 w-auto object-contain"
-        />
-      </div>
+      <LogoYlada />
       <h1 className="mb-8 text-3xl font-bold leading-tight text-gray-900">
         Explique menos.
         <br />

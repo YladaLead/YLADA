@@ -4,6 +4,8 @@ import { useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import PilotLandingIntro from '@/components/pilot/PilotLandingIntro'
+import PortaUnica from '@/components/porta-unica/PortaUnica'
+import { isPorta1Enabled } from '@/lib/porta-unica/porta-unica-flag'
 import { trackYladaFunnelEvent } from '@/lib/ylada-funnel-client'
 
 /** /pt — só hero; segmentos após “Comece agora” em /pt/segmentos. */
@@ -43,5 +45,8 @@ export default function PtHomeLandingClient() {
     )
   }
 
+  // Porta 1 (atrás de flag): visitante deslogado vê a home reposicionada (categoria
+  // + desafio → Noel), absorvendo a /descubra. OFF = home atual (byte-idêntico).
+  if (isPorta1Enabled()) return <PortaUnica variant="home" />
   return <PilotLandingIntro />
 }

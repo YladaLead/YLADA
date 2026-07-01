@@ -33,3 +33,15 @@ export function isNoelDesafioConducaoEnabled(): boolean {
   const v = process.env.NEXT_PUBLIC_NOEL_DESAFIO_CONDUCAO_ENABLED
   return v === 'true' || v === '1'
 }
+
+/**
+ * Flag da PORTA 1 (home reposicionada): com ON a `/pt` (visitante deslogado) vira a
+ * porta única com a CATEGORIA no topo (hero + desafio → Noel), absorvendo a `/descubra`;
+ * com OFF a home atual (`PilotLandingIntro` → `/pt/segmentos`) fica byte-idêntica.
+ * `NEXT_PUBLIC` porque o gate roda no cliente (`PtHomeLandingClient`).
+ * @see blueprint-plataforma/Paginas_Entrada_Arquitetura.md (porta 1)
+ */
+export function isPorta1Enabled(): boolean {
+  const v = process.env.NEXT_PUBLIC_PORTA_1_ENABLED
+  return v === 'true' || v === '1'
+}
