@@ -5,6 +5,7 @@
 import assert from 'node:assert'
 import { isDesafioKey } from './desafio'
 import { NOEL_LAB_CENARIOS } from './noel-lab-cenarios'
+import { precisaMentoriaDiaADia, estaPosAtivacao } from './noel-dia-a-dia'
 
 let passou = 0
 function caso(nome: string, fn: () => void): void {
@@ -43,6 +44,28 @@ caso('dia a dia: sem desafio (não conduz pra link) e não espera link', () => {
     assert.strictEqual(c.desafio, null, `dia a dia não deve mandar desafio em ${c.id}`)
     assert.strictEqual(c.esperaLink, false, `dia a dia não espera link em ${c.id}`)
     assert.ok(c.turns.length >= 1, `sem fala em ${c.id}`)
+  }
+})
+
+// Integração real: o seedHistory tem que marcar pós-ativação E a fala tem que acionar a mentoria.
+// Sem isto, o cenário roda no lab mas a camada nova nunca dispara (falso "verde" visual).
+caso('dia a dia: seedHistory marca pós-ativação e a 1ª fala aciona a mentoria', () => {
+  for (const c of diaADia) {
+    assert.ok(c.seedHistory && c.seedHistory.length > 0, `dia a dia sem seedHistory em ${c.id}`)
+    assert.ok(
+      estaPosAtivacao({ temLinkAtivo: false, conversationHistory: c.seedHistory }),
+      `seedHistory não marca pós-ativação em ${c.id} (falta um link entregue?)`
+    )
+    assert.ok(
+      precisaMentoriaDiaADia({ message: c.turns[0], temLinkAtivo: false, conversationHistory: c.seedHistory }),
+      `a fala de ${c.id} não aciona a mentoria do dia a dia: "${c.turns[0]}"`
+    )
+  }
+})
+
+caso('entrada: NÃO traz seedHistory (começa do zero, é a condução real)', () => {
+  for (const c of entrada) {
+    assert.ok(!c.seedHistory, `entrada não deveria ter seedHistory em ${c.id}`)
   }
 })
 

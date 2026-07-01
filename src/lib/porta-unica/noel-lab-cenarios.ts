@@ -55,7 +55,30 @@ export type LabCenario = {
   turns: string[]
   /** entrada espera um link no fim; dia a dia não (é orientação). Default: entrada=true. */
   esperaLink: boolean
+  /**
+   * Histórico injetado ANTES das falas (a página inicia `conversationHistory` com ele). Usado
+   * nos cenários de DIA A DIA pra marcar PÓS-ATIVAÇÃO: o lab isolado não tem link na conta, então
+   * sem um link JÁ ENTREGUE no histórico a camada de mentoria do dia a dia (`estaPosAtivacao`, em
+   * noel-dia-a-dia) não dispararia. Termina com o Noel entregando um link de exemplo.
+   */
+  seedHistory?: readonly LabTurno[]
 }
+
+export type LabTurno = { role: 'user' | 'assistant'; content: string }
+
+/**
+ * Semente de PÓS-ATIVAÇÃO: uma troca curta que termina com o Noel ENTREGANDO um link. O `/l/`
+ * na fala do Noel é o que `estaPosAtivacao` (noel-dia-a-dia) lê pra saber que a pessoa já ativou.
+ * URL de exemplo (não é clicada no teste do dia a dia; o foco é a QUALIDADE da orientação).
+ */
+const SEED_POS_ATIVACAO: readonly LabTurno[] = [
+  { role: 'user', content: 'já montei meu diagnóstico com você' },
+  {
+    role: 'assistant',
+    content:
+      'Boa! Seu diagnóstico está pronto. [Acessar diagnóstico](https://ylada.com/l/exemplo-ativo) É esse link que você compartilha pra as pessoas responderem.',
+  },
+]
 
 /** WhatsApps fictícios por cenário de entrada (com DDD), só pra disparar o handoff no teste. */
 export const NOEL_LAB_CENARIOS: readonly LabCenario[] = [
@@ -211,7 +234,7 @@ export const NOEL_LAB_CENARIOS: readonly LabCenario[] = [
   },
   {
     id: 'vendedor-servico-indicacoes-estetica',
-    label: 'Indicações · estética (testa viral, não formulário de nomes)',
+    label: 'Indicações · estética (observar: mensagem de compartilhar + link de ATRAIR, NÃO requiz da cliente)',
     papel: 'vendedor-servico',
     fase: 'entrada',
     esperaLink: true,
@@ -235,6 +258,7 @@ export const NOEL_LAB_CENARIOS: readonly LabCenario[] = [
     esperaLink: false,
     desafio: null,
     turns: ['já tenho meu diagnóstico no ar. o que eu posto hoje pra atrair clientes sem ficar vendendo?'],
+    seedHistory: SEED_POS_ATIVACAO,
   },
   {
     id: 'dia-falar-com-lead',
@@ -244,6 +268,7 @@ export const NOEL_LAB_CENARIOS: readonly LabCenario[] = [
     esperaLink: false,
     desafio: null,
     turns: ['uma pessoa respondeu meu diagnóstico e parou no resultado. o que eu mando pra ela no whatsapp?'],
+    seedHistory: SEED_POS_ATIVACAO,
   },
   {
     id: 'dia-conduzir-conversa',
@@ -253,6 +278,7 @@ export const NOEL_LAB_CENARIOS: readonly LabCenario[] = [
     esperaLink: false,
     desafio: null,
     turns: ['como eu conduzo a conversa com quem chega interessado, sem parecer que estou empurrando?'],
+    seedHistory: SEED_POS_ATIVACAO,
   },
   {
     id: 'dia-clareza-funil',
@@ -262,6 +288,7 @@ export const NOEL_LAB_CENARIOS: readonly LabCenario[] = [
     esperaLink: false,
     desafio: null,
     turns: ['eu fico mandando promoção e preço e quase ninguém compra. o que eu faço diferente?'],
+    seedHistory: SEED_POS_ATIVACAO,
   },
   {
     id: 'dia-indicacoes-autoridade',
@@ -271,6 +298,7 @@ export const NOEL_LAB_CENARIOS: readonly LabCenario[] = [
     esperaLink: false,
     desafio: null,
     turns: ['como eu uso meu link pra gerar mais indicações e virar autoridade no meu nicho?'],
+    seedHistory: SEED_POS_ATIVACAO,
   },
   {
     id: 'dia-acao-de-hoje',
@@ -280,5 +308,6 @@ export const NOEL_LAB_CENARIOS: readonly LabCenario[] = [
     esperaLink: false,
     desafio: null,
     turns: ['o que eu faço hoje, na prática, pra começar a usar isso de verdade com meu time?'],
+    seedHistory: SEED_POS_ATIVACAO,
   },
 ] as const

@@ -27,11 +27,12 @@ type Turno = { role: string; content: string }
 const GATILHOS_DIA_A_DIA: readonly RegExp[] = [
   /o que (eu )?(fa[çc]o|fazer|devo fazer)|por onde come[çc]|pr[óo]ximo passo|minha rotina|meu dia a dia/i,
   /agenda\b.{0,10}(vazia|parada|cheia)|sem cliente|n[ãa]o (tenho|fecho|consigo) client/i,
-  /o que (eu )?(posto|postar)|conte[úu]do|no instagram|minha bio|o que divulgo|como divulgo/i,
-  /o que (eu )?(falo|falar)|como abordo|no direct/i,
+  /o que (eu )?(posto|postar)|conte[úu]do|no instagram|minha bio|(o que|como) divulgo/i,
+  /o que (eu )?(falo|falar|mando|respondo|escrevo|digo)|como (eu )?(abordo|conduzo|conduzir|converso|atendo|falo com)|no direct|primeira mensagem|conduzir a conversa/i,
   /minha meta|meta do m[êe]s|bati a meta/i,
-  /quero (mais )?(cliente|contato|indica[çc])|como (consigo|atra[ií]o) (mais )?client/i,
-  /cheio de curioso|s[óo] curioso|s[óo] (me )?perguntam pre[çc]o|n[ãa]o qualifica/i,
+  /(quero|gerar|mais|colher).{0,12}indica[çc]|indica[çc][õoã]|virar autoridade|ser autoridade|autoridade no meu nicho/i,
+  /quero (mais )?(cliente|contato)|como (consigo|atra[ií]o) (mais )?client/i,
+  /cheio de curioso|s[óo] curioso|s[óo] (me )?perguntam pre[çc]o|n[ãa]o qualifica|mandando (promo[çc][ãa]o|pre[çc]o)/i,
 ]
 
 /** A mensagem pede orientação do dia a dia (o que faço/posto/falo/meta/atração)? */

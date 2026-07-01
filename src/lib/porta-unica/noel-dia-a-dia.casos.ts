@@ -29,6 +29,11 @@ caso('pedeOrientacaoDiaADia pega os pedidos do dia a dia', () => {
     'qual minha meta desse mês',
     'quero mais clientes',
     'chega cheio de curioso que só pergunta preço',
+    // frases exatas dos cenários do /pt/noel-lab (garante que o lab aciona a camada)
+    'o que eu mando pra ela no whatsapp?',
+    'como eu conduzo a conversa com quem chega interessado, sem parecer que estou empurrando?',
+    'como eu uso meu link pra gerar mais indicações e virar autoridade no meu nicho?',
+    'eu fico mandando promoção e preço e quase ninguém compra. o que eu faço diferente?',
   ]) {
     assert.ok(pedeOrientacaoDiaADia(m), `deveria pedir orientação: ${m}`)
   }

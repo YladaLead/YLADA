@@ -40,7 +40,9 @@ export default function NoelLabPage() {
   const rodarCenario = useCallback(
     async (c: LabCenario) => {
       setResultados((r) => ({ ...r, [c.id]: { transcript: [], status: 'running' } }))
-      let historia: Turno[] = []
+      // Dia a dia: começa com o histórico semeado (link já entregue) pra marcar pós-ativação —
+      // sem isso a camada de mentoria do dia a dia não dispara no lab isolado (conta sem link).
+      let historia: Turno[] = c.seedHistory ? c.seedHistory.map((t) => ({ ...t })) : []
       let link: LinkCtx | null = null
       try {
         for (const fala of c.turns) {
