@@ -15,7 +15,8 @@ import {
 } from '@/lib/pro-lideres-member-noel-context'
 import { buildProLideresMemberNoelCatalogExcerpt } from '@/lib/pro-lideres-member-noel-catalog'
 import { fetchProLideresMemberTabulatorName } from '@/lib/pro-lideres-noel-member-access'
-import { isNoelProLideresUnifiedEnabled } from '@/lib/pro-lideres-noel-unified-flag'
+import { isNoelProLideresUnifiedForTenant } from '@/lib/pro-lideres-noel-unified-flag'
+import { resolvedUserEmail } from '@/lib/pro-lideres-server'
 import type { LeaderTenantRow } from '@/types/leader-tenant'
 import type { ProLideresTenantRole } from '@/types/leader-tenant'
 
@@ -41,13 +42,7 @@ export type BuildProLideresNoelContextBlockParams = {
   objectionExcerpt?: string | null
 }
 
-function requestOrigin(request: NextRequest): string {
-  try {
-    return new URL(request.url).origin
-  } catch {
-    return process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://www.ylada.com'
-  }
-}
+import { resolveProLideresNoelPublicBaseUrl } from '@/lib/pro-lideres-noel-public-base-url'
 
 function replyLanguageLabel(locale: string | undefined): string {
   if (locale === 'en') return 'English'
@@ -84,10 +79,10 @@ Quando este bloco está ativo (papel=líder, Pro Líderes), a regra **ENTREGA PR
 }
 
 function buildMemberRamoRulesBlock(): string {
-  return `[PRO LÍDERES — RAMO MEMBRO]
-- Você orienta quem está **em campo na rede**; **não cria** links novos nem inventa URL.
-- Indique **somente** links listados em **[MEUS LINKS]** abaixo (URLs personalizadas do membro).
-- Formato preferido: abertura curta → **Na prática** (bullets) → **Mensagem pronta** / **Legenda curta** (se couber) → **Link para enviar** (se couber) → **Próximo passo** (1 frase).
+  return `[PRO LÍDERES — RAMO MEMBRO (CAMPO)]
+- Você é o mesmo Noel: apoia quem está **em campo** nesta operação, atendendo os clientes da rede.
+- Tem o motor completo do YLADA: pode montar diagnóstico/quiz/link quando fizer sentido, **e** usar os endereços prontos em **[MEUS LINKS]** para compartilhar rápido.
+- Nunca **escreva ou invente uma URL à mão**: use um link de [MEUS LINKS] ou deixe o sistema gerar o link de verdade.
 - Marca: **YLADA** / **Pro Líderes** — nunca "Wellness" como nome da plataforma.`
 }
 
@@ -264,28 +259,21 @@ export type LoadProLideresNoelMatrixContextInput = {
   locale?: string
 }
 
-/**
- * Carrega tenant + dados e devolve o bloco de contexto PL para a matriz.
- * Retorna `null` se flag OFF, sem papel PL, sem tenant ou papel não autorizado.
- */
-export async function loadProLideresNoelMatrixContext(
-  input: LoadProLideresNoelMatrixContextInput
-): Promise<string | null> {
-  if (!isNoelProLideresUnifiedEnabled()) return null
+export type ProLideresNoelMatrixSession = {
+  papel: ProLideresNoelUnifiedPapel
+  tenant: LeaderTenantRow
+  tenantRole: ProLideresTenantRole
+  contextBlock: string
+}
 
-  const papel = resolveProLideresNoelUnifiedPapel({
-    area: input.area,
-    proLideresPapel: input.proLideresPapel,
-  })
-  if (!papel) return null
-
-  const ctx = await resolveProLideresTenantContext(input.supabase, input.user)
-  if (!ctx) return null
-  if (!papelAllowedForRole(papel, ctx.role)) return null
-
+async function buildSessionContextBlock(
+  input: LoadProLideresNoelMatrixContextInput,
+  papel: ProLideresNoelUnifiedPapel,
+  ctx: { tenant: LeaderTenantRow; role: ProLideresTenantRole }
+): Promise<string> {
   const tenant = ctx.tenant
   const verticalCode = (tenant.vertical_code ?? 'h-lider').trim() || 'h-lider'
-  const baseUrl = requestOrigin(input.request).replace(/\/$/, '')
+  const baseUrl = resolveProLideresNoelPublicBaseUrl(input.request).replace(/\/$/, '')
   const replyLanguage = replyLanguageLabel(input.locale)
 
   const baseParams: BuildProLideresNoelContextBlockParams = {
@@ -311,4 +299,47 @@ export async function loadProLideresNoelMatrixContext(
     input.message
   )
   return buildProLideresNoelContextBlock({ ...baseParams, ...memberFields })
+}
+
+/**
+ * Carrega tenant + dados e devolve sessão PL para a matriz.
+ * Retorna `null` se unificação inativa, sem papel PL, sem tenant ou papel não autorizado.
+ */
+export async function loadProLideresNoelMatrixSession(
+  input: LoadProLideresNoelMatrixContextInput
+): Promise<ProLideresNoelMatrixSession | null> {
+  const papel = resolveProLideresNoelUnifiedPapel({
+    area: input.area,
+    proLideresPapel: input.proLideresPapel,
+  })
+  if (!papel) return null
+
+  const ctx = await resolveProLideresTenantContext(input.supabase, input.user)
+  if (!ctx) return null
+  if (!papelAllowedForRole(papel, ctx.role)) return null
+
+  const ownerEmail =
+    ctx.role === 'leader' ? resolvedUserEmail(input.user) : null
+  if (!isNoelProLideresUnifiedForTenant(ctx.tenant, { ownerEmail, role: ctx.role })) {
+    return null
+  }
+
+  const contextBlock = await buildSessionContextBlock(input, papel, ctx)
+  return {
+    papel,
+    tenant: ctx.tenant,
+    tenantRole: ctx.role,
+    contextBlock,
+  }
+}
+
+/**
+ * Carrega tenant + dados e devolve o bloco de contexto PL para a matriz.
+ * Retorna `null` se flag OFF, sem papel PL, sem tenant ou papel não autorizado.
+ */
+export async function loadProLideresNoelMatrixContext(
+  input: LoadProLideresNoelMatrixContextInput
+): Promise<string | null> {
+  const session = await loadProLideresNoelMatrixSession(input)
+  return session?.contextBlock ?? null
 }

@@ -10,6 +10,8 @@ import {
 } from '@/lib/pro-lideres-noel-context-block'
 import {
   isNoelProLideresUnifiedEnabled,
+  isNoelProLideresUnifiedForTenant,
+  isNoelProLideresUnifiedPilotOwnerEmail,
   NOEL_CHAT_MODEL,
 } from '@/lib/pro-lideres-noel-unified-flag'
 
@@ -38,6 +40,18 @@ function withEnv(value: string | undefined, fn: () => void) {
   }
 }
 
+function withPilotEmails(value: string | undefined, fn: () => void) {
+  const prev = process.env.NOEL_PRO_LIDERES_UNIFIED_PILOT_EMAILS
+  if (value === undefined) delete process.env.NOEL_PRO_LIDERES_UNIFIED_PILOT_EMAILS
+  else process.env.NOEL_PRO_LIDERES_UNIFIED_PILOT_EMAILS = value
+  try {
+    fn()
+  } finally {
+    if (prev === undefined) delete process.env.NOEL_PRO_LIDERES_UNIFIED_PILOT_EMAILS
+    else process.env.NOEL_PRO_LIDERES_UNIFIED_PILOT_EMAILS = prev
+  }
+}
+
 assert('modelo padrão gpt-4o-mini', NOEL_CHAT_MODEL === 'gpt-4o-mini')
 
 withEnv(undefined, () => {
@@ -46,6 +60,22 @@ withEnv(undefined, () => {
 
 withEnv('true', () => {
   assert('flag unified true ON', isNoelProLideresUnifiedEnabled())
+})
+
+assert(
+  'piloto por coluna tenant',
+  isNoelProLideresUnifiedForTenant({ noel_unified_pilot_enabled: true })
+)
+assert(
+  'piloto OFF sem coluna nem global',
+  !isNoelProLideresUnifiedForTenant({ noel_unified_pilot_enabled: false })
+)
+
+withPilotEmails('deisefaula@gmail.com', () => {
+  assert(
+    'piloto por e-mail dono',
+    isNoelProLideresUnifiedPilotOwnerEmail('deisefaula@gmail.com')
+  )
 })
 
 assert('papel explícito leader', resolveProLideresNoelUnifiedPapel({ proLideresPapel: 'leader' }) === 'leader')
@@ -93,8 +123,10 @@ const memberBlock = buildProLideresNoelContextBlock({
   dailyTasksExcerpt: 'Checklist do líder para hoje',
 })
 
-assert('membro: ramo membro', memberBlock.includes('RAMO MEMBRO'))
-assert('membro: proíbe criar link', /não cria.*links/i.test(memberBlock))
+assert('membro: ramo membro (campo)', memberBlock.includes('RAMO MEMBRO'))
+assert('membro: campo da operação', /campo/i.test(memberBlock))
+assert('membro: pode usar motor (não proíbe criar)', !/não cria.*links/i.test(memberBlock))
+assert('membro: não escreve URL à mão', /invente uma URL|invente URL/i.test(memberBlock))
 assert('membro: MEUS LINKS', memberBlock.includes('[MEUS LINKS'))
 assert('membro: tabulador Ana', memberBlock.includes('Ana'))
 assert('membro: tarefas hoje', memberBlock.includes('TAREFAS DE HOJE'))

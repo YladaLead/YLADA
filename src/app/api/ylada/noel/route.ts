@@ -99,8 +99,19 @@ import {
   NOEL_LAYER4_PRIORITY_RULE,
 } from '@/lib/noel-wellness/prompt-layers'
 import { applyNoelPersonaToSystemPrompt } from '@/lib/ylada-flow/noel/persona'
-import { loadProLideresNoelMatrixContext } from '@/lib/pro-lideres-noel-context-block'
-import { NOEL_CHAT_MODEL } from '@/lib/pro-lideres-noel-unified-flag'
+import {
+  loadProLideresNoelMatrixContext,
+  loadProLideresNoelMatrixSession,
+} from '@/lib/pro-lideres-noel-context-block'
+import {
+  NOEL_CHAT_MODEL,
+  isNoelProLideresMemberMatrizPureEnabled,
+} from '@/lib/pro-lideres-noel-unified-flag'
+import {
+  assertProLideresMemberMatrixChatAccess,
+  buildProLideresMemberMatrixTurn,
+  handleProLideresMemberMatrixChat,
+} from '@/lib/pro-lideres-noel-member-matrix-turn'
 import OpenAI from 'openai'
 import { hasYladaProPlan } from '@/lib/subscription-helpers'
 import { getNoelUsageCount, incrementNoelUsage } from '@/lib/noel-usage-helpers'
@@ -749,13 +760,6 @@ const SEGMENT_CONTEXT: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireApiAuth(request, [
-      'ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller',
-      'perfumaria', 'estetica', 'fitness', 'joias', 'nutri', 'admin', 'wellness', 'coach-bem-estar',
-    ])
-    if (auth instanceof NextResponse) return auth
-    const { user } = auth
-
     const body = await request.json()
     const {
       message,
@@ -779,17 +783,28 @@ export async function POST(request: NextRequest) {
       locale?: 'pt' | 'en' | 'es'
       channel?: string
       supportUi?: 'matrix' | 'wellness'
-      /** Força um modo de resposta. 'espelho' = Etapa 1 (convicção), sem gerar link. */
       mode?: 'espelho'
-      /** Modo laboratório (`/pt/noel-lab`): ignora o estado da conta (links ativos, memória,
-       *  histórico salvo) e NÃO persiste, pra cada cenário rodar do zero. Só vale com a flag de
-       *  condução ligada (inerte em produção). @see app/pt/noel-lab/page.tsx */
       labIsolado?: boolean
-      /** Toque "b" Fase 2: desafio capturado pela porta única (cru, normalizado depois). */
       desafio?: unknown
-      /** Unificação PL na matriz (Fase 1): `leader` | `member` — inerte com NOEL_PRO_LIDERES_UNIFIED_ENABLED OFF. */
       proLideresPapel?: string
     }
+
+    const isProLideresNoelArea =
+      area === 'pro_lideres' ||
+      area === 'pro_lideres_member' ||
+      proLideresPapel === 'leader' ||
+      proLideresPapel === 'member' ||
+      proLideresPapel === 'lider' ||
+      proLideresPapel === 'membro'
+
+    const auth = isProLideresNoelArea
+      ? await requireApiAuth(request)
+      : await requireApiAuth(request, [
+          'ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller',
+          'perfumaria', 'estetica', 'fitness', 'joias', 'nutri', 'admin', 'wellness', 'coach-bem-estar',
+        ])
+    if (auth instanceof NextResponse) return auth
+    const { user } = auth
 
     const isSupportChannel = channel === 'support'
 
@@ -822,9 +837,59 @@ export async function POST(request: NextRequest) {
     // Só com a flag de condução ligada → inerte em produção (mesmo se o body mandar labIsolado).
     const isLabIsolado = isNoelDesafioConducaoEnabled() && labIsolado === true
 
+    // Fase 2 — PL membro na matriz (piloto por tenant).
+    // Flag pure ON: membro cai no MOTOR da matriz (mesmo Noel, só com o bloco de campo);
+    // o acesso já é validado aqui e o freemium é pulado (paga o add-on). OFF: motor rígido dedicado.
+    let plMemberMatrizPure = false
+    if (supabaseAdmin && !isLabIsolado && !isSupportChannel) {
+      try {
+        const plSession = await loadProLideresNoelMatrixSession({
+          supabase: supabaseAdmin,
+          user,
+          request,
+          message: message.trim(),
+          area: typeof area === 'string' ? area : undefined,
+          proLideresPapel: typeof proLideresPapel === 'string' ? proLideresPapel : undefined,
+          locale,
+        })
+        if (plSession?.papel === 'member') {
+          const denied = await assertProLideresMemberMatrixChatAccess(supabaseAdmin, user, plSession)
+          if (denied) return denied
+          if (!process.env.OPENAI_API_KEY) {
+            return NextResponse.json({ error: 'OpenAI não configurado' }, { status: 503 })
+          }
+          if (isNoelProLideresMemberMatrizPureEnabled()) {
+            // Não early-return: segue para o motor da matriz. O bloco [CONTEXTO PRO LÍDERES]
+            // (papel=member) é injetado adiante (loadProLideresNoelMatrixContext).
+            plMemberMatrizPure = true
+          } else {
+            const memberTurn = await buildProLideresMemberMatrixTurn({
+              supabase: supabaseAdmin,
+              user,
+              request,
+              message: message.trim(),
+              conversationHistory,
+              locale,
+              session: plSession,
+            })
+            return handleProLideresMemberMatrixChat({
+              openai,
+              turn: memberTurn,
+              message: message.trim(),
+              conversationHistory,
+              area: typeof area === 'string' ? area : 'pro_lideres_member',
+            })
+          }
+        }
+      } catch (e) {
+        console.warn('[/api/ylada/noel] PL membro unificado:', e)
+      }
+    }
+
     // Freemium: verificar limite de análises avançadas antes de chamar IA (mentor; Nina não consome cota)
+    // Membro PL puro já passou pelo gate de acesso/assinatura do add-on → não consome cota freemium.
     const isPro = await hasYladaProPlan(user.id)
-    if (!isSupportChannel && !isPro) {
+    if (!isSupportChannel && !isPro && !plMemberMatrizPure) {
       const used = await getNoelUsageCount(user.id)
       if (used >= FREEMIUM_LIMITS.FREE_LIMIT_NOEL_ADVANCED_ANALYSES_PER_MONTH) {
         void recordFreemiumLimitHit(user.id, 'noel')
@@ -1070,7 +1135,8 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = typeof request.url === 'string' ? new URL(request.url).origin : (process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app')
 
-    // Fase 1 — Pro Líderes unificado na matriz (inerte com NOEL_PRO_LIDERES_UNIFIED_ENABLED OFF).
+    // Pro Líderes unificado na matriz: líder sempre; membro quando na matriz pura (flag pure ON,
+    // caiu do ramo acima). Com a flag OFF o membro já retornou pelo motor rígido dedicado.
     let proLideresNoelContextBlock: string | null = null
     if (supabaseAdmin && !isLabIsolado) {
       try {
