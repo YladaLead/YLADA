@@ -52,6 +52,38 @@ export function buildSignupUrlWithReferral(input: {
   return query ? `/pt/cadastro?${query}` : '/pt/cadastro'
 }
 
+// ─── Porta única / fluxo de entrada ─────────────────────────────────────────
+
+export type PortaEntradaDestino = 'pt' | 'descubra'
+
+/** Parâmetro de URL que indica qual passo inicial mostrar na PortaUnica. */
+export const PORTA_START_PARAM = 'start'
+
+/** Valor que faz a PortaUnica começar direto no desafio picker (pula o hero). */
+export const PORTA_START_DESAFIO = 'desafio'
+
+/**
+ * Entrada do fluxo da porta (hero + desafio → devolutiva → cadastro).
+ * Preserva ?ref do loop. Porta 1 absorve em `/pt`; senão a rota dedicada `/descubra`.
+ * @example buildPortaEntradaUrlWithReferral({ code: 'a3f9k2', destino: 'descubra', source: 'diagnostico' })
+ *          // '/descubra?ref=a3f9k2&source=diagnostico'
+ */
+export function buildPortaEntradaUrlWithReferral(input: {
+  code?: string | null
+  destino: PortaEntradaDestino
+  source?: ReferralSource
+  /** Porta 2 (`/criar`): pula o hero e abre no picker do desafio. */
+  start?: typeof PORTA_START_DESAFIO
+}): string {
+  const params = new URLSearchParams()
+  if (input.code) params.set(REFERRAL_PARAM, input.code)
+  params.set(REFERRAL_SOURCE_PARAM, input.source ?? 'diagnostico')
+  if (input.start === PORTA_START_DESAFIO) params.set(PORTA_START_PARAM, PORTA_START_DESAFIO)
+  const base = input.destino === 'pt' ? '/pt' : '/descubra'
+  const query = params.toString()
+  return query ? `${base}?${query}` : base
+}
+
 /** Lê ref/source de uma querystring (ex.: window.location.search). Tolerante a lixo. */
 export function parseReferralParams(search: string): {
   ref: string | null
