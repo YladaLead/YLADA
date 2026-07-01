@@ -86,10 +86,12 @@ function Tela1({ variant, onAvancar }: { variant: PortaUnicaVariant; onAvancar: 
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-sky-700">
           {PORTA1_HERO.categoria}
         </p>
-        <h1 className="mb-4 text-3xl font-bold leading-tight text-gray-900">{PORTA1_HERO.headline}</h1>
-        <p className="mx-auto mb-8 max-w-md text-base leading-relaxed text-gray-600">
-          {PORTA1_HERO.subheadline}
-        </p>
+        <h1 className={`text-3xl font-bold leading-tight text-gray-900 ${PORTA1_HERO.subheadline ? 'mb-4' : 'mb-8'}`}>{PORTA1_HERO.headline}</h1>
+        {PORTA1_HERO.subheadline ? (
+          <p className="mx-auto mb-8 max-w-md text-base leading-relaxed text-gray-600">
+            {PORTA1_HERO.subheadline}
+          </p>
+        ) : null}
         <button
           type="button"
           onClick={onAvancar}
