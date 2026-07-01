@@ -38,8 +38,11 @@ export default function CriarPage() {
     void trackReferralLanding(parsed.ref, parsed.source)
   }, [])
 
+  // /criar é Porta 2 (loop) — a pessoa já fez um diagnóstico, não precisa do hero.
+  // Vai direto pro cadastro preservando o ?ref. Nunca passa pela Porta 1 (evita duplo clique).
   const signupUrl = useMemo(() => buildSignupUrlWithReferral({ code: ref }), [ref])
   const copy = HEADLINES[source]
+  const ctaLabel = 'Criar minha conta'
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
@@ -51,7 +54,7 @@ export default function CriarPage() {
           href={signupUrl}
           className="inline-flex w-full items-center justify-center rounded-xl bg-sky-600 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-sky-700"
         >
-          Criar minha conta
+          {ctaLabel}
         </Link>
         <p className="mt-4 text-sm text-gray-500">
           Já tem conta?{' '}
