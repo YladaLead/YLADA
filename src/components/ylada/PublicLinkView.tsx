@@ -27,6 +27,7 @@ import { createClient } from '@/lib/supabase-client'
 import { parseProLideresMemberPathSegment } from '@/lib/ylada-public-link-path'
 import { dedupeQuizExpandedBody, splitQuizDescriptionForPublicResult } from '@/lib/split-quiz-result-description'
 import { shouldAdvanceConfigDrivenStepToResult } from '@/lib/ylada/public-link-quiz-flow'
+import { isSentenceLikeProfileName, isUsableShortContext } from '@/lib/ylada/short-profile-name'
 import {
   buildYladaFlowCalculatorResultCopy,
   computeYladaFlowCalculatorResult,
@@ -1495,7 +1496,11 @@ function ConfigDrivenLinkView({
       const themeHintForUi = `${themeFromMeta || ''} ${pageTitleRaw} ${displayTitle || ''}`
       const waterIntakeTool = isWaterIntakeCalculatorContext(meta, displayTitle)
       let profileName = toShortProfileName(chosenProfileBase, { waterIntakeTool })
-      if (isIncompleteFragment(profileName) && contextTitle.trim().length >= 6) {
+      // BUG 2: nome de perfil que é fragmento cortado OU frase longa (fluxos de negócio) cai no
+      // rótulo curto do contexto (ex.: "Produtividade em vendas"), como já fazem os de saúde.
+      const profileNameEhFraseOuFragmento =
+        isIncompleteFragment(profileName) || isSentenceLikeProfileName(profileName)
+      if (profileNameEhFraseOuFragmento && isUsableShortContext(contextTitle)) {
         profileName = contextTitle
       }
       const formattedProfileTitle = profileName || contextTitle || 'Padrão de atenção identificado'
