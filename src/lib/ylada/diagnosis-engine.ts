@@ -32,6 +32,7 @@ import {
 } from './diagnosis-templates'
 import { isAestheticsContext } from './diagnosis-templates'
 import { validateDiagnosisDecision } from './diagnosis-validation'
+import { displayProfileType } from './profile-type-label'
 
 const BLOCKER_LABELS: Record<BlockerType, string> = {
   rotina: 'Falta de organização na rotina',
@@ -523,7 +524,7 @@ function getMainBlocker(
     case 'BLOCKER_DIAGNOSIS':
       return payload.blocker_type ? BLOCKER_LABELS[payload.blocker_type] : 'Algo trava sua constância'
     case 'PROFILE_TYPE':
-      return payload.profile_type ? `Seu jeito é ${payload.profile_type}` : 'Seu jeito de lidar com isso'
+      return payload.profile_type ? `Seu jeito é ${displayProfileType(payload.profile_type)}` : 'Seu jeito de lidar com isso'
     case 'READINESS_CHECKLIST': {
       const score = payload.score ?? 0
       const theme = sanitizeThemeForMainBlocker((payload.theme ?? '').trim())
@@ -704,7 +705,8 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
       const p = calcProfile(visitor_answers)
       profile_type = p.profile_type
       evidence_bullets = p.evidence
-      slots.PROFILE = p.profile_type
+      // Rótulo acentuado só pra exibição ({PROFILE}); profile_type cru segue pros lookups (BUG 5).
+      slots.PROFILE = displayProfileType(p.profile_type)
       next_step = getNextStep(meta.architecture, { profile_type: p.profile_type })
       break
     }

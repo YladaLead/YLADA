@@ -789,15 +789,15 @@ const PROFILE: ArchitectureTemplates = {
     'Seu estilo em {THEME}: {PROFILE}',
   ],
   explanation:
-    'Seu jeito de lidar com isso tem pontos fortes e alguns que atrapalham.',
+    'Seu jeito de lidar com isso tem forças reais. O que trava não é você, é quando o método não conversa com esse jeito.',
   causa_provavel:
-    'A causa provável: quando o caminho não combina com seu perfil, a inconsistência tende a aparecer.',
+    'A causa provável: você vem seguindo um caminho que não foi pensado pro seu perfil, e é isso que faz o resultado oscilar.',
   preocupacoes:
-    'Seguir um método que não combina com seu jeito tende a gerar abandono.',
+    'Insistir num método que não combina com você costuma cansar e levar a desistir no meio, mesmo quando o plano até faz sentido.',
   consequence:
-    'Se o caminho não combinar com seu perfil, tende a ficar inconsistente.',
+    'Com o tempo, a inconsistência vira a sensação de que "não é pra você", quando na verdade é só o caminho errado.',
   possibility:
-    'Quando combina, fica mais leve. Vale conversar pra alinhar.',
+    'Quando o caminho é ajustado ao seu perfil, a constância vem com menos esforço. O próximo passo é adaptar o método ao seu jeito com quem já fez isso.',
   cta_helper: 'Quer que eu te diga o caminho ideal pro seu perfil?',
   cta_button: ['Quero o caminho do meu perfil', 'Quero aplicar'],
   cta_imperative: 'Fale comigo sobre isso',
