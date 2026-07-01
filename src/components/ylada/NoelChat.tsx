@@ -1103,7 +1103,7 @@ export default function NoelChat({
   return (
     <div className={`flex flex-col rounded-2xl border border-sky-100 bg-white shadow-lg overflow-hidden ${className}`}>
       <div
-        className={`flex items-center gap-3 border-b border-sky-200 bg-sky-100/80 px-4 py-2.5 ${
+        className={`flex items-center gap-3 border-b border-gray-100 bg-white px-4 py-2.5 ${
           showChatHeaderTitle ? 'justify-between' : 'justify-end'
         }`}
       >
@@ -1122,9 +1122,9 @@ export default function NoelChat({
               </span>
             )}
             <div className="min-w-0 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-              <span className="text-sm font-bold text-sky-800">{headerTitle ?? 'Noel, mentor estratégico'}</span>
+              <span className="text-sm font-bold text-gray-900">{headerTitle ?? 'Noel, mentor estratégico'}</span>
               {headerTagline?.trim() ? (
-                <span className="text-xs font-medium leading-snug text-sky-800/85">{headerTagline.trim()}</span>
+                <span className="text-xs font-medium leading-snug text-gray-500">{headerTagline.trim()}</span>
               ) : null}
             </div>
           </div>
@@ -1132,7 +1132,7 @@ export default function NoelChat({
         <button
           type="button"
           onClick={clearChat}
-          className="flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-sky-600 hover:text-sky-800 hover:bg-sky-100/80 rounded-lg transition-colors opacity-80 hover:opacity-100"
+          className="flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
           title="Limpar conversa e começar do zero"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1216,8 +1216,8 @@ export default function NoelChat({
                 msg.role === 'user'
                   ? 'bg-sky-600 text-white shadow-md shadow-sky-500/20'
                   : hasLink(msg.content)
-                    ? 'bg-white text-gray-800 border-2 border-sky-100 shadow-md'
-                    : 'bg-white text-gray-800 border border-gray-100 shadow-sm'
+                    ? 'bg-gray-50 text-gray-800 border border-sky-100 shadow-sm'
+                    : 'bg-gray-50 text-gray-800 border border-gray-200 shadow-sm'
               }`}
             >
               {msg.role === 'user' ? (
@@ -1840,7 +1840,16 @@ export default function NoelChat({
             disabled={!input.trim() || loading}
             className="h-[48px] px-6 bg-sky-600 text-white rounded-xl hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold shrink-0 shadow-md flex items-center gap-2"
           >
-            {loading ? '⏳' : '➤'}
+            {loading ? (
+              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            )}
             <span className="hidden sm:inline">{sendButtonLabel ?? 'Enviar'}</span>
           </button>
         </div>

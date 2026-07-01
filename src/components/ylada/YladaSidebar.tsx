@@ -111,7 +111,7 @@ export default function YladaSidebar({
         href={href}
         onClick={onMobileClose}
         className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-          isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
+          isActive ? 'bg-sky-50 text-sky-700' : 'text-gray-700 hover:bg-gray-100'
         }`}
       >
         <span aria-hidden>{item.icon}</span>
