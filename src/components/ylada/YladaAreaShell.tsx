@@ -59,8 +59,8 @@ function YladaAreaShellLayout({
             ) : (
               <span className="lg:hidden w-10 shrink-0" aria-hidden />
             )}
-            {/* No desktop o logo já aparece na sidebar — esconde no header */}
-            <Link href={areaCodigo === 'ylada' ? '/pt' : `/pt/${areaCodigo}/home`} className="lg:hidden flex items-center gap-2 min-w-0">
+            {/* Quando sidebar visível, o logo já aparece nela — esconde no header só nesse caso */}
+            <Link href={areaCodigo === 'ylada' ? '/pt' : `/pt/${areaCodigo}/home`} className={`${sidebarVisible ? 'lg:hidden' : ''} flex items-center gap-2 min-w-0`}>
               <Image
                 src={YLADA_LOGO}
                 alt="YLADA"
