@@ -313,9 +313,24 @@ export function emailHasYladaCommercialUnlimitedByEsteticaOrEnv(email: string | 
 }
 
 /**
+ * Última etapa de `hasYladaProPlan` após checagens de e-mail e assinatura `ylada`.
+ * Membro ativo Pro Líderes desbloqueia freemium em qualquer perfil (não só wellness).
+ */
+export function yladaMatrixProFromPerfilAndAccess(signals: {
+  wellnessCommercialSub: boolean
+  proLideresUnlock: boolean
+  segmentCommercialSub: boolean
+}): boolean {
+  if (signals.wellnessCommercialSub) return true
+  if (signals.proLideresUnlock) return true
+  return signals.segmentCommercialSub
+}
+
+/**
  * Verifica se usuário tem benefícios “sem limite freemium” na matriz YLADA (links, Noel, WhatsApp).
  * Inclui: **admin ou suporte**; **demo.*@ylada**; ylada mensal/anual/trial/cortesia;
- * **wellness / coach-bem-estar** com assinatura `wellness` vigente (mensal/anual/trial) ou equipa Pró Líderes;
+ * **wellness / coach-bem-estar** com assinatura `wellness` vigente (mensal/anual/trial);
+ * **membro ativo ou líder Pro Líderes** (qualquer perfil);
  * **ou** segmento da matriz (nutri, med, coach, …) com plano comercial equivalente.
  * Não inclui: free migração/legado sem prazo pago vigente.
  * @see docs/SPEC-FREEMIUM-YLADA.md
@@ -337,16 +352,23 @@ export async function hasYladaProPlan(userId: string): Promise<boolean> {
     if (yladaSub && activeYladaRowIsUnlimited(yladaSub)) return true
 
     const perfil = profile?.perfil as string | undefined
-    if (isWellnessProductPerfil(perfil)) {
-      if (await getWellnessProductCommercialSubscription(userId)) return true
-      if (await proLideresContextUnlocksYladaMatrixApis(userId)) return true
-    }
+    const wellnessCommercialSub = isWellnessProductPerfil(perfil)
+      ? !!(await getWellnessProductCommercialSubscription(userId))
+      : false
+    const proLideresUnlock = await proLideresContextUnlocksYladaMatrixApis(userId)
 
     const area = perfilMatrizToSubscriptionArea(perfil)
-    if (!area) return false
+    let segmentCommercialSub = false
+    if (area) {
+      const segSub = await getActiveSubscription(userId, area)
+      segmentCommercialSub = !!(segSub && subscriptionRowIsMatrixSegmentCommercialUnlimited(segSub))
+    }
 
-    const segSub = await getActiveSubscription(userId, area)
-    return !!(segSub && subscriptionRowIsMatrixSegmentCommercialUnlimited(segSub))
+    return yladaMatrixProFromPerfilAndAccess({
+      wellnessCommercialSub,
+      proLideresUnlock,
+      segmentCommercialSub,
+    })
   } catch {
     return false
   }
