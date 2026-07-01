@@ -1716,10 +1716,12 @@ function ConfigDrivenLinkView({
                   </div>
                 ) : null}
 
-                {showGenericClinicalSafeguardBoxes ? (
+                {/* BUG 6: mostra o box só na versão específica de nicho (estética); esconde o
+                    "A boa notícia…" genérico (encheção que a régua manda cortar). */}
+                {showGenericClinicalSafeguardBoxes && isProEsteticaVerticalLink ? (
                 <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
                   <p className="text-gray-700 text-sm leading-relaxed">
-                    {isProEsteticaVerticalLink ? t.esteticaExpandedEncouragement : t.goodNews}
+                    {t.esteticaExpandedEncouragement}
                   </p>
                 </div>
                 ) : null}
@@ -2539,10 +2541,11 @@ function DiagnosticoQuiz({
                     <p className="text-sm leading-relaxed text-gray-800 whitespace-pre-line">{quizExpandedBody}</p>
                   </div>
                 ) : null}
-                {showGenericClinicalSafeguardBoxes ? (
+                {/* BUG 6: mostra o box só na versão específica de nicho (estética); esconde o genérico. */}
+                {showGenericClinicalSafeguardBoxes && isProEsteticaVerticalQuiz ? (
                 <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
                   <p className="text-gray-700 text-sm leading-relaxed">
-                    {isProEsteticaVerticalQuiz ? t.esteticaExpandedEncouragement : t.goodNews}
+                    {t.esteticaExpandedEncouragement}
                   </p>
                 </div>
                 ) : null}
@@ -3629,11 +3632,14 @@ function CalculatorBlock({
                 ) : null}
                 {showFullAnalysis && resultCopy ? (
                   <>
+                    {/* BUG 6: box só na versão específica (calculadora metabólica); esconde o genérico. */}
+                    {metabolicMacroCalculator ? (
                     <div className="p-4 rounded-xl bg-green-50/80 border border-green-100">
                       <p className="text-gray-700 text-sm leading-relaxed">
-                        {metabolicMacroCalculator ? t.calculatorExpandedMetabolicEncouragement : t.goodNews}
+                        {t.calculatorExpandedMetabolicEncouragement}
                       </p>
                     </div>
+                    ) : null}
                     <div className="p-4 rounded-xl bg-sky-50/80 border border-sky-100">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
                         {metabolicMacroCalculator ? t.calculatorMetabolicProNextStepHeadline : t.moreFactors}
