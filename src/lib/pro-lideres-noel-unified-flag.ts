@@ -33,10 +33,12 @@ export function isNoelProLideresUnifiedPilotOwnerEmail(email: string | null | un
  * Só tem efeito quando já existe sessão de membro (tenant no piloto de unificação).
  */
 export function isNoelProLideresMemberMatrizPureEnabled(): boolean {
-  return (
-    process.env.NOEL_PL_MEMBER_MATRIZ_PURE_ENABLED === 'true' ||
-    process.env.NOEL_PL_MEMBER_MATRIZ_PURE_ENABLED === '1'
-  )
+  // Variável pública (NEXT_PUBLIC_) para ligar motor + renderer juntos numa só chave;
+  // aceita a variante server-only antiga como fallback.
+  const v =
+    process.env.NEXT_PUBLIC_NOEL_PL_MEMBER_MATRIZ_PURE_ENABLED ??
+    process.env.NOEL_PL_MEMBER_MATRIZ_PURE_ENABLED
+  return v === 'true' || v === '1'
 }
 
 /**

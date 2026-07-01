@@ -17,8 +17,10 @@ import {
 } from '@/lib/pro-lideres-server'
 import {
   proLideresNoelMemberMonthlyAmountBrl,
+  proLideresTenantUsesUnifiedMatrixNoel,
   resolveProLideresNoelMemberSurface,
 } from '@/lib/pro-lideres-noel-member-access'
+import { resolvedUserEmail } from '@/lib/pro-lideres-server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 
 /**
@@ -56,6 +58,11 @@ export default async function ProLideresPainelNoelMembroPage() {
   const noelEquipeHref = `${PRO_LIDERES_BASE_PATH.replace(/\/$/, '')}/configuracao`
   const demoConviteHref = proLideresDemoMemberInviteHref()
 
+  const useUnifiedMatrixNoel = proLideresTenantUsesUnifiedMatrixNoel(gate.tenant, {
+    ownerEmail: resolvedUserEmail(user),
+    role: gate.role,
+  })
+
   if (!ui.teamViewPreview && surface.noelMemberIncludedForLeader && surface.canOpenChat) {
     return (
       <Suspense fallback={<p className="p-4 text-sm text-gray-500">Carregando…</p>}>
@@ -64,6 +71,7 @@ export default async function ProLideresPainelNoelMembroPage() {
           initialHasSubscription
           initialCanChat
           monthlyAmountBrl={proLideresNoelMemberMonthlyAmountBrl()}
+          useUnifiedMatrixNoel={useUnifiedMatrixNoel}
         />
       </Suspense>
     )

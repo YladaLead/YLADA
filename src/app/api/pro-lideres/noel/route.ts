@@ -19,6 +19,7 @@ import { formatProLideresCatalogForNoel } from '@/lib/pro-lideres-noel-catalog-c
 import { getFlowBuilderMethodologyBlock } from '@/lib/ylada-flow-builder-methodology'
 import { sanitizeNoelAssistantOutput } from '@/lib/noel-output-sanitize'
 import { applyNoelPersonaToSystemPrompt } from '@/lib/ylada-flow/noel/persona'
+import { NOEL_CHAT_MODEL } from '@/lib/pro-lideres-noel-unified-flag'
 import {
   buildCanonicalQuizMarkdownForProLideresResponse,
   isProLideresNoelShortApprovalAfterQuizDraft,
@@ -232,7 +233,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: NOEL_CHAT_MODEL,
       messages: openaiMessages,
       temperature: 0.52,
       max_tokens: 1800,

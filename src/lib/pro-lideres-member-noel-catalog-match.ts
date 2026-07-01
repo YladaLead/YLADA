@@ -12,7 +12,7 @@ const TOPIC_KEYWORDS: Array<{ tags: string[]; labelHints: string[] }> = [
   { tags: ['agua', 'hidrat', 'beber'], labelHints: ['água', 'agua', 'hidrata'] },
   { tags: ['emagrec', 'peso', 'imc', 'caloria'], labelHints: ['imc', 'caloria', 'emagrec', 'peso', 'metabol'] },
   { tags: ['proteina', 'proteína'], labelHints: ['proteína', 'proteina'] },
-  { tags: ['oportunidade', 'negocio', 'negócio', 'renda'], labelHints: ['oportunidade', 'negócio', 'negocio', 'carreira'] },
+  { tags: ['oportunidade', 'negocio', 'negócio', 'renda', 'projeto', 'conhecer', 'apresent'], labelHints: ['oportunidade', 'negócio', 'negocio', 'carreira', 'projeto', 'recrut', 'apresent'] },
   { tags: ['quiz', 'diagnost', 'diagnóst'], labelHints: ['quiz', 'diagnóst', 'diagnost'] },
   { tags: ['sacola', 'kit', 'teste'], labelHints: ['sacola', 'kit', 'teste'] },
 ]
@@ -50,20 +50,22 @@ export function matchProLideresMemberNoelCatalog(
 
   for (const item of items) {
     const labelN = norm(item.label)
-    let score = 0
+    let semanticScore = 0
 
     for (const word of m.split(/\s+/)) {
       if (word.length < 4) continue
-      if (labelN.includes(word)) score += 2
+      if (labelN.includes(word)) semanticScore += 2
     }
 
     for (const topic of TOPIC_KEYWORDS) {
       const tagHit = topic.tags.some((t) => m.includes(t))
       const labelHit = topic.labelHints.some((h) => labelN.includes(h))
-      if (tagHit && labelHit) score += 5
+      if (tagHit && labelHit) semanticScore += 5
     }
 
-    if (/(qual link|que link|mandar link|link para)/.test(m)) score += 1
+    let score = semanticScore
+    // Bônus “qual link” só quando já há match semântico — evita chutar o 1º do catálogo.
+    if (semanticScore > 0 && /(qual link|que link|mandar link|link para)/.test(m)) score += 1
 
     if (score > 0) scores.push({ label: item.label, url: item.url, score })
   }

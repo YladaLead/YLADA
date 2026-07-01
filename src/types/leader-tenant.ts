@@ -22,6 +22,8 @@ export type LeaderTenantRow = {
   vertical_code?: string
   /** Total de cadastros na equipe permitidos (50 por pacote pago; soma +50 a cada top-up MP). */
   team_invite_pending_quota?: number
+  /** Piloto Fase 2: ramo PL na rota `/api/ylada/noel` (contexto + guardrails por papel). */
+  noel_unified_pilot_enabled?: boolean
   /** Se true, membros elegíveis podem aderir ao Noel campo (pago à parte). */
   noel_member_offer_enabled?: boolean
   /** Quem vê a oferta: toda a equipa ativa ou só quem tem tabulador no convite. */

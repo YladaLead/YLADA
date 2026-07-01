@@ -39,10 +39,12 @@ import type { DesafioResposta } from '@/lib/porta-unica/desafio'
 function proLideresMemberNoelStoredContent(
   area: NoelArea,
   raw: string | undefined,
-  userMessage = ''
+  userMessage = '',
+  memberMatrizPure = false
 ): string {
   const t = raw?.trim() || 'Desculpe, não consegui processar. Tente novamente.'
-  if (area === 'pro_lideres_member') {
+  // Membro na matriz pura: prosa da matriz, sem o polish de seções do motor rígido.
+  if (area === 'pro_lideres_member' && !memberMatrizPure) {
     return polishProLideresMemberNoelForDisplay(t, userMessage) || t
   }
   return t
@@ -401,6 +403,10 @@ interface NoelChatProps {
   locale?: Language
   /** POST do chat; default `/api/ylada/noel` */
   chatApiPath?: string
+  /** Unificação PL na matriz: `leader` | `member` (com `chatApiPath` = `/api/ylada/noel`). */
+  proLideresPapel?: 'leader' | 'member'
+  /** Membro rodando o motor puro da matriz: renderiza como a matriz (prosa), não seções. */
+  memberMatrizPure?: boolean
   /** Não buscar dashboard/links da matriz YLADA para substituir o welcome (ex.: Pro Líderes). */
   skipYladaContextualWelcome?: boolean
   /** Título no cabeçalho do cartão (ex.: «Noel»). */
@@ -435,6 +441,10 @@ function isProLideresNoelApiPath(path: string | undefined): boolean {
   )
 }
 
+function isPlMatrixNoelApiPath(path: string | undefined, papel?: string): boolean {
+  return path === '/api/ylada/noel' && (papel === 'leader' || papel === 'member')
+}
+
 function isProLideresLeaderNoelApiPath(path: string | undefined): boolean {
   if (!path?.includes('/pro-lideres/noel')) return false
   return !path.includes('/membro/')
@@ -446,6 +456,8 @@ export default function NoelChat({
   initialMessage,
   locale: localeProp,
   chatApiPath,
+  proLideresPapel,
+  memberMatrizPure = false,
   skipYladaContextualWelcome = false,
   headerTitle,
   headerTagline,
@@ -463,7 +475,8 @@ export default function NoelChat({
   const locale = localeProp ?? getLocaleFromPathname(pathname ?? '')
   const uxContent = getNoelUxContent(area)
   const resolvedChatApi = chatApiPath ?? '/api/ylada/noel'
-  const proLideresPayload = isProLideresNoelApiPath(resolvedChatApi)
+  const plMatrixNoel = isPlMatrixNoelApiPath(resolvedChatApi, proLideresPapel)
+  const proLideresPayload = isProLideresNoelApiPath(resolvedChatApi) || plMatrixNoel
   const proLideresPainelCatalogHref =
     area === 'pro_estetica_corporal'
       ? '/pro-estetica-corporal/painel/catalogo'
@@ -697,7 +710,16 @@ export default function NoelChat({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
-          proLideresPayload
+          plMatrixNoel
+            ? {
+                message: text,
+                conversationHistory,
+                area,
+                proLideresPapel,
+                locale,
+                lastLinkContext: lastLinkContext ?? undefined,
+              }
+            : proLideresPayload
             ? { message: text, conversationHistory, locale, lastLinkContext: lastLinkContext ?? undefined }
             : {
                 message: text,
@@ -768,7 +790,7 @@ export default function NoelChat({
       const assistantMsg: Message = {
         id: `a-${Date.now()}`,
         role: 'assistant',
-        content: proLideresMemberNoelStoredContent(area, data.response, text),
+        content: proLideresMemberNoelStoredContent(area, data.response, text, memberMatrizPure),
         timestamp: new Date(),
         linkContext: data.lastLinkContext ?? undefined,
       }
@@ -1064,7 +1086,7 @@ export default function NoelChat({
         const assistantMsg: Message = {
           id: `a-${Date.now()}`,
           role: 'assistant',
-          content: proLideresMemberNoelStoredContent(area, data.response, text),
+          content: proLideresMemberNoelStoredContent(area, data.response, text, memberMatrizPure),
           timestamp: new Date(),
           linkContext: data.lastLinkContext ?? undefined,
         }
@@ -1185,7 +1207,7 @@ export default function NoelChat({
               : msg.content
           const assistantMarkdownNormalized =
             msg.role === 'assistant'
-              ? area === 'pro_lideres_member'
+              ? area === 'pro_lideres_member' && !memberMatrizPure
                 ? softenProLideresMemberNoelMarkdown(
                     normalizeNoelAssistantMarkdown(assistantMarkdownSource)
                   )
@@ -1224,7 +1246,7 @@ export default function NoelChat({
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
               ) : (
                 <div>
-                  {area === 'pro_lideres_member' ? (
+                  {area === 'pro_lideres_member' && !memberMatrizPure ? (
                     <ProLideresMemberNoelMessageBody markdown={assistantMarkdownNormalized} />
                   ) : (
                   <div className="prose prose-sm max-w-none prose-p:my-4 prose-p:leading-relaxed prose-ul:my-5 prose-li:my-2 prose-li:leading-relaxed prose-strong:text-gray-900 prose-a:no-underline hover:prose-a:underline prose-hr:my-8 prose-hr:border-sky-100 [&_h3]:border-l-4 [&_h3]:border-sky-400 [&_h3]:pl-3 [&_h3]:-ml-1 [&_h3]:border-b [&_h3]:border-sky-100 [&_h3]:pb-2 [&_h3]:mb-4 [&_h3]:mt-8 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-sky-600">

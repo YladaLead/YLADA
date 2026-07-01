@@ -9,7 +9,8 @@ import {
   ensureLeaderTenantAccess,
   resolveProLideresPainelUiState,
 } from '@/lib/pro-lideres-server'
-import { proLideresNoelMemberMonthlyAmountBrl, resolveProLideresNoelMemberSurface } from '@/lib/pro-lideres-noel-member-access'
+import { proLideresNoelMemberMonthlyAmountBrl, proLideresTenantUsesUnifiedMatrixNoel, resolveProLideresNoelMemberSurface } from '@/lib/pro-lideres-noel-member-access'
+import { resolvedUserEmail } from '@/lib/pro-lideres-server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 
 export default async function ProLideresMembroNoelMembroPage() {
@@ -44,6 +45,11 @@ export default async function ProLideresMembroNoelMembroPage() {
     redirect(PRO_LIDERES_MEMBER_BASE_PATH)
   }
 
+  const useUnifiedMatrixNoel = proLideresTenantUsesUnifiedMatrixNoel(gate.tenant, {
+    ownerEmail: resolvedUserEmail(user),
+    role: gate.role,
+  })
+
   return (
     <Suspense fallback={<p className="p-4 text-sm text-gray-500">Carregando…</p>}>
       <ProLideresNoelMembroClient
@@ -52,6 +58,7 @@ export default async function ProLideresMembroNoelMembroPage() {
         initialNoelMemberLapsed={surface.noelMemberLapsed}
         initialCanChat={surface.canOpenChat}
         monthlyAmountBrl={proLideresNoelMemberMonthlyAmountBrl()}
+        useUnifiedMatrixNoel={useUnifiedMatrixNoel}
       />
     </Suspense>
   )

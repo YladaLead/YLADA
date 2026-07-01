@@ -6,8 +6,8 @@ import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import { buildProLideresMemberNoelSystemPrompt } from '@/lib/pro-lideres-member-noel-prompt'
 import { buildProLideresMemberNoelCatalogExcerpt } from '@/lib/pro-lideres-member-noel-catalog'
+import { NOEL_CHAT_MODEL } from '@/lib/pro-lideres-noel-unified-flag'
 import {
-  PRO_LIDERES_NOEL_MEMBER_MODEL,
   buildProLideresMemberNoelDailyTasksExcerpt,
   buildProLideresMemberNoelObjectionExcerpt,
   fetchProLideresMemberNoelObjection,
@@ -35,13 +35,7 @@ import type { LeaderTenantRow } from '@/types/leader-tenant'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
-function requestOrigin(request: NextRequest): string {
-  try {
-    return new URL(request.url).origin
-  } catch {
-    return process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://www.ylada.com'
-  }
-}
+import { resolveProLideresNoelPublicBaseUrl } from '@/lib/pro-lideres-noel-public-base-url'
 
 type HistoryTurn = { role?: string; content?: string }
 
@@ -134,7 +128,7 @@ export async function POST(request: NextRequest) {
   const operationLabel =
     t.display_name?.trim() || t.team_name?.trim() || t.slug || 'Pro Líderes'
   const verticalCode = (t.vertical_code ?? 'h-lider').trim() || 'h-lider'
-  const baseUrl = requestOrigin(request).replace(/\/$/, '')
+  const baseUrl = resolveProLideresNoelPublicBaseUrl(request).replace(/\/$/, '')
 
   let catalogExcerpt: string | null = null
   let dailyTasksExcerpt: string | null = null
@@ -225,7 +219,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: PRO_LIDERES_NOEL_MEMBER_MODEL,
+      model: NOEL_CHAT_MODEL,
       messages: openaiMessages,
       temperature: 0.55,
       max_tokens: 1600,

@@ -125,6 +125,9 @@ const memberBlock = buildProLideresNoelContextBlock({
 
 assert('membro: ramo membro (campo)', memberBlock.includes('RAMO MEMBRO'))
 assert('membro: campo da operação', /campo/i.test(memberBlock))
+assert('membro: eixo negócio/educacional', /negócio.*educacional/i.test(memberBlock))
+assert('membro: não empurra produto', /nunca produto|não abra nem empurre produto/i.test(memberBlock))
+assert('membro: método vem da matriz (não duplica)', /já traz da matriz/i.test(memberBlock))
 assert('membro: pode usar motor (não proíbe criar)', !/não cria.*links/i.test(memberBlock))
 assert('membro: não escreve URL à mão', /invente uma URL|invente URL/i.test(memberBlock))
 assert('membro: MEUS LINKS', memberBlock.includes('[MEUS LINKS'))

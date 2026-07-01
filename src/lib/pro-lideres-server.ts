@@ -484,6 +484,7 @@ function devStubLeaderTenant(userId: string): LeaderTenantRow {
     opportunity_video_url: null,
     noel_member_offer_enabled: false,
     noel_member_offer_scope: 'all_members',
+    noel_unified_pilot_enabled: false,
     created_at: now,
     updated_at: now,
   }

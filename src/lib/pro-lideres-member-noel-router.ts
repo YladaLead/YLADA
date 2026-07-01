@@ -38,7 +38,7 @@ function detectAudience(m: string): ProLideresMemberNoelRoute['audience'] {
   if (/(minha cliente|minha paciente|ja comprou|pos venda|pos-venda|retorno|reativar|sumiu|nao responde)/.test(m)) {
     return 'cliente'
   }
-  if (/(oportunidade|convite|recrut|apresentacao|negocio|parceir|distribuidor)/.test(m)) {
+  if (/(oportunidade|convite|recrut|apresentacao|negocio|parceir|distribuidor|projeto|conhecer melhor)/.test(m)) {
     return 'oportunidade'
   }
   if (/(mais clientes|novos contatos|atrair|prospect|lista|captar|geracao de contato)/.test(m)) {
@@ -126,9 +126,9 @@ export function classifyProLideresMemberNoelMessage(
       mode: 'catalogo',
       audience,
       includeLink: true,
-      includeMensagemPronta: true,
+      includeMensagemPronta: /(mensagem|texto|o que falar|whatsapp|zap)/.test(m),
       directive:
-        'Diga **qual link** (Meus links), **por quê**, e **mensagem pronta** curta para pedir permissão antes de enviar.',
+        'Indique **qual link** (Meus links) e **por quê**. Se nada em [LINK INDICADO] couber, **1 pergunta curta** (oportunidade de negócio vs produto/saúde) — **não chute** URL fora de contexto. Mensagem pronta só se pediu texto.',
     }
   }
 
@@ -173,12 +173,15 @@ export function classifyProLideresMemberNoelMessage(
   }
 
   if (/(convite|oportunidade|apresentacao|explicar o negocio|sem prometer|nao sou vendedor)/.test(m)) {
+    const pedeLinkExplicito = /(qual link|que link|mandar link|enviar link|link para|link do|link da)/.test(m)
     return {
       mode: 'mentor',
       audience: audience === 'ambiguo' ? 'oportunidade' : audience,
-      includeLink: true,
+      includeLink: pedeLinkExplicito,
       includeMensagemPronta: true,
-      directive: 'Convite ético na rede: princípio + sequência + **mensagem pronta** leve + link após permissão.',
+      directive: pedeLinkExplicito
+        ? 'Convite ético na rede: princípio + sequência + **mensagem pronta** leve + link após permissão.'
+        : 'Convite ético: **mensagem pronta** leve. **Sem** bloco Link para enviar nesta resposta.',
     }
   }
 

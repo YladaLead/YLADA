@@ -451,7 +451,7 @@ function defaultProximoPasso(mode: ProLideresMemberNoelMode, userMessage = ''): 
       'Confirme até amanhã quem aceitou o combinado — anote no painel YLADA. 💪',
     comportamento: 'Sem resposta em 48h, siga para o próximo nome da lista.',
     mentor: 'Faça pelo menos 1 convite leve hoje para manter o ritmo. 💪',
-    catalogo: 'Pergunte o que ela achou depois que usar o link.',
+    catalogo: 'Depois que ela abrir o link, pergunte o que achou — sem pressionar.',
     emocional: 'Me conta o que conseguiu fazer, mesmo que pequeno. 💪',
     bloqueio_criar_link: 'Me diga o tema que você quer trabalhar — indico qual link já existe.',
     scripts_painel: 'Gere o pacote em Scripts se precisar escalar para a equipe.',
@@ -459,10 +459,21 @@ function defaultProximoPasso(mode: ProLideresMemberNoelMode, userMessage = ''): 
   return byMode[mode] ?? 'Me conta como foi — um passo de cada vez. 💪'
 }
 
+/** Remove rótulos soltos no preâmbulo que viram seção duplicada depois. */
+function stripRedundantInlineSectionLabels(text: string): string {
+  let t = text.replace(/\r\n/g, '\n')
+  for (const label of PLAIN_SECTION_LABELS) {
+    const esc = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    t = t.replace(new RegExp(`(^|\\n)${esc}\\s*:\\s*`, 'gim'), '$1')
+  }
+  return t.replace(/\n{3,}/g, '\n\n').trim()
+}
+
 function polishMemberNoelText(text: string): string {
   const base = stripMemberNoelDebugLines(sanitizeProLideresMemberNoelBrand(text.trim()))
   const softened = softenProLideresMemberNoelMarkdown(base)
-  const headings = collapseDuplicateSectionHeadings(normalizePlainSectionHeadings(softened))
+  const stripped = stripRedundantInlineSectionLabels(softened)
+  const headings = collapseDuplicateSectionHeadings(normalizePlainSectionHeadings(stripped))
   return sanitizeNoelAssistantOutput(formatMemberNoelSectionSpacing(headings))
 }
 

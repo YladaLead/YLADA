@@ -1,10 +1,19 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { LeaderTenantRow, ProLideresNoelMemberOfferScope, ProLideresTenantRole } from '@/types/leader-tenant'
+import { isNoelProLideresUnifiedForTenant } from '@/lib/pro-lideres-noel-unified-flag'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
 import { proLideresTeamSubscriptionAllowsAccess } from '@/lib/pro-lideres-subscription-access'
 import type { User } from '@supabase/supabase-js'
 
 export const PRO_LIDERES_NOEL_MEMBER_SUBSCRIPTION_AREA = 'pro_lideres_noel_member' as const
+
+/** Tenant no piloto Fase 2 — chat membro via `/api/ylada/noel`. */
+export function proLideresTenantUsesUnifiedMatrixNoel(
+  tenant: Pick<LeaderTenantRow, 'noel_unified_pilot_enabled'>,
+  opts?: { ownerEmail?: string | null; role?: ProLideresTenantRole }
+): boolean {
+  return isNoelProLideresUnifiedForTenant(tenant, opts)
+}
 
 export function proLideresNoelMemberMonthlyAmountBrl(): number {
   const raw = process.env.PRO_LIDERES_NOEL_MEMBER_MONTHLY_BRL

@@ -106,4 +106,4 @@ export function buildProLideresMemberNoelObjectionExcerpt(obj: WellnessObjeção
 export const PRO_LIDERES_NOEL_MEMBER_MODEL =
   process.env.PRO_LIDERES_NOEL_MEMBER_MODEL?.trim() ||
   process.env.OPENAI_MODEL?.trim() ||
-  'gpt-4.1-mini-2025-04-14'
+  'gpt-4o-mini'

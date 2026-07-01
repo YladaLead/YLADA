@@ -17,6 +17,7 @@ export default function ProLideresNoelMembroClient({
   initialNoelMemberLapsed = false,
   initialCanChat,
   monthlyAmountBrl,
+  useUnifiedMatrixNoel = false,
 }: {
   variant?: ProLideresNoelMembroClientVariant
   initialHasSubscription: boolean
@@ -24,6 +25,8 @@ export default function ProLideresNoelMembroClient({
   initialNoelMemberLapsed?: boolean
   initialCanChat: boolean
   monthlyAmountBrl: number
+  /** Piloto Fase 2: motor único `/api/ylada/noel` com `proLideresPapel=member`. */
+  useUnifiedMatrixNoel?: boolean
 }) {
   const router = useRouter()
   const sp = useSearchParams()
@@ -79,17 +82,17 @@ export default function ProLideresNoelMembroClient({
 
   if (chatUnlocked) {
     return (
-      <div className="flex min-h-0 flex-1 flex-col gap-2">
-        {variant === 'leader_included' ? (
-          <p className="text-xs leading-relaxed text-gray-700 rounded-lg border border-sky-100 bg-sky-50/90 px-3 py-2">
-            <strong>Incluído no seu plano:</strong> este Noel da equipe vem na mensalidade Pro Líderes, sem taxa extra
-            na YLADA. Membros que quiserem o add-on contratam à parte, na própria conta.
-          </p>
-        ) : null}
+      <div className="flex min-h-0 flex-1 flex-col">
         <NoelChat
           area="pro_lideres_member"
           className="flex min-h-[min(70vh,560px)] flex-1 flex-col"
-          chatApiPath="/api/pro-lideres/membro/noel"
+          chatApiPath={useUnifiedMatrixNoel ? '/api/ylada/noel' : '/api/pro-lideres/membro/noel'}
+          proLideresPapel={useUnifiedMatrixNoel ? 'member' : undefined}
+          memberMatrizPure={
+            useUnifiedMatrixNoel &&
+            (process.env.NEXT_PUBLIC_NOEL_PL_MEMBER_MATRIZ_PURE_ENABLED === 'true' ||
+              process.env.NEXT_PUBLIC_NOEL_PL_MEMBER_MATRIZ_PURE_ENABLED === '1')
+          }
           skipYladaContextualWelcome
           skipWelcomeMessage
           showChatHeaderTitle
