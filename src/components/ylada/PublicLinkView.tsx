@@ -180,8 +180,11 @@ const PUBLIC_LINK_UI: Record<Language, {
     quizIntroLead:
       'Em cerca de dois minutos você vê um resultado inicial com base no que informar aqui.',
     quizIntroMicro: 'Sem cadastro — só preencher e ver o resultado.',
+    // Neutra por nicho (BUG 4): "corpo" só cabe em saúde; este resumo aparece em vendas,
+    // negócio, comportamental e jurídico também. "quem te enviou" cobre o dono do link em
+    // qualquer caso (nem sempre é "um profissional").
     quizResultHelperLine:
-      'Cada corpo responde de um jeito. Este resumo ajuda a abrir a conversa com um profissional.',
+      'Cada caso é único. Este resumo ajuda a abrir a conversa com quem te enviou.',
     calculatorIntroBadge: 'Antes de começar',
     calculatorIntroLead:
       'Descubra em cerca de dois minutos um número de partida com base no que você informar aqui.',
@@ -256,7 +259,7 @@ const PUBLIC_LINK_UI: Record<Language, {
       'In about two minutes, get a clear initial result from what you enter here.',
     quizIntroMicro: 'No sign-up — fill in and see your result.',
     quizResultHelperLine:
-      'Every body responds differently. This summary helps you start the conversation with a professional.',
+      'Every case is unique. This summary helps you start the conversation with whoever sent you this.',
     calculatorIntroBadge: 'Before you start',
     calculatorIntroLead:
       'In about two minutes, get a clear starting number from what you enter here.',
@@ -331,7 +334,7 @@ const PUBLIC_LINK_UI: Record<Language, {
       'En unos dos minutos obtienes un resultado inicial claro con lo que indiques aquí.',
     quizIntroMicro: 'Sin registro — rellena y ve el resultado.',
     quizResultHelperLine:
-      'Cada cuerpo responde distinto. Este resumen ayuda a abrir la conversación con un profesional.',
+      'Cada caso es único. Este resumen ayuda a abrir la conversación con quien te lo envió.',
     calculatorIntroBadge: 'Antes de empezar',
     calculatorIntroLead:
       'En unos dos minutos obtienes un número de partida claro con lo que indiques aquí.',
@@ -1531,6 +1534,13 @@ function ConfigDrivenLinkView({
       const primaryInsightTextForUi = softenTemplateEmDashes(
         String(commerceNarrative?.supportingLine ?? primaryInsightText).trim()
       )
+      // BUG 5: a caixa de insight mostra o primaryInsight; quando ele É a causa_provavel (perfil
+      // comportamental, onde o DIAGNÓSTICO fica com o main_blocker "Seu jeito é…"), rotula "Causa
+      // provável" em vez de "Consequência" — senão vira dois blocos CONSEQUÊNCIA e a causa aparece
+      // sob o rótulo errado. Em saúde o insight costuma ser a consequência → rótulo segue igual.
+      const primaryInsightIsCause =
+        !!diagnosis.causa_provavel?.trim() &&
+        primaryInsightText.trim() === diagnosis.causa_provavel.trim()
 
       const firstFoldInsightRedundant =
         !primaryInsightTextForUi ||
@@ -1631,7 +1641,7 @@ function ConfigDrivenLinkView({
               <div className="mb-5 p-4 rounded-xl border border-gray-100 bg-gray-50/70">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
                   {/* Varejo: `whatItMeans`. Pro Estética vertical: “Leitura prática”. Demais: “Consequência”. */}
-                  {commercePublicCopy ? t.whatItMeans : isProEsteticaVerticalLink ? t.calculatorMetabolicReadingLabel : t.consequence}
+                  {commercePublicCopy ? t.whatItMeans : isProEsteticaVerticalLink ? t.calculatorMetabolicReadingLabel : primaryInsightIsCause ? t.probableCause : t.consequence}
                 </p>
                 <p className="text-sm text-gray-700 leading-relaxed">
                   {primaryInsightTextForUi}

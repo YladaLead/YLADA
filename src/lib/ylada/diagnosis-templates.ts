@@ -790,8 +790,10 @@ const PROFILE: ArchitectureTemplates = {
   ],
   explanation:
     'Seu jeito de lidar com isso tem forças reais. O que trava não é você, é quando o método não conversa com esse jeito.',
+  // Sem o prefixo "A causa provável:" — no perfil comportamental este texto aparece numa caixa
+  // JÁ rotulada "Causa provável" (BUG 5), então o prefixo ficaria redundante.
   causa_provavel:
-    'A causa provável: você vem seguindo um caminho que não foi pensado pro seu perfil, e é isso que faz o resultado oscilar.',
+    'Você vem seguindo um caminho que não foi pensado pro seu perfil, e é isso que faz o resultado oscilar.',
   preocupacoes:
     'Insistir num método que não combina com você costuma cansar e levar a desistir no meio, mesmo quando o plano até faz sentido.',
   consequence:
