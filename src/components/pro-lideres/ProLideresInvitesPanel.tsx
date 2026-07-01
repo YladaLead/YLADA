@@ -34,15 +34,6 @@ type QuotaInfo = {
 
 type YladaTeamSubHint = { monthlyAmountBrl: number; pendingInviteQuota: number }
 
-type InviteQuotaPackSummary = {
-  id: string
-  status: string
-  slots: number
-  amountBrl: number
-  billingDay: number
-  currentPeriodEnd: string | null
-}
-
 type MpQuotaReceipt = {
   paymentId: string
   amountBrl: number
@@ -86,8 +77,6 @@ export function ProLideresInvitesPanel() {
   const [copiedPix, setCopiedPix] = useState(false)
   const [subscriptionAccessOk, setSubscriptionAccessOk] = useState<boolean | null>(null)
   const [subscriptionBlockReason, setSubscriptionBlockReason] = useState<string | null>(null)
-  const [overdueInvitePacks, setOverdueInvitePacks] = useState<InviteQuotaPackSummary[]>([])
-  const [packPayLoadingId, setPackPayLoadingId] = useState<string | null>(null)
   const [yladaSubHint, setYladaSubHint] = useState<YladaTeamSubHint | null>(null)
   const [teamBankPaymentUrlDraft, setTeamBankPaymentUrlDraft] = useState('')
   const [teamBankPixPaymentUrlDraft, setTeamBankPixPaymentUrlDraft] = useState('')
@@ -144,11 +133,7 @@ export function ProLideresInvitesPanel() {
       const accessOk = Boolean((subData as { accessOk?: boolean }).accessOk)
       const accessBlocked = subRes.ok && !accessOk
       const blockReason = ((subData as { blockReason?: string | null }).blockReason ?? null) as string | null
-      const packs = ((subData as { inviteQuotaPacks?: InviteQuotaPackSummary[] }).inviteQuotaPacks ??
-        []) as InviteQuotaPackSummary[]
-      const overduePacks = packs.filter((pack) => pack.status === 'past_due')
       setSubscriptionBlockReason(blockReason)
-      setOverdueInvitePacks(overduePacks)
       const monthlyAmountBrl = Number((subData as { monthlyAmountBrl?: number }).monthlyAmountBrl) || 750
       const pendingInviteQuota =
         Number((subData as { pendingInviteQuota?: number }).pendingInviteQuota) || 50
@@ -368,29 +353,6 @@ export function ProLideresInvitesPanel() {
     }
   }
 
-  async function startOverduePackPixCheckout(packId: string) {
-    setPackPayLoadingId(packId)
-    setError(null)
-    try {
-      const res = await fetch(`/api/pro-lideres/invites/quota-pack/${packId}/pay-pix`, {
-        method: 'POST',
-        credentials: 'include',
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setError((data as { error?: string }).error || 'Não foi possível abrir o pagamento.')
-        return
-      }
-      const url = (data as { checkoutUrl?: string }).checkoutUrl
-      if (url) window.location.href = url
-      else setError('Resposta inválida do servidor.')
-    } catch {
-      setError('Erro de rede. Tenta outra vez.')
-    } finally {
-      setPackPayLoadingId(null)
-    }
-  }
-
   async function saveTeamPaymentUrls(e: React.FormEvent) {
     e.preventDefault()
     setTeamBankUrlSaving(true)
@@ -564,47 +526,6 @@ export function ProLideresInvitesPanel() {
               {purgingId === lastCreatedInviteId ? 'Removendo…' : 'Excluir convite'}
             </button>
           </div>
-        </div>
-      )}
-
-      {subscriptionAccessOk === false && subscriptionBlockReason === 'invite_quota_pack_overdue' && (
-        <div className="rounded-xl border border-red-300 bg-red-50 px-4 py-4 text-red-950 shadow-sm">
-          <p className="text-base font-semibold text-red-950">Pacote de convites em atraso — painel bloqueado</p>
-          <p className="mt-2 text-sm leading-relaxed text-red-900/95">
-            Cada pacote de 50 convites custa R$ 750 por mês e renova no dia em que foi contratado. Enquanto houver
-            pagamento em atraso, o painel inteiro fica bloqueado até regularizar.
-          </p>
-          <ul className="mt-4 space-y-3">
-            {overdueInvitePacks.map((pack) => (
-              <li
-                key={pack.id}
-                className="rounded-lg border border-red-200 bg-white/90 px-3 py-3 text-sm text-red-950"
-              >
-                <p className="font-medium">
-                  +{pack.slots} convites · vence dia <strong>{pack.billingDay}</strong> de cada mês · R${' '}
-                  {pack.amountBrl.toLocaleString('pt-BR')}
-                </p>
-                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                  <button
-                    type="button"
-                    disabled={packPayLoadingId === pack.id || quotaTopupLoading}
-                    onClick={() => void startOverduePackPixCheckout(pack.id)}
-                    className="min-h-[44px] rounded-xl bg-red-800 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-900 disabled:opacity-60"
-                  >
-                    {packPayLoadingId === pack.id ? 'A abrir…' : 'Pagar com PIX ou cartão'}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={packPayLoadingId === pack.id || quotaTopupLoading}
-                    onClick={() => void startInviteQuotaTopupCheckout(pack.id)}
-                    className="min-h-[44px] rounded-xl border border-red-300 bg-white px-5 py-2.5 text-sm font-semibold text-red-900 hover:bg-red-50 disabled:opacity-60"
-                  >
-                    {quotaTopupLoading ? 'A abrir…' : 'Assinar com cartão (renovação automática)'}
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
         </div>
       )}
 
