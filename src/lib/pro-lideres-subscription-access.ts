@@ -89,6 +89,19 @@ export function proLideresSubscriptionRequiredResponse(reason?: ProLideresAccess
   )
 }
 
+/**
+ * O dono pode montar catálogo antes de pagar a base — mas pacote +50 vencido bloqueia
+ * TODO o painel (incluindo líder). Puro pra teste de regressão.
+ */
+export function ownerUnpaidDraftPodePassar(
+  allowUnpaidOwnerDraft: boolean,
+  isOwner: boolean,
+  blockReason: ProLideresAccessBlockReason
+): boolean {
+  if (!allowUnpaidOwnerDraft || !isOwner) return false
+  return blockReason !== 'invite_quota_pack_overdue'
+}
+
 export type RequireProLideresPaidContextOptions = {
   /**
    * Quando true, só exige tenant autenticado — não bloqueia por assinatura da equipe (qualquer papel).
@@ -123,7 +136,7 @@ export async function requireProLideresPaidContext(
     return { ok: true, ctx }
   }
 
-  if (options?.allowUnpaidOwnerDraft && ctx.tenant.owner_user_id === user.id) {
+  if (ownerUnpaidDraftPodePassar(Boolean(options?.allowUnpaidOwnerDraft), ctx.tenant.owner_user_id === user.id, accessStatus.reason)) {
     return { ok: true, ctx }
   }
 
