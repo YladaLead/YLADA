@@ -1260,12 +1260,18 @@ export default function NoelChat({
                             proLideresPayload && quizSlimHref && hrefAbsolutized
                               ? proLideresEffectivePublicHref(hrefAbsolutized, quizSlimHref)
                               : hrefAbsolutized
-                          /** Um só chip «abrir» no texto: sem segundo «Copiar link» (há «Copiar link público» abaixo). */
+                          /** Um só chip «abrir» no texto quando há «Copiar link público» na barra
+                           *  abaixo (link gerado / com contexto) — evita botão de copiar duplicado.
+                           *  Link só citado (sem barra) mantém o LinkWithCopy com o copiar. */
+                          const messageHasPublicLinkToolbar = Boolean(
+                            msg.linkContext?.link_id ??
+                              (isLastAssistantMessage ? lastLinkContext?.link_id : null)
+                          )
                           const proLideresPublicQuizChip =
                             proLideresPayload &&
-                            quizSlimHref &&
                             effectiveHref &&
-                            looksLikeYladaPublicLinkPath(hrefAbsolutized ?? '')
+                            looksLikeYladaPublicLinkPath(hrefAbsolutized ?? '') &&
+                            (Boolean(quizSlimHref) || messageHasPublicLinkToolbar)
                           if (proLideresPublicQuizChip) {
                             return (
                               <a
