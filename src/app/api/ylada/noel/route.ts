@@ -75,6 +75,11 @@ import {
   artefatoDoObjetivo,
   type ArtefatoDaConducao,
 } from '@/lib/porta-unica/conducao-geracao'
+import {
+  precisaMentoriaDiaADia,
+  jaConduziuDiaADia,
+  construirBlocoMentoriaDiaADiaParaPrompt,
+} from '@/lib/porta-unica/noel-dia-a-dia'
 import { relaxarGateMatrizParaNoelDireto } from '@/lib/porta-unica/destino-pos-cadastro'
 import {
   construirBlocoColetaContatoParaPrompt,
@@ -1459,6 +1464,16 @@ export async function POST(request: NextRequest) {
       // Artefato = abertura (indicação): enquadra o link gerado como diagnóstico de ATRAIR
       // pra compartilhar (§3), nunca como requiz da cliente atual. Só no turno que gera.
       if (conducaoAbertura) parts.push(construirBlocoAberturaIndicacaoParaPrompt())
+      // MENTORIA DO DIA A DIA (pós-ativação): quem JÁ ativou (tem link ativo) e pede orientação
+      // ("o que faço hoje / o que posto / minha meta") volta a receber o MÉTODO pela prioridade,
+      // que hoje some fora da condução de entrada. Não repete a "aula" turno a turno.
+      const temLinkAtivo = linksAtivos.length > 0
+      if (
+        precisaMentoriaDiaADia({ message, temLinkAtivo, conversationHistory }) &&
+        !jaConduziuDiaADia(conversationHistory)
+      ) {
+        parts.push(construirBlocoMentoriaDiaADiaParaPrompt())
+      }
     }
     // Item 3 Fase 2 (Plano A): pedir WhatsApp/perfil na HORA DA AÇÃO (não na entrada).
     // `coleta*Pendente` só fica true com a flag do fluxo novo ON; OFF = nenhum bloco.
