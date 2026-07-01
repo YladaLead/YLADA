@@ -21,7 +21,12 @@ import {
 import { persistDesafio } from '@/lib/porta-unica/desafio-client'
 import { devolutivaReativaPara } from '@/lib/porta-unica/devolutiva-reativa'
 import { PORTA1_HERO } from '@/lib/porta-unica/porta1-home-copy'
-import { buildSignupUrlWithReferral, parseReferralParams } from '@/lib/referrals/referral-url'
+import {
+  buildSignupUrlWithReferral,
+  parseReferralParams,
+  PORTA_START_DESAFIO,
+  PORTA_START_PARAM,
+} from '@/lib/referrals/referral-url'
 import { persistReferral } from '@/lib/referrals/referral-client'
 
 /**
@@ -30,9 +35,16 @@ import { persistReferral } from '@/lib/referrals/referral-client'
  */
 type PortaUnicaVariant = 'porta' | 'home'
 
+/** Lê o passo inicial da query (puro — testável). */
+function passoInicialFromSearch(search: string): 1 | 2 | 3 {
+  const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search)
+  return params.get(PORTA_START_PARAM) === PORTA_START_DESAFIO ? 2 : 1
+}
+
 export default function PortaUnica({ variant = 'porta' }: { variant?: PortaUnicaVariant }) {
   const router = useRouter()
   const [passo, setPasso] = useState<1 | 2 | 3>(1)
+  const [pronto, setPronto] = useState(false)
   const [ref, setRef] = useState<string | null>(null)
   const [escolha, setEscolha] = useState<DesafioKey | null>(null)
 
@@ -40,6 +52,8 @@ export default function PortaUnica({ variant = 'porta' }: { variant?: PortaUnica
     const parsed = parseReferralParams(window.location.search)
     setRef(parsed.ref)
     persistReferral(parsed.ref, parsed.source)
+    setPasso(passoInicialFromSearch(window.location.search))
+    setPronto(true)
   }, [])
 
   function irParaDevolutiva(key: DesafioKey, textoLivre: string): void {
@@ -50,6 +64,14 @@ export default function PortaUnica({ variant = 'porta' }: { variant?: PortaUnica
 
   function criarConta(): void {
     router.push(buildSignupUrlWithReferral({ code: ref }))
+  }
+
+  if (!pronto) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-6">
+        <div className="h-48 w-full max-w-lg animate-pulse rounded-2xl bg-white" aria-hidden />
+      </main>
+    )
   }
 
   return (

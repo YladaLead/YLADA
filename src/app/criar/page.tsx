@@ -9,11 +9,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
+  buildPortaEntradaUrlWithReferral,
   buildSignupUrlWithReferral,
   parseReferralParams,
   type ReferralSource,
 } from '@/lib/referrals/referral-url'
 import { persistReferral, trackReferralLanding } from '@/lib/referrals/referral-client'
+import { isNoelDiretoEnabled } from '@/lib/porta-unica/porta-unica-flag'
+import { PORTA_START_DESAFIO } from '@/lib/referrals/referral-url'
 
 const HEADLINES: Record<ReferralSource, { titulo: string; sub: string }> = {
   diagnostico: {
@@ -27,8 +30,14 @@ const HEADLINES: Record<ReferralSource, { titulo: string; sub: string }> = {
 }
 
 export default function CriarPage() {
-  const [ref, setRef] = useState<string | null>(null)
-  const [source, setSource] = useState<ReferralSource>('diagnostico')
+  const [ref, setRef] = useState<string | null>(() =>
+    typeof window === 'undefined' ? null : parseReferralParams(window.location.search).ref,
+  )
+  const [source, setSource] = useState<ReferralSource>(() =>
+    typeof window === 'undefined'
+      ? 'diagnostico'
+      : parseReferralParams(window.location.search).source,
+  )
 
   useEffect(() => {
     const parsed = parseReferralParams(window.location.search)
@@ -38,11 +47,22 @@ export default function CriarPage() {
     void trackReferralLanding(parsed.ref, parsed.source)
   }, [])
 
-  // /criar é Porta 2 (loop) — a pessoa já fez um diagnóstico, não precisa do hero.
-  // Vai direto pro cadastro preservando o ?ref. Nunca passa pela Porta 1 (evita duplo clique).
-  const signupUrl = useMemo(() => buildSignupUrlWithReferral({ code: ref }), [ref])
+  // /criar é Porta 2 (loop): pessoa já tem contexto (fez um diagnóstico), não precisa do
+  // hero. Pula a Tela1 e vai direto pro desafio (?start=desafio) → devolutiva → cadastro.
+  // Nunca manda pra /pt (CATEGORIA é pra tráfego frio; loop vai pra /descubra com start).
+  const signupUrl = useMemo(() => {
+    if (isNoelDiretoEnabled()) {
+      return buildPortaEntradaUrlWithReferral({
+        code: ref,
+        destino: 'descubra',
+        source,
+        start: PORTA_START_DESAFIO,
+      })
+    }
+    return buildSignupUrlWithReferral({ code: ref })
+  }, [ref, source])
   const copy = HEADLINES[source]
-  const ctaLabel = 'Criar minha conta'
+  const ctaLabel = isNoelDiretoEnabled() ? 'Começar' : 'Criar minha conta'
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
