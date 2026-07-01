@@ -22,6 +22,6 @@ export const PORTA1_HERO: Porta1HeroCopy = {
   categoria: 'Inteligência de Convicção',
   headline: 'Explique menos. Venda mais.',
   subheadline:
-    'Fazer a pessoa certa te procurar não é falar mais. É a pergunta certa, na hora certa. Um método de 30 anos, agora com o Noel te guiando.',
+    'Fazer a pessoa certa te procurar não é falar mais. É a pergunta certa, na hora certa. Um método de 30 anos, agora com um assistente de IA te guiando.',
   cta: 'Descubra como',
 }
