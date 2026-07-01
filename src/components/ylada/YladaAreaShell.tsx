@@ -59,7 +59,8 @@ function YladaAreaShellLayout({
             ) : (
               <span className="lg:hidden w-10 shrink-0" aria-hidden />
             )}
-            <Link href={areaCodigo === 'ylada' ? '/pt' : `/pt/${areaCodigo}/home`} className="flex items-center gap-2 min-w-0">
+            {/* No desktop o logo já aparece na sidebar — esconde no header */}
+            <Link href={areaCodigo === 'ylada' ? '/pt' : `/pt/${areaCodigo}/home`} className="lg:hidden flex items-center gap-2 min-w-0">
               <Image
                 src={YLADA_LOGO}
                 alt="YLADA"
@@ -74,15 +75,18 @@ function YladaAreaShellLayout({
             </Link>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <Link href="/pt/perfil-empresarial" className="hidden sm:flex items-center gap-2 text-gray-600 hover:text-gray-900">
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-semibold text-sm">
-                {userName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
+            <Link href="/pt/conta/configuracao" className="hidden sm:flex items-center gap-2 text-gray-600 hover:text-gray-900">
+              <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-semibold text-sm">
+                {userName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
               </div>
               <span className="text-sm font-medium truncate max-w-[120px]">{userName.split(' ')[0]}</span>
             </Link>
-            <Link href="/pt" className="text-xs sm:text-sm text-gray-500 hover:text-gray-700">
-              Voltar ao YLADA
-            </Link>
+            {/* "Voltar ao YLADA" só faz sentido em sub-áreas, não na home principal */}
+            {areaCodigo !== 'ylada' && (
+              <Link href="/pt" className="text-xs sm:text-sm text-gray-500 hover:text-gray-700">
+                Voltar ao YLADA
+              </Link>
+            )}
           </div>
         </header>
         <main className="flex-1 min-w-0 overflow-x-hidden p-4 lg:p-6">{children}</main>
