@@ -445,6 +445,7 @@ export default function LoginForm({
           // Melhorar mensagens de erro
           if (signInError.message?.includes('Invalid login credentials')) {
             setError('Email ou senha incorretos. Verifique suas credenciais.')
+            setLoading(false)
           } else {
             throw signInError
           }
