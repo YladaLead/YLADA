@@ -1541,6 +1541,13 @@ function ConfigDrivenLinkView({
       const primaryInsightIsCause =
         !!diagnosis.causa_provavel?.trim() &&
         primaryInsightText.trim() === diagnosis.causa_provavel.trim()
+      // Quando o rótulo já é "Causa provável", tira o prefixo "A causa provável:" do texto (senão
+      // fica redundante: rótulo + "A causa provável: ..."). Capitaliza a 1ª letra que sobra.
+      const primaryInsightTextForBox = (() => {
+        if (!primaryInsightIsCause) return primaryInsightTextForUi
+        const semPrefixo = primaryInsightTextForUi.replace(/^\s*a?\s*causa prov[áa]vel:\s*/i, '')
+        return semPrefixo ? semPrefixo.charAt(0).toUpperCase() + semPrefixo.slice(1) : primaryInsightTextForUi
+      })()
 
       const firstFoldInsightRedundant =
         !primaryInsightTextForUi ||
@@ -1644,7 +1651,7 @@ function ConfigDrivenLinkView({
                   {commercePublicCopy ? t.whatItMeans : isProEsteticaVerticalLink ? t.calculatorMetabolicReadingLabel : primaryInsightIsCause ? t.probableCause : t.consequence}
                 </p>
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  {primaryInsightTextForUi}
+                  {primaryInsightTextForBox}
                 </p>
               </div>
             ) : null}
