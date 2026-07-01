@@ -802,7 +802,7 @@ export async function POST(request: NextRequest) {
     const conducaoDeveGerar =
       noelResponseMode !== 'modo_espelho' &&
       !!desafioConducao &&
-      deveGerarNaConducao({ message, conversationHistory })
+      deveGerarNaConducao({ message, conversationHistory, desafio: desafioConducao })
     if (conducaoDeveGerar) noelResponseMode = 'modo_link'
     // Artefato por objetivo (refactor §3): indicação → 'abertura' (link de ATRAIR pra
     // compartilhar, SEM requiz da cliente); todo o resto → 'diagnostico'. Só o fluxo da

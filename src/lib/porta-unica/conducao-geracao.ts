@@ -59,6 +59,16 @@ function jaEntregouLinkNaConversa(historico: readonly Turno[]): boolean {
   )
 }
 
+/**
+ * O Noel ENTREGOU a mensagem de compartilhar (fluxo de indicação): o "rascunho" dele aqui é
+ * um post pra encaminhar, não um quiz. Marcadores da mensagem pronta ("Título:", "Texto para
+ * o post:", "Chamada à ação:"). Sem isto, a indicação nunca disparava a geração e nenhum link
+ * de ATRAIR nascia pra acompanhar o post (BUG 3).
+ */
+function noelEntregouCompartilhar(falaDoNoel: string): boolean {
+  return /t[íi]tulo:|texto para o post|chamada à ação|chamada a acao|compartilh/i.test(falaDoNoel)
+}
+
 /** O Noel mostrou o rascunho do diagnóstico OU pediu aprovação na última fala. */
 function noelMostrouRascunhoOuPediuAprovacao(falaDoNoel: string): boolean {
   const temAlternativas = /(^|\n)\s*[a-d]\)\s/i.test(falaDoNoel) || /\*\*\d+\.\s/.test(falaDoNoel)
@@ -125,6 +135,8 @@ export function artefatoDoObjetivo(args: {
 export function deveGerarNaConducao(args: {
   message: string
   conversationHistory?: readonly Turno[]
+  /** Desafio em jogo — usado só pra detectar o fluxo de indicação (abertura), BUG 3. */
+  desafio?: DesafioResposta
 }): boolean {
   const historico = Array.isArray(args.conversationHistory) ? args.conversationHistory : []
   if (historico.length === 0) return false
@@ -139,6 +151,12 @@ export function deveGerarNaConducao(args: {
   if (noelPediuWhatsapp(falaDoNoel) && passouNumero) return true
   // Caminho do usuário com WhatsApp já no perfil: aprovou o rascunho que o Noel mostrou.
   if (noelMostrouRascunhoOuPediuAprovacao(falaDoNoel) && (aprovou || passouNumero)) return true
+  // Indicação (BUG 3): o Noel entregou o post de compartilhar (não um quiz) e a pessoa topou →
+  // geramos o link de ATRAIR que acompanha o post. Só quando a conversa é de fato sobre indicação.
+  const ehIndicacao = args.desafio
+    ? conversaEhSobreIndicacao({ desafio: args.desafio, conversationHistory: historico })
+    : false
+  if (ehIndicacao && noelEntregouCompartilhar(falaDoNoel) && (aprovou || passouNumero)) return true
   return false
 }
 

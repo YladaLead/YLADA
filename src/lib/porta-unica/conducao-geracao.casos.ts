@@ -94,6 +94,39 @@ caso('trava de idempotência NÃO dispara com placeholder de orientação (/l/ex
   )
 })
 
+caso('GERA na INDICAÇÃO: Noel entregou o post de compartilhar e a pessoa topou (BUG 3)', () => {
+  const noelEntregouPost = {
+    role: 'assistant',
+    content:
+      'Claro! Vamos criar um material leve pra suas clientes compartilharem.\n\nTítulo: Você e quem ama merecem esse cuidado!\nTexto para o post: ...\nChamada à ação: Marque quem você quer ver brilhar!',
+  }
+  const hist = [
+    { role: 'user', content: 'queria mais indicações das minhas clientes atuais' },
+    noelEntregouPost,
+  ]
+  assert.strictEqual(
+    deveGerarNaConducao({ message: 'gostei', conversationHistory: hist, desafio: { key: 'atrair', texto: null } }),
+    true,
+    'indicação: post entregue + aprovação deve gerar o link de atrair'
+  )
+})
+
+caso('NÃO confunde: post de compartilhar SEM contexto de indicação não gera', () => {
+  const noelEntregouPost = {
+    role: 'assistant',
+    content: 'Título: dica do dia\nChamada à ação: compartilhe com quem precisa',
+  }
+  // desafio 'vender', sem sinal de indicação na conversa → não é o caminho da abertura.
+  assert.strictEqual(
+    deveGerarNaConducao({
+      message: 'gostei',
+      conversationHistory: [{ role: 'user', content: 'vendo semijoias' }, noelEntregouPost],
+      desafio: { key: 'vender', texto: null },
+    }),
+    false
+  )
+})
+
 caso('mensagemEhAprovacao reconhece os "ok/gera" e rejeita pergunta/recusa', () => {
   for (const ok of ['sim', 'perfeito', 'ficou ótimo', 'pode gerar', 'gera', 'manda', 'show', 'adorei']) {
     assert.ok(mensagemEhAprovacao(ok), `deveria aprovar: ${ok}`)
