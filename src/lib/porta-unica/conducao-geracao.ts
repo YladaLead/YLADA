@@ -45,6 +45,20 @@ function noelPediuWhatsapp(falaDoNoel: string): boolean {
   )
 }
 
+/**
+ * Um link oficial JÁ foi entregue antes nesta conversa? Trava de idempotência do BUG do
+ * link duplicado (30/06): sem isto a APROVAÇÃO gerava o link #1 e o WhatsApp gerava o #2
+ * (dois links por conversa, queimando o limite Free). O marcador "link (oficial" só sai
+ * quando um link real foi gerado (bloco oficial do route), então NÃO dá falso-positivo no
+ * placeholder de orientação ("/l/exemplo-ativo"). Se a geração falhou (sem bloco oficial no
+ * histórico), a trava não dispara e o próximo turno pode tentar de novo (retry saudável).
+ */
+function jaEntregouLinkNaConversa(historico: readonly Turno[]): boolean {
+  return historico.some(
+    (t) => t.role === 'assistant' && /link \(oficial/i.test(t.content ?? '')
+  )
+}
+
 /** O Noel mostrou o rascunho do diagnóstico OU pediu aprovação na última fala. */
 function noelMostrouRascunhoOuPediuAprovacao(falaDoNoel: string): boolean {
   const temAlternativas = /(^|\n)\s*[a-d]\)\s/i.test(falaDoNoel) || /\*\*\d+\.\s/.test(falaDoNoel)
@@ -114,6 +128,8 @@ export function deveGerarNaConducao(args: {
 }): boolean {
   const historico = Array.isArray(args.conversationHistory) ? args.conversationHistory : []
   if (historico.length === 0) return false
+  // Idempotência: já entregamos um link nesta conversa → não gerar o 2º (BUG do link duplicado).
+  if (jaEntregouLinkNaConversa(historico)) return false
   const falaDoNoel = ultimaFalaDoNoel(historico)
   if (!falaDoNoel) return false
   const passouNumero = pareceNumeroDeContato(args.message)

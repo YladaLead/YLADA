@@ -64,6 +64,36 @@ caso('GERA quando o Noel mostrou o rascunho e a pessoa aprovou (whats já no per
   )
 })
 
+caso('NÃO gera o 2º link: já entregou um link oficial antes (BUG link duplicado)', () => {
+  // Cena real do lab: aprovou o rascunho → link #1 (bloco oficial no histórico) → passa o WhatsApp.
+  // O turno do WhatsApp NÃO pode gerar um 2º link.
+  const linkOficialEntregue = {
+    role: 'assistant',
+    content:
+      'Perfeito — seu diagnóstico está pronto.\n\n### Diagnóstico e link (oficial — igual ao link público e à edição)\n[Acessar diagnóstico](http://localhost:3000/l/5pkd5gu3)',
+  }
+  const hist = [noelMostrouRascunho, { role: 'user', content: 'ficou ótimo' }, linkOficialEntregue]
+  assert.strictEqual(
+    deveGerarNaConducao({ message: '19 98100-0002', conversationHistory: hist }),
+    false,
+    'não pode gerar 2º link depois que o oficial já foi entregue'
+  )
+})
+
+caso('trava de idempotência NÃO dispara com placeholder de orientação (/l/exemplo)', () => {
+  // Orientação usa "/l/exemplo-ativo" sem o marcador "link (oficial" → não conta como link entregue.
+  const orientacao = {
+    role: 'assistant',
+    content: 'Boa! Seu diagnóstico está pronto. [Acessar diagnóstico](https://ylada.com/l/exemplo-ativo)',
+  }
+  const hist = [orientacao, noelPediuWhats]
+  assert.strictEqual(
+    deveGerarNaConducao({ message: '19 98186-8000', conversationHistory: hist }),
+    true,
+    'placeholder de orientação não deve travar a geração real'
+  )
+})
+
 caso('mensagemEhAprovacao reconhece os "ok/gera" e rejeita pergunta/recusa', () => {
   for (const ok of ['sim', 'perfeito', 'ficou ótimo', 'pode gerar', 'gera', 'manda', 'show', 'adorei']) {
     assert.ok(mensagemEhAprovacao(ok), `deveria aprovar: ${ok}`)
