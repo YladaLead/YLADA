@@ -31,6 +31,10 @@ import {
   leaderLinkObjetivoAssistantDisplayText,
 } from '@/lib/pro-lideres-noel-leader-link-objetivos'
 import { sanitizeNoelAssistantOutput } from '@/lib/noel-output-sanitize'
+import {
+  renumberNoelQuizPreviewQuestions,
+  separateNoelPublicLinkAnchorLine,
+} from '@/lib/noel-assistant-markdown-format'
 import { isNoelDesafioConducaoEnabled } from '@/lib/porta-unica/porta-unica-flag'
 import { readDesafio, consumirDesafio } from '@/lib/porta-unica/desafio-client'
 import { aberturaNoelDoDesafio } from '@/lib/porta-unica/abertura-noel-desafio'
@@ -69,6 +73,9 @@ function markdownPlainText(children: ReactNode): string {
 function normalizeNoelAssistantMarkdown(raw: string): string {
   let t = sanitizeNoelAssistantOutput(raw.replace(/\r\n/g, '\n').trim())
   if (!t) return t
+
+  t = renumberNoelQuizPreviewQuestions(t)
+  t = separateNoelPublicLinkAnchorLine(t)
 
   // Quebra antes de "2. 3. ..." quando vier colado ao parágrafo anterior
   t = t.replace(/([^\n])\s+(\d+)\.\s+(?=[^\d\s])/g, '$1\n\n$2. ')
@@ -1279,7 +1286,7 @@ export default function NoelChat({
                                 href={effectiveHref}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 w-fit max-w-full px-3 py-2 rounded-lg bg-sky-50 text-sky-700 font-medium hover:bg-sky-100 transition-colors border border-sky-200 mt-2 mb-1 no-underline hover:underline break-all"
+                                className="inline-flex items-center gap-1.5 w-fit max-w-full px-3 py-2 rounded-lg bg-sky-50 text-sky-700 font-medium hover:bg-sky-100 transition-colors border border-sky-200 mt-2 mb-1 ml-0.5 no-underline hover:underline break-all [&:not(:first-child)]:mt-3"
                               >
                                 <span className="truncate">{children}</span>
                                 <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
