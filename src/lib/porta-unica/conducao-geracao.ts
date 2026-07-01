@@ -64,6 +64,44 @@ export function mensagemEhAprovacao(mensagem: string): boolean {
   )
 }
 
+/* ============================================================================
+ * ARTEFATO POR OBJETIVO (refactor 30/06 — decisão Andre)
+ * O OBJETIVO decide O QUE se produz, não só o texto. O caso que exige tratamento
+ * próprio é a INDICAÇÃO: colher indicação = compartilhar/viral (§6.1), NÃO um quiz
+ * novo e NÃO reavaliar a cliente satisfeita. Então indicação → 'abertura' (mensagem
+ * pra encaminhar + link de ATRAIR); todo o resto segue no 'diagnostico'.
+ * @see blueprint-plataforma/Conducao_Refactor_Artefato_Por_Objetivo.md §3
+ * ========================================================================== */
+
+export type ArtefatoDaConducao = 'diagnostico' | 'abertura'
+
+/** Radicais que sinalizam o objetivo de COLHER INDICAÇÃO (indica*, indiqu*). */
+const RE_INDICACAO = /\bindica\w*|\bindiqu\w*/i
+
+/** A pessoa declarou (no texto livre do desafio ou na conversa) que quer colher indicações. */
+function conversaEhSobreIndicacao(args: {
+  desafio: DesafioResposta
+  conversationHistory?: readonly Turno[]
+}): boolean {
+  if (args.desafio.key === 'outro' && args.desafio.texto && RE_INDICACAO.test(args.desafio.texto)) {
+    return true
+  }
+  const historico = Array.isArray(args.conversationHistory) ? args.conversationHistory : []
+  return historico.some((t) => t.role === 'user' && RE_INDICACAO.test(t.content ?? ''))
+}
+
+/**
+ * O objetivo governa o ARTEFATO. Indicação vira 'abertura' (compartilhar + link de atrair,
+ * sem requiz); atrair/vender/equipe/outro seguem 'diagnostico'. Puro, testável. Lê o desafio
+ * E a conversa porque a indicação costuma emergir na fala (o desafio pode ser 'atrair').
+ */
+export function artefatoDoObjetivo(args: {
+  desafio: DesafioResposta
+  conversationHistory?: readonly Turno[]
+}): ArtefatoDaConducao {
+  return conversaEhSobreIndicacao(args) ? 'abertura' : 'diagnostico'
+}
+
 /**
  * É o momento de o SISTEMA gerar o link real, dentro do fluxo de condução? (Decisão do
  * Andre: "na aprovação + WhatsApp".) Exige que o Noel TENHA chegado ao fim da condução
@@ -132,9 +170,15 @@ function ehRespostaSubstantiva(conteudo: string): boolean {
 export function construirTextoInterpretConducao(args: {
   desafio: DesafioResposta
   conversationHistory?: readonly Turno[]
+  /** 'abertura' (indicação): link é um diagnóstico de ATRAIR pra quem RECEBE, não requiz. */
+  artefato?: ArtefatoDaConducao
 }): string {
-  const objetivo =
-    args.desafio.key === 'outro' && args.desafio.texto
+  const ehAbertura = args.artefato === 'abertura'
+  // Na abertura o objetivo é sempre ATRAIR (quem recebe a indicação é pessoa nova), mesmo
+  // que o desafio livre falasse de "indicações" — senão o interpret geraria um requiz.
+  const objetivo = ehAbertura
+    ? OBJETIVO_PRIMEIRA_PESSOA.atrair
+    : args.desafio.key === 'outro' && args.desafio.texto
       ? args.desafio.texto.trim()
       : OBJETIVO_PRIMEIRA_PESSOA[args.desafio.key]
   const historico = Array.isArray(args.conversationHistory) ? args.conversationHistory : []
@@ -142,11 +186,14 @@ export function construirTextoInterpretConducao(args: {
     .filter((t) => t.role === 'user')
     .map((t) => (t.content ?? '').trim())
     .filter(ehRespostaSubstantiva)
+    // Na abertura, tira a fala de indicação do "meu nicho" pra o diagnóstico sair de ATRAIR
+    // (a dor de quem RECEBE), não uma reavaliação da cliente satisfeita que pediu a indicação.
+    .filter((r) => !ehAbertura || !RE_INDICACAO.test(r))
   const corpo = respostas.join('. ')
   const sobre = corpo ? ` Meu nicho e o que eu faço: ${corpo}.` : ''
   const notaObjetivo = ` (Objetivo interno meu, que NÃO deve aparecer nas perguntas: ${objetivo}.)`
 
-  if (args.desafio.key === 'equipe') {
+  if (args.desafio.key === 'equipe' && !ehAbertura) {
     return (
       'Quero um diagnóstico para COMPARTILHAR com a minha equipe (cada vendedor ou membro do time), ' +
       'pra cada um refletir sobre as PRÓPRIAS dificuldades e voltar a agir. ' +

@@ -75,6 +75,25 @@ export function construirBlocoGeracaoToolParaPrompt(): string {
 }
 
 /**
+ * Bloco pro system prompt quando o ARTEFATO é 'abertura' (objetivo = colher indicação).
+ * Regra Andre 30/06 (§3): indicação NÃO é quiz novo nem reavaliação da cliente satisfeita.
+ * É uma mensagem pra ela ENCAMINHAR + o link de ATRAIR (o diagnóstico que a pessoa NOVA
+ * que receber vai preencher). O selo do loop conta a indicação. Injetado só no turno em que
+ * o sistema gera o link de atrair pra compartilhar, atrás da mesma flag de condução.
+ * @see blueprint-plataforma/Conducao_Refactor_Artefato_Por_Objetivo.md §3
+ */
+export function construirBlocoAberturaIndicacaoParaPrompt(): string {
+  return (
+    '\n[ARTEFATO = ABERTURA (objetivo: colher indicação) — NÃO é um quiz novo]\n' +
+    'O objetivo aqui é colher indicação, e indicação se colhe COMPARTILHANDO algo útil, não com formulário de nomes nem reavaliando quem já é cliente. ' +
+    'O link que o sistema acabou de gerar é um DIAGNÓSTICO DE ATRAIR: quem vai responder é a pessoa NOVA que receber a indicação, não a cliente satisfeita que está com você. ' +
+    'NUNCA trate esse link como uma reavaliação/requiz da cliente atual.\n' +
+    'SUA RESPOSTA: entregue uma mensagem curta, calorosa e pronta pra ela ENCAMINHAR pra quem ela gosta (ex.: "quem você ama merece esse cuidado"), com um convite leve pra passar adiante, e diga que o link de atrair vai anexado abaixo pra ela compartilhar. ' +
+    'Sem pedir nome/telefone de terceiros. Deixe claro que quem clicar e responder cai como contato novo pra ela, e que é assim que a indicação acontece sozinha (a pessoa compartilha algo útil em vez de pedir favor).'
+  )
+}
+
+/**
  * Few-shot: conversas-modelo que TRAVAM o comportamento da condução (técnica do
  * `HANDOFF_Noel_Reestruturacao.md`: exemplos pesam mais que regra em prosa). As
  * falas do Noel modelam a voz limpa (sem travessão de aparte); os rótulos de seção

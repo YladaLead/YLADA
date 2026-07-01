@@ -65,12 +65,15 @@ import {
   construirBlocoDesafioParaPrompt,
   construirBlocoGeracaoToolParaPrompt,
   construirBlocoFewShotConducaoParaPrompt,
+  construirBlocoAberturaIndicacaoParaPrompt,
 } from '@/lib/porta-unica/abertura-noel-desafio'
 import {
   deveGerarNaConducao,
   construirTextoInterpretConducao,
   corrigirFlowDaConducao,
   perguntasDoUltimoRascunho,
+  artefatoDoObjetivo,
+  type ArtefatoDaConducao,
 } from '@/lib/porta-unica/conducao-geracao'
 import { relaxarGateMatrizParaNoelDireto } from '@/lib/porta-unica/destino-pos-cadastro'
 import {
@@ -796,6 +799,14 @@ export async function POST(request: NextRequest) {
       !!desafioConducao &&
       deveGerarNaConducao({ message, conversationHistory })
     if (conducaoDeveGerar) noelResponseMode = 'modo_link'
+    // Artefato por objetivo (refactor §3): indicação → 'abertura' (link de ATRAIR pra
+    // compartilhar, SEM requiz da cliente); todo o resto → 'diagnostico'. Só o fluxo da
+    // porta (flag + desafio) muda de rota; OFF/sem-desafio = sempre 'diagnostico' (idêntico).
+    const artefatoConducao: ArtefatoDaConducao =
+      conducaoDeveGerar && desafioConducao
+        ? artefatoDoObjetivo({ desafio: desafioConducao, conversationHistory })
+        : 'diagnostico'
+    const conducaoAbertura = artefatoConducao === 'abertura'
     const linkModeEnabled = noelResponseMode === 'modo_link'
     // Modo laboratório: cada cenário roda do ZERO (ignora estado da conta + não persiste).
     // Só com a flag de condução ligada → inerte em produção (mesmo se o body mandar labIsolado).
@@ -1139,7 +1150,11 @@ export async function POST(request: NextRequest) {
     // desafio + as respostas de nicho/foco da conversa pra o interpret gerar o diagnóstico SOB MEDIDA.
     const interpretTextForGeneration =
       conducaoDeveGerar && desafioConducao
-        ? construirTextoInterpretConducao({ desafio: desafioConducao, conversationHistory })
+        ? construirTextoInterpretConducao({
+            desafio: desafioConducao,
+            conversationHistory,
+            artefato: artefatoConducao,
+          })
         : message.trim()
 
     // Se o profissional pediu link/quiz/calculadora: verificar perfil; se tiver, interpret + generate
@@ -1173,7 +1188,9 @@ export async function POST(request: NextRequest) {
           let questions = Array.isArray(data?.questions) ? data.questions : []
           // #2: o link tem que SER o rascunho que a pessoa aprovou. Na condução, se o Noel mostrou
           // um rascunho (perguntas + opções), usamos ELE; senão cai nas perguntas do interpret.
-          if (conducaoDeveGerar) {
+          // Na abertura (indicação) o "rascunho" do Noel é a MENSAGEM de compartilhar, não um quiz —
+          // então NÃO reusamos: o link é um diagnóstico de ATRAIR gerado do zero pra quem receber.
+          if (conducaoDeveGerar && !conducaoAbertura) {
             const doRascunho = perguntasDoUltimoRascunho(conversationHistory)
             if (doRascunho) questions = doRascunho
           }
@@ -1439,6 +1456,9 @@ export async function POST(request: NextRequest) {
         // Few-shot: conversas-modelo que travam o comportamento (HANDOFF_Noel_Reestruturacao)
         parts.push(construirBlocoFewShotConducaoParaPrompt())
       }
+      // Artefato = abertura (indicação): enquadra o link gerado como diagnóstico de ATRAIR
+      // pra compartilhar (§3), nunca como requiz da cliente atual. Só no turno que gera.
+      if (conducaoAbertura) parts.push(construirBlocoAberturaIndicacaoParaPrompt())
     }
     // Item 3 Fase 2 (Plano A): pedir WhatsApp/perfil na HORA DA AÇÃO (não na entrada).
     // `coleta*Pendente` só fica true com a flag do fluxo novo ON; OFF = nenhum bloco.

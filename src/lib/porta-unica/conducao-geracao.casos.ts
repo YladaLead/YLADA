@@ -11,6 +11,7 @@ import {
   corrigirFlowDaConducao,
   extrairPerguntasDoRascunho,
   perguntasDoUltimoRascunho,
+  artefatoDoObjetivo,
 } from './conducao-geracao'
 
 let passou = 0
@@ -217,6 +218,84 @@ caso('perguntasDoUltimoRascunho pega o rascunho mais recente do assistente', () 
   ]
   const p = perguntasDoUltimoRascunho(hist)
   assert.ok(p && p.length === 3, 'devia extrair as 3 do último rascunho')
+})
+
+/* ---- Artefato por objetivo (indicação → abertura; §3) -------------------- */
+
+caso('artefatoDoObjetivo: atrair sem sinal de indicação → diagnostico', () => {
+  assert.strictEqual(
+    artefatoDoObjetivo({
+      desafio: { key: 'atrair', texto: null },
+      conversationHistory: [{ role: 'user', content: 'tenho clínica de estética' }],
+    }),
+    'diagnostico'
+  )
+})
+
+caso('artefatoDoObjetivo: desafio "outro" pedindo indicação → abertura', () => {
+  assert.strictEqual(
+    artefatoDoObjetivo({ desafio: { key: 'outro', texto: 'quero mais indicações dos clientes' } }),
+    'abertura'
+  )
+})
+
+caso('artefatoDoObjetivo: indicação declarada na conversa (mesmo com desafio atrair) → abertura', () => {
+  assert.strictEqual(
+    artefatoDoObjetivo({
+      desafio: { key: 'atrair', texto: null },
+      conversationHistory: [
+        { role: 'assistant', content: 'o que você quer?' },
+        { role: 'user', content: 'queria que meus clientes me indicassem mais' },
+      ],
+    }),
+    'abertura'
+  )
+})
+
+caso('artefatoDoObjetivo: pega "indique/indicar/indicações" (radicais)', () => {
+  for (const t of ['peça indicações', 'quero indicar meu trabalho', 'que me indiquem']) {
+    assert.strictEqual(
+      artefatoDoObjetivo({ desafio: { key: 'atrair', texto: null }, conversationHistory: [{ role: 'user', content: t }] }),
+      'abertura',
+      `deveria virar abertura: ${t}`
+    )
+  }
+})
+
+caso('artefatoDoObjetivo: vender sem indicação segue diagnostico', () => {
+  assert.strictEqual(
+    artefatoDoObjetivo({
+      desafio: { key: 'vender', texto: null },
+      conversationHistory: [{ role: 'user', content: 'vendo semijoias pelo instagram' }],
+    }),
+    'diagnostico'
+  )
+})
+
+caso('texto do interpret na ABERTURA vira ATRAIR e tira o ruído de indicação (sem requiz)', () => {
+  const texto = construirTextoInterpretConducao({
+    desafio: { key: 'outro', texto: 'quero mais indicações' },
+    conversationHistory: [
+      { role: 'user', content: 'queria indicações dos meus clientes satisfeitos' },
+      { role: 'user', content: 'tenho clínica de estética facial' },
+    ],
+    artefato: 'abertura',
+  })
+  assert.match(texto, /COMPARTILHAR/i)
+  assert.match(texto, /ponto de vista do CLIENTE/i)
+  assert.match(texto, /atrair mais clientes/i) // objetivo forçado pra atrair, não "indicações"
+  assert.match(texto, /cl[íi]nica de est[ée]tica/i) // o nicho substantivo entra
+  assert.ok(!/indica/i.test(texto), 'a fala de indicação não pode vazar pro texto do interpret')
+})
+
+caso('abertura com desafio equipe ainda vira ATRAIR (não texto de equipe/membro)', () => {
+  const texto = construirTextoInterpretConducao({
+    desafio: { key: 'equipe', texto: null },
+    conversationHistory: [{ role: 'user', content: 'quero indicações' }],
+    artefato: 'abertura',
+  })
+  assert.match(texto, /ponto de vista do CLIENTE/i)
+  assert.ok(!/QUEM RESPONDE \(o vendedor/i.test(texto), 'não deve cair no molde de equipe')
 })
 
 console.log(`\n${passou} casos verdes.`)
