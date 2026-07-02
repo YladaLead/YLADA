@@ -284,47 +284,46 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
       {/* Perfil profissional — informações usadas pelo Noel */}
       <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="px-6 sm:px-8 py-5 border-b border-gray-100">
-          <div className="flex items-center gap-4">
-            {/* Avatar clicável — abre seletor de arquivo */}
-            <label
-              className="relative flex-shrink-0 w-14 h-14 rounded-full cursor-pointer group"
-              title="Alterar foto"
-            >
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="sr-only"
-                onChange={handleAvatarChange}
-                disabled={uploadingAvatar}
-              />
-              {perfil.avatarUrl ? (
-                <img
-                  src={perfil.avatarUrl}
-                  alt="Sua foto"
-                  className="w-14 h-14 rounded-full object-cover border border-gray-200"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg font-semibold">
-                  {uploadingAvatar ? (
+          <div className="flex items-start gap-4">
+            {/* Avatar + botão de upload */}
+            <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+              <div className="relative w-16 h-16 rounded-full overflow-hidden border border-gray-200 bg-indigo-100">
+                {perfil.avatarUrl ? (
+                  <img
+                    src={perfil.avatarUrl}
+                    alt="Sua foto"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xl font-semibold text-indigo-700">
+                    {uploadingAvatar ? (
+                      <span className="animate-spin rounded-full h-5 w-5 border-2 border-indigo-400 border-t-indigo-700" />
+                    ) : (
+                      iniciais
+                    )}
+                  </div>
+                )}
+                {uploadingAvatar && perfil.avatarUrl && (
+                  <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
                     <span className="animate-spin rounded-full h-5 w-5 border-2 border-indigo-400 border-t-indigo-700" />
-                  ) : (
-                    iniciais
-                  )}
-                </div>
-              )}
-              {/* Overlay de hover */}
-              <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/30 flex items-center justify-center transition-colors pointer-events-none">
-                {!uploadingAvatar && (
-                  <span className="text-white text-[10px] font-semibold opacity-0 group-hover:opacity-100 leading-tight text-center">
-                    Alterar
-                  </span>
+                  </div>
                 )}
               </div>
-            </label>
-            <div>
+              <label className="cursor-pointer text-xs font-medium text-sky-600 hover:text-sky-800">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  onChange={handleAvatarChange}
+                  disabled={uploadingAvatar}
+                />
+                {uploadingAvatar ? 'Enviando…' : perfil.avatarUrl ? 'Trocar foto' : 'Adicionar foto'}
+              </label>
+            </div>
+            <div className="pt-1">
               <h2 className="text-lg font-semibold text-gray-900">{perfil.nome || 'Seu nome'}</h2>
               <p className="text-sm text-gray-500">{perfil.email}</p>
-              {erroAvatar && <p className="text-xs text-red-600 mt-0.5">{erroAvatar}</p>}
+              {erroAvatar && <p className="text-xs text-red-600 mt-1">{erroAvatar}</p>}
             </div>
           </div>
         </div>
