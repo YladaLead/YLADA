@@ -33,8 +33,21 @@ caso('líder vê banner quando equipe bloqueada por base', () => {
       isLeaderWorkspace: true,
       accessOk: false,
       blockReason: 'base_subscription',
+      hasTeamSubscriptionHistory: true,
     }),
     true
+  )
+})
+
+caso('draft sem assinatura anterior não mostra banner', () => {
+  assert.strictEqual(
+    proLideresLeaderShouldSeeTeamSubscriptionLapsedBanner({
+      isLeaderWorkspace: true,
+      accessOk: false,
+      blockReason: 'base_subscription',
+      hasTeamSubscriptionHistory: false,
+    }),
+    false
   )
 })
 
@@ -44,6 +57,7 @@ caso('líder não vê banner com acesso ok', () => {
       isLeaderWorkspace: true,
       accessOk: true,
       blockReason: null,
+      hasTeamSubscriptionHistory: true,
     }),
     false
   )
@@ -55,6 +69,7 @@ caso('membro não vê banner do líder', () => {
       isLeaderWorkspace: false,
       accessOk: false,
       blockReason: 'base_subscription',
+      hasTeamSubscriptionHistory: true,
     }),
     false
   )
@@ -66,6 +81,7 @@ caso('pacote +50 vencido usa outro banner', () => {
       isLeaderWorkspace: true,
       accessOk: false,
       blockReason: 'invite_quota_pack_overdue',
+      hasTeamSubscriptionHistory: true,
     }),
     false
   )

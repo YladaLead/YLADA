@@ -1,4 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { proLideresLeaderShouldSeeTeamSubscriptionLapsedBanner } from '@/lib/pro-lideres-team-subscription-lapsed-banner'
+
+export { proLideresLeaderShouldSeeTeamSubscriptionLapsedBanner }
 
 const MP_SUB_PREFIX = 'mp_sub_'
 
@@ -23,16 +26,6 @@ export function parseMpPreapprovalIdFromStripeSubscriptionId(
   if (!stripeSubscriptionId?.startsWith(MP_SUB_PREFIX)) return null
   const id = stripeSubscriptionId.slice(MP_SUB_PREFIX.length).trim()
   return id.length > 0 ? id : null
-}
-
-/** Líder deve ver aviso quando a equipe está bloqueada por assinatura base vencida. */
-export function proLideresLeaderShouldSeeTeamSubscriptionLapsedBanner(input: {
-  isLeaderWorkspace: boolean
-  accessOk: boolean
-  blockReason: string | null | undefined
-}): boolean {
-  if (!input.isLeaderWorkspace || input.accessOk) return false
-  return (input.blockReason ?? 'base_subscription') === 'base_subscription'
 }
 
 /**

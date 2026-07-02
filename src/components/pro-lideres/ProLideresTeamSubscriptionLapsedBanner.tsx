@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 
-import { proLideresLeaderShouldSeeTeamSubscriptionLapsedBanner } from '@/lib/pro-lideres-team-subscription-mp-sync'
+import { proLideresLeaderShouldSeeTeamSubscriptionLapsedBanner } from '@/lib/pro-lideres-team-subscription-lapsed-banner'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
 
 /**
@@ -24,11 +24,13 @@ export function ProLideresTeamSubscriptionLapsedBanner() {
       const data = await res.json().catch(() => ({}))
       const accessOk = Boolean((data as { accessOk?: boolean }).accessOk)
       const blockReason = (data as { blockReason?: string | null }).blockReason ?? null
+      const hasTeamSubscriptionHistory = Boolean((data as { isRenewal?: boolean }).isRenewal)
       setVisible(
         proLideresLeaderShouldSeeTeamSubscriptionLapsedBanner({
           isLeaderWorkspace: true,
           accessOk,
           blockReason,
+          hasTeamSubscriptionHistory,
         })
       )
     } catch {
