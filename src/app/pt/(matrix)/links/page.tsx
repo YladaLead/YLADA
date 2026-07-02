@@ -902,42 +902,44 @@ function LinksPageContent({
               Se não colar no celular, copie o endereço cinza abaixo ou use <strong>Mais</strong> → Ver QR na tela.
             </p>
             {embedded ? (
-              {/* Filtro de origem — só na matriz ylada */}
-              {areaCodigo === 'ylada' && (
-                <div className="mb-2 flex gap-1.5">
-                  {(['', 'noel', 'biblioteca'] as const).map((v) => {
-                    const label = v === '' ? 'Todos' : v === 'noel' ? '✨ Do Noel' : '📚 Da biblioteca'
-                    return (
-                      <button
-                        key={v}
-                        type="button"
-                        onClick={() => setOrigemFiltro(v)}
-                        className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                          origemFiltro === v
-                            ? 'bg-sky-600 text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    )
-                  })}
+              <>
+                {/* Filtro de origem — só na matriz ylada */}
+                {areaCodigo === 'ylada' && (
+                  <div className="mb-2 flex gap-1.5">
+                    {(['', 'noel', 'biblioteca'] as const).map((v) => {
+                      const label = v === '' ? 'Todos' : v === 'noel' ? '✨ Do Noel' : '📚 Da biblioteca'
+                      return (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => setOrigemFiltro(v)}
+                          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                            origemFiltro === v
+                              ? 'bg-sky-600 text-white'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+                <div className="mb-3">
+                  <label htmlFor="meus-links-busca" className="sr-only">
+                    Pesquisar entre os teus links
+                  </label>
+                  <input
+                    id="meus-links-busca"
+                    type="search"
+                    value={meusLinksBusca}
+                    onChange={(e) => setMeusLinksBusca(e.target.value)}
+                    placeholder="Pesquisar por nome, modelo ou URL…"
+                    autoComplete="off"
+                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
+                  />
                 </div>
-              )}
-              <div className="mb-3">
-                <label htmlFor="meus-links-busca" className="sr-only">
-                  Pesquisar entre os teus links
-                </label>
-                <input
-                  id="meus-links-busca"
-                  type="search"
-                  value={meusLinksBusca}
-                  onChange={(e) => setMeusLinksBusca(e.target.value)}
-                  placeholder="Pesquisar por nome, modelo ou URL…"
-                  autoComplete="off"
-                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
-                />
-              </div>
+              </>
             ) : null}
             {(() => {
               const baseList = linksFiltradosMeusLinks
