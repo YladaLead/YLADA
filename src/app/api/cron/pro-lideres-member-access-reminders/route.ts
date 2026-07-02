@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { sendProLideresMemberAccessExpiryReminderEmail } from '@/lib/pro-lideres-member-expiry-reminder-email'
+import { syncProLideresTeamSubscriptionsFromMercadoPago } from '@/lib/pro-lideres-team-subscription-mp-sync'
 import { daysUntilProLideresTeamAccessEnds } from '@/lib/pro-lideres-team-access-expiry-ui'
 import { supabaseAdmin } from '@/lib/supabase'
 
@@ -120,5 +121,13 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true, processed: (rows ?? []).length, sent, skipped, errors })
+  let mpSync: Awaited<ReturnType<typeof syncProLideresTeamSubscriptionsFromMercadoPago>> | null = null
+  try {
+    mpSync = await syncProLideresTeamSubscriptionsFromMercadoPago(supabaseAdmin)
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'sync MP'
+    errors.push(`mp-sync: ${msg}`)
+  }
+
+  return NextResponse.json({ ok: true, processed: (rows ?? []).length, sent, skipped, errors, mpSync })
 }

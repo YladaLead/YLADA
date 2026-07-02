@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   /** Menos workers em paralelo no container 8 GB da Vercel (evita OOM no compile + SSG). */
   ...(isVercel
     ? {
-        staticGenerationMaxConcurrency: 2,
+        staticGenerationMaxConcurrency: 1,
         experimental: {
           cpus: 1,
           workerThreads: false,

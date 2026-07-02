@@ -11,11 +11,6 @@
     {
       "path": "/api/cron/pro-lideres-member-access-reminders",
       "schedule": "0 13 * * *"
-    },
-    {
-      "path": "/api/cron/pro-lideres-team-subscription-sync",
-      "schedule": "0 14 * * *"
     }
   ]
 }
-
