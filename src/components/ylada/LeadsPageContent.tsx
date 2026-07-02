@@ -138,10 +138,13 @@ export default function LeadsPageContent({ areaCodigo, areaLabel, noAreaShell }:
   })
 
   const awaiting = funnel.completes - funnel.clicks
-  const rateViewToComplete = convRate(funnel.completes, funnel.views)
+  // Views devem ser >= completes (quem respondeu obviamente abriu o link antes).
+  // Se o dado estiver abaixo (ex: dono testou sem contar view), usa completes como piso.
+  const effectiveViews = Math.max(funnel.views, funnel.completes)
+  const rateViewToComplete = convRate(funnel.completes, effectiveViews)
   const rateCompleteToClick = convRate(funnel.clicks, funnel.completes)
 
-  const hasSomeData = funnel.views > 0 || metrics.length > 0
+  const hasSomeData = effectiveViews > 0 || metrics.length > 0
 
   const core = (
     <div>
@@ -222,7 +225,7 @@ export default function LeadsPageContent({ areaCodigo, areaLabel, noAreaShell }:
             {/* Card 1: Abriram — informativo, não filtra */}
             <div className="rounded-xl border border-gray-200 bg-white p-4">
               <div className="text-xl mb-2">👁️</div>
-              <div className="text-2xl font-bold text-gray-900">{funnel.views}</div>
+              <div className="text-2xl font-bold text-gray-900">{effectiveViews}</div>
               <div className="text-xs font-medium text-gray-500 mt-1">Abriram o link</div>
               <div className="text-xs text-gray-400 mt-1">Topo do funil</div>
             </div>
