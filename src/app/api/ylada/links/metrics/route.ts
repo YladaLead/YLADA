@@ -73,7 +73,28 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({ success: true, data: list })
+    // Contagem de views (topo do funil) — ylada_link_events não tem perfume_usage, conta total
+    let viewQuery = supabaseAdmin
+      .from('ylada_link_events')
+      .select('*', { count: 'exact', head: true })
+      .in('link_id', linkIds)
+      .eq('event_type', 'view')
+
+    if (linkId && linkIds.includes(linkId)) {
+      viewQuery = viewQuery.eq('link_id', linkId)
+    }
+
+    const { count: viewsCount } = await viewQuery
+
+    return NextResponse.json({
+      success: true,
+      data: list,
+      funnel: {
+        views: viewsCount ?? 0,
+        completes: list.length,
+        clicks: list.filter((m) => m.clicked_whatsapp).length,
+      },
+    })
   } catch (e) {
     console.error('[ylada/links/metrics]', e)
     return NextResponse.json({ success: false, error: 'Erro ao listar métricas' }, { status: 500 })
