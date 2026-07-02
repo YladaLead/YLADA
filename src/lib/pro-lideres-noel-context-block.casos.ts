@@ -15,6 +15,7 @@ import {
 import {
   buildProLideresNoelContextBlock,
   buildProLideresNoelLeaderConducaoOverrideBlock,
+  buildProLideresNoelLeaderMatrixFormatBlock,
   resolveProLideresNoelUnifiedPapel,
 } from '@/lib/pro-lideres-noel-context-block'
 import {
@@ -115,6 +116,12 @@ assert('líder: override ENTREGA PRIMEIRO', /ENTREGA PRIMEIRO/.test(leaderBlock)
 assert('líder: catálogo pl', leaderBlock.includes('CATÁLOGO DE FERRAMENTAS'))
 assert('líder: links ativos', leaderBlock.includes('LINKS ATIVOS'))
 assert('líder: URL tarefas', leaderBlock.includes('/pro-lideres/painel/tarefas'))
+
+const leaderFormat = buildProLideresNoelLeaderMatrixFormatBlock()
+assert('líder FORMATO: mobile-first', leaderFormat.includes('Mobile-first'))
+assert('líder FORMATO: proíbe Compartilhe com Contexto', leaderFormat.includes('Compartilhe com Contexto'))
+assert('líder FORMATO: ENTREGA PRIMEIRO', leaderFormat.includes('ENTREGA PRIMEIRO'))
+assert('líder bloco inclui FORMATO', leaderBlock.includes('FORMATO DE RESPOSTA — IGUAL MATRIZ YLADA'))
 
 const override = buildProLideresNoelLeaderConducaoOverrideBlock()
 assert('override menciona COMPORTAMENTO ESTRATÉGICO', override.includes('[COMPORTAMENTO ESTRATÉGICO]'))

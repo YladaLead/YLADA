@@ -1,25 +1,36 @@
-'use client'
+import { Suspense } from 'react'
+import { redirect } from 'next/navigation'
 
-import NoelChat from '@/components/ylada/NoelChat'
+import ProLideresNoelLeaderClient from '@/components/pro-lideres/ProLideresNoelLeaderClient'
+import { PRO_LIDERES_BASE_PATH } from '@/config/pro-lideres-menu'
+import {
+  createProLideresServerClient,
+  ensureLeaderTenantAccess,
+  resolvedUserEmail,
+} from '@/lib/pro-lideres-server'
+import { proLideresTenantUsesUnifiedMatrixNoel } from '@/lib/pro-lideres-noel-member-access'
 
-export default function ProLideresNoelPage() {
+export default async function ProLideresNoelPage() {
+  const gate = await ensureLeaderTenantAccess()
+  if (!gate.ok) redirect(gate.redirect)
+
+  const supabase = await createProLideresServerClient()
+  const { data: userData } = await supabase.auth.getUser()
+  const user = userData.user
+  if (!user?.id) redirect('/pro-lideres/entrar')
+
+  if (gate.role !== 'leader') {
+    redirect(PRO_LIDERES_BASE_PATH)
+  }
+
+  const useUnifiedMatrixNoel = proLideresTenantUsesUnifiedMatrixNoel(gate.tenant, {
+    ownerEmail: resolvedUserEmail(user),
+    role: gate.role,
+  })
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <NoelChat
-        area="pro_lideres"
-        className="flex min-h-[min(70vh,560px)] flex-1 flex-col"
-        chatApiPath="/api/pro-lideres/noel"
-        skipYladaContextualWelcome
-        skipWelcomeMessage
-        hideSuggestions
-        showChatHeaderTitle
-        showHeaderEmoji={false}
-        headerTitle="Noel"
-        headerTagline="Estou aqui para ajudar, pergunte o que precisar para desenvolver você e sua equipe."
-        hideInputHint
-        sendButtonLabel="Enviar"
-        locale="pt"
-      />
-    </div>
+    <Suspense fallback={<p className="p-4 text-sm text-gray-500">Carregando…</p>}>
+      <ProLideresNoelLeaderClient useUnifiedMatrixNoel={useUnifiedMatrixNoel} />
+    </Suspense>
   )
 }

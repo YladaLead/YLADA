@@ -40,9 +40,13 @@ function proLideresMemberNoelStoredContent(
   area: NoelArea,
   raw: string | undefined,
   userMessage = '',
-  memberMatrizPure = false
+  memberMatrizPure = false,
+  leaderMatrizUnified = false
 ): string {
   const t = raw?.trim() || 'Desculpe, não consegui processar. Tente novamente.'
+  if (area === 'pro_lideres' && leaderMatrizUnified) {
+    return polishNoelAssistantMarkdownForChat(t)
+  }
   if (area === 'pro_lideres_member' && memberMatrizPure) {
     return polishNoelAssistantMarkdownForChat(t)
   }
@@ -457,7 +461,8 @@ function isPlMatrixNoelApiPath(path: string | undefined, papel?: string): boolea
   return path === '/api/ylada/noel' && (papel === 'leader' || papel === 'member')
 }
 
-function isProLideresLeaderNoelApiPath(path: string | undefined): boolean {
+function isProLideresLeaderNoelApiPath(path: string | undefined, papel?: string): boolean {
+  if (isPlMatrixNoelApiPath(path, 'leader') && papel === 'leader') return true
   if (!path?.includes('/pro-lideres/noel')) return false
   return !path.includes('/membro/')
 }
@@ -502,7 +507,10 @@ export default function NoelChat({
           ? '/pro-lideres/membro/catalogo'
           : '/pro-lideres/painel/catalogo'
   /** Guia «publicar na biblioteca» + PATCH link-meta: só o Noel do painel Pro Líderes clássico. */
-  const proLideresLeaderLibraryFlow = Boolean(resolvedChatApi?.includes('/pro-lideres/noel'))
+  const proLideresLeaderLibraryFlow =
+    Boolean(resolvedChatApi?.includes('/pro-lideres/noel')) ||
+    Boolean(plMatrixNoel && proLideresPapel === 'leader')
+  const leaderMatrizUnifiedUi = Boolean(plMatrixNoel && proLideresPapel === 'leader')
   /** Noel embed Pro Estética: mesmos atalhos de testar link / catálogo que o líder, sem modal Vendas/Recrutamento. */
   const proEsteticaNoelLinkToolbar =
     Boolean(resolvedChatApi?.includes('/pro-estetica-corporal/noel')) ||
@@ -808,7 +816,8 @@ export default function NoelChat({
         area,
         data.response,
         text,
-        memberMatrizPure
+        memberMatrizPure,
+        leaderMatrizUnifiedUi
       )
       if (
         noelAssistantMarkdownHasRenderableText(storedContent) ||
@@ -906,6 +915,7 @@ export default function NoelChat({
 
   const [copiedScriptId, setCopiedScriptId] = useState<string | null>(null)
   const [copiedQuizLinkMsgId, setCopiedQuizLinkMsgId] = useState<string | null>(null)
+  const [copiedMaterialMsgId, setCopiedMaterialMsgId] = useState<string | null>(null)
   // Passo 4 (Fase 2): na condução da matriz, o card é limpo (1 Acessar + 1 Copiar, vocabulário
   // "diagnóstico"). A âncora oficial já dá Acessar + Copiar, então o botão duplicado de copiar do
   // toolbar é escondido. Flag OFF (ou Pró-Líderes) = UI inalterada.
@@ -939,28 +949,44 @@ export default function NoelChat({
 
   const lastAssistantMsg = [...messages].reverse().find((m) => m.role === 'assistant')
 
-  /** A mensagem contém quiz e/ou link? Mostramos Editar/Gerar quando o profissional recebeu o diagnóstico. */
+  /** Contexto de link só da mensagem — não herda `lastLinkContext` da sessão (evita botões de quiz em turno conversacional). */
+  function linkContextForMessage(msg: Message): LastLinkContext | null {
+    return msg.linkContext?.link_id || msg.linkContext?.url ? msg.linkContext ?? null : null
+  }
+
+  /** A mensagem contém quiz e/ou link? Toolbar de link só quando o conteúdo (ou linkContext da mensagem) é de entrega. */
   function messageContainsQuizContent(content: string, linkCtx?: LastLinkContext | null): boolean {
-    if (linkCtx?.url) return true
-    if (linkCtx?.link_id) return true
     const t = content.trim()
     if (!t) return false
-    const hasLink = /\[.*?\]\(https?:\/\/[^)]+\)/.test(t) || /https?:\/\/[^\s)]+/.test(t)
-    if (!hasLink) return false
-    // Aceita: seção ###, estrutura de quiz (perguntas + A) B) C) D)), ou só link (formato natural)
     const hasSecaoPerguntas = /###\s*(?:AQUI ESTÃO AS PERGUNTAS|Chamada para Ação|Link Inteligente)/i.test(t)
-    // Aceita o heading "Quiz e link (oficial)" e o "Diagnóstico e link (oficial)" da condução (additivo).
     const hasQuizOficialProLideres = /###\s*(?:Quiz|Diagn[óo]stico)\s+e\s+link\s*\(oficial/i.test(t)
     const hasEstruturaQuiz = (/\d+\.\s+/.test(t) || /\*\*\d+\.\s+/.test(t)) && /[A-D]\)\s+/.test(t)
     const hasFormatoNatural =
-      /aqui está o link|acesse seu quiz|acessar diagn[óo]stico|preparei um diagnóstico|diagnóstico\/link\s*\*\*já\s*foi\s*gravado/i.test(t)
-    return hasSecaoPerguntas || hasQuizOficialProLideres || hasEstruturaQuiz || hasFormatoNatural
+      /aqui está o link|acesse seu quiz|acessar diagn[óo]stico|preparei um diagnóstico|link\s*\*\*já\s*foi\s*gravado|diagnóstico\/link\s*\*\*já\s*foi\s*gravado/i.test(
+        t
+      )
+    const contentIsLinkDelivery =
+      hasSecaoPerguntas || hasQuizOficialProLideres || hasEstruturaQuiz || hasFormatoNatural
+    if (contentIsLinkDelivery) return true
+    if (!linkCtx?.url && !linkCtx?.link_id) return false
+    const hasLink = /\[.*?\]\(https?:\/\/[^)]+\)/.test(t) || /https?:\/\/[^\s)]+/.test(t)
+    return hasLink && (hasQuizOficialProLideres || hasEstruturaQuiz || hasFormatoNatural)
   }
 
-  const ctxForLinkActions = lastAssistantMsg?.linkContext ?? null
-  const lastAssistantHasLinkContext = Boolean(lastAssistantMsg?.linkContext?.link_id)
+  function showProLideresCopyMaterialButton(msg: Message, isLastAssistantMessage: boolean): boolean {
+    if (msg.role !== 'assistant' || msg.id === 'welcome' || !isLastAssistantMessage || loading) return false
+    if (!proLideresNoelChrome && !leaderMatrizUnifiedUi) return false
+    if (linkContextForMessage(msg)) return false
+    if (messageContainsQuizContent(msg.content, null)) return false
+    if (assistantContentIsProLideresQuizDraftNoOfficialLink(msg.content)) return false
+    return msg.content.trim().length >= 80
+  }
+
+  const ctxForLinkActions = lastAssistantMsg ? linkContextForMessage(lastAssistantMsg) : null
+  const lastAssistantHasLinkContext = Boolean(ctxForLinkActions?.link_id)
   const showEditarConcordoButtons =
     !disableYladaLinkEditor &&
+    !leaderMatrizUnifiedUi &&
     lastAssistantHasLinkContext &&
     !loading &&
     lastAssistantMsg &&
@@ -1114,7 +1140,7 @@ export default function NoelChat({
         const assistantMsg: Message = {
           id: `a-${Date.now()}`,
           role: 'assistant',
-          content: proLideresMemberNoelStoredContent(area, data.response, text, memberMatrizPure),
+          content: proLideresMemberNoelStoredContent(area, data.response, text, memberMatrizPure, leaderMatrizUnifiedUi),
           timestamp: new Date(),
           linkContext: data.lastLinkContext ?? undefined,
         }
@@ -1214,10 +1240,7 @@ export default function NoelChat({
             return null
           }
           const isLastAssistantMessage = lastAssistantMsg?.id === msg.id
-          const ctxForMarkdown =
-            msg.role === 'assistant'
-              ? msg.linkContext ?? (isLastAssistantMessage ? lastLinkContext : null)
-              : null
+          const ctxForMarkdown = msg.role === 'assistant' ? linkContextForMessage(msg) : null
           const quizSlimHref =
             msg.role === 'assistant' && proLideresNoelChrome
               ? ctxForMarkdown?.url ?? null
@@ -1243,12 +1266,12 @@ export default function NoelChat({
               : ''
           const assistantMarkdownForDisplay =
             msg.role === 'assistant' &&
-            isProLideresLeaderNoelApiPath(resolvedChatApi) &&
+            isProLideresLeaderNoelApiPath(resolvedChatApi, proLideresPapel) &&
             leaderAssistantOffersLinkObjetivoChoices(assistantMarkdownNormalized)
               ? leaderLinkObjetivoAssistantDisplayText(assistantMarkdownNormalized)
               : assistantMarkdownNormalized
           const showLeaderLinkObjetivoChips =
-            isProLideresLeaderNoelApiPath(resolvedChatApi) &&
+            isProLideresLeaderNoelApiPath(resolvedChatApi, proLideresPapel) &&
             msg.role === 'assistant' &&
             isLastAssistantMessage &&
             !loading &&
@@ -1434,6 +1457,23 @@ export default function NoelChat({
                       </div>
                     </div>
                   ) : null}
+                  {showProLideresCopyMaterialButton(msg, isLastAssistantMessage) ? (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const ok = await copyTextToClipboard(msg.content.trim())
+                        if (!ok) return
+                        setCopiedMaterialMsgId(msg.id)
+                        setTimeout(
+                          () => setCopiedMaterialMsgId((prev) => (prev === msg.id ? null : prev)),
+                          2000
+                        )
+                      }}
+                      className="mt-3 inline-flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-medium text-sky-800 hover:bg-sky-100 touch-manipulation"
+                    >
+                      {copiedMaterialMsgId === msg.id ? 'Material copiado!' : 'Copiar material'}
+                    </button>
+                  ) : null}
                   {lastAssistantMsg?.id === msg.id &&
                     msg.id !== 'welcome' &&
                     msg.id !== 'abertura-desafio' &&
@@ -1466,7 +1506,7 @@ export default function NoelChat({
                   )}
                   {msg.id !== 'welcome' && msg.role === 'assistant' && !disableYladaLinkEditor && (() => {
                     const isLastAssistantMessage = lastAssistantMsg?.id === msg.id
-                    const ctxForMessage = msg.linkContext ?? (isLastAssistantMessage ? lastLinkContext : null)
+                    const ctxForMessage = linkContextForMessage(msg)
                     const hasQuizContent = messageContainsQuizContent(msg.content, ctxForMessage)
                     if (!hasQuizContent) return null
                     const quizUrl =

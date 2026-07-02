@@ -144,6 +144,19 @@ const ATRAIR_POLISH = polishNoelAssistantMarkdownForChat(ATRAIR)
 assert('atrair: sem : no início da linha', !/^:/m.test(ATRAIR_POLISH))
 assert('atrair: parágrafos separados', ATRAIR_POLISH.includes('\n\nAo compartilhar seu link'))
 
+const FUNIL_COLONS = `: Explique como o funil Ylada é dividido em etapas.
+
+:
+
+Incentive a equipe a criar conteúdo relevante.
+
+:
+
+Após atrair o público, eduque com materiais.`
+const FUNIL_POLISH = polishNoelAssistantMarkdownForChat(FUNIL_COLONS)
+assert('funil: sem : no início da linha', !/^:/m.test(FUNIL_POLISH))
+assert('funil: sem linha só com dois-pontos', !/\n\s*:\s*\n/.test(FUNIL_POLISH))
+
 const WALL = `Para atrair mais clientes utilizando seu link, é fundamental criar uma estratégia que desperte interesse. Compartilhe o link em redes sociais com contexto. Peça permissão antes de mandar. Acompanhe quem responde em 24 horas.`
 const WALL_SPLIT = splitNoelDenseParagraphsForMobile(WALL)
 assert('mobile: quebra parede de texto', WALL_SPLIT.includes('\n\n'))

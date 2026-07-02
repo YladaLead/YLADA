@@ -81,6 +81,11 @@ export function resolveProLideresNoelUnifiedPapel(input: {
   return null
 }
 
+/** Bloco FORMATO para líder na matriz unificada (exportado para testes). */
+export function buildProLideresNoelLeaderMatrixFormatBlock(): string {
+  return buildLeaderMatrixFormatBlock()
+}
+
 /** Override de conduta: ENTREGA PRIMEIRO sobrepõe regras genéricas da matriz. */
 export function buildProLideresNoelLeaderConducaoOverrideBlock(): string {
   return `[PRO LÍDERES — RAMO LÍDER — PRIORIDADE SOBRE REGRAS GENÉRICAS]
@@ -104,9 +109,22 @@ function appendFocusNotes(focusNotes: string | null): string {
   return `- Notas de foco do líder (use com critério): ${focusNotes.trim().slice(0, 2000)}\n`
 }
 
+function buildLeaderMatrixFormatBlock(): string {
+  return `[FORMATO DE RESPOSTA — IGUAL MATRIZ YLADA]
+- Tom de **conversa estratégica**, não manual corporativo nem post de blog.
+- **Mobile-first:** parágrafos curtos (1 ideia por bloco); **linha em branco** entre ideias; nunca parede de texto.
+- **Emojis (0 a 2 por resposta, só se natural):** leve acolhimento ou destaque de passo — sem exagero.
+- Prosa direta; **proibido** blocos rígidos (Compartilhe com Contexto, Na prática, Mensagem pronta, Próximo passo, Texto para Postagem).
+- **Proibido** separadores \`---\` ou linhas horizontais entre parágrafos (exceto o bloco oficial ### Quiz e link anexado pelo sistema).
+- **Proibido** listas com rótulos **Nome da seção:** repetidos.
+- Pedido de **criar quiz/link**: ENTREGA PRIMEIRO (rascunho ou bloco oficial); no máximo 1–2 perguntas de refino no fim.
+- Link novo: cite **uma vez** com markdown [rótulo](url); botões do chat são a fonte de copiar/publicar/equipe.`
+}
+
 function appendLeaderExtras(params: BuildProLideresNoelContextBlockParams): string {
   const parts: string[] = []
   parts.push(buildProLideresNoelLeaderConducaoOverrideBlock())
+  parts.push('\n' + buildLeaderMatrixFormatBlock())
   if (params.catalogContext?.trim()) parts.push('\n' + params.catalogContext.trim())
   if (params.linksAtivosContext?.trim()) {
     parts.push('\n' + params.linksAtivosContext.trim())

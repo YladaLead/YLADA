@@ -47,12 +47,29 @@ export function isProLideresLeaderConversationalQuery(userMessage: string): bool
   ) {
     return true
   }
+  if (
+    /(funil|atrair|educar|qualificar|equipe|minha equipe|orientar|como usar|marketing ylada|ylada)/.test(
+      um
+    ) &&
+    !/(quiz|link|fluxo|gera|gerar|cria|criar|monta)/.test(um)
+  ) {
+    return true
+  }
+  if (
+    /(engajar|engajamento)/.test(um) &&
+    /(equipe|time|rede)/.test(um) &&
+    !/(quiz|link|fluxo)/.test(um)
+  ) {
+    return true
+  }
   return false
 }
 
 export function leaderConversationalSystemHint(): string {
   return `[TURNO CONVERSACIONAL]
-Resposta em **1–3 parágrafos** naturais. **Máximo ~3 pontos** com **linha em branco** entre cada um. **Sem** blocos ### Diagnóstico, Corte, Execução, Como conduzir ou Próximo passo. Feche com **uma** ação concreta.`
+Resposta em **prosa** (tom de conversa), não manual. **Mobile-first:** parágrafos curtos com linha em branco entre ideias.
+**Máximo ~3 pontos** — **sem** rótulos tipo **Entender o Funil:**, **Atração:**, **Educação:** ou listas numeradas com título em negrito por seção.
+Feche com **uma** ação concreta (no máximo uma pergunta curta). **Sem** repetir o pedido do líder como título.`
 }
 
 const EXAMPLE_MARKERS = [/na prática\s*:/i, /exemplo\s*:/i, /por exemplo/i] as const

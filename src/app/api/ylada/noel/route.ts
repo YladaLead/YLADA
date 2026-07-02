@@ -103,7 +103,15 @@ import { polishNoelAssistantMarkdownForChat } from '@/lib/noel-assistant-markdow
 import {
   loadProLideresNoelMatrixContext,
   loadProLideresNoelMatrixSession,
+  type ProLideresNoelMatrixSession,
 } from '@/lib/pro-lideres-noel-context-block'
+import {
+  buildProLideresLeaderMatrixSystemExtras,
+  finalizeProLideresLeaderMatrixAssistantText,
+  runProLideresLeaderMatrixLinkTurn,
+} from '@/lib/pro-lideres-leader-matrix-noel'
+import type { ProLideresNoelLastLinkContext } from '@/lib/pro-lideres-noel-link-generation'
+import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import {
   NOEL_CHAT_MODEL,
   isNoelProLideresMemberMatrizPureEnabled,
@@ -842,6 +850,8 @@ export async function POST(request: NextRequest) {
     // Flag pure ON: membro cai no MOTOR da matriz (mesmo Noel, só com o bloco de campo);
     // o acesso já é validado aqui e o freemium é pulado (paga o add-on). OFF: motor rígido dedicado.
     let plMemberMatrizPure = false
+    let plLeaderMatrixUnified = false
+    let plMatrixSession: ProLideresNoelMatrixSession | null = null
     if (supabaseAdmin && !isLabIsolado && !isSupportChannel) {
       try {
         const plSession = await loadProLideresNoelMatrixSession({
@@ -849,11 +859,21 @@ export async function POST(request: NextRequest) {
           user,
           request,
           message: message.trim(),
+          conversationHistory,
           area: typeof area === 'string' ? area : undefined,
           proLideresPapel: typeof proLideresPapel === 'string' ? proLideresPapel : undefined,
           locale,
         })
+        if (plSession?.papel === 'leader') {
+          const paid = await requireProLideresPaidContext(supabaseAdmin, user, {
+            allowUnpaidOwnerDraft: true,
+          })
+          if (!paid.ok) return paid.response
+          plLeaderMatrixUnified = true
+          plMatrixSession = plSession
+        }
         if (plSession?.papel === 'member') {
+          plMatrixSession = plSession
           const denied = await assertProLideresMemberMatrixChatAccess(supabaseAdmin, user, plSession)
           if (denied) return denied
           if (!process.env.OPENAI_API_KEY) {
@@ -890,7 +910,7 @@ export async function POST(request: NextRequest) {
     // Freemium: verificar limite de análises avançadas antes de chamar IA (mentor; Nina não consome cota)
     // Membro PL puro já passou pelo gate de acesso/assinatura do add-on → não consome cota freemium.
     const isPro = await hasYladaProPlan(user.id)
-    if (!isSupportChannel && !isPro && !plMemberMatrizPure) {
+    if (!isSupportChannel && !isPro && !plMemberMatrizPure && !plLeaderMatrixUnified) {
       const used = await getNoelUsageCount(user.id)
       if (used >= FREEMIUM_LIMITS.FREE_LIMIT_NOEL_ADVANCED_ANALYSES_PER_MONTH) {
         void recordFreemiumLimitHit(user.id, 'noel')
@@ -1138,8 +1158,8 @@ export async function POST(request: NextRequest) {
 
     // Pro Líderes unificado na matriz: líder sempre; membro quando na matriz pura (flag pure ON,
     // caiu do ramo acima). Com a flag OFF o membro já retornou pelo motor rígido dedicado.
-    let proLideresNoelContextBlock: string | null = null
-    if (supabaseAdmin && !isLabIsolado) {
+    let proLideresNoelContextBlock: string | null = plMatrixSession?.contextBlock ?? null
+    if (!proLideresNoelContextBlock && supabaseAdmin && !isLabIsolado) {
       try {
         proLideresNoelContextBlock = await loadProLideresNoelMatrixContext({
           supabase: supabaseAdmin,
@@ -1178,6 +1198,46 @@ export async function POST(request: NextRequest) {
     // acessava em TDZ (ReferenceError em runtime). Fix de bug pré-existente, sem mudar o valor.
     const requestedTitle = extractRequestedTitleFromMessage(message)
 
+    let shouldGenerateNewLink = false
+    let plLeaderLinkModeEnabled = linkModeEnabled
+    let plLeaderShouldGenerateNewLink = false
+    let plLeaderLastLinkContextForResponse: ProLideresNoelLastLinkContext | null = null
+    const primeiraConversaOuVaga = isPrimeiraConversaOuVaga(message, conversationHistory)
+
+    if (plLeaderMatrixUnified && plMatrixSession && supabaseAdmin) {
+      const plLastLink =
+        lastLinkContext &&
+        typeof lastLinkContext === 'object' &&
+        typeof lastLinkContext.flow_id === 'string'
+          ? (lastLinkContext as ProLideresNoelLastLinkContext)
+          : null
+      const leaderTurn = await runProLideresLeaderMatrixLinkTurn({
+        request,
+        message: message.trim(),
+        conversationHistory,
+        locale,
+        tenant: plMatrixSession.tenant,
+        sessionUserId: user.id,
+        supabase: supabaseAdmin,
+        lastLinkContext: plLastLink,
+      })
+      linkGeradoBlock = leaderTurn.linkGeradoBlock
+      lastLinkContextOut = leaderTurn.lastLinkContextOut
+      canonicalAppendix = leaderTurn.canonicalAppendix
+      plLeaderLastLinkContextForResponse = leaderTurn.lastLinkContextForResponse
+      plLeaderLinkModeEnabled = leaderTurn.linkModeEnabled
+      plLeaderShouldGenerateNewLink = leaderTurn.shouldGenerateNewLink
+      if (
+        YLADA_SEGMENT_CODES.includes(
+          leaderTurn.yladaSegment as (typeof YLADA_SEGMENT_CODES)[number]
+        )
+      ) {
+        validSegment = leaderTurn.yladaSegment
+      }
+      shouldGenerateNewLink = leaderTurn.shouldGenerateNewLink
+    }
+
+    if (!plLeaderMatrixUnified) {
     if (linkModeEnabled && lastLinkContext?.flow_id && lastLinkContext?.interpretacao && isIntencaoAjustarLink(message)) {
       try {
         const cookie = request.headers.get('cookie') || ''
@@ -1239,7 +1299,7 @@ export async function POST(request: NextRequest) {
 
     const blockAutoLinkForClientFollowUp = shouldBlockAutoLinkForClientFollowUp(message)
     const retrieveExistingLinkIntent = isIntencaoRecuperarLinkExistente(message)
-    const shouldGenerateNewLink =
+    shouldGenerateNewLink =
       linkModeEnabled &&
       (isIntencaoCriarLink(message, conversationHistory) || conducaoDeveGerar) &&
       !retrieveExistingLinkIntent
@@ -1328,7 +1388,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Primeira conversa guiada: mensagem vaga + perfil existe → gerar diagnóstico base automaticamente (demonstrar valor)
-    const primeiraConversaOuVaga = isPrimeiraConversaOuVaga(message, conversationHistory)
     if (!linkGeradoBlock && linkModeEnabled && !blockAutoLinkForClientFollowUp && primeiraConversaOuVaga && profileRow && (profileRow.profile_type || profileRow.profession)) {
       try {
         const cookie = request.headers.get('cookie') || ''
@@ -1382,13 +1441,14 @@ export async function POST(request: NextRequest) {
         console.warn('[/api/ylada/noel] primeira conversa interpret/generate:', e)
       }
     }
+    }
 
     // PRÉ-PASSO (Chat 8) — Recomendador da Biblioteca, ADVISORY, atrás de flag (OFF por padrão).
     // Lookup determinístico (zero LLM/DB) ANTES da geração: quando há um fluxo curado que casa,
     // injeta um bloco para o Noel CITAR a recomendação. A geração de hoje segue entregando o link.
     // Inerte com a flag OFF (byte-idêntico). NÃO toca classifyNoelResponseMode ("conteúdo > link").
     let recomendacaoCuradaBlock = ''
-    if (isNoelRecomendadorEnabled() && linkModeEnabled && shouldGenerateNewLink) {
+    if (isNoelRecomendadorEnabled() && linkModeEnabled && shouldGenerateNewLink && !plLeaderMatrixUnified) {
       try {
         const rec = recomendarParaNoel(
           construirCriterioNoel({
@@ -1648,8 +1708,20 @@ export async function POST(request: NextRequest) {
     }
     if (linkPerformanceBlock) parts.push(linkPerformanceBlock)
     if (recomendacaoCuradaBlock) parts.push(recomendacaoCuradaBlock)
-    if (linkGeradoBlock) parts.push(linkGeradoBlock)
-    if (linkGeradoBlock && lastLinkContextOut?.url) {
+    if (plLeaderMatrixUnified) {
+      for (const extra of buildProLideresLeaderMatrixSystemExtras({
+        message: message.trim(),
+        conversationHistory,
+        linkGeradoBlock,
+        linkModeEnabled: plLeaderLinkModeEnabled,
+        shouldGenerateNewLink: plLeaderShouldGenerateNewLink,
+      })) {
+        parts.push('\n' + extra)
+      }
+    } else if (linkGeradoBlock) {
+      parts.push(linkGeradoBlock)
+    }
+    if (!plLeaderMatrixUnified && linkGeradoBlock && lastLinkContextOut?.url) {
       const url = lastLinkContextOut.url
       parts.push(
         '\n[INCENTIVO MÚLTIPLOS DIAGNÓSTICOS]\nApós entregar o link, pode incentivar experimentação: "Muitos profissionais também testam variações de diagnóstico para ver qual gera mais interesse. Posso criar outra versão focada em: sintomas, hábitos, objetivos ou resultados desejados." Isso incentiva criação de múltiplos diagnósticos e compartilhamento.'
@@ -1658,17 +1730,17 @@ export async function POST(request: NextRequest) {
         `\n🚨 ALINHAMENTO COM O BLOCO OFICIAL:\nO sistema anexará ao final **### Quiz e link (oficial — igual ao link público e à edição)** com as perguntas exatas e [Acesse seu quiz](${url}). Sua mensagem deve ser só introdução (sem listar perguntas, sem outro link markdown).`
       )
     }
-    if (primeiraConversaOuVaga && linkGeradoBlock) {
+    if (!plLeaderMatrixUnified && primeiraConversaOuVaga && linkGeradoBlock) {
       parts.push(
         '\n[PRIMEIRA CONVERSA GUIADA — COM LINK]\nO profissional está começando. Mensagem curta: boas-vindas, tema, que o bloco oficial abaixo traz o quiz idêntico ao link. Objetivo: "já tenho algo para usar" em segundos.'
       )
     }
-    if (primeiraConversaOuVaga && !linkGeradoBlock) {
+    if (!plLeaderMatrixUnified && primeiraConversaOuVaga && !linkGeradoBlock) {
       parts.push(
         '\n[PRIMEIRA CONVERSA OU MENSAGEM VAGA — SEM LINK]\nO profissional está começando ou não sabe por onde começar. NÃO apenas explique o sistema — mostre o caminho prático. Se o perfil estiver incompleto: diga para preencher em "Perfil empresarial" (menu ao lado) e que em um minuto você cria um diagnóstico para ele testar. Se o perfil já existir: diga que pode criar um diagnóstico agora e sugira que ele peça com o tema, ex.: "Quero um diagnóstico para captar clientes" (ou "captar pacientes" se for médico), e aí você gera o link. Objetivo: demonstrar valor, não só explicar.'
       )
     }
-    if (linkModeEnabled && shouldGenerateNewLink && !linkGeradoBlock) {
+    if (!plLeaderMatrixUnified && linkModeEnabled && shouldGenerateNewLink && !linkGeradoBlock) {
       parts.push(
         '\n[PEDIDO DE LINK SEM GERAÇÃO]\nO profissional pediu link/quiz/formulário/fluxo mas o sistema não gerou o link nesta resposta. NUNCA invente um link nem diga "Clique aqui", "Copiar link" ou "link gerado" sem URL real fornecido pelo sistema. O link só existe quando o backend anexar o bloco oficial. Faça assim: (1) Explique brevemente que nesta rodada o link automático não saiu (perfil, tema ou limite técnico). (2) Ofereça o **texto completo** do quiz/formulário no chat (perguntas + opções + CTA) para ela usar já. (3) Diga que, para **link único YLADA**, ela pode repetir o pedido com tema explícito, ex.: "Quero um quiz para [tema]" ou "Cria um formulário para captar clientes de estética". (4) Se ela precisar de **URL fora da YLADA** (Google Forms), seja honesto: você não hospeda; ela cola o roteiro lá — reforce que é rápido e que ela consegue.'
       )
@@ -1726,7 +1798,8 @@ export async function POST(request: NextRequest) {
     // Limpar linhas vazias duplicadas após remoção
     responseText = responseText.replace(/\n{3,}/g, '\n\n')
     
-    // DEBUG: Log após remoção de marcações internas (antes do pós-processamento de links)
+    // DEBUG + pós-processamento de links da matriz — líder unificado usa finalizeProLideresLeaderMatrixAssistantText.
+    if (!plLeaderMatrixUnified) {
     if (linkGeradoBlock && lastLinkContextOut?.url && responseText.includes('Copiar link')) {
       const debugTitle = lastLinkContextOut.title || 'Acesse seu quiz'
       const debugUrl = lastLinkContextOut.url
@@ -2031,8 +2104,19 @@ export async function POST(request: NextRequest) {
       console.warn('[/api/ylada/noel] Erro no pós-processamento de links:', postProcessError)
       // Continuar mesmo se o pós-processamento falhar
     }
+    }
 
-    if (linkModeEnabled && canonicalAppendix && lastLinkContextOut?.url) {
+    if (plLeaderMatrixUnified) {
+      responseText = finalizeProLideresLeaderMatrixAssistantText({
+        text: responseText,
+        message: message.trim(),
+        conversationHistory,
+        linkModeEnabled: plLeaderLinkModeEnabled,
+        canonicalAppendix,
+        lastLinkContextForResponse:
+          plLeaderLastLinkContextForResponse ?? lastLinkContextOut ?? null,
+      })
+    } else if (linkModeEnabled && canonicalAppendix && lastLinkContextOut?.url) {
       // Vocabulário: na condução (porta), posiciona como "diagnóstico" (autoridade), não "quiz".
       const appendixVocab: 'quiz' | 'diagnostico' = conducaoDeveGerar ? 'diagnostico' : 'quiz'
       const blocoNome = appendixVocab === 'diagnostico' ? 'Diagnóstico e link (oficial)' : 'Quiz e link (oficial)'
@@ -2115,15 +2199,19 @@ export async function POST(request: NextRequest) {
       }).catch((e) => console.warn('[/api/ylada/noel] saveConversationDiagnosis:', e))
     }
 
-    if (plMemberMatrizPure && responseText) {
+    if (plMemberMatrizPure && !plLeaderMatrixUnified && responseText) {
       responseText = polishNoelAssistantMarkdownForChat(responseText)
     }
+
+    const lastLinkContextResponse = plLeaderMatrixUnified
+      ? plLeaderLastLinkContextForResponse ?? lastLinkContextOut ?? null
+      : lastLinkContextOut ?? null
 
     return NextResponse.json({
       response: responseText,
       segment: validSegment,
       area: validSegment,
-      lastLinkContext: lastLinkContextOut ?? null,
+      lastLinkContext: lastLinkContextResponse,
     })
   } catch (error: unknown) {
     console.error('[/api/ylada/noel]', error)

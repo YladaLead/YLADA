@@ -116,11 +116,33 @@ const NOEL_RIGID_SECTION_LABELS = [
   'Link para enviar',
   'Próximo passo',
   'Legenda curta',
+  'Entender o Funil',
+  'Atração',
+  'Educação',
+  'Qualificação',
+  'Análise e Ajustes',
+  'Treinamento e Suporte',
+  'Celebrar Resultados',
+  'Defina Metas Claras',
+  'Reunião de Alinhamento',
+  'Reconhecimento',
+  'Feedback Contínuo',
+  'Atividades de Team Building',
+  'Desenvolvimento Pessoal',
 ] as const
 
 /**
  * Remove rótulos de template (**Texto para Postagem:** etc.) que deixam a resposta “montada”.
  */
+/** Remove **1. Título:** / **Objetivo:** genéricos que o modelo usa em respostas “manual”. */
+function flattenNoelGenericBoldSectionLabels(text: string): string {
+  let t = text.replace(/\r\n/g, '\n')
+  t = t.replace(/^\s*\*\*\d+\.\s*[^*\n]{1,120}:?\*\*\s*$/gim, '')
+  t = t.replace(/^\s*\*\*[^*\n]{2,120}:?\*\*\s*$/gim, '')
+  t = t.replace(/^\s*\*\*[^*\n]{2,120}:?\*\*\s+/gm, '')
+  return t
+}
+
 export function flattenNoelRigidSectionLabels(text: string): string {
   let t = text.replace(/\r\n/g, '\n')
   for (const label of NOEL_RIGID_SECTION_LABELS) {
@@ -130,7 +152,8 @@ export function flattenNoelRigidSectionLabels(text: string): string {
     t = t.replace(new RegExp(`^\\s*${esc}\\s*:\\s*$`, 'gim'), '')
     t = t.replace(new RegExp(`^${esc}\\s*:\\s*`, 'gim'), '')
   }
-  return t.replace(/\n{3,}/g, '\n\n').trim()
+  t = flattenNoelGenericBoldSectionLabels(t)
+  return cleanupOrphanMarkdownSectionColons(t.replace(/\n{3,}/g, '\n\n').trim())
 }
 
 /**
@@ -181,7 +204,14 @@ export function stripNoelTemplateInstructionLines(text: string): string {
 
 /** Sobra de `:` quando o rótulo em negrito foi removido (ex.: `: Publique conteúdos…`). */
 export function cleanupOrphanMarkdownSectionColons(text: string): string {
-  return text.replace(/^\s*[:：]\s*/gm, '')
+  const lines = text.replace(/\r\n/g, '\n').split('\n')
+  const cleaned = lines
+    .map((line) => line.replace(/^\s*[:：]\s*/, ''))
+    .filter((line) => {
+      const tr = line.trim()
+      return tr !== ':' && tr !== '：'
+    })
+  return cleaned.join('\n').replace(/\n{3,}/g, '\n\n').trim()
 }
 
 const COLON_BULLET_LINE = /^\s*[:：]\s*(.+)$/
@@ -196,6 +226,8 @@ export function reflowNoelColonBulletLines(text: string): string {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
+    const trimmed = line.trim()
+    if (trimmed === ':' || trimmed === '：') continue
     const colonItem = line.match(COLON_BULLET_LINE)
     if (colonItem) {
       const body = colonItem[1].trim()
@@ -323,6 +355,10 @@ export function polishNoelAssistantMarkdownForChat(raw: string): string {
   t = stripNoelBracketPlaceholders(t)
   t = stripNoelTemplateInstructionLines(t)
   t = cleanupOrphanMarkdownSectionColons(t)
+  if (!quizPreview) {
+    t = t.replace(/^\s*#{1,3}\s*Pr[oó]ximos?\s+passos\b[^\n]*\n+/gim, '')
+    t = t.replace(/^\s*\*\*Pr[oó]ximos?\s+passos:?\*\*\s*$/gim, '')
+  }
   t = ensureProseParagraphBreaks(t)
   t = splitNoelDenseParagraphsForMobile(t)
   t = t.replace(/\n{3,}/g, '\n\n').trim()
