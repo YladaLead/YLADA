@@ -10,6 +10,7 @@ import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 import { PRO_LIDERES_MEMBER_BASE_PATH } from '@/config/pro-lideres-menu'
 import { ProLideresMembroAccessExpiryBanner } from './ProLideresMembroAccessExpiryBanner'
 import { ProLideresInviteQuotaPackOverdueBanner } from './ProLideresInviteQuotaPackOverdueBanner'
+import { ProLideresTeamSubscriptionLapsedBanner } from './ProLideresTeamSubscriptionLapsedBanner'
 
 const YLADA_LOGO = YLADA_OG_FALLBACK_LOGO_PATH
 
@@ -76,6 +77,7 @@ export default function ProLideresAreaShell({
         {isMemberAreaShell && !teamViewPreview && memberAccessExpiry?.showBanner ? (
           <ProLideresMembroAccessExpiryBanner ui={memberAccessExpiry} />
         ) : null}
+        <ProLideresTeamSubscriptionLapsedBanner />
         <ProLideresInviteQuotaPackOverdueBanner />
         {/* Única barra de marca: mobile-first (44px mín. toque no menu) */}
         <header className="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-2 border-b border-gray-200 bg-white px-3 sm:gap-3 sm:px-4 lg:px-6">

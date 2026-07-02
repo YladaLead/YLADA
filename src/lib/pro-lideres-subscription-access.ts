@@ -9,10 +9,43 @@ import {
   proLideresPainelDevBypassEnabled,
 } from '@/lib/pro-lideres-server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { hasActiveSubscription, type SubscriptionArea } from '@/lib/subscription-helpers'
 import { evaluateInviteQuotaPacksAccess } from '@/lib/pro-lideres-invite-quota-packs'
+import {
+  isProLideresTeamSubscriptionEffectivelyActive,
+  type ProLideresTeamSubscriptionRow,
+} from '@/lib/pro-lideres-team-subscription-period'
+import type { SubscriptionArea } from '@/lib/subscription-helpers'
 
 const PRO_LIDERES_TEAM_AREA: SubscriptionArea = 'pro_lideres_team'
+
+/** Lê a assinatura equipe do dono (sem filtrar por `current_period_end`). */
+export async function fetchOwnerProLideresTeamSubscription(
+  supabase: SupabaseClient,
+  ownerUserId: string
+): Promise<ProLideresTeamSubscriptionRow | null> {
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('status, current_period_end, stripe_subscription_id, plan_type')
+    .eq('user_id', ownerUserId)
+    .eq('area', PRO_LIDERES_TEAM_AREA)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[fetchOwnerProLideresTeamSubscription]', error.message)
+    return null
+  }
+  return (data as ProLideresTeamSubscriptionRow | null) ?? null
+}
+
+async function ownerProLideresTeamSubscriptionAllowsAccess(
+  supabase: SupabaseClient,
+  ownerUserId: string
+): Promise<boolean> {
+  const sub = await fetchOwnerProLideresTeamSubscription(supabase, ownerUserId)
+  return isProLideresTeamSubscriptionEffectivelyActive(sub)
+}
 
 export type ProLideresAccessBlockReason =
   | null
@@ -43,7 +76,7 @@ export async function resolveProLideresTeamAccessStatus(
   }
 
   const ownerId = ctx.tenant.owner_user_id
-  const baseOk = await hasActiveSubscription(ownerId, PRO_LIDERES_TEAM_AREA)
+  const baseOk = await ownerProLideresTeamSubscriptionAllowsAccess(supabase, ownerId)
   if (!baseOk) {
     return { allowed: false, reason: 'base_subscription', overduePackIds: [] }
   }
@@ -70,7 +103,8 @@ export async function proLideresTeamSubscriptionAllowsAccess(
 }
 
 export async function ownerHasProLideresTeamSubscription(ownerUserId: string): Promise<boolean> {
-  return hasActiveSubscription(ownerUserId, PRO_LIDERES_TEAM_AREA)
+  if (!supabaseAdmin) return false
+  return ownerProLideresTeamSubscriptionAllowsAccess(supabaseAdmin, ownerUserId)
 }
 
 export function proLideresSubscriptionRequiredResponse(reason?: ProLideresAccessBlockReason): NextResponse {

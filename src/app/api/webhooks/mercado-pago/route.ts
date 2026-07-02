@@ -19,6 +19,10 @@ import {
 } from '@/lib/pro-lideres-invite-quota-mp'
 import { tryHandleProLideresInviteQuotaPackPreapprovalWebhook } from '@/lib/pro-lideres-invite-quota-packs'
 import {
+  computeProLideresTeamPeriodEnd,
+  extendProLideresTeamMonthlyPeriodEnd,
+} from '@/lib/pro-lideres-team-subscription-period'
+import {
   extendProEsteticaCapilarConsultAccess,
   isProEsteticaCapilarSubscriptionArea,
   PRO_ESTETICA_CAPILAR_MP_AREA_SLUG,
@@ -868,7 +872,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
       } else {
         expiresAt.setMonth(expiresAt.getMonth() + 1)
       }
-      
+
       // 🛡️ VALIDAÇÃO: Verificar que data calculada é razoável
       const daysUntilExpiry = Math.floor((expiresAt.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
       if (planType === 'monthly' && daysUntilExpiry > 60) {
@@ -880,8 +884,15 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
         expiresAt = new Date()
         expiresAt.setMonth(expiresAt.getMonth() + 12)
       }
-      
+
       console.log('🆕 Nova assinatura! Data de vencimento:', expiresAt.toISOString())
+    }
+
+    if (area === 'pro_lideres_team' && planType === 'monthly') {
+      expiresAt =
+        existingSubscription?.current_period_end != null
+          ? extendProLideresTeamMonthlyPeriodEnd(existingSubscription.current_period_end, new Date())
+          : computeProLideresTeamPeriodEnd({ planType: 'monthly', now: new Date() })
     }
 
     // Verificar se é PIX ou Boleto (para assinaturas mensais manuais, marcar reminder_sent como false)
@@ -1558,14 +1569,26 @@ async function handleSubscriptionEvent(
 
            // Calcular datas de período baseado no tipo de plano
            const now = new Date()
-           const periodEnd = new Date()
-           if (planType === 'monthly') {
-             periodEnd.setMonth(periodEnd.getMonth() + 1) // Próximo mês
-           } else if (planType === 'annual') {
-             periodEnd.setMonth(periodEnd.getMonth() + 12) // Próximo ano
-           } else {
-             periodEnd.setMonth(periodEnd.getMonth() + 1) // Fallback
-           }
+           const nextPaymentDate =
+             typeof fullData.next_payment_date === 'string' ? fullData.next_payment_date : null
+           const periodEnd =
+             area === 'pro_lideres_team'
+               ? computeProLideresTeamPeriodEnd({
+                   planType,
+                   now,
+                   nextPaymentDateIso: nextPaymentDate,
+                 })
+               : (() => {
+                   const end = new Date(now.getTime())
+                   if (planType === 'monthly') {
+                     end.setMonth(end.getMonth() + 1)
+                   } else if (planType === 'annual') {
+                     end.setMonth(end.getMonth() + 12)
+                   } else {
+                     end.setMonth(end.getMonth() + 1)
+                   }
+                   return end
+                 })()
 
     // Criar ou atualizar assinatura no banco
     const subscriptionIdDb = `mp_sub_${subscriptionId}`
