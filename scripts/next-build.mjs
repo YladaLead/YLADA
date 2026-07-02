@@ -6,8 +6,8 @@
 import { spawnSync } from 'node:child_process'
 
 const isVercel = process.env.VERCEL === '1'
-// 3 GB heap: 4 GB + webpack nativo ainda estourava 8 GB com o app maior (jul/2026).
-const heapMb = isVercel ? '3072' : '8192'
+// 4 GB heap: abaixo disso o next build OOM no compile; acima + webpack nativo estoura 8 GB na Vercel.
+const heapMb = isVercel ? '4096' : '8192'
 
 const result = spawnSync('npx', ['next', 'build'], {
   stdio: 'inherit',
