@@ -1,5 +1,5 @@
-import PerfilEmpresarialView from '@/components/perfil/PerfilEmpresarialView'
+import NoelPerfilMirror from '@/components/perfil/NoelPerfilMirror'
 
 export default function MatrixPerfilPage() {
-  return <PerfilEmpresarialView areaCodigo="ylada" areaLabel="YLADA" />
+  return <NoelPerfilMirror areaCodigo="ylada" areaLabel="YLADA" />
 }

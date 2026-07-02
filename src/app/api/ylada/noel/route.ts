@@ -13,6 +13,7 @@ import { YLADA_SEGMENT_CODES } from '@/config/ylada-areas'
 import { supabaseAdmin } from '@/lib/supabase'
 import { getNoelJoiasLinhaPlaybookBlock } from '@/config/noel-joias-playbook'
 import { buildProfileResumo, type YladaNoelProfileRow } from '@/lib/ylada-profile-resumo'
+import { atualizarPerfilDoChat } from '@/lib/ylada/profile-updater-from-chat'
 import {
   evaluateNoelProfileGate,
   loadNoelProfileGateContext,
@@ -111,6 +112,22 @@ import {
   runProLideresLeaderMatrixLinkTurn,
 } from '@/lib/pro-lideres-leader-matrix-noel'
 import type { ProLideresNoelLastLinkContext } from '@/lib/pro-lideres-noel-link-generation'
+import {
+  isNoelPlBriefGateEnabled,
+  isVagueCreateRequest,
+  PERGUNTA_BRIEF_PROLIDERES_FIXA,
+} from '@/lib/pro-lideres-noel-link-generation'
+import {
+  construirBlocoPrincipiosConviccao,
+  construirBlocoFormatoCurto,
+  FORMATO_LEMBRETE_CURTO,
+  isNoelPrincipiosConviccaoEnabled,
+} from '@/lib/pro-lideres-noel-principios-conviccao'
+import {
+  isNoelPlMemberDivulgacaoEnabled,
+  isDivulgacaoIntent,
+  construirBlocoDivulgacaoParaPrompt,
+} from '@/lib/pro-lideres-member-divulgacao'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import {
   NOEL_CHAT_MODEL,
@@ -1199,6 +1216,9 @@ export async function POST(request: NextRequest) {
     const requestedTitle = extractRequestedTitleFromMessage(message)
 
     let shouldGenerateNewLink = false
+    // Membro Pró Líderes (gated): declarados aqui pra ficarem no escopo do prompt/completion adiante.
+    let memberNeedsBrief = false
+    let memberDivulgacao = false
     let plLeaderLinkModeEnabled = linkModeEnabled
     let plLeaderShouldGenerateNewLink = false
     let plLeaderLastLinkContextForResponse: ProLideresNoelLastLinkContext | null = null
@@ -1303,6 +1323,19 @@ export async function POST(request: NextRequest) {
       linkModeEnabled &&
       (isIntencaoCriarLink(message, conversationHistory) || conducaoDeveGerar) &&
       !retrieveExistingLinkIntent
+    // Membro Pró Líderes (gated por plMemberMatrizPure — usuário matriz de verdade não entra):
+    // pedido vago → pede brief; pedido de divulgar → ajuda a espalhar. Nos dois, NÃO gera quiz.
+    memberNeedsBrief =
+      plMemberMatrizPure &&
+      isNoelPlBriefGateEnabled() &&
+      isVagueCreateRequest(message, conversationHistory)
+    memberDivulgacao =
+      plMemberMatrizPure &&
+      isNoelPlMemberDivulgacaoEnabled() &&
+      isDivulgacaoIntent(message)
+    if (memberNeedsBrief || memberDivulgacao) {
+      shouldGenerateNewLink = false
+    }
     // Passo 4: na condução, o `message` é só "pode gerar"/o WhatsApp — cego ao caso. Costuramos o
     // desafio + as respostas de nicho/foco da conversa pra o interpret gerar o diagnóstico SOB MEDIDA.
     const interpretTextForGeneration =
@@ -1534,6 +1567,14 @@ export async function POST(request: NextRequest) {
     ]
     if (proLideresNoelContextBlock) {
       parts.push('\n' + proLideresNoelContextBlock)
+    }
+    // Membro Pró Líderes (gated): princípios + voz curta + (se for pedido de divulgar) o bloco de distribuição.
+    if (plMemberMatrizPure && isNoelPrincipiosConviccaoEnabled()) {
+      parts.push('\n' + construirBlocoPrincipiosConviccao())
+      parts.push('\n' + construirBlocoFormatoCurto())
+    }
+    if (memberDivulgacao) {
+      parts.push('\n' + construirBlocoDivulgacaoParaPrompt())
     }
     parts.push(
       `\n[MODO DA RESPOSTA — CAMADA 0]\nModo atual detectado: ${noelResponseMode}.\n- modo_link: pode criar/ajustar link, quiz e anexar bloco oficial.\n- modo_mentor: foco em direção estratégica; NÃO gerar/anexar link.\n- modo_copy: foco em texto/script/CTA; NÃO gerar/anexar link.\n- modo_execucao: foco em ação prática e rotina; NÃO gerar/anexar link.\n- modo_espelho: Etapa 1 (convicção). Conduz o profissional a ver o próprio ciclo e dar um primeiro passo; NUNCA gera link/quiz/copy.`
@@ -1769,16 +1810,29 @@ export async function POST(request: NextRequest) {
           content: m.content,
         }))
 
+    // Membro Pró Líderes (gated): pedido vago de criar → resposta FIXA de brief, sem chamar o modelo.
+    if (memberNeedsBrief) {
+      return NextResponse.json({
+        response: PERGUNTA_BRIEF_PROLIDERES_FIXA,
+        segment: validSegment,
+        area: validSegment,
+        lastLinkContext: null,
+      })
+    }
+
+    const memberVozCurta = plMemberMatrizPure && isNoelPrincipiosConviccaoEnabled()
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: 'system', content: systemContent },
       ...historyWithWarning,
+      // Membro: lembrete de formato encostado no turno do usuário (segura a voz curta com histórico cheio).
+      ...(memberVozCurta ? [{ role: 'system' as const, content: FORMATO_LEMBRETE_CURTO }] : []),
       { role: 'user', content: message.trim() },
     ]
 
     const completion = await openai.chat.completions.create({
       model: NOEL_CHAT_MODEL,
       messages,
-      max_tokens: 1024,
+      max_tokens: memberVozCurta ? 700 : 1024,
       temperature: 0.7,
     })
 
@@ -2206,6 +2260,18 @@ export async function POST(request: NextRequest) {
     const lastLinkContextResponse = plLeaderMatrixUnified
       ? plLeaderLastLinkContextForResponse ?? lastLinkContextOut ?? null
       : lastLinkContextOut ?? null
+
+    // Atualiza o perfil empresarial de forma silenciosa (a cada 5 turnos do usuário).
+    // Fire-and-forget: não bloqueia a resposta, falha silenciosamente.
+    if (supabaseAdmin && user && message) {
+      void atualizarPerfilDoChat({
+        userId: user.id,
+        segment: validSegment,
+        history: conversationHistory,
+        currentMessage: message,
+        supabase: supabaseAdmin,
+      }).catch(() => {})
+    }
 
     return NextResponse.json({
       response: responseText,
