@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import YladaAreaShell from './YladaAreaShell'
 import { getYladaAreaPathPrefix, getYladaLeadsPath } from '@/config/ylada-areas'
-import { YLADA_PRO_UPGRADE_PITCH } from '@/config/freemium-limits'
-import { useIsAndroidTWA } from '@/lib/native-app'
 
 type DashboardData = {
   respostas_hoje: number
@@ -20,13 +18,6 @@ type DashboardData = {
     conversas: number
   } | null
   respostas_mes?: number
-  freemium?: {
-    is_pro: boolean
-    whatsapp_clicks_mes?: number
-    limite_whatsapp_clicks?: number
-    noel_analises_mes?: number
-    limite_noel_analises?: number
-  }
 }
 
 type FunnelData = { views: number; completes: number; clicks: number }
@@ -38,14 +29,13 @@ type Dica = {
   noelMsg: string
 }
 
-/** Gera até 2 dicas operacionais determinísticas — zero LLM, sem chamada ao servidor. */
+/** Gera até 2 dicas operacionais determinísticas — zero LLM. */
 function gerarDicas(funnel: FunnelData, titulo?: string | null): Dica[] {
   const dicas: Dica[] = []
   const effectiveViews = Math.max(funnel.views, funnel.completes)
   const taxaResposta = effectiveViews > 0 ? funnel.completes / effectiveViews : null
   const taxaClique = funnel.completes > 0 ? funnel.clicks / funnel.completes : null
 
-  // Ainda sem alcance
   if (effectiveViews < 3) {
     dicas.push({
       icon: '📤',
@@ -56,19 +46,17 @@ function gerarDicas(funnel: FunnelData, titulo?: string | null): Dica[] {
     })
   }
 
-  // Muitas aberturas mas baixa conclusão
   if (effectiveViews >= 5 && taxaResposta !== null && taxaResposta < 0.4) {
     dicas.push({
       icon: '✏️',
       titulo: 'Pessoas abrem mas poucas respondem',
       corpo: `${effectiveViews} aberturas, ${funnel.completes} respostas. Algo trava no meio. Revise as primeiras perguntas: estão longas, técnicas demais ou pouco relacionadas com a dor que motivou o clique?`,
       noelMsg: titulo
-        ? `Meu diagnóstico "${titulo}" tem ${effectiveViews} aberturas mas só ${funnel.completes} respostas. Como posso melhorar a taxa de conclusão?`
+        ? `Meu diagnóstico "${titulo}" tem ${effectiveViews} aberturas mas só ${funnel.completes} respostas. Como melhorar a taxa de conclusão?`
         : `Meu diagnóstico tem ${effectiveViews} aberturas mas só ${funnel.completes} respostas. Como melhorar a taxa de conclusão?`,
     })
   }
 
-  // Boas respostas mas baixo clique no WhatsApp
   if (funnel.completes >= 3 && taxaClique !== null && taxaClique < 0.25) {
     dicas.push({
       icon: '💬',
@@ -80,7 +68,6 @@ function gerarDicas(funnel: FunnelData, titulo?: string | null): Dica[] {
     })
   }
 
-  // Convertendo bem — reforço positivo + próximo passo
   if (funnel.completes >= 5 && taxaClique !== null && taxaClique >= 0.3) {
     dicas.push({
       icon: '🚀',
@@ -107,8 +94,6 @@ export default function PainelPageContent({
   const [data, setData] = useState<DashboardData | null>(null)
   const [funnel, setFunnel] = useState<FunnelData>({ views: 0, completes: 0, clicks: 0 })
   const [loading, setLoading] = useState(true)
-  // Android (TWA): app B2B só-login, sem venda dentro — esconde o pitch de upgrade.
-  const isTWA = useIsAndroidTWA()
 
   useEffect(() => {
     let cancelled = false
@@ -127,7 +112,7 @@ export default function PainelPageContent({
           if (metricsJson?.funnel) setFunnel(metricsJson.funnel as FunnelData)
         }
       } catch {
-        // silently fall through — UI renders with zeroes
+        // renderiza com zeros
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -143,12 +128,8 @@ export default function PainelPageContent({
     <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
       <div className="max-w-2xl space-y-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
-            📊 Resultados
-          </h1>
-          <p className="text-sm text-gray-600">
-            O que está acontecendo com seus diagnósticos.
-          </p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">📊 Resultados</h1>
+          <p className="text-sm text-gray-600">O que está acontecendo com seus diagnósticos.</p>
         </div>
 
         {loading ? (
@@ -157,100 +138,7 @@ export default function PainelPageContent({
           </div>
         ) : (
           <>
-            {/* Freemium: aviso progressivo para usuários Free. No app iOS o CTA
-                de upgrade leva ao paywall IAP (IAP-tampão); no Android (TWA) é
-                escondido — app B2B só-login, sem venda dentro. */}
-            {data?.freemium && !data.freemium.is_pro && !isTWA && (
-              <section className="rounded-xl border border-sky-200 bg-sky-50/80 p-5">
-                <p className="text-sm font-medium text-gray-900 mb-1">
-                  {data.freemium.whatsapp_clicks_mes ?? 0}/{data.freemium.limite_whatsapp_clicks ?? 10} contatos no WhatsApp este mês
-                </p>
-                {typeof data.freemium.noel_analises_mes === 'number' && (
-                  <p className="text-sm text-gray-700 mb-2">
-                    {data.freemium.noel_analises_mes}/{data.freemium.limite_noel_analises ?? 10} análises do Noel
-                  </p>
-                )}
-                <p className="text-xs text-gray-600 mb-2">
-                  Cada contato é uma pessoa que clicou no botão e te contactou no WhatsApp.
-                </p>
-                {(data.freemium.whatsapp_clicks_mes ?? 0) >= (data.freemium.limite_whatsapp_clicks ?? 10) ? (
-                  <>
-                    <div className="rounded-lg border border-amber-200 bg-amber-50/90 p-3 mb-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-900/80 mb-1.5">
-                        Limite do mês utilizado
-                      </p>
-                      <p className="text-sm text-amber-950 leading-relaxed">
-                        Seus contatos pelo WhatsApp neste mês chegaram ao teto do plano gratuito. No próximo ciclo o contador renova sozinho.
-                      </p>
-                    </div>
-                    <div className="rounded-lg border border-sky-200 bg-gradient-to-br from-sky-50 to-white p-3 mb-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-sky-800 mb-1.5">
-                        Plano Pro
-                      </p>
-                      <p className="text-sm text-slate-800 leading-relaxed">{YLADA_PRO_UPGRADE_PITCH}</p>
-                    </div>
-                  </>
-                ) : (data.freemium.whatsapp_clicks_mes ?? 0) >= 7 ? (
-                  <p className="text-sm text-gray-700 mb-3">
-                    Seu diagnóstico está gerando contatos. Faltam {(data.freemium.limite_whatsapp_clicks ?? 10) - (data.freemium.whatsapp_clicks_mes ?? 0)} para o limite gratuito.
-                  </p>
-                ) : (data.freemium.whatsapp_clicks_mes ?? 0) >= 5 ? (
-                  <p className="text-sm text-gray-700 mb-3">
-                    {(data.freemium.whatsapp_clicks_mes ?? 0)} pessoas já te contactaram no WhatsApp este mês.
-                  </p>
-                ) : (
-                  <p className="text-sm text-gray-700 mb-3">
-                    Seu diagnóstico está gerando resultado.
-                  </p>
-                )}
-                <Link
-                  href="/pt/precos"
-                  className="inline-flex w-full sm:w-auto justify-center items-center gap-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-sky-600/20 hover:from-sky-700 hover:to-sky-800 transition-all"
-                >
-                  Quero o plano Pro
-                </Link>
-                {(data.freemium.whatsapp_clicks_mes ?? 0) >= (data.freemium.limite_whatsapp_clicks ?? 10) ? (
-                  <p className="text-xs text-slate-500 mt-2">Veja preços e ative em um clique.</p>
-                ) : null}
-              </section>
-            )}
-
-            {/* Atividade de hoje */}
-            <section className="rounded-xl border border-sky-100 bg-sky-50/60 p-5">
-              <h2 className="text-sm font-semibold text-gray-800 mb-4">Atividade de hoje</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl" aria-hidden>👩</span>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {data?.respostas_hoje ?? 0}
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      {(data?.respostas_hoje ?? 0) === 1 ? 'respondeu' : 'responderam'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl" aria-hidden>💬</span>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {data?.conversas_hoje ?? 0}
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      {(data?.conversas_hoje ?? 0) === 1 ? 'conversa' : 'conversas'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <Link
-                href={`${prefix}/${getYladaLeadsPath(areaCodigo)}`}
-                className="mt-4 inline-block text-sm font-medium text-sky-600 hover:text-sky-800"
-              >
-                Ver leads →
-              </Link>
-            </section>
-
-            {/* Funil acumulado (todos os links) */}
+            {/* Funil acumulado */}
             <section className="rounded-xl border border-gray-200 bg-white p-5">
               <h2 className="text-sm font-semibold text-gray-900 mb-1">Funil dos seus diagnósticos</h2>
               <p className="text-xs text-gray-500 mb-4">Total acumulado em todos os links ativos.</p>
@@ -265,7 +153,7 @@ export default function PainelPageContent({
                   <span className="font-medium text-gray-700">
                     {Math.round((funnel.completes / effectiveViews) * 100)}%
                   </span>
-                  {funnel.clicks > 0 && funnel.completes > 0 && (
+                  {funnel.clicks > 0 && (
                     <>
                       {' '}· WhatsApp:{' '}
                       <span className="font-medium text-gray-700">
@@ -283,7 +171,7 @@ export default function PainelPageContent({
               </Link>
             </section>
 
-            {/* Diagnóstico mais ativo esta semana */}
+            {/* Mais ativo esta semana */}
             {data?.link_mais_ativo_semana && (
               <section className="rounded-xl border border-amber-100 bg-amber-50/60 p-5">
                 <h2 className="text-xs font-semibold uppercase tracking-wide text-amber-700 mb-2">
@@ -307,32 +195,7 @@ export default function PainelPageContent({
               </section>
             )}
 
-            {/* Esta semana */}
-            <section className="rounded-xl border border-gray-200 bg-white p-5">
-              <h2 className="text-sm font-semibold text-gray-900 mb-4">📈 Esta semana</h2>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {data?.links_criados_semana ?? 0}
-                  </p>
-                  <p className="text-xs text-gray-500">Criados</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {data?.respostas_semana ?? 0}
-                  </p>
-                  <p className="text-xs text-gray-500">Respostas</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {data?.conversas_semana ?? 0}
-                  </p>
-                  <p className="text-xs text-gray-500">Conversas</p>
-                </div>
-              </div>
-            </section>
-
-            {/* Dicas operacionais — determinísticas, zero LLM */}
+            {/* Dicas operacionais */}
             {dicas.length > 0 && (
               <section className="space-y-3">
                 <h2 className="text-sm font-semibold text-gray-900">🎯 O que ajustar agora</h2>
