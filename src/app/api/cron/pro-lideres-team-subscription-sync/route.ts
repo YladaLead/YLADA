@@ -6,6 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 /**
  * Cron: re-sincroniza assinaturas Pro Líderes equipe vencidas/atrasadas com o Mercado Pago.
  * Cobre o intervalo em que o MP já cobrou o cartão mas o webhook ainda não atualizou o Supabase.
+ * Vercel Hobby: cron no vercel.json só pode rodar 1×/dia — expressões mais frequentes quebram o deploy.
  */
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization') || ''
