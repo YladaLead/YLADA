@@ -78,13 +78,56 @@ export function isMemberNoelConversationalQuery(userMessage: string): boolean {
   return false
 }
 
+/** Aceite curto depois que o Noel ofereceu conteúdo no turno anterior. */
+export function isMemberNoelAffirmativeFollowUp(
+  userMessage: string,
+  lastAssistantContent: string
+): boolean {
+  const um = expandMemberNoelQueryNorm(userMessage)
+  if (
+    !/^(quero sim|sim|pode ser|bora|manda|pode mandar|quero|ok|beleza|isso|vamos|faz isso|pode|manda ver|show|claro|com certeza)$/.test(
+      um
+    )
+  ) {
+    return false
+  }
+  return /(posso ajudar|quer que eu|o que acha|criar um conte[uú]do|criar conte[uú]do|montar|espec[ií]fico|te mando|legenda|postagem|compartilhar junto|texto para)/i.test(
+    lastAssistantContent
+  )
+}
+
 export function classifyProLideresMemberNoelMessage(
   message: string,
-  opts?: { hasObjectionBase?: boolean }
+  opts?: { hasObjectionBase?: boolean; lastAssistantContent?: string }
 ): ProLideresMemberNoelRoute {
   const m = norm(message)
   const audience = detectAudience(m)
   const wantsText = /(mensagem|texto|o que falar|o que mandar|o que escrever|script|whatsapp|zap)/.test(m)
+
+  if (
+    opts?.lastAssistantContent?.trim() &&
+    isMemberNoelAffirmativeFollowUp(message, opts.lastAssistantContent)
+  ) {
+    return {
+      mode: 'comportamento',
+      audience: detectAudience(opts.lastAssistantContent),
+      includeLink: /link/i.test(opts.lastAssistantContent),
+      includeMensagemPronta: true,
+      directive:
+        'O usuário aceitou sua oferta do turno anterior. Entregue **texto pronto para copiar** (post/story/WhatsApp) em prosa fluida — **sem** rótulos de seção, **sem** colchetes [insira…]. Use tema da operação se faltar detalhe; no máximo 1 pergunta curta no final.',
+    }
+  }
+
+  if (/(atrair mais clientes|mais clientes com meu link|como usar meu link|divulgar meu link|compartilhar meu link)/.test(m)) {
+    return {
+      mode: 'mentor',
+      audience: 'captacao',
+      includeLink: true,
+      includeMensagemPronta: false,
+      directive:
+        'Estratégia em **2–4 parágrafos curtos** separados por linha em branco (mobile). **1–2 emojis** leves no total (😊 abertura, 👇 passo prático). **Proibido** parede de texto num bloco só, listas com rótulo **Nome:** ou seções de manual. No final, **uma** pergunta oferecendo criar texto específico.',
+    }
+  }
 
   if (isMemberNoelConversationalQuery(message)) {
     return {
@@ -235,6 +278,22 @@ export function classifyProLideresMemberNoelMessage(
     includeMensagemPronta: wantsText,
     directive: 'Mentor de campo: orientação + mensagem pronta quando útil + link de Meus links.',
   }
+}
+
+/** Bloco injetado no contexto PL membro (matriz pura) — substitui o router da stack rígida. */
+export function buildProLideresMemberNoelRouteContextBlock(route: ProLideresMemberNoelRoute): string {
+  const linkRule = route.includeLink
+    ? '- **Incluir link nesta resposta:** sim — priorize [LINK INDICADO] ou [MEUS LINKS].'
+    : '- **Incluir link nesta resposta:** **não** — proibido chip/URL neste turno.'
+  const msgRule = route.includeMensagemPronta
+    ? '- **Mensagem pronta:** sim — script curto copiável com [Nome].'
+    : '- **Mensagem pronta:** não obrigatória neste turno.'
+  return `[ROTEAMENTO DESTE TURNO — MEMBRO CAMPO]
+- **modo:** ${route.mode}
+- **audiência:** ${route.audience}
+${linkRule}
+${msgRule}
+- **diretriz:** ${route.directive}`
 }
 
 export function proLideresMemberNoelFewShot(mode: ProLideresMemberNoelMode): string {

@@ -4,6 +4,15 @@
  */
 import { formatProLideresCatalogForNoel } from '@/lib/pro-lideres-noel-catalog-context'
 import {
+  buildProLideresMemberNoelRouteContextBlock,
+  classifyProLideresMemberNoelMessage,
+  isMemberNoelAffirmativeFollowUp,
+} from '@/lib/pro-lideres-member-noel-router'
+import {
+  buildProLideresMemberNoelCatalogHint,
+  matchProLideresMemberNoelCatalog,
+} from '@/lib/pro-lideres-member-noel-catalog-match'
+import {
   buildProLideresNoelContextBlock,
   buildProLideresNoelLeaderConducaoOverrideBlock,
   resolveProLideresNoelUnifiedPapel,
@@ -133,6 +142,68 @@ assert('membro: não escreve URL à mão', /invente uma URL|invente URL/i.test(m
 assert('membro: MEUS LINKS', memberBlock.includes('[MEUS LINKS'))
 assert('membro: tabulador Ana', memberBlock.includes('Ana'))
 assert('membro: tarefas hoje', memberBlock.includes('TAREFAS DE HOJE'))
+
+const catalogExcerptProjeto = [
+  '- **Mães que Querem Trabalhar de Casa** — https://ylada.com/l/a',
+  '- **Oportunidade — Conheça o Projeto** — https://ylada.com/l/b',
+].join('\n')
+const projetoMatches = matchProLideresMemberNoelCatalog(
+  'Qual link eu mando pra alguém que quer conhecer melhor o projeto?',
+  catalogExcerptProjeto
+)
+const projetoHint = buildProLideresMemberNoelCatalogHint(projetoMatches)
+const memberComHint = buildProLideresNoelContextBlock({
+  papel: 'member',
+  operationLabel: 'Rede Norte',
+  verticalCode: 'h-lider',
+  focusNotes: null,
+  replyLanguage: 'Português (Brasil)',
+  noelProfileId: 'noel_pro_lideres_h_lider_v1',
+  tenantRole: 'member',
+  catalogExcerpt: catalogExcerptProjeto,
+  catalogHint: projetoHint,
+})
+assert('membro: LINK INDICADO no bloco', memberComHint.includes('[LINK INDICADO PARA ESTE PEDIDO]'))
+assert('membro: hint aponta oportunidade', memberComHint.includes('Oportunidade'))
+
+const msgFria = classifyProLideresMemberNoelMessage(
+  'Me dá uma mensagem pronta pra convidar alguém frio no WhatsApp'
+)
+assert('roteamento msg fria: sem link', msgFria.includeLink === false)
+const rotaFria = buildProLideresMemberNoelRouteContextBlock(msgFria)
+const memberComRota = buildProLideresNoelContextBlock({
+  papel: 'member',
+  operationLabel: 'Rede Norte',
+  verticalCode: 'h-lider',
+  focusNotes: null,
+  replyLanguage: 'Português (Brasil)',
+  noelProfileId: 'noel_pro_lideres_h_lider_v1',
+  tenantRole: 'member',
+  memberRouteContextBlock: rotaFria,
+})
+assert('membro: ROTEAMENTO no bloco', memberComRota.includes('[ROTEAMENTO DESTE TURNO'))
+assert('membro: rota proíbe link', memberComRota.includes('**não**'))
+assert('membro: formato matriz', memberBlock.includes('IGUAL MATRIZ YLADA'))
+assert('membro: formato proíbe placeholder', memberBlock.includes('[insira'))
+assert('membro: formato mobile-first', memberBlock.includes('Mobile-first'))
+assert('membro: formato emojis', memberBlock.includes('1 a 3'))
+
+const simFollow = classifyProLideresMemberNoelMessage('quero sim', {
+  lastAssistantContent:
+    'Se precisar, posso ajudar a criar um conteúdo específico para compartilhar junto com seu link! O que acha?',
+})
+assert('roteamento quero sim: mensagem pronta', simFollow.includeMensagemPronta === true)
+assert(
+  'roteamento quero sim: detecta oferta',
+  isMemberNoelAffirmativeFollowUp(
+    'quero sim',
+    'posso ajudar a criar um conteúdo específico para compartilhar junto com seu link'
+  )
+)
+
+const atrair = classifyProLideresMemberNoelMessage('Como atrair mais clientes com meu link?')
+assert('roteamento atrair: captação', atrair.audience === 'captacao')
+assert('roteamento atrair: prosa', atrair.directive.includes('parágrafos'))
 
 console.log(`\n${ok} ok, ${fail} fail`)
 process.exit(fail > 0 ? 1 : 0)

@@ -14,7 +14,15 @@ import {
   fetchProLideresMemberNoelObjection,
 } from '@/lib/pro-lideres-member-noel-context'
 import { buildProLideresMemberNoelCatalogExcerpt } from '@/lib/pro-lideres-member-noel-catalog'
+import {
+  buildProLideresMemberNoelCatalogHint,
+  matchProLideresMemberNoelCatalog,
+} from '@/lib/pro-lideres-member-noel-catalog-match'
 import { fetchProLideresMemberTabulatorName } from '@/lib/pro-lideres-noel-member-access'
+import {
+  buildProLideresMemberNoelRouteContextBlock,
+  classifyProLideresMemberNoelMessage,
+} from '@/lib/pro-lideres-member-noel-router'
 import { isNoelProLideresUnifiedForTenant } from '@/lib/pro-lideres-noel-unified-flag'
 import { resolvedUserEmail } from '@/lib/pro-lideres-server'
 import type { LeaderTenantRow } from '@/types/leader-tenant'
@@ -37,6 +45,10 @@ export type BuildProLideresNoelContextBlockParams = {
   painelTarefasDiariasUrl?: string | null
   /** Membro: URLs personalizadas em Meus links. */
   catalogExcerpt?: string | null
+  /** Membro: match determinístico do catálogo para este pedido. */
+  catalogHint?: string | null
+  /** Membro: roteamento leve (só mensagem vs link). */
+  memberRouteContextBlock?: string | null
   tabulatorName?: string | null
   dailyTasksExcerpt?: string | null
   objectionExcerpt?: string | null
@@ -114,8 +126,33 @@ Formato na mensagem: [Tarefas diárias — Painel Pro Líderes](${url}) + bloco 
   return parts.join('\n')
 }
 
+function buildMemberMatrixFormatBlock(): string {
+  return `[FORMATO DE RESPOSTA — IGUAL MATRIZ YLADA]
+- Tom de **conversa no WhatsApp**, não de manual nem post de blog.
+- **Mobile-first:** parágrafos curtos (1 ideia por bloco, 2–3 frases no máximo); **linha em branco** entre cada ideia; nunca parede de texto num bloco só.
+- **Emojis (1 a 3 por resposta, leve):** 😊 na abertura acolhedora quando fizer sentido; 👇 antes de um passo prático; 💪 ou 💡 no fechamento — **não** em toda linha, sem exagero infantil.
+- Prosa direta e fluida; **proibido** blocos rígidos (Na prática, Mensagem pronta, Link para enviar, Próximo passo, Texto para Postagem, Sugestões de Personalização).
+- **Proibido** separadores \`---\` ou linhas horizontais entre parágrafos.
+- **Proibido** listas com rótulos repetidos no padrão **Nome da seção:** (ex.: **Conteúdo Engajador:**, **Chamada para Ação:**).
+- **Proibido** colchetes-placeholder ([insira…], [Seu link aqui], [benefício…]). Entregue **texto pronto para copiar** com exemplo concreto; se faltar um detalhe, use suposição leve da operação ou **1 pergunta curta** no final — nunca formulário em branco.
+- Quando o usuário disser **sim / quero sim** após você oferecer conteúdo: vá direto ao texto copiável (2–6 linhas + CTA), sem reintroduzir nem repetir a oferta.
+- Pedido de **só mensagem**: entregue o script copiável; **sem** mencionar quiz/link no mesmo turno.
+- Prévia de diagnóstico: intro curta + perguntas numeradas com opções A/B (uma opção por linha).
+- Link de Meus links: cite **uma vez** com markdown [rótulo](url); não repita chip nem «Copiar link» no texto.
+
+Exemplo (estratégia — certo):
+"Faz sentido querer mais gente chegando pelo link 😊
+
+Comece pelos contatos que já te conhecem — manda com contexto, não só o endereço.
+
+👇 Se quiser, monto um texto pronto pra story ou WhatsApp. Topa?"`
+}
+
 function appendMemberExtras(params: BuildProLideresNoelContextBlockParams): string {
-  const parts: string[] = [buildMemberRamoRulesBlock()]
+  const parts: string[] = [buildMemberRamoRulesBlock(), buildMemberMatrixFormatBlock()]
+  if (params.memberRouteContextBlock?.trim()) {
+    parts.push(`\n${params.memberRouteContextBlock.trim()}`)
+  }
   const tab = params.tabulatorName?.trim()
     ? `Tabulador: **${params.tabulatorName.trim()}**.`
     : 'Sem tabulador na ficha.'
@@ -134,6 +171,9 @@ function appendMemberExtras(params: BuildProLideresNoelContextBlockParams): stri
     parts.push(
       '\n[MEUS LINKS]\nEm Meus links cada ferramenta já é **seu link** com URL própria. **Nunca** invente URL.'
     )
+  }
+  if (params.catalogHint?.trim()) {
+    parts.push(`\n[LINK INDICADO PARA ESTE PEDIDO]\n${params.catalogHint.trim()}`)
   }
   return parts.join('\n')
 }
@@ -203,11 +243,17 @@ async function loadMemberContextFields(
   tenant: LeaderTenantRow,
   memberUserId: string,
   baseUrl: string,
-  message: string
+  message: string,
+  conversationHistory: Array<{ role: string; content: string }> = []
 ): Promise<
   Pick<
     BuildProLideresNoelContextBlockParams,
-    'catalogExcerpt' | 'tabulatorName' | 'dailyTasksExcerpt' | 'objectionExcerpt'
+    | 'catalogExcerpt'
+    | 'catalogHint'
+    | 'memberRouteContextBlock'
+    | 'tabulatorName'
+    | 'dailyTasksExcerpt'
+    | 'objectionExcerpt'
   >
 > {
   let catalogExcerpt: string | null = null
@@ -247,7 +293,25 @@ async function loadMemberContextFields(
     console.warn('[pro-lideres-noel-context-block] tabulador', e)
   }
 
-  return { catalogExcerpt, tabulatorName, dailyTasksExcerpt, objectionExcerpt }
+  const catalogMatches = matchProLideresMemberNoelCatalog(message, catalogExcerpt)
+  const catalogHint = buildProLideresMemberNoelCatalogHint(catalogMatches)
+  const lastAssistant = [...conversationHistory]
+    .reverse()
+    .find((h) => h.role === 'assistant' && typeof h.content === 'string')
+  const memberRoute = classifyProLideresMemberNoelMessage(message, {
+    hasObjectionBase: Boolean(objectionExcerpt),
+    lastAssistantContent: lastAssistant?.content,
+  })
+  const memberRouteContextBlock = buildProLideresMemberNoelRouteContextBlock(memberRoute)
+
+  return {
+    catalogExcerpt,
+    catalogHint,
+    memberRouteContextBlock,
+    tabulatorName,
+    dailyTasksExcerpt,
+    objectionExcerpt,
+  }
 }
 
 export type LoadProLideresNoelMatrixContextInput = {
@@ -255,6 +319,7 @@ export type LoadProLideresNoelMatrixContextInput = {
   user: User
   request: NextRequest
   message: string
+  conversationHistory?: Array<{ role: string; content: string }>
   area?: string
   proLideresPapel?: string
   locale?: string
@@ -297,7 +362,8 @@ async function buildSessionContextBlock(
     tenant,
     input.user.id,
     baseUrl,
-    input.message
+    input.message,
+    input.conversationHistory ?? []
   )
   return buildProLideresNoelContextBlock({ ...baseParams, ...memberFields })
 }

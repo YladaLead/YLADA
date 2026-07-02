@@ -81,6 +81,11 @@ export default function ProLideresNoelMembroClient({
   }
 
   if (chatUnlocked) {
+    const memberMatrizPure =
+      useUnifiedMatrixNoel &&
+      (process.env.NEXT_PUBLIC_NOEL_PL_MEMBER_MATRIZ_PURE_ENABLED === 'true' ||
+        process.env.NEXT_PUBLIC_NOEL_PL_MEMBER_MATRIZ_PURE_ENABLED === '1')
+
     return (
       <div className="flex min-h-0 flex-1 flex-col">
         <NoelChat
@@ -88,18 +93,18 @@ export default function ProLideresNoelMembroClient({
           className="flex min-h-[min(70vh,560px)] flex-1 flex-col"
           chatApiPath={useUnifiedMatrixNoel ? '/api/ylada/noel' : '/api/pro-lideres/membro/noel'}
           proLideresPapel={useUnifiedMatrixNoel ? 'member' : undefined}
-          memberMatrizPure={
-            useUnifiedMatrixNoel &&
-            (process.env.NEXT_PUBLIC_NOEL_PL_MEMBER_MATRIZ_PURE_ENABLED === 'true' ||
-              process.env.NEXT_PUBLIC_NOEL_PL_MEMBER_MATRIZ_PURE_ENABLED === '1')
-          }
+          memberMatrizPure={memberMatrizPure}
           skipYladaContextualWelcome
-          skipWelcomeMessage
+          skipWelcomeMessage={memberMatrizPure}
           showChatHeaderTitle
-          showHeaderEmoji={false}
-          headerTitle="Noel"
-          headerTagline="Estou aqui para ajudar, pergunte apenas o que precisar para desenvolver você."
-          hideInputHint
+          showHeaderEmoji={!memberMatrizPure ? false : undefined}
+          headerTitle={memberMatrizPure ? undefined : 'Noel'}
+          headerTagline={
+            memberMatrizPure
+              ? undefined
+              : 'Estou aqui para ajudar, pergunte apenas o que precisar para desenvolver você.'
+          }
+          hideInputHint={!memberMatrizPure}
           sendButtonLabel="Enviar"
           locale="pt"
         />

@@ -30,11 +30,7 @@ import {
   leaderAssistantOffersLinkObjetivoChoices,
   leaderLinkObjetivoAssistantDisplayText,
 } from '@/lib/pro-lideres-noel-leader-link-objetivos'
-import { sanitizeNoelAssistantOutput } from '@/lib/noel-output-sanitize'
-import {
-  renumberNoelQuizPreviewQuestions,
-  separateNoelPublicLinkAnchorLine,
-} from '@/lib/noel-assistant-markdown-format'
+import { polishNoelAssistantMarkdownForChat, noelAssistantMarkdownHasRenderableText } from '@/lib/noel-assistant-markdown-format'
 import { isNoelDesafioConducaoEnabled } from '@/lib/porta-unica/porta-unica-flag'
 import { readDesafio, consumirDesafio } from '@/lib/porta-unica/desafio-client'
 import { aberturaNoelDoDesafio } from '@/lib/porta-unica/abertura-noel-desafio'
@@ -47,7 +43,9 @@ function proLideresMemberNoelStoredContent(
   memberMatrizPure = false
 ): string {
   const t = raw?.trim() || 'Desculpe, não consegui processar. Tente novamente.'
-  // Membro na matriz pura: prosa da matriz, sem o polish de seções do motor rígido.
+  if (area === 'pro_lideres_member' && memberMatrizPure) {
+    return polishNoelAssistantMarkdownForChat(t)
+  }
   if (area === 'pro_lideres_member' && !memberMatrizPure) {
     return polishProLideresMemberNoelForDisplay(t, userMessage) || t
   }
@@ -71,35 +69,7 @@ function markdownPlainText(children: ReactNode): string {
  * e aplica negrito, para o ReactMarkdown renderizar hierarquia legível.
  */
 function normalizeNoelAssistantMarkdown(raw: string): string {
-  let t = sanitizeNoelAssistantOutput(raw.replace(/\r\n/g, '\n').trim())
-  if (!t) return t
-
-  t = renumberNoelQuizPreviewQuestions(t)
-  t = separateNoelPublicLinkAnchorLine(t)
-
-  // Quebra antes de "2. 3. ..." quando vier colado ao parágrafo anterior
-  t = t.replace(/([^\n])\s+(\d+)\.\s+(?=[^\d\s])/g, '$1\n\n$2. ')
-
-  // Uma opção por vez: "…? A) x B) y" → parágrafos separados com **A)** **B)** …
-  let prev = ''
-  while (prev !== t) {
-    prev = t
-    t = t.replace(/\s+([A-D])\)\s+/, '\n\n**$1)** ')
-  }
-
-  // "A) texto" no início de linha (sem espaço antes)
-  t = t.replace(/^([A-D])\)\s+/gm, '**$1)** ')
-
-  // "**Pergunta N:**" / "**Pergunta N**" / "Pergunta N:" → ### (margem prose + separadores)
-  t = t.replace(/\*\*Pergunta\s+(\d+)\*\*\s*:?\s*/gi, '\n\n### Pergunta $1\n\n')
-  t = t.replace(/(^|\n)Pergunta\s+(\d+)\s*:\s*/gi, '$1\n\n### Pergunta $2\n\n')
-
-  // Respiração entre perguntas quando o modelo omitir `---` antes da 2ª em diante
-  t = t.replace(/\n(###\s+Pergunta\s+([2-9]|\d{2,})\b)/gi, '\n\n---\n\n$1')
-
-  t = t.replace(/(?:\n---\s*){2,}/g, '\n\n---\n\n')
-  t = t.replace(/\n{3,}/g, '\n\n')
-  return t
+  return polishNoelAssistantMarkdownForChat(raw)
 }
 
 function clampNoelFeedbackExcerpt(raw: string, max: number): string {
@@ -384,14 +354,31 @@ function getAberturaDesafioMessage(area: NoelArea): Message | null {
   return { id: 'abertura-desafio', role: 'assistant', content, timestamp: new Date() }
 }
 
+function polishSavedMemberMatrizMessages(messages: Message[], enabled: boolean): Message[] {
+  if (!enabled) return messages
+  return messages.map((m) =>
+    m.role === 'assistant'
+      ? { ...m, content: polishNoelAssistantMarkdownForChat(m.content) }
+      : m
+  )
+}
+
 /** Mensagens iniciais do Noel: histórico salvo > abertura do desafio > welcome estático. */
-function getInitialNoelMessages(area: NoelArea, skipWelcomeMessage: boolean): Message[] {
-  const saved = normalizeSavedMessagesForSkipWelcome(loadMessages(area), skipWelcomeMessage)
+function getInitialNoelMessages(
+  area: NoelArea,
+  skipWelcomeMessage: boolean,
+  welcomeArea: NoelArea = area,
+  polishMemberMatrizPure = false
+): Message[] {
+  let saved = normalizeSavedMessagesForSkipWelcome(loadMessages(area), skipWelcomeMessage)
+  if (welcomeArea !== area) saved = stripLegacyAreaWelcome(saved, area)
+  saved = filterNoRenderableAssistantMessages(saved)
+  saved = polishSavedMemberMatrizMessages(saved, polishMemberMatrizPure)
   if (saved.length > 0) return saved
-  const abertura = getAberturaDesafioMessage(area)
+  const abertura = getAberturaDesafioMessage(welcomeArea)
   if (abertura) return [abertura]
   if (skipWelcomeMessage) return []
-  return [getWelcomeMessage(area)]
+  return [getWelcomeMessage(welcomeArea)]
 }
 
 /** Sem mensagem inicial: se só existia o welcome antigo no storage, começa vazio. */
@@ -399,6 +386,24 @@ function normalizeSavedMessagesForSkipWelcome(saved: Message[], skipWelcomeMessa
   if (!skipWelcomeMessage) return saved
   if (saved.length === 1 && saved[0]?.id === 'welcome' && saved[0]?.role === 'assistant') return []
   return saved
+}
+
+/** Remove welcome da área de storage quando a UI usa outra (ex.: membro matriz pura → welcome ylada). */
+function stripLegacyAreaWelcome(messages: Message[], storageArea: NoelArea): Message[] {
+  const legacyUx = getNoelUxContent(storageArea)
+  const legacyWelcome = legacyUx.welcomeMessage.trim()
+  return messages.filter((m) => {
+    if (m.id !== 'welcome' || m.role !== 'assistant') return true
+    return m.content.trim() !== legacyWelcome
+  })
+}
+
+function filterNoRenderableAssistantMessages(messages: Message[]): Message[] {
+  return messages.filter((m) => {
+    if (m.role !== 'assistant') return true
+    if (m.id === 'welcome') return String(m.content ?? '').trim().length > 0
+    return noelAssistantMarkdownHasRenderableText(m.content)
+  })
 }
 
 interface NoelChatProps {
@@ -480,10 +485,14 @@ export default function NoelChat({
   const router = useRouter()
   const pathname = usePathname()
   const locale = localeProp ?? getLocaleFromPathname(pathname ?? '')
-  const uxContent = getNoelUxContent(area)
   const resolvedChatApi = chatApiPath ?? '/api/ylada/noel'
   const plMatrixNoel = isPlMatrixNoelApiPath(resolvedChatApi, proLideresPapel)
   const proLideresPayload = isProLideresNoelApiPath(resolvedChatApi) || plMatrixNoel
+  /** Membro na matriz pura: mesmo motor + renderer da área YLADA (sem chrome PL). */
+  const memberMatrizPureUi = Boolean(memberMatrizPure && plMatrixNoel)
+  const proLideresNoelChrome = proLideresPayload && !memberMatrizPureUi
+  const noelUxArea: NoelArea = memberMatrizPureUi ? 'ylada' : area
+  const uxContent = getNoelUxContent(noelUxArea)
   const proLideresPainelCatalogHref =
     area === 'pro_estetica_corporal'
       ? '/pro-estetica-corporal/painel/catalogo'
@@ -538,8 +547,9 @@ export default function NoelChat({
   const [capilarFeedbackByMsgId, setCapilarFeedbackByMsgId] = useState<Record<string, 'up' | 'down'>>({})
   const capilarFeedbackSubmittedRef = useRef<Set<string>>(new Set())
 
+  const welcomeArea: NoelArea = memberMatrizPureUi ? 'ylada' : area
   const [messages, setMessages] = useState<Message[]>(() =>
-    getInitialNoelMessages(area, skipWelcomeMessage)
+    getInitialNoelMessages(area, skipWelcomeMessage, welcomeArea, memberMatrizPureUi)
   )
   const [lastLinkContext, setLastLinkContext] = useState<LastLinkContext | null>(() => loadLastLinkContext(area))
   const [input, setInput] = useState(initialMessage ?? '')
@@ -596,13 +606,13 @@ export default function NoelChat({
   useEffect(() => {
     if (initializedRef.current) return
     initializedRef.current = true
-    setMessages(getInitialNoelMessages(area, skipWelcomeMessage))
+    setMessages(getInitialNoelMessages(area, skipWelcomeMessage, welcomeArea, memberMatrizPureUi))
     setLastLinkContext(loadLastLinkContext(area))
-  }, [area, skipWelcomeMessage])
+  }, [area, skipWelcomeMessage, welcomeArea, memberMatrizPureUi])
 
   // Mensagem contextual ao abrir (mentor ativo): busca dashboard + links e substitui o welcome
   useEffect(() => {
-    if (skipYladaContextualWelcome || skipWelcomeMessage) return
+    if (skipYladaContextualWelcome || skipWelcomeMessage || memberMatrizPureUi || area === 'pro_lideres_member') return
     // Toque "b": se a abertura veio do desafio (porta), não substituir pela contextual.
     if (getAberturaDesafioMessage(area)) return
     const saved = loadMessages(area)
@@ -630,7 +640,7 @@ export default function NoelChat({
         if (!cancelled) setContextualActions([])
       })
     return () => { cancelled = true }
-  }, [area, skipYladaContextualWelcome, skipWelcomeMessage])
+  }, [area, skipYladaContextualWelcome, skipWelcomeMessage, memberMatrizPureUi])
 
   useEffect(() => {
     if (initialMessage?.trim()) setInput(initialMessage.trim())
@@ -794,14 +804,25 @@ export default function NoelChat({
         //  precisam persistir ATÉ a geração, que acontece vários turnos depois.)
         if (desafioParaEnvio) consumirDesafio()
       }
-      const assistantMsg: Message = {
-        id: `a-${Date.now()}`,
-        role: 'assistant',
-        content: proLideresMemberNoelStoredContent(area, data.response, text, memberMatrizPure),
-        timestamp: new Date(),
-        linkContext: data.lastLinkContext ?? undefined,
+      const storedContent = proLideresMemberNoelStoredContent(
+        area,
+        data.response,
+        text,
+        memberMatrizPure
+      )
+      if (
+        noelAssistantMarkdownHasRenderableText(storedContent) ||
+        Boolean(data.lastLinkContext?.link_id)
+      ) {
+        const assistantMsg: Message = {
+          id: `a-${Date.now()}`,
+          role: 'assistant',
+          content: storedContent,
+          timestamp: new Date(),
+          linkContext: data.lastLinkContext ?? undefined,
+        }
+        setMessages((prev) => [...prev, assistantMsg])
       }
-      setMessages((prev) => [...prev, assistantMsg])
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Erro de conexão. Tente novamente.'
       setMessages((prev) => [
@@ -888,7 +909,7 @@ export default function NoelChat({
   // Passo 4 (Fase 2): na condução da matriz, o card é limpo (1 Acessar + 1 Copiar, vocabulário
   // "diagnóstico"). A âncora oficial já dá Acessar + Copiar, então o botão duplicado de copiar do
   // toolbar é escondido. Flag OFF (ou Pró-Líderes) = UI inalterada.
-  const conducaoUiEnabled = isNoelDesafioConducaoEnabled() && !proLideresPayload
+  const conducaoUiEnabled = isNoelDesafioConducaoEnabled() && !proLideresNoelChrome
   const [shareCatalogBusy, setShareCatalogBusy] = useState(false)
   const [shareCatalogError, setShareCatalogError] = useState<string | null>(null)
   /** Publicar fluxo na biblioteca do líder (Vendas/Recrutamento) após testar o link no chat. */
@@ -946,18 +967,18 @@ export default function NoelChat({
     messageContainsQuizContent(lastAssistantMsg.content, ctxForLinkActions)
 
   const showShareWithTeamButton =
-    proLideresPayload &&
+    proLideresLeaderLibraryFlow &&
     Boolean(lastLinkContext?.link_id) &&
     lastLinkContext?.visible_to_team_in_catalog === false
 
   const showAlreadySharedInCatalog =
-    proLideresPayload &&
+    proLideresLeaderLibraryFlow &&
     Boolean(lastLinkContext?.link_id) &&
     lastLinkContext?.visible_to_team_in_catalog === true
 
   const shareToolWithTeam = useCallback(async () => {
     const linkId = lastLinkContext?.link_id
-    if (!proLideresPayload || !linkId || shareCatalogBusy) return
+    if (!proLideresLeaderLibraryFlow || !linkId || shareCatalogBusy) return
     setShareCatalogBusy(true)
     setShareCatalogError(null)
     try {
@@ -984,7 +1005,7 @@ export default function NoelChat({
     } finally {
       setShareCatalogBusy(false)
     }
-  }, [proLideresPayload, flowsVisibilityApiBase, lastLinkContext?.link_id, shareCatalogBusy, authenticatedFetch])
+  }, [proLideresLeaderLibraryFlow, flowsVisibilityApiBase, lastLinkContext?.link_id, shareCatalogBusy, authenticatedFetch])
 
   const confirmPublishCatalogKind = useCallback(
     async (kind: 'sales' | 'recruitment') => {
@@ -1198,13 +1219,13 @@ export default function NoelChat({
               ? msg.linkContext ?? (isLastAssistantMessage ? lastLinkContext : null)
               : null
           const quizSlimHref =
-            msg.role === 'assistant' && proLideresPayload
+            msg.role === 'assistant' && proLideresNoelChrome
               ? ctxForMarkdown?.url ?? null
               : msg.role === 'assistant'
                 ? ctxForMarkdown?.url ?? extractFirstHttpUrl(msg.content)
                 : null
           const assistantMarkdownSource =
-            msg.role === 'assistant' && quizSlimHref
+            msg.role === 'assistant' && quizSlimHref && proLideresNoelChrome
               ? stripMarkdownProLideresProximoPassoSection(
                   sanitizeProLideresQuizMarkdownToCanonicalUrl(
                     stripRedundantUrlCodeFence(msg.content, quizSlimHref),
@@ -1233,6 +1254,14 @@ export default function NoelChat({
             !loading &&
             leaderAssistantOffersLinkObjetivoChoices(msg.content)
 
+          if (
+            msg.role === 'assistant' &&
+            msg.id !== 'welcome' &&
+            !noelAssistantMarkdownHasRenderableText(assistantMarkdownForDisplay || msg.content)
+          ) {
+            return null
+          }
+
           return (
           <div
             key={msg.id}
@@ -1256,15 +1285,16 @@ export default function NoelChat({
                   {area === 'pro_lideres_member' && !memberMatrizPure ? (
                     <ProLideresMemberNoelMessageBody markdown={assistantMarkdownNormalized} />
                   ) : (
-                  <div className="prose prose-sm max-w-none prose-p:my-4 prose-p:leading-relaxed prose-ul:my-5 prose-li:my-2 prose-li:leading-relaxed prose-strong:text-gray-900 prose-a:no-underline hover:prose-a:underline prose-hr:my-8 prose-hr:border-sky-100 [&_h3]:border-l-4 [&_h3]:border-sky-400 [&_h3]:pl-3 [&_h3]:-ml-1 [&_h3]:border-b [&_h3]:border-sky-100 [&_h3]:pb-2 [&_h3]:mb-4 [&_h3]:mt-8 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-sky-600">
+                  <div className="prose prose-sm max-w-none prose-p:my-3.5 sm:prose-p:my-4 prose-p:leading-relaxed prose-p:first:mt-0 prose-p:last:mb-0 prose-ul:my-4 prose-li:my-2 prose-li:leading-relaxed prose-strong:text-gray-900 prose-a:no-underline hover:prose-a:underline [&_h3]:border-l-4 [&_h3]:border-sky-400 [&_h3]:pl-3 [&_h3]:-ml-1 [&_h3]:border-b [&_h3]:border-sky-100 [&_h3]:pb-2 [&_h3]:mb-4 [&_h3]:mt-6 [&_h3]:text-base sm:[&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-sky-600">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm, remarkBreaks]}
                       components={{
+                        hr: () => null,
                         a: ({ href, children }) => {
                           const hrefAbsolutized =
-                            proLideresPayload && href ? absolutizeYladaPublicLinkHref(href) ?? href : href
+                            plMatrixNoel && href ? absolutizeYladaPublicLinkHref(href) ?? href : href
                           const effectiveHref =
-                            proLideresPayload && quizSlimHref && hrefAbsolutized
+                            proLideresNoelChrome && quizSlimHref && hrefAbsolutized
                               ? proLideresEffectivePublicHref(hrefAbsolutized, quizSlimHref)
                               : hrefAbsolutized
                           /** Um só chip «abrir» no texto quando há «Copiar link público» na barra
@@ -1275,7 +1305,7 @@ export default function NoelChat({
                               (isLastAssistantMessage ? lastLinkContext?.link_id : null)
                           )
                           const proLideresPublicQuizChip =
-                            proLideresPayload &&
+                            proLideresNoelChrome &&
                             effectiveHref &&
                             looksLikeYladaPublicLinkPath(hrefAbsolutized ?? '') &&
                             (Boolean(quizSlimHref) || messageHasPublicLinkToolbar)
@@ -1365,7 +1395,7 @@ export default function NoelChat({
                       }}
                     />
                   ) : null}
-                  {proLideresPayload &&
+                  {proLideresNoelChrome &&
                     !disableYladaLinkEditor &&
                     msg.role === 'assistant' &&
                     msg.id !== 'welcome' &&
@@ -1408,9 +1438,10 @@ export default function NoelChat({
                     msg.id !== 'welcome' &&
                     msg.id !== 'abertura-desafio' &&
                     area !== 'pro_lideres_member' &&
+                    !memberMatrizPureUi &&
                     !resolvedChatApi?.includes('/membro/noel') &&
                     messageHasScript(msg.content) &&
-                    !(proLideresPayload && isExtractedScriptOnlyUrl(msg.content)) && (
+                    !(proLideresNoelChrome && isExtractedScriptOnlyUrl(msg.content)) && (
                     <button
                       type="button"
                       onClick={() => copyScript(msg)}
@@ -1439,19 +1470,19 @@ export default function NoelChat({
                     const hasQuizContent = messageContainsQuizContent(msg.content, ctxForMessage)
                     if (!hasQuizContent) return null
                     const quizUrl =
-                      proLideresPayload && ctxForMessage?.url
+                      proLideresNoelChrome && ctxForMessage?.url
                         ? ctxForMessage.url
                         : ctxForMessage?.url ?? extractFirstHttpUrl(msg.content)
                     const isSessionQuizLink =
                       Boolean(ctxForMessage?.link_id && lastLinkContext?.link_id === ctxForMessage.link_id)
                     const sessionCatalogVis = isSessionQuizLink ? lastLinkContext?.visible_to_team_in_catalog : undefined
                     const showDisponibilizarCatalog =
-                      proLideresPayload &&
+                      proLideresLeaderLibraryFlow &&
                       Boolean(quizUrl && ctxForMessage?.link_id) &&
                       isSessionQuizLink &&
                       sessionCatalogVis !== true
                     const showVerCatalogoAposDisponibilizar =
-                      proLideresPayload &&
+                      proLideresLeaderLibraryFlow &&
                       Boolean(quizUrl && ctxForMessage?.link_id) &&
                       isSessionQuizLink &&
                       sessionCatalogVis === true
@@ -1467,7 +1498,7 @@ export default function NoelChat({
                               href={`${yladaMatrixPathPrefix}/links/editar/${ctxForMessage.link_id}`}
                               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors touch-manipulation"
                             >
-                              {proLideresPayload ? 'Editar na Ylada' : conducaoUiEnabled ? 'Editar diagnóstico' : 'Editar quiz'}
+                              {proLideresNoelChrome ? 'Editar na Ylada' : conducaoUiEnabled ? 'Editar diagnóstico' : 'Editar quiz'}
                             </Link>
                           )}
                           {conducaoUiEnabled && quizUrl ? (
@@ -1487,7 +1518,7 @@ export default function NoelChat({
                               Enviar no WhatsApp
                             </a>
                           ) : null}
-                          {proLideresPayload && (proLideresLeaderLibraryFlow || proEsteticaNoelLinkToolbar) && quizUrl ? (
+                          {(proLideresLeaderLibraryFlow || proEsteticaNoelLinkToolbar) && quizUrl ? (
                             <a
                               href={quizUrl}
                               target="_blank"
@@ -1497,7 +1528,7 @@ export default function NoelChat({
                               Abrir e testar
                             </a>
                           ) : null}
-                          {proLideresPayload && proLideresLeaderLibraryFlow && lid && quizUrl && !alreadyInLibrary ? (
+                          {proLideresLeaderLibraryFlow && lid && quizUrl && !alreadyInLibrary ? (
                             <button
                               type="button"
                               disabled={loading || linkMetaBusy}
@@ -1510,7 +1541,7 @@ export default function NoelChat({
                               Publicar na minha biblioteca…
                             </button>
                           ) : null}
-                          {proLideresPayload && proLideresLeaderLibraryFlow && lid && alreadyInLibrary ? (
+                          {proLideresLeaderLibraryFlow && lid && alreadyInLibrary ? (
                             <Link
                               href={`${proLideresPainelCatalogHref}?highlightYladaLink=${lid}`}
                               className="inline-flex min-h-[40px] items-center gap-2 rounded-lg border border-indigo-300 bg-white px-3 py-2 text-sm font-semibold text-indigo-800 hover:bg-indigo-50 touch-manipulation"
@@ -1531,12 +1562,12 @@ export default function NoelChat({
                             >
                               {copiedQuizLinkMsgId === msg.id
                                 ? 'Copiado!'
-                                : proLideresPayload
+                                : proLideresNoelChrome
                                   ? 'Copiar link público'
                                   : 'Copiar link do quiz'}
                             </button>
                           )}
-                          {proLideresPayload && ctxForMessage?.link_id ? (
+                          {proLideresNoelChrome && ctxForMessage?.link_id ? (
                             <Link
                               href={`${proLideresPainelCatalogHref}?highlightYladaLink=${ctxForMessage.link_id}`}
                               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-50 text-violet-900 text-sm font-medium border border-violet-200 hover:bg-violet-100 transition-colors touch-manipulation"
@@ -1704,7 +1735,7 @@ export default function NoelChat({
         )}
         {showEditarConcordoButtons && (
           <div className="flex flex-col gap-2 pt-2">
-            {proLideresPayload ? (
+            {proLideresNoelChrome ? (
               <div className="rounded-xl border border-emerald-200 bg-emerald-50/90 px-3 py-2.5 text-xs text-emerald-950">
                 <p className="font-semibold text-emerald-900">Próximos passos</p>
                 <ul className="mt-1.5 list-disc space-y-1 pl-4 text-emerald-900/95">
@@ -1785,7 +1816,7 @@ export default function NoelChat({
                   Abrir link
                 </a>
               )}
-              {proLideresPayload ? (
+              {proLideresNoelChrome ? (
                 <>
                   <button
                     type="button"
@@ -1819,7 +1850,7 @@ export default function NoelChat({
                   Ver meus links
                 </button>
               )}
-              {proLideresPayload ? (
+              {proLideresNoelChrome ? (
                 <>
                   <button
                     type="button"

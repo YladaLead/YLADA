@@ -99,6 +99,7 @@ import {
   NOEL_LAYER4_PRIORITY_RULE,
 } from '@/lib/noel-wellness/prompt-layers'
 import { applyNoelPersonaToSystemPrompt } from '@/lib/ylada-flow/noel/persona'
+import { polishNoelAssistantMarkdownForChat } from '@/lib/noel-assistant-markdown-format'
 import {
   loadProLideresNoelMatrixContext,
   loadProLideresNoelMatrixSession,
@@ -1145,6 +1146,7 @@ export async function POST(request: NextRequest) {
           user,
           request,
           message: message.trim(),
+          conversationHistory,
           area: typeof area === 'string' ? area : undefined,
           proLideresPapel: typeof proLideresPapel === 'string' ? proLideresPapel : undefined,
           locale,
@@ -2111,6 +2113,10 @@ export async function POST(request: NextRequest) {
         funnelStageCodes,
         strategies: noelStrategies,
       }).catch((e) => console.warn('[/api/ylada/noel] saveConversationDiagnosis:', e))
+    }
+
+    if (plMemberMatrizPure && responseText) {
+      responseText = polishNoelAssistantMarkdownForChat(responseText)
     }
 
     return NextResponse.json({
