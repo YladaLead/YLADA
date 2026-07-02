@@ -213,6 +213,59 @@ function buildInterpretTextForProLideresNewLink(
   return `${draft}\n\n---\nAprovação do líder (gerar link oficial YLADA agora, com perguntas estruturadas): ${msg}`
 }
 
+/** Exportado para teste de regressão do gatilho de criação de link (bug do tema solto). */
+export function proLideresNoelCreateLinkIntent(
+  message: string,
+  conversationHistory?: Array<{ role: string; content: string }>
+): boolean {
+  return isIntencaoCriarLink(message, conversationHistory)
+}
+
+/** Brief-gate: quando ON, pedido de criar SEM tema faz o Noel pedir o brief em vez de gerar. OFF = inerte. */
+export function isNoelPlBriefGateEnabled(): boolean {
+  return (
+    process.env.NOEL_PL_BRIEF_GATE_ENABLED === 'true' ||
+    process.env.NOEL_PL_BRIEF_GATE_ENABLED === '1'
+  )
+}
+
+/**
+ * Pedido de criar link/quiz SEM tema explícito (vago) — o Noel deve pedir o brief antes de gerar,
+ * em vez de deixar o gerador chutar (o default de emagrecimento). Exportado p/ teste.
+ */
+export function isVagueCreateRequest(
+  message: string,
+  conversationHistory?: Array<{ role: string; content: string }>
+): boolean {
+  const hist = conversationHistory ?? []
+  if (!isIntencaoCriarLink(message, conversationHistory)) return false
+  const m = message.toLowerCase()
+  // Sinais explícitos de "ainda não tenho tema" → SEMPRE vago (prioridade sobre aprovação/ajuste).
+  const semTema =
+    /n[ãa]o tenho t[íi]tulo|n[ãa]o sei quantas|me ajuda a pensar|ainda n[ãa]o sei o tema|n[ãa]o sei o tema|n[ãa]o sei por onde|sem ideia do tema/i
+  if (semTema.test(m)) return true
+  if (isShortApprovalAfterQuizDraft(message, hist)) return false // aprovação de rascunho já tem tema
+  if (isIntencaoAjustarLink(message)) return false // ajuste tem link anterior
+  return extractRequestedTitleFromMessage(message) === null // sem tema na mensagem = vago
+}
+
+/** Camada injetada quando o pedido de criar é vago: pede o brief, nunca defaulta a emagrecimento. */
+export const COLETA_BRIEF_PROLIDERES_PT = `[COLETA DE BRIEF — NÃO GERE LINK AINDA]
+O líder pediu criar um quiz/diagnóstico mas NÃO deu o tema. NÃO invente tema nem gere link, e NUNCA defaulte para emagrecimento/peso/dieta.
+Pergunte, em 1-2 perguntas curtas, só o essencial pra montar: (1) qual é o PÚBLICO, (2) o OBJETIVO da conversa depois do quiz, (3) sobre QUE TEMA. Assim que o tema vier, aí sim gere.`
+
+/**
+ * Resposta FIXA (determinística) quando o pedido de criar é vago — usada no short-circuit da rota,
+ * pra não depender do modelo obedecer o prompt (ele às vezes rascunha um quiz mesmo assim).
+ */
+export const PERGUNTA_BRIEF_PROLIDERES_FIXA = `Boa. Pra montar um diagnóstico que sirva de verdade, me diz 3 coisas rápidas:
+
+- Pra quem é? (o público)
+- Sobre que tema? (ex.: energia, rotina, organização…)
+- O que você quer que aconteça depois que a pessoa responde?
+
+Com isso eu já monto certinho.`
+
 function isIntencaoCriarLink(
   message: string,
   conversationHistory?: Array<{ role: string; content: string }>
@@ -228,8 +281,10 @@ function isIntencaoCriarLink(
     'para engajar', 'para captar', 'para meus clientes', 'para meus pacientes',
     'despertar curiosidade', 'link que atrai',
     'quero captar', 'captar pacientes', 'captar clientes', 'quero atrair',
-    'emagrecimento', 'para emagrecimento', 'pacientes para emagrecer',
-    'intestino', 'energia', 'ansiedade', 'bem-estar', 'suplementação',
+    // NÃO listar tema solto (emagrecimento/energia/ansiedade/bem-estar/intestino/suplementação):
+    // pergunta de compliance/mentoria que só CITA o tema virava geração de quiz. A criação real
+    // é pega pelos verbos ("quiz para", "cria um", "criar um quiz"). Mantém só os qualificados.
+    'para emagrecimento', 'pacientes para emagrecer',
     'me ajuda a criar', 'me dá um', 'me faz um', 'cria um', 'cria uma',
     'criar esse fluxo', 'esse fluxo para mim', 'cria esse fluxo', 'criar o fluxo',
     'meu link',
@@ -346,6 +401,7 @@ export async function runProLideresNoelLinkPipeline(params: {
   yladaSegment: string
   linkModeEnabled: boolean
   shouldGenerateNewLink: boolean
+  needsBrief: boolean
 }> {
   const {
     request,
@@ -368,6 +424,11 @@ export async function runProLideresNoelLinkPipeline(params: {
   const shouldGenerateNewLink =
     linkModeEnabled && isIntencaoCriarLink(message, conversationHistory) && !retrieveExistingLinkIntent
   const blockAutoLinkForClientFollowUp = shouldBlockAutoLinkForClientFollowUp(message)
+  // Brief-gate: pedido vago (sem tema) → pedir brief em vez de gerar (evita default de emagrecimento).
+  const needsBrief =
+    isNoelPlBriefGateEnabled() &&
+    shouldGenerateNewLink &&
+    isVagueCreateRequest(message, conversationHistory)
 
   let linkGeradoBlock = ''
   let lastLinkContextOut: ProLideresNoelLastLinkContext | undefined
@@ -387,6 +448,7 @@ export async function runProLideresNoelLinkPipeline(params: {
       linkModeEnabled,
       /** Só o dono do tenant pode gravar links na conta YLADA via estas APIs. */
       shouldGenerateNewLink: false,
+      needsBrief: false,
     }
   }
 
@@ -398,6 +460,7 @@ export async function runProLideresNoelLinkPipeline(params: {
       yladaSegment,
       linkModeEnabled,
       shouldGenerateNewLink,
+      needsBrief: false,
     }
   }
 
@@ -478,7 +541,7 @@ export async function runProLideresNoelLinkPipeline(params: {
   }
 
   // Novo link (Pro Líderes: tenta mesmo sem perfil Noel completo — interpret usa contexto mínimo)
-  if (!linkGeradoBlock && shouldGenerateNewLink) {
+  if (!linkGeradoBlock && shouldGenerateNewLink && !needsBrief) {
     try {
       const interpretText = buildInterpretTextForProLideresNewLink(message, conversationHistory)
       const interpretRes = await fetch(`${baseUrl}/api/ylada/interpret`, {
@@ -549,5 +612,6 @@ export async function runProLideresNoelLinkPipeline(params: {
     yladaSegment,
     linkModeEnabled,
     shouldGenerateNewLink,
+    needsBrief,
   }
 }

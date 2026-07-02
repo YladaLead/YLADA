@@ -16,12 +16,20 @@ import {
 } from '@/lib/pro-lideres-noel-leader-conducao'
 import { formatLinksAtivosParaNoel, getNoelYladaLinks } from '@/lib/noel-ylada-links'
 import { formatProLideresCatalogForNoel } from '@/lib/pro-lideres-noel-catalog-context'
+import {
+  construirBlocoPrincipiosConviccao,
+  isNoelPrincipiosConviccaoEnabled,
+  construirBlocoFormatoCurto,
+  FORMATO_LEMBRETE_CURTO,
+} from '@/lib/pro-lideres-noel-principios-conviccao'
 import { getFlowBuilderMethodologyBlock } from '@/lib/ylada-flow-builder-methodology'
 import { sanitizeNoelAssistantOutput } from '@/lib/noel-output-sanitize'
 import { applyNoelPersonaToSystemPrompt } from '@/lib/ylada-flow/noel/persona'
 import { NOEL_CHAT_MODEL } from '@/lib/pro-lideres-noel-unified-flag'
 import {
   buildCanonicalQuizMarkdownForProLideresResponse,
+  COLETA_BRIEF_PROLIDERES_PT,
+  PERGUNTA_BRIEF_PROLIDERES_FIXA,
   isProLideresNoelShortApprovalAfterQuizDraft,
   runProLideresNoelLinkPipeline,
   type ProLideresNoelLastLinkContext,
@@ -168,7 +176,7 @@ export async function POST(request: NextRequest) {
     lastLinkContext,
   })
 
-  const { linkGeradoBlock, lastLinkContextOut, canonicalAppendix, linkModeEnabled, shouldGenerateNewLink } =
+  const { linkGeradoBlock, lastLinkContextOut, canonicalAppendix, linkModeEnabled, shouldGenerateNewLink, needsBrief } =
     pipeline
 
   let lastLinkContextForResponse: ProLideresNoelLastLinkContext | null = lastLinkContextOut ?? null
@@ -188,17 +196,28 @@ export async function POST(request: NextRequest) {
   }
 
   const extraSystemParts: string[] = []
+  // Princípios da Inteligência de Convicção (norte da ação + educar/certificar + voz). Flag OFF = inerte.
+  if (isNoelPrincipiosConviccaoEnabled()) {
+    extraSystemParts.push(construirBlocoPrincipiosConviccao())
+  }
   if (isNoelProLideresLeaderConducaoEnabled() && isProLideresLeaderConversationalQuery(message)) {
     extraSystemParts.push(leaderConversationalSystemHint())
   }
   if (isProLideresNoelShortApprovalAfterQuizDraft(message, historyNorm)) {
     extraSystemParts.push(APROVACAO_CURTA_SEM_SEGUNDA_CONFIRMACAO_PT)
   }
-  if (linkGeradoBlock) {
+  if (needsBrief) {
+    // Pedido de criar vago (sem tema): pede o brief, não gera nem defaulta a emagrecimento.
+    extraSystemParts.push(COLETA_BRIEF_PROLIDERES_PT)
+  } else if (linkGeradoBlock) {
     extraSystemParts.push(MODO_EXECUTOR_LINK_PT)
     extraSystemParts.push(linkGeradoBlock)
   } else if (linkModeEnabled && shouldGenerateNewLink) {
     extraSystemParts.push(PEDIDO_SEM_GERACAO_PT)
+  }
+  // Formato curto por ÚLTIMO (o modelo pesa mais o que vem no fim do prompt).
+  if (isNoelPrincipiosConviccaoEnabled()) {
+    extraSystemParts.push(construirBlocoFormatoCurto())
   }
 
   const histBlob = [message, ...historyNorm.map((h) => h.content)].join('\n')
@@ -228,15 +247,30 @@ export async function POST(request: NextRequest) {
       role: h.role as 'user' | 'assistant',
       content: h.content,
     })),
+    // Lembrete de formato ENCOSTADO no turno do usuário: mantém a regra saliente mesmo com histórico cheio.
+    ...(isNoelPrincipiosConviccaoEnabled()
+      ? [{ role: 'system' as const, content: FORMATO_LEMBRETE_CURTO }]
+      : []),
     { role: 'user', content: message },
   ]
+
+  // Brief-gate DETERMINÍSTICO: pedido de criar vago → resposta fixa de brief, sem chamar o modelo
+  // (ele às vezes rascunha um quiz mesmo mandado pedir brief). Só dispara com a flag do brief-gate.
+  if (needsBrief) {
+    return NextResponse.json({
+      response: PERGUNTA_BRIEF_PROLIDERES_FIXA,
+      noelProfileId,
+      lastLinkContext: null,
+    })
+  }
 
   try {
     const completion = await openai.chat.completions.create({
       model: NOEL_CHAT_MODEL,
       messages: openaiMessages,
       temperature: 0.52,
-      max_tokens: 1800,
+      // Com os princípios ligados, teto menor força respostas curtas (anti-palestra).
+      max_tokens: isNoelPrincipiosConviccaoEnabled() ? 700 : 1800,
     })
     let text = completion.choices[0]?.message?.content?.trim()
     if (!text) {

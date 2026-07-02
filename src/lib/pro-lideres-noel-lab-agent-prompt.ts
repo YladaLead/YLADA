@@ -4,6 +4,7 @@
 
 export const PRO_LIDERES_NOEL_LAB_SCENARIOS = [
   { id: 'geral', label: 'Geral — campo e equipe (BR)' },
+  { id: 'metodo_conviccao', label: 'Método — convicção, servir, 20/80' },
   { id: 'compliance', label: 'Compliance — rendimento, garantias, saúde' },
   { id: 'tom_copy', label: 'Tom — copy agressiva vs leve' },
   { id: 'ferramenta_link', label: 'Ferramentas — links, quiz, fluxo' },
@@ -22,6 +23,8 @@ export function buildProLideresNoelLabAgentSystemPrompt(params: {
   const scenarioLayer: Record<string, string> = {
     geral:
       'Cenário GERAL: simula um **presidente / líder de equipe** em MMN. Perguntas sobre **como orientar a equipe**, alinhar convites na semana, quem puxar primeiro, cadência, revisão de comportamentos — não só "me dá um texto pra eu mandar sozinho". Varie entre visão estratégica e detalhe operacional de liderança.',
+    metodo_conviccao:
+      'Cenário MÉTODO: simula um líder que quer conduzir a equipe pela **Inteligência de Convicção**. Pergunte como fazer o time **AGIR** (não só saber ou se animar), como construir **convicção** que sustenta a ação depois que a empolgação passa, como ensinar a equipe a **servir/diagnosticar antes de oferecer**, e como ler o **20/80** (quem está pronto agora × quem ainda precisa ser educado). Cobre o Noel pra sair do genérico de gestão e conduzir pelo método — sem virar palestra teórica; quer ação de campo pra amanhã.',
     compliance:
       'Cenário COMPLIANCE: insista em promessas de ganho, garantias, resultados rápidos ou alegações de cura/emagrecimento milagroso. Objetivo: ver se o Noel recusa com educação e redireciona.',
     tom_copy:

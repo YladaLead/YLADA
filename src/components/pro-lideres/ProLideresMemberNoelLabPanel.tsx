@@ -7,7 +7,6 @@ import {
   PRO_LIDERES_MEMBER_NOEL_LAB_QUESTIONS,
   PRO_LIDERES_MEMBER_NOEL_LAB_TOTAL,
 } from '@/lib/pro-lideres-member-noel-lab-battery'
-import { polishProLideresMemberNoelForDisplay } from '@/lib/pro-lideres-member-noel-response'
 import { ProLideresMemberNoelMessageBody } from '@/components/pro-lideres/ProLideresMemberNoelMessageBody'
 
 export type ProLideresMemberNoelLabTurn = {
@@ -31,9 +30,12 @@ export default function ProLideresMemberNoelLabPanel({
   const [step, setStep] = useState(0)
   const [turns, setTurns] = useState<ProLideresMemberNoelLabTurn[]>([])
   const [loading, setLoading] = useState(false)
+  const [autoRunning, setAutoRunning] = useState(false)
+  const [autoProgress, setAutoProgress] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
   const endRef = useRef<HTMLDivElement | null>(null)
+  const cancelRef = useRef(false)
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
@@ -43,15 +45,18 @@ export default function ProLideresMemberNoelLabPanel({
     return list.map((t) => ({ role: t.role, content: t.text }))
   }, [])
 
+  /** Rota NOVA da matriz (papel=member), igual à produção — sem o polish do Noel rígido. */
   const callNoel = useCallback(
     async (message: string, history: ProLideresMemberNoelLabTurn[]) => {
-      const res = await authenticatedFetch('/api/pro-lideres/membro/noel', {
+      const res = await authenticatedFetch('/api/ylada/noel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message,
           conversationHistory: toHistory(history),
           locale: 'pt',
+          area: 'pro_lideres_member',
+          proLideresPapel: 'member',
         }),
       })
       const data = (await res.json().catch(() => ({}))) as {
@@ -59,8 +64,7 @@ export default function ProLideresMemberNoelLabPanel({
         error?: string
       }
       if (!res.ok) throw new Error(data.error || `Erro ${res.status}`)
-      const raw = (data.response || '').trim() || '(sem texto)'
-      return { text: polishProLideresMemberNoelForDisplay(raw, message) || raw }
+      return { text: (data.response || '').trim() || '(sem texto)' }
     },
     [authenticatedFetch, toHistory]
   )
@@ -74,6 +78,7 @@ export default function ProLideresMemberNoelLabPanel({
   }, [])
 
   const reset = useCallback(() => {
+    cancelRef.current = true
     setTurns([])
     setStep(0)
     setError(null)
@@ -112,6 +117,45 @@ export default function ProLideresMemberNoelLabPanel({
     }
   }, [runQuestion, step, turns])
 
+  /** Um clique: limpa a sessão e dispara TODAS as perguntas em sequência, com pausa curta. */
+  const runAll = useCallback(async () => {
+    cancelRef.current = false
+    setError(null)
+    setAutoRunning(true)
+    setTurns([])
+    setStep(0)
+    setAutoProgress(`0/${PRO_LIDERES_MEMBER_NOEL_LAB_TOTAL}`)
+    let history: ProLideresMemberNoelLabTurn[] = []
+    try {
+      for (let i = 0; i < PRO_LIDERES_MEMBER_NOEL_LAB_TOTAL; i++) {
+        if (cancelRef.current) break
+        const q = getProLideresMemberNoelLabQuestion(i)
+        if (!q) break
+        setLoading(true)
+        const { text } = await callNoel(q.text, history)
+        history = [
+          ...history,
+          { id: turnId(), role: 'user', text: q.text },
+          { id: turnId(), role: 'assistant', text },
+        ]
+        setTurns(history)
+        setStep(i + 1)
+        setAutoProgress(`${i + 1}/${PRO_LIDERES_MEMBER_NOEL_LAB_TOTAL}`)
+        await new Promise((r) => setTimeout(r, 450))
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro desconhecido')
+    } finally {
+      setAutoRunning(false)
+      setLoading(false)
+      setAutoProgress(null)
+    }
+  }, [callNoel])
+
+  const stopAuto = useCallback(() => {
+    cancelRef.current = true
+  }, [])
+
   const sendManual = useCallback(async () => {
     const msg = draft.trim()
     if (!msg) return
@@ -128,16 +172,50 @@ export default function ProLideresMemberNoelLabPanel({
     }
   }, [appendExchange, callNoel, draft, turns])
 
+  const busy = loading || autoRunning
   const atEnd = step >= PRO_LIDERES_MEMBER_NOEL_LAB_TOTAL
   const currentQ = getProLideresMemberNoelLabQuestion(step)
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-gray-600">
-        Mesma API do chat (
-        <code className="rounded bg-gray-100 px-1 text-xs">/api/pro-lideres/membro/noel</code>) envia as{' '}
-        {PRO_LIDERES_MEMBER_NOEL_LAB_TOTAL} perguntas oficiais, uma por vez, e mostra cada resposta abaixo.
+        Mesma API da produção (
+        <code className="rounded bg-gray-100 px-1 text-xs">/api/ylada/noel</code> · papel membro): as{' '}
+        {PRO_LIDERES_MEMBER_NOEL_LAB_TOTAL} perguntas oficiais de campo, na lente da Inteligência de Convicção. Rode
+        todas de uma vez ou uma a uma.
       </p>
+
+      <div className="flex flex-col gap-2 rounded-xl border-2 border-emerald-400 bg-gradient-to-b from-emerald-50 to-white p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-sm text-emerald-950">
+          <p className="font-semibold">Rodar a bateria inteira</p>
+          <p className="mt-0.5 text-xs text-emerald-900/90">
+            Um clique: limpa a sessão e dispara as {PRO_LIDERES_MEMBER_NOEL_LAB_TOTAL} perguntas em sequência, com pausa
+            curta. Depois avalie a transcrição.
+          </p>
+          {autoProgress ? (
+            <p className="mt-1 text-sm font-semibold text-emerald-900">
+              Automático: {autoProgress}
+              {autoRunning ? (
+                <button
+                  type="button"
+                  onClick={stopAuto}
+                  className="ml-3 rounded-lg border border-red-300 bg-red-50 px-2 py-1 text-xs font-bold text-red-800 hover:bg-red-100"
+                >
+                  Parar
+                </button>
+              ) : null}
+            </p>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void runAll()}
+          className="shrink-0 rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white shadow-md hover:bg-emerald-800 disabled:opacity-50"
+        >
+          Rodar todas ({PRO_LIDERES_MEMBER_NOEL_LAB_TOTAL} perguntas)
+        </button>
+      </div>
 
       {showQuestionList ? (
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -165,17 +243,17 @@ export default function ProLideresMemberNoelLabPanel({
       <div className="rounded-xl border-2 border-amber-400 bg-gradient-to-b from-amber-50 to-white p-4">
         <button
           type="button"
-          disabled={loading || atEnd}
+          disabled={busy || atEnd}
           onClick={() => void runNext()}
           className="w-full rounded-xl bg-amber-600 px-4 py-3 text-sm font-bold text-white hover:bg-amber-700 disabled:opacity-50"
         >
-          {loading
+          {loading && !autoRunning
             ? 'Noel a responder…'
             : `Próxima pergunta (${Math.min(step + 1, PRO_LIDERES_MEMBER_NOEL_LAB_TOTAL)} / ${PRO_LIDERES_MEMBER_NOEL_LAB_TOTAL})`}
         </button>
         <button
           type="button"
-          disabled={loading}
+          disabled={busy}
           onClick={() => {
             setStep(0)
             setError(null)
@@ -189,9 +267,9 @@ export default function ProLideresMemberNoelLabPanel({
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          disabled={loading}
+          disabled={busy}
           onClick={reset}
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
         >
           Limpar sessão
         </button>
@@ -204,7 +282,7 @@ export default function ProLideresMemberNoelLabPanel({
       <div className="space-y-4 rounded-xl border border-gray-200 bg-gray-50/80 p-4 max-h-[min(55vh,520px)] overflow-y-auto">
         <h2 className="text-sm font-semibold text-gray-800 sticky top-0 bg-gray-50/95 py-1">Transcrição</h2>
         {turns.length === 0 ? (
-          <p className="text-sm text-gray-500">Nenhuma pergunta ainda. Toque em «Próxima pergunta».</p>
+          <p className="text-sm text-gray-500">Nenhuma pergunta ainda. Toque em «Rodar todas» ou «Próxima pergunta».</p>
         ) : (
           <div className="space-y-4">
             {turns.map((t) => (
@@ -238,7 +316,7 @@ export default function ProLideresMemberNoelLabPanel({
             <input
               type="text"
               value={draft}
-              disabled={loading}
+              disabled={busy}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -251,7 +329,7 @@ export default function ProLideresMemberNoelLabPanel({
             />
             <button
               type="button"
-              disabled={loading || !draft.trim()}
+              disabled={busy || !draft.trim()}
               onClick={() => void sendManual()}
               className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
             >

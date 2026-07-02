@@ -13,6 +13,7 @@ import {
   getNoelLabPresetTotal,
   NOEL_LAB_FULL_SEQUENCE_ID,
   NOEL_LAB_LINK_ONLY_BATTERY_ID,
+  NOEL_LAB_MIXED_BATTERY_ID,
   PRO_LIDERES_NOEL_LAB_BATTERIES,
 } from '@/lib/pro-lideres-noel-lab-battery'
 import {
@@ -244,6 +245,81 @@ export default function ProLideresNoelLaboratorioPage() {
     })
   }, [runAllPresetsAutomatically])
 
+  /** Um clique: TODAS as baterias (mentoria + quiz/link + mista) em sequência. Cada bloco roda com
+   *  contexto FRESCO (histórico reinicia entre blocos) mas tudo acumula na mesma transcrição. */
+  const runEverythingSequential = useCallback(async () => {
+    const order: Array<{ id: string; label: string }> = [
+      { id: NOEL_LAB_FULL_SEQUENCE_ID, label: 'Mentoria (sequência completa)' },
+      {
+        id: NOEL_LAB_LINK_ONLY_BATTERY_ID,
+        label: getNoelLabBatteryById(NOEL_LAB_LINK_ONLY_BATTERY_ID)?.label ?? 'Quiz/link',
+      },
+      {
+        id: NOEL_LAB_MIXED_BATTERY_ID,
+        label: getNoelLabBatteryById(NOEL_LAB_MIXED_BATTERY_ID)?.label ?? 'Sequência mista',
+      },
+    ]
+    autoRunCancelRef.current = false
+    setError(null)
+    setAutoRunning(true)
+    setTurns([])
+    setBatteryStep(0)
+    let allTurns: LabTurn[] = []
+    const grandTotal = order.reduce((s, b) => s + getNoelLabPresetTotal(b.id), 0)
+    let done = 0
+    setAutoProgress(`0/${grandTotal}`)
+    try {
+      for (const bat of order) {
+        if (autoRunCancelRef.current) break
+        const total = getNoelLabPresetTotal(bat.id)
+        allTurns = [...allTurns, { id: id(), from: 'president', text: `━━━━━ ${bat.label} (${total}) ━━━━━` }]
+        setTurns(allTurns)
+        let ctxTurns: LabTurn[] = [] // contexto fresco por bloco
+        let ctxLink: LastLinkCtx | null = null
+        for (let step = 0; step < total; step++) {
+          if (autoRunCancelRef.current) break
+          const question = getNoelLabPresetQuestionAt(bat.id, step)
+          if (!question) break
+          setLoading('noel')
+          const noelRes = await authenticatedFetch('/api/pro-lideres/noel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: question,
+              conversationHistory: toNoelHistory(ctxTurns),
+              locale: 'pt',
+              lastLinkContext: ctxLink ?? undefined,
+            }),
+          })
+          const noelData = (await noelRes.json().catch(() => ({}))) as {
+            response?: string
+            lastLinkContext?: LastLinkCtx | null
+            error?: string
+          }
+          if (!noelRes.ok) throw new Error(noelData.error || 'Falha no Noel')
+          const response = (noelData.response || '').trim()
+          if (noelData.lastLinkContext) ctxLink = noelData.lastLinkContext
+          const pair: LabTurn[] = [
+            { id: id(), from: 'president' as const, text: question },
+            { id: id(), from: 'noel' as const, text: response || '(sem texto)' },
+          ]
+          ctxTurns = [...ctxTurns, ...pair]
+          allTurns = [...allTurns, ...pair]
+          setTurns(allTurns)
+          done++
+          setAutoProgress(`${done}/${grandTotal}`)
+          await new Promise((r) => setTimeout(r, 450))
+        }
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro desconhecido')
+    } finally {
+      setAutoRunning(false)
+      setLoading(null)
+      setAutoProgress(null)
+    }
+  }, [authenticatedFetch, toNoelHistory])
+
   /** Limpa a sessão, ativa só a bateria de quiz/link e dispara todas as perguntas com pausa (igual «Rodar todas»). */
   const runLinksBatteryAutoOneClick = useCallback(async () => {
     await runAllPresetsAutomatically({
@@ -411,6 +487,25 @@ export default function ProLideresNoelLaboratorioPage() {
           O <strong>Noel real</strong> usa as mesmas regras do painel. Nada disto grava no Noel de produção fora desta
           sessão no browser.
         </p>
+        <div className="mt-4 flex flex-col gap-2 rounded-xl border-2 border-emerald-500 bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-emerald-950">
+            <p className="font-semibold">Rodar TUDO de uma vez</p>
+            <p className="mt-0.5 text-xs text-emerald-900/90">
+              Um clique: <strong>mentoria completa</strong> + <strong>quiz/link</strong> + <strong>sequência mista</strong>,
+              em sequência. Cada bloco roda com contexto próprio (histórico reinicia entre blocos) mas tudo cai na mesma
+              transcrição pra você revisar de cima a baixo.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={!!loading || autoRunning}
+            onClick={() => void runEverythingSequential()}
+            className="shrink-0 rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white shadow-md hover:bg-emerald-800 disabled:opacity-50"
+          >
+            Rodar TUDO
+          </button>
+        </div>
+
         <div className="mt-4 flex flex-col gap-2 rounded-xl border border-violet-200 bg-violet-50/80 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-violet-950">
             <p className="font-semibold">Análise em massa (todas as áreas)</p>
