@@ -12,6 +12,7 @@ import { YLADA_NOEL_HOME_EXPANDED_KEY, yladaNoelHomeCollapsedCopy } from '@/lib/
 import { trackEvent } from '@/lib/analytics-events'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { useYladaSidebarReveal } from '@/components/ylada/YladaSidebarRevealContext'
+import { useAuth } from '@/hooks/useAuth'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import YladaReceptionWelcomeVideo from '@/components/ylada/YladaReceptionWelcomeVideo'
 
@@ -140,17 +141,20 @@ function NoelHomeChatShell({
   const isHero = collapsedLayout === 'receptionHero'
   const sidebarReveal = useYladaSidebarReveal()
   const forceOpenFromSidebar = searchParams.get('chat') === '1'
+  const { user } = useAuth()
 
   useEffect(() => {
     setMounted(true)
     try {
-      if (forceOpenFromSidebar || localStorage.getItem(YLADA_NOEL_HOME_EXPANDED_KEY) === '1') {
+      // Usuário autenticado já conhecido: pula a recepção e abre o chat direto
+      const jaUsou = localStorage.getItem(YLADA_NOEL_HOME_EXPANDED_KEY) === '1'
+      if (forceOpenFromSidebar || jaUsou || !!user) {
         setExpanded(true)
       }
     } catch {
       /* ok */
     }
-  }, [forceOpenFromSidebar])
+  }, [forceOpenFromSidebar, user])
 
   useEffect(() => {
     if (expanded) sidebarReveal?.revealSidebar()
