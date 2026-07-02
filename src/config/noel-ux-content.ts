@@ -38,9 +38,9 @@ export interface NoelUxContent {
 }
 
 /** Texto fixo de abertura (sem API) — curto; detalhes vêm depois que a pessoa age ou pergunta. */
-export const NOEL_UNIVERSAL_WELCOME = `Vamos montar seu primeiro link agora.
+export const NOEL_UNIVERSAL_WELCOME = `O que você quer resolver hoje?
 
-Me diga em uma frase o que você quer conquistar hoje.`
+Conquista de clientes, conversa, link — me diga em uma frase e a gente vai junto.`
 
 /**
  * Aviso na recepção do Noel (/pt/home) para quem ainda está em área neutra (perfil ylada ou outros).
@@ -52,8 +52,8 @@ export const NOEL_NEUTRAL_SPECIALIZATION_NOTICE =
 type NoelUxContentWithoutWelcome = Omit<NoelUxContent, 'welcomeMessage'>
 
 const DEFAULT_SUGGESTIONS = [
-  { label: 'Criar meu primeiro link', prompt: 'Quero criar meu primeiro link para atrair clientes' },
-  { label: 'Atrair mais clientes', prompt: 'Como atrair mais clientes com meu link?' },
+  { label: 'Quero mais clientes', prompt: 'Como atrair mais clientes com o Ylada?' },
+  { label: 'Criar ou ajustar um link', prompt: 'Quero criar ou ajustar um link para atrair clientes' },
   { label: 'Melhorar minhas conversas', prompt: 'Como melhorar minhas conversas com quem responde o link?' },
 ]
 

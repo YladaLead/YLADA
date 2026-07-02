@@ -100,24 +100,17 @@ export const YLADA_AREAS: YladaAreaConfig[] = [
 ]
 
 /**
- * Menu enxuto: fluxo do dia em “Principal”, conteúdo em “Aprender” (inclui Academia).
+ * Menu enxuto: Noel é o hub central — usuário entra direto no chat.
  * Lab e Planejamento só para admin.
  */
 export const YLADA_MENU_GROUPS = [
   {
     label: 'Principal',
     items: [
-      { key: 'painel', label: 'Painel', path: 'painel', icon: '📊' },
-      { key: 'home', label: 'Noel (mentor)', path: 'home', icon: '💬' },
+      { key: 'home', label: 'Noel', path: 'home', icon: '💬' },
       { key: 'links', label: 'Links', path: 'links', icon: '🔗' },
       { key: 'leads', label: 'Leads', path: 'leads', icon: '👥' },
-      { key: 'suporte', label: 'Suporte', path: 'suporte', icon: '💬' },
-    ],
-  },
-  {
-    label: 'Aprender',
-    items: [
-      { key: 'como-usar', label: 'Como usar', path: 'como-usar', icon: '📖' },
+      { key: 'painel', label: 'Resultados', path: 'painel', icon: '📊' },
     ],
   },
   {
@@ -126,6 +119,7 @@ export const YLADA_MENU_GROUPS = [
       { key: 'perfil-empresarial', label: 'Perfil', path: 'perfil-empresarial', icon: '👤' },
       { key: 'assinatura', label: 'Assinatura', path: 'configuracao', icon: '📋', hash: 'assinatura' as const },
       { key: 'configuracao', label: 'Configurações', path: 'configuracao', icon: '⚙️' },
+      { key: 'suporte', label: 'Suporte', path: 'suporte', icon: '🆘' },
     ],
   },
   {
