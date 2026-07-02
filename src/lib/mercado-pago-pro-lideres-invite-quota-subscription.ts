@@ -1,5 +1,6 @@
 import { PreApproval } from 'mercadopago'
 import { createMercadoPagoClient } from '@/lib/mercado-pago'
+import { truncateMercadoPagoPreapprovalReason } from '@/lib/mercado-pago-subscriptions'
 import { PRO_LIDERES_INVITE_PACK_BRL } from '@/lib/pro-lideres-invite-slots'
 import { buildProLideresInviteQuotaPackMpExternalReference } from '@/lib/pro-lideres-invite-quota-packs'
 
@@ -37,7 +38,7 @@ export async function createProLideresInviteQuotaPackSubscription(
   const startDate = new Date(Date.now() + 60_000)
 
   const body = {
-    reason: 'YLADA Pro Líderes — +50 convites (assinatura mensal)',
+    reason: truncateMercadoPagoPreapprovalReason('YLADA PL +50 convites (mensal)'),
     external_reference: buildProLideresInviteQuotaPackMpExternalReference(params.packId),
     payer_email: email,
     auto_recurring: {

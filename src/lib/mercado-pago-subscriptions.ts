@@ -3,8 +3,21 @@
  * Para planos mensais que cobram automaticamente todo mês
  */
 
-import { MercadoPagoConfig, PreApproval } from 'mercadopago'
+import { PreApproval } from 'mercadopago'
 import { createMercadoPagoClient, buildExternalReference, toMercadoPagoExternalAreaSlug } from './mercado-pago'
+
+/** Limite da API Mercado Pago (Preapproval.reason). */
+export const MERCADO_PAGO_PREAPPROVAL_REASON_MAX = 40
+
+/**
+ * Encurta o motivo da assinatura para o limite do Mercado Pago.
+ * Ex.: truncateMercadoPagoPreapprovalReason('YLADA Noel membro Pro Líderes (mensal, R$ 40) — Equipe X')
+ */
+export function truncateMercadoPagoPreapprovalReason(reason: string): string {
+  const trimmed = reason.trim()
+  if (trimmed.length <= MERCADO_PAGO_PREAPPROVAL_REASON_MAX) return trimmed
+  return trimmed.slice(0, MERCADO_PAGO_PREAPPROVAL_REASON_MAX)
+}
 
 export interface CreateSubscriptionRequest {
   area:
@@ -87,8 +100,17 @@ export async function createRecurringSubscription(
   // IMPORTANTE: Não enviar end_date se for null (omitir campo) e não enviar status no create
   const startDate = new Date(Date.now() + 60000) // 1 minuto no futuro
   
+  const preapprovalReason = truncateMercadoPagoPreapprovalReason(request.description)
+  if (preapprovalReason.length < request.description.trim().length) {
+    console.warn('⚠️ reason Preapproval truncado para limite Mercado Pago:', {
+      originalLength: request.description.trim().length,
+      truncated: preapprovalReason,
+      area: request.area,
+    })
+  }
+
   const preapprovalData: any = {
-    reason: request.description,
+    reason: preapprovalReason,
     external_reference: buildExternalReference(
       toMercadoPagoExternalAreaSlug(request.area),
       request.planType,

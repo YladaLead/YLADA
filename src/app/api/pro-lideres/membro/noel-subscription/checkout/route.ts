@@ -79,7 +79,7 @@ export async function POST(_request: NextRequest) {
         userId: user.id,
         userEmail: email,
         amount,
-        description: `YLADA — Noel membro Pro Líderes (mensal, R$ ${amount.toFixed(2)}) — ${t.display_name?.trim() || t.team_name?.trim() || 'equipe'}`,
+        description: 'YLADA Noel membro Pro Líderes (mensal)',
         successUrl,
         failureUrl,
         pendingUrl,
