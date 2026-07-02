@@ -29,7 +29,10 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
     whatsapp: '',
     countryCode: 'BR',
     bio: '',
+    avatarUrl: '',
   })
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [erroAvatar, setErroAvatar] = useState<string | null>(null)
   const [salvando, setSalvando] = useState(false)
   const [salvoComSucesso, setSalvoComSucesso] = useState(false)
   const [carregando, setCarregando] = useState(true)
@@ -92,6 +95,7 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
             whatsapp: data.profile.whatsapp || data.profile.telefone || '',
             countryCode: data.profile.countryCode || 'BR',
             bio: data.profile.bio || '',
+            avatarUrl: data.profile.avatarUrl || '',
           })
         }
       }
@@ -157,6 +161,7 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
           whatsapp: perfil.whatsapp,
           countryCode: perfil.countryCode,
           bio: perfil.bio,
+          avatarUrl: perfil.avatarUrl || null,
         }),
       })
       const data = await response.json()
@@ -230,6 +235,33 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
     }
   }
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setErroAvatar(null)
+    setUploadingAvatar(true)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const res = await authenticatedFetch('/api/ylada/perfil/avatar', { method: 'POST', body: form })
+      const data = await res.json()
+      if (!res.ok || !data.url) throw new Error(data.error || 'Erro ao subir a foto')
+      // Salvar URL na conta
+      await authenticatedFetch('/api/ylada/account', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatarUrl: data.url }),
+      })
+      setPerfil((prev) => ({ ...prev, avatarUrl: data.url }))
+    } catch (err: any) {
+      setErroAvatar(err.message || 'Não foi possível subir a foto.')
+    } finally {
+      setUploadingAvatar(false)
+      // Limpa input para permitir reselecionar o mesmo arquivo
+      e.target.value = ''
+    }
+  }
+
   const iniciais = (perfil.nome || perfil.email || '?').trim().slice(0, 2).toUpperCase()
 
   if (carregando) {
@@ -253,15 +285,46 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
       <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="px-6 sm:px-8 py-5 border-b border-gray-100">
           <div className="flex items-center gap-4">
-            <div
-              className="flex-shrink-0 w-12 h-12 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg font-semibold"
-              aria-hidden
+            {/* Avatar clicável — abre seletor de arquivo */}
+            <label
+              className="relative flex-shrink-0 w-14 h-14 rounded-full cursor-pointer group"
+              title="Alterar foto"
             >
-              {iniciais}
-            </div>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                onChange={handleAvatarChange}
+                disabled={uploadingAvatar}
+              />
+              {perfil.avatarUrl ? (
+                <img
+                  src={perfil.avatarUrl}
+                  alt="Sua foto"
+                  className="w-14 h-14 rounded-full object-cover border border-gray-200"
+                />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg font-semibold">
+                  {uploadingAvatar ? (
+                    <span className="animate-spin rounded-full h-5 w-5 border-2 border-indigo-400 border-t-indigo-700" />
+                  ) : (
+                    iniciais
+                  )}
+                </div>
+              )}
+              {/* Overlay de hover */}
+              <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/30 flex items-center justify-center transition-colors pointer-events-none">
+                {!uploadingAvatar && (
+                  <span className="text-white text-[10px] font-semibold opacity-0 group-hover:opacity-100 leading-tight text-center">
+                    Alterar
+                  </span>
+                )}
+              </div>
+            </label>
             <div>
               <h2 className="text-lg font-semibold text-gray-900">{perfil.nome || 'Seu nome'}</h2>
               <p className="text-sm text-gray-500">{perfil.email}</p>
+              {erroAvatar && <p className="text-xs text-red-600 mt-0.5">{erroAvatar}</p>}
             </div>
           </div>
         </div>
@@ -691,9 +754,9 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
       <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
         <h2 className="text-lg font-semibold text-gray-900 mb-1">Conta</h2>
         <p className="text-sm text-gray-600 mb-4">
-          Para editar informações estratégicas usadas pelo Noel e pelos diagnósticos, acesse a área{' '}
+          Para editar o contexto do seu negócio usado pelo Noel e pelos diagnósticos, acesse{' '}
           <Link href={`${prefix}/perfil-empresarial`} className="text-indigo-600 hover:underline font-medium">
-            Perfil
+            Meu negócio
           </Link>
           .
         </p>
@@ -704,6 +767,26 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
         >
           Encerrar sessão
         </button>
+      </section>
+
+      {/* Ajuda */}
+      <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">Precisa de ajuda?</h2>
+        <div className="flex flex-col sm:flex-row gap-3 mt-3">
+          <Link
+            href={`${prefix}/home?msg=${encodeURIComponent('Preciso de ajuda')}`}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700"
+          >
+            💬 Perguntar ao Noel
+          </Link>
+          <a
+            href="mailto:suporte@ylada.com?subject=Ajuda%20com%20a%20conta"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            ✉️ suporte@ylada.com
+          </a>
+        </div>
+        <p className="text-xs text-gray-500 mt-3">Use o e-mail para cancelamento ou ajuste de assinatura.</p>
       </section>
 
       {/* Excluir conta */}

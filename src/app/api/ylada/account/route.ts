@@ -1,6 +1,6 @@
 /**
  * GET /api/ylada/account — dados da conta (user_profiles) para áreas YLADA.
- * PUT /api/ylada/account — atualiza nome, email, whatsapp, bio.
+ * PUT /api/ylada/account — atualiza nome, email, whatsapp, bio, avatar_url.
  * Aceita: psi, psicanalise, odonto, fitness, estetica, med, ylada, nutra, coach, perfumaria, seller, admin.
  */
 import { NextRequest, NextResponse } from 'next/server'
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     const { data: profile } = await supabaseAdmin
       .from('user_profiles')
-      .select('nome_completo, email, whatsapp, bio, country_code')
+      .select('nome_completo, email, whatsapp, bio, country_code, avatar_url')
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
         whatsapp: profile?.whatsapp || '',
         countryCode: profile?.country_code || 'BR',
         bio: profile?.bio || '',
+        avatarUrl: (profile as any)?.avatar_url || '',
       },
     })
   } catch (error: any) {
@@ -68,7 +69,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { nome, telefone, whatsapp, countryCode, bio } = body
+    const { nome, telefone, whatsapp, countryCode, bio, avatarUrl } = body
 
     const profileData: Record<string, unknown> = {
       nome_completo: nome ?? undefined,
@@ -82,6 +83,7 @@ export async function PUT(request: NextRequest) {
     }
     if (bio !== undefined) profileData.bio = bio || null
     if (countryCode) profileData.country_code = countryCode
+    if (avatarUrl !== undefined) profileData.avatar_url = avatarUrl || null
 
     const { data: current } = await supabaseAdmin
       .from('user_profiles')
