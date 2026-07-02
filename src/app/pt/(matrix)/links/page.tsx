@@ -952,7 +952,8 @@ function LinksPageContent({
                 : null
               const respostasMaisAtivo = linkMaisAtivo ? (linkMaisAtivo.stats?.diagnosis_count ?? linkMaisAtivo.stats?.complete ?? 0) : 0
               const conversasMaisAtivo = linkMaisAtivo ? (linkMaisAtivo.stats?.cta_click ?? 0) : 0
-              if (!linkMaisAtivo || (respostasMaisAtivo === 0 && conversasMaisAtivo === 0)) return null
+              // Só mostra o destaque quando há 2+ links — com 1 link é redundante (já aparece na lista)
+              if (!linkMaisAtivo || (respostasMaisAtivo === 0 && conversasMaisAtivo === 0) || baseList.length < 2) return null
               return (
                 <div className={`rounded-lg border border-amber-100 bg-amber-50/80 ${embedded ? 'mb-3 p-3' : 'mb-4 p-4'}`}>
                   <p className="text-[10px] sm:text-xs font-semibold text-amber-800 uppercase tracking-wide mb-1">Diagnóstico mais respondido</p>
@@ -1219,7 +1220,8 @@ function LinksPageContent({
           </div>
         )}
 
-        {!showProEsteticaEmpty && !proEsteticaAwaitingLinks && (
+        {/* Resumo: oculto no embedded quando há exatamente 1 link (as stats já aparecem no card) */}
+        {!showProEsteticaEmpty && !proEsteticaAwaitingLinks && !(embedded && hasLinks && linksForUi.length <= 1) && (
         <div
           className={`rounded-lg border border-emerald-100 bg-emerald-50/60 px-4 ${hasLinks ? 'py-3' : 'py-4'}`}
         >
@@ -1354,9 +1356,11 @@ function LinksPageContent({
                       {(() => {
                         const temasFromProfile = profile?.area_specific?.temas_atuacao
                         const useTemasFromProfile = Array.isArray(temasFromProfile) && temasFromProfile.length > 0
-                        const temasPerfil = useTemasFromProfile
+                        const temasPerfilRaw = useTemasFromProfile
                           ? (temasFromProfile as string[]).map((v) => ({ value: v, label: getTemaLabel(v) }))
                           : getTemasForProfession(profile?.profession ?? null)
+                        // Remove value='outro' da lista — o botão "Outro tema" abaixo já cobre isso
+                        const temasPerfil = temasPerfilRaw.filter((t) => t.value !== 'outro')
                         return (
                           <>
                             {temasPerfil.map((t) => (
