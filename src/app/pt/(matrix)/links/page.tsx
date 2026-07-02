@@ -1305,8 +1305,8 @@ function LinksPageContent({
           </section>
         )}
 
-        {/* Criar novo diagnóstico (matriz / outras áreas YLADA) */}
-        {!proEsteticaCorporalEmbedded && !showProEsteticaEmpty && !proEsteticaAwaitingLinks && (
+        {/* Criar novo diagnóstico — só na página standalone; no embedded a criação vai pelo Noel ou pela aba Explorar */}
+        {!proEsteticaCorporalEmbedded && !embedded && !showProEsteticaEmpty && !proEsteticaAwaitingLinks && (
         <section ref={criadorRef} className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between mb-4">
             <div>
