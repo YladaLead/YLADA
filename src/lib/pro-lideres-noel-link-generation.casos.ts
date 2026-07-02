@@ -46,6 +46,20 @@ assert(
   vago('Preciso de um diagnóstico rápido pra quem foi no evento. Ainda não tenho título nem sei quantas perguntas — me ajuda a pensar e a criar o link') === true
 )
 
+// Regressão dos 3 ajustes (falsos positivos do membro)
+// Fix B: "me dá uma mensagem pronta" (objeção de preço) NÃO é pedido de criar link
+assert(
+  'objeção "me dá uma mensagem pronta" não cria',
+  criar('A cliente disse que tá caro. Me orienta e me dá uma mensagem pronta') === false
+)
+assert('"me dá uma ideia de story" não cria', criar('Não sei o que postar hoje. Me dá uma ideia e uma legenda') === false)
+// Fix C: adjetivo entre o tipo e "de" ainda extrai o tema → NÃO é vago
+assert(
+  'diagnóstico "rápido de sono" tem tema (não vago)',
+  vago('Cria um diagnóstico rápido de sono pra eu mandar pra uma cliente') === false
+)
+assert('quiz "rápido de energia" tem tema (não vago)', vago('Gera um quiz rápido de energia pro meu grupo') === false)
+
 // Flag do brief-gate: OFF por padrão
 const prev = process.env.NOEL_PL_BRIEF_GATE_ENABLED
 delete process.env.NOEL_PL_BRIEF_GATE_ENABLED

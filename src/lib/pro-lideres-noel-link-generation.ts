@@ -33,11 +33,12 @@ export function mapProLideresVerticalToYladaSegment(verticalCode: string): strin
 function extractRequestedTitleFromMessage(message: string): string | null {
   const raw = (message || '').trim()
   if (!raw) return null
-  const cleaned = raw.replace(/\s+/g, ' ')
+  const cleaned = stripAccentsForMatch(raw.replace(/\s+/g, ' '))
+  // (?:\w+\s+)? aceita um adjetivo entre o tipo e de/para: "diagnóstico rápido de sono" → tema "sono".
   const match =
-    cleaned.match(/(?:diagn[oó]stico|quiz|calculadora)\s+para\s+(.+)$/i) ||
-    cleaned.match(/(?:quero|cria|criar|gera|gerar)\s+(?:um|uma)?\s*(?:diagn[oó]stico|quiz|calculadora)\s+de\s+(.+)$/i) ||
-    cleaned.match(/(?:quero|cria|criar|gera|gerar)\s+(?:um|uma)?\s*(?:diagn[oó]stico|quiz|calculadora)\s+para\s+(.+)$/i)
+    cleaned.match(/(?:diagn[oó]stico|quiz|calculadora)\s+(?:\w+\s+)?para\s+(.+)$/i) ||
+    cleaned.match(/(?:quero|cria|criar|gera|gerar)\s+(?:um|uma)?\s*(?:diagn[oó]stico|quiz|calculadora)\s+(?:\w+\s+)?de\s+(.+)$/i) ||
+    cleaned.match(/(?:quero|cria|criar|gera|gerar)\s+(?:um|uma)?\s*(?:diagn[oó]stico|quiz|calculadora)\s+(?:\w+\s+)?para\s+(.+)$/i)
   const candidate = (match?.[1] ?? '').trim().replace(/[.!?]+$/, '')
   if (!candidate || candidate.length < 4) return null
   return candidate.slice(0, 140)
@@ -285,7 +286,9 @@ function isIntencaoCriarLink(
     // pergunta de compliance/mentoria que só CITA o tema virava geração de quiz. A criação real
     // é pega pelos verbos ("quiz para", "cria um", "criar um quiz"). Mantém só os qualificados.
     'para emagrecimento', 'pacientes para emagrecer',
-    'me ajuda a criar', 'me dá um', 'me faz um', 'cria um', 'cria uma',
+    // "me dá um"/"me faz um" SOLTOS pegavam "me dá uma mensagem/ideia" (objeção/post, não criar link).
+    'me ajuda a criar', 'me dá um link', 'me dá um quiz', 'me dá um diagnóstico', 'me dá uma calculadora',
+    'me faz um link', 'me faz um quiz', 'me faz um diagnóstico', 'cria um', 'cria uma',
     'criar esse fluxo', 'esse fluxo para mim', 'cria esse fluxo', 'criar o fluxo',
     'meu link',
     'e meu link',

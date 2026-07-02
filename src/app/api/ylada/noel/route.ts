@@ -1325,14 +1325,16 @@ export async function POST(request: NextRequest) {
       !retrieveExistingLinkIntent
     // Membro Pró Líderes (gated por plMemberMatrizPure — usuário matriz de verdade não entra):
     // pedido vago → pede brief; pedido de divulgar → ajuda a espalhar. Nos dois, NÃO gera quiz.
-    memberNeedsBrief =
-      plMemberMatrizPure &&
-      isNoelPlBriefGateEnabled() &&
-      isVagueCreateRequest(message, conversationHistory)
     memberDivulgacao =
       plMemberMatrizPure &&
       isNoelPlMemberDivulgacaoEnabled() &&
       isDivulgacaoIntent(message)
+    // Divulgação tem PRIORIDADE sobre o brief ("acabei de criar o link, onde divulgo?" não é pedido de brief).
+    memberNeedsBrief =
+      plMemberMatrizPure &&
+      isNoelPlBriefGateEnabled() &&
+      !memberDivulgacao &&
+      isVagueCreateRequest(message, conversationHistory)
     if (memberNeedsBrief || memberDivulgacao) {
       shouldGenerateNewLink = false
     }
@@ -1940,7 +1942,7 @@ export async function POST(request: NextRequest) {
           // "Título (quiz)Copiar link" - padrão mais simples (sem título específico)
           {
             pattern: /([^\n\[\]]+?)\s*\([^)]+\)Copiar link/gi,
-            replacement: (match, p1) => {
+            replacement: (match: string, p1: string) => {
               // Só substituir se contiver palavras-chave relacionadas
               if (/calculadora|diagnóstico|quiz|link|emagrecimento|saúde|intestinal/i.test(p1)) {
                 return `[${title}](${url})`
