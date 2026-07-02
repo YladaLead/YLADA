@@ -324,6 +324,7 @@ export async function POST(request: NextRequest) {
             ...configJson,
             meta: {
               version: 1,
+              source: 'biblioteca',
               objective: 'captar',
               theme_raw: title,
               theme_display: title,
@@ -494,6 +495,7 @@ export async function POST(request: NextRequest) {
         ctaText: ctaSuggestion ?? flow.cta_default ?? (schema.ctaDefault as string) ?? 'Quero analisar meu caso',
         meta: {
           version: 1,
+          source: 'noel',
           objective,
           theme_raw: themeRaw,
           theme_text: themeRaw,

@@ -65,6 +65,8 @@ type LinkRow = {
   pro_lideres_preset?: boolean
   /** Marcado pra aparecer na vitrine da página pública /[perfil] (porta 3). */
   perfil_destaque?: boolean
+  /** Origem do link: 'noel' (gerado pelo Noel) ou 'biblioteca' (modelo pronto). */
+  created_source?: 'noel' | 'biblioteca'
 }
 
 /** Rótulos amigáveis de perfil/categoria para exibir ao usuário (sem jargão técnico). */
@@ -230,6 +232,8 @@ function LinksPageContent({
   const [rowCopyFeedback, setRowCopyFeedback] = useState<{ id: string; mode: 'link' | 'qr' } | null>(null)
   /** Hub com abas: filtrar a lista «Os teus links» por texto. */
   const [meusLinksBusca, setMeusLinksBusca] = useState('')
+  /** Filtro de origem: '' = Todos, 'noel' = Do Noel, 'biblioteca' = Da biblioteca. */
+  const [origemFiltro, setOrigemFiltro] = useState<'' | 'noel' | 'biblioteca'>('')
   /** null = ainda carregando assinatura; false = gratuito; true = Pro (ou equivalente). */
   const [isProUser, setIsProUser] = useState<boolean | null>(null)
 
@@ -251,9 +255,15 @@ function LinksPageContent({
   }, [links, proEsteticaCorporalEmbedded])
 
   const linksFiltradosMeusLinks = useMemo(() => {
+    let result = linksForUi
+    // Filtro de origem
+    if (origemFiltro) {
+      result = result.filter((l) => (l.created_source ?? 'biblioteca') === origemFiltro)
+    }
+    // Filtro de busca por texto
     const q = meusLinksBusca.trim().toLowerCase()
-    if (!q) return linksForUi
-    return linksForUi.filter((l) => {
+    if (!q) return result
+    return result.filter((l) => {
       const haystack = [
         l.title,
         l.slug,
@@ -265,7 +275,7 @@ function LinksPageContent({
         .join(' ')
       return haystack.includes(q)
     })
-  }, [linksForUi, meusLinksBusca])
+  }, [linksForUi, meusLinksBusca, origemFiltro])
   /** Plano gratuito já tem 1 diagnóstico ativo: não dá para criar outro ativo até pausar/arquivar ou fazer Pro. */
   const freeTierBlocksNewActive = isProUser === false && activeLinksCount >= 1
 
@@ -892,6 +902,28 @@ function LinksPageContent({
               Se não colar no celular, copie o endereço cinza abaixo ou use <strong>Mais</strong> → Ver QR na tela.
             </p>
             {embedded ? (
+              {/* Filtro de origem — só na matriz ylada */}
+              {areaCodigo === 'ylada' && (
+                <div className="mb-2 flex gap-1.5">
+                  {(['', 'noel', 'biblioteca'] as const).map((v) => {
+                    const label = v === '' ? 'Todos' : v === 'noel' ? '✨ Do Noel' : '📚 Da biblioteca'
+                    return (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => setOrigemFiltro(v)}
+                        className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                          origemFiltro === v
+                            ? 'bg-sky-600 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
               <div className="mb-3">
                 <label htmlFor="meus-links-busca" className="sr-only">
                   Pesquisar entre os teus links

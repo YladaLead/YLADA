@@ -42,6 +42,20 @@ function perfilDestaqueFromConfigJson(configJson: unknown): boolean {
   return meta?.perfil_destaque === true
 }
 
+/**
+ * Origem do link: 'noel' (gerado pelo Noel via flow_id+interpretacao) ou 'biblioteca' (modelo pronto).
+ * Usa meta.source quando disponível; fallback: meta.flow_id presente → noel, ausente → biblioteca.
+ */
+function createdSourceFromConfigJson(configJson: unknown): 'noel' | 'biblioteca' {
+  if (!configJson || typeof configJson !== 'object') return 'biblioteca'
+  const meta = (configJson as { meta?: Record<string, unknown> }).meta
+  if (!meta) return 'biblioteca'
+  if (meta.source === 'noel') return 'noel'
+  if (meta.source === 'biblioteca') return 'biblioteca'
+  // fallback para links antigos sem meta.source
+  return typeof meta.flow_id === 'string' && meta.flow_id.trim() ? 'noel' : 'biblioteca'
+}
+
 function buildStatsMap(
   rows: Array<{ link_id: string; event_type: string; cnt: number | string }> | null
 ): Record<string, EventCounts> {
@@ -165,11 +179,13 @@ export async function GET(request: NextRequest) {
       const theme_raw = themeRawFromConfigJson(config_json)
       const pro_lideres_preset = proLideresPresetFromConfigJson(config_json)
       const perfil_destaque = perfilDestaqueFromConfigJson(config_json)
+      const created_source = createdSourceFromConfigJson(config_json)
       return {
         ...rest,
         theme_raw,
         pro_lideres_preset,
         perfil_destaque,
+        created_source,
         url: baseUrl ? `${baseUrl}/l/${row.slug}` : `/l/${row.slug}`,
         template_name: row.template_id ? templatesMap[row.template_id]?.name ?? null : null,
         template_type: row.template_id ? templatesMap[row.template_id]?.type ?? null : null,
