@@ -75,11 +75,19 @@ function YladaAreaShellLayout({
             </Link>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <Link href="/pt/conta/configuracao" className="hidden sm:flex items-center gap-2 text-gray-600 hover:text-gray-900">
-              <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-semibold text-sm">
-                {userName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
-              </div>
-              <span className="text-sm font-medium truncate max-w-[120px]">{userName.split(' ')[0]}</span>
+            <Link href="/pt/configuracao" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+              {userProfile?.avatar_url ? (
+                <img
+                  src={userProfile.avatar_url}
+                  alt={userName.split(' ')[0]}
+                  className="w-8 h-8 rounded-full object-cover border border-gray-200 shrink-0"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-semibold text-sm shrink-0">
+                  {userName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
+                </div>
+              )}
+              <span className="hidden sm:block text-sm font-medium truncate max-w-[120px]">{userName.split(' ')[0]}</span>
             </Link>
             {/* "Voltar ao YLADA" só faz sentido em sub-áreas, não na home principal */}
             {areaCodigo !== 'ylada' && (

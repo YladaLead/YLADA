@@ -33,6 +33,7 @@ interface UserProfile {
   email: string | null
   is_admin?: boolean
   is_support?: boolean
+  avatar_url?: string | null
 }
 
 export function useAuth() {
@@ -76,7 +77,7 @@ export function useAuth() {
       // Criar uma Promise com timeout de 15 segundos (aumentado)
       const profileQuery = supabase
         .from('user_profiles')
-        .select('id, user_id, perfil, nome_completo, email, is_admin, is_support')
+        .select('id, user_id, perfil, nome_completo, email, is_admin, is_support, avatar_url')
         .eq('user_id', userId)
         .maybeSingle()
       
@@ -116,7 +117,7 @@ export function useAuth() {
             
             const { data: retryData, error: retryError } = await supabase
               .from('user_profiles')
-              .select('id, user_id, perfil, nome_completo, email, is_admin, is_support')
+              .select('id, user_id, perfil, nome_completo, email, is_admin, is_support, avatar_url')
               .eq('user_id', userId)
               .maybeSingle()
             
