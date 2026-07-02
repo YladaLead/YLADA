@@ -100,11 +100,11 @@ function LinksHubContentInner({
                       📚
                     </span>
                     <span className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight min-w-0">
-                      Usar modelo pronto
+                      Explorar
                     </span>
                   </div>
                   <p className="text-[11px] sm:text-xs text-gray-600 mt-1 leading-snug line-clamp-2 pl-[calc(1.25rem+0.5rem)]">
-                    Biblioteca YLADA
+                    Modelos prontos
                   </p>
                 </button>
                 <button
@@ -127,6 +127,14 @@ function LinksHubContentInner({
                   </p>
                 </button>
               </div>
+              {!proEsteticaProBiblioteca && areaCodigo === 'ylada' && (
+                <p className="text-center text-xs text-gray-500 pt-0.5">
+                  ou{' '}
+                  <a href="/pt/home?chat=1" className="font-medium text-sky-600 hover:text-sky-700 hover:underline">
+                    crie com o Noel
+                  </a>
+                </p>
+              )}
             </>
           ) : (
             <div className="flex gap-1 border-b border-gray-200 pb-0.5" role="tablist" aria-label="Biblioteca e seus links">

@@ -1126,8 +1126,10 @@ function BibliotecaPageContentInner({
 
   /** Só faz sentido escolher segmento se não há um fixo pelo perfil/URL ou se é admin/suporte. */
   const isPrivilegedBiblioteca = !!(userProfile?.is_admin || userProfile?.is_support)
+  /** Na matriz ylada (/pt/links) o OBJETIVO é o filtro primário — segmento é coletado pelo Noel na criação. */
+  const isMatrizYlada = (areaCodigo || '').toLowerCase().trim() === 'ylada'
   const mostrarFiltroSegmento =
-    !hubBuscaEstreita && (isPrivilegedBiblioteca || !segmentoSugerido)
+    !hubBuscaEstreita && !isMatrizYlada && (isPrivilegedBiblioteca || !segmentoSugerido)
 
   const terapiaLinhaAtual = parseEsteticaTerapiaLinhaParam(linhaBibliotecaQueryRaw)
   const setTerapiaLinhaUrl = (linha: EsteticaTerapiaLinha) => {
@@ -1351,12 +1353,10 @@ function BibliotecaPageContentInner({
         setSegmentoFiltro(seg)
       }
     } else {
-      // Matriz (/pt/links): segmento vem do perfil do usuário; demais rotas → área na URL
+      // Matriz ylada (/pt/links): OBJETIVO é o filtro primário — não pré-filtra por segmento.
+      // Noel colhe o segmento durante a criação. Demais áreas: segmento vem da URL/área.
       let seg: BibliotecaSegmentCode | null = null
-      if ((areaCodigo || '').toLowerCase().trim() === 'ylada') {
-        seg = getBibliotecaSegmentFromUserPerfil(userProfile?.perfil ?? null)
-      }
-      if (!seg) {
+      if ((areaCodigo || '').toLowerCase().trim() !== 'ylada') {
         seg = getBibliotecaSegmentFromArea(areaCodigo)
       }
       if (seg) {
